@@ -26,7 +26,7 @@ public class NodeObject extends ModelElement {
 			properties.add(new Property(mp));
 		}
 		this.shape = shape;
-		bound = new Rectangle2D(0,0,50,50);
+		bound = new Rectangle2D(0,0,50,getProperty().size() * 20);
 	}
 
 	public Object clone() {
@@ -37,11 +37,13 @@ public class NodeObject extends ModelElement {
 	public void draw(GraphicManager gm) {
 		gm.setColor(color);
 		shape.draw(gm, bound);
+		int h = 0;
 		for(Property p : getProperty()) {
-			GWT.log(p.getContent());
+//			GWT.log(p.getContent());
 			if(p.getContent() != null) {
-				gm.DrawText(p.getContent(), (int)bound.x, (int)bound.y + 20, 100/*(int)bound.width*/);
+				gm.DrawText(p.getContent(), (int)bound.x, (int)bound.y + 20 + h * 20, 100/*(int)bound.width*/);
 			}
+			h++;
 		}
 	}
 
