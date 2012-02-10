@@ -34,8 +34,12 @@ public class MetaDiagram extends MetaElement {
 		 */
 		List<MetaProperty> properties0 = new ArrayList<MetaProperty>();
 		properties0.add(new MetaProperty(0, "name", "text"));
-		properties0.add(new MetaProperty(1, "graphic", "text"));
-		MetaObject object = new MetaObject(0, "Object", false,"rect", 1, properties0);
+		List<String> graphic_strings = new ArrayList<String>();
+		graphic_strings.add("rect");
+		graphic_strings.add("circle");
+		graphic_strings.add("fillcircle");
+		properties0.add(new MetaProperty(1, "graphic", "pulldown", graphic_strings));
+		MetaObject object = new MetaObject(0, "Object", false, "rect", 1, properties0);
 		meta_objects.add(object);
 		/*
 		 * Bindingの作成

@@ -6,8 +6,8 @@ import java.util.List;
 import com.clooca.core.client.diagram.*;
 import com.clooca.core.client.gopr.element.Diagram;
 import com.clooca.core.client.gopr.metamodel.MetaModel;
-import com.clooca.webutil.client.MyTabPanel2;
-import com.clooca.webutil.client.MyTabPanel2.MyTabPanelListener;
+import com.clooca.webutil.client.MyTabPanel;
+import com.clooca.webutil.client.MyTabPanel.MyTabPanelListener;
 
 /**
  * @version 1.1
@@ -22,7 +22,7 @@ public class EditorTabPanel implements MyTabPanelListener {
 	/**
 	 * 
 	 */
-	static private MyTabPanel2 mainpanel;
+	static private MyTabPanel mainpanel;
 	
 	/**
 	 * 
@@ -45,7 +45,7 @@ public class EditorTabPanel implements MyTabPanelListener {
 	static private List<mdlAbstractEditor> editors;
 	
 	public EditorTabPanel() {
-		mainpanel = new MyTabPanel2();
+		mainpanel = new MyTabPanel();
 		mainpanel.setStyleName("mycanvas_tab");
 		mainpanel.addSelectionHandler(this);
 		listeners = new ArrayList<DiagramSelectionListener>();
@@ -64,7 +64,7 @@ public class EditorTabPanel implements MyTabPanelListener {
 	 * get main panel
 	 * @return
 	 */
-	static public MyTabPanel2 getPanel() {
+	static public MyTabPanel getPanel() {
 		return mainpanel;
 	}
 	
