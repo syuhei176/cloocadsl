@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:p1="urn:import:com.google.gwt.user.cellview.client">
+	<ui:style>
+		.important {
+			font-weight: bold;
+		}
+	</ui:style>
+	<g:HTMLPanel width="340px" height="300px">
+		<g:AbsolutePanel height="300px" width="340px">
+				<g:at left="105" top="10">
+					<g:Label text="external event" width="105px" height="18px"/>
+				</g:at>
+				<g:at left="256" top="34">
+					<g:Button ui:field="AddButton" width="77px" height="28px">Add</g:Button>
+				</g:at>
+				<g:at left="256" top="68">
+					<g:Button ui:field="remove_button" width="77px" height="28px">Remove</g:Button>
+				</g:at>
+				<g:at left="10" top="34">
+					<g:ListBox visibleItemCount="5" width="240px" height="257px" ui:field="event_list"/>
+				</g:at>
+				<g:at left="256" top="102">
+					<g:Button width="77px" height="28px" ui:field="button">Edit</g:Button>
+				</g:at>
+			</g:AbsolutePanel>
+		
+	</g:HTMLPanel>
+</ui:UiBinder> 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='testeditor'>
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User'/>
+
+  <!-- Inherit the default GWT style sheet.  You can change       -->
+  <!-- the theme of your GWT application by uncommenting          -->
+  <!-- any one of the following lines.                            -->
+  <inherits name='com.google.gwt.user.theme.clean.Clean'/>
+  <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+  
+  <inherits name='com.google.gwt.xml.XML'/>
+  <inherits name='com.google.gwt.json.JSON' />
+  <!-- <inherits name='com.lservice.diagla.common.Common'/> -->
+  <inherits name='com.clooca.core.Core'/>
+  <inherits name='com.clooca.webutil.WebUtil'/>
+  <inherits name="com.google.gwt.i18n.I18N"/>
+  <!-- Other module inherits                                      -->
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='com.clooca.testeditor.client.TestEditor'/>
+  <extend-property name="locale" values="ja"/>
+  <extend-property name="locale" values="en"/>
+  <extend-property name="locale" values="ja_JP"/>
+<!-- <set-property-fallback name="locale" value="ja"/> -->
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client'/>
+
+</module>
