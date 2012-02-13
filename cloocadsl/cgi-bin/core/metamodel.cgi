@@ -4,6 +4,7 @@ import cgi
 import os
 import sys
 import json
+from Controller.MetaModelService import *
 
 print "Content-type: text/javascript; charset=utf-8\n\n"
 
@@ -16,4 +17,4 @@ form = cgi.parse_qs(sys.stdin.read(content_length))
 
 metamodel_id = form["id"][0]
 
-print '{"name" : "StartModel" , "diagram" : 0}'
+print json.dumps(GetMetaModel(1))

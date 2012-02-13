@@ -4,160 +4,102 @@ import md5
 import re
 import sys
 import datetime
+sys.path.append('../')
+import config
 
 reg_username = re.compile('\w+')
 
-def CreateMetaModel():
-    cur.execute('INSERT INTO userinfo (username,password, role, regist_date, detail) VALUES(%s,%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), role, d.strftime("%Y-%m-%d"), detail))
-    pass
+connect = None
 
-def UpdateMetaModel():
-    affect_row_count = cur.execute('UPDATE userinfo SET password=%s WHERE username = %s;',(password,username))
-    pass
-
-def LoadMetaModel(metamodel_id):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+def GetMetaModel(metamodel_id):
+    metamodel = {}
+    global connect
+    connect = MySQLdb.connect(db=config.DB_METAMODEL_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB_METAMODEL_USER, passwd=config.DB2_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT name,root FROM metamodel WHERE id = %s;', metamodel_id)
+    cur.execute('SELECT * FROM metamodel WHERE id=%s;',(metamodel_id, ))
     rows = cur.fetchall()
-    rows[0][0]
-    rows[0][1]
     cur.close()
+    if len(rows) == 0:
+        return None
+    metamodel['id'] = rows[0][0]
+    metamodel['name'] = rows[0][1]
+    metamodel['root'] = GetMetaDiagram(rows[0][2])
     connect.close()
+    return metamodel
 
-def LoadMetaDiagram(metadiagram_id):
-    pass
-
-def LoadMetaObject(metaobject_id):
-    pass
-
-def LoadMetaBinding(metabinding_id):
-    pass
-
-def LoadMetaRelationship(metarelation_id):
-    pass
-
-def LoadMetaRole(metarole_id):
-    pass
-
-def GetUserFromDB(username):
-  connect = MySQLdb.connect(db="clooca", host="localhost", port=3306, user="clooca", passwd="un1verse")
-  cur = connect.cursor()
-  cur.execute('SELECT id,username,password,email,role,detail FROM userinfo WHERE username = %s;', username)
-  rows = cur.fetchall()
-  if len(rows) == 0:
-    cur.close()
-    connect.close()
-    return None
-  user = FreeUser(rows[0][0])
-  user.username = rows[0][1]
-  user.password = rows[0][2]
-  user.email = rows[0][3]
-  user.role = rows[0][4]
-  user.detail = rows[0][5]
-  cur.close()
-  connect.close()
-  return user
-
-  cur.execute('INSERT INTO userinfo (username,password, role, regist_date, detail) VALUES(%s,%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), role, d.strftime("%Y-%m-%d"), detail))
-  connect.commit()
-  cur.close()
-  connect.close()
-  return True
-
-def EnableEmail(user, email):
-  return user.EnableMail(email)
-
-def Login(username, password):
-  if not reg_username.match(username):
-    return LoginInfo(False, False, None)
-  session = GetSession()
-  user = GetUserFromDB(username)
-  if user == None:
-      return LoginInfo(False, False, None)
-  if not user.username == username:
-    return LoginInfo(False, False, None)
-  if md5.new(password).hexdigest() == user.password:
-    session.setAttribute('user', user)
-  else:
-    return LoginInfo(False, False, None)
-  lesson = GetLesson()
-  if lesson == None:
-    return LoginInfo(True, False, user)
-  else:
-    return LoginInfo(True, True, user)
-  return LoginInfo(False, False, None)
-
-def CheckLoggedin():
-  user = GetUser()
-  if user == None:
-    return LoginInfo(False, False, None)
-  lesson = GetLesson()
-  if lesson == None:
-    return LoginInfo(True, False, user)
-  else:
-    return LoginInfo(True, True, user)
-
-#admin
-def DeleteUser(username):
-    connect = MySQLdb.connect(db="clooca", host="localhost", port=3306, user="clooca", passwd="un1verse")
+def GetMetaDiagram(diagram_id):
+    diagram = {}
+    diagram['diagram'] = SelectMetaDiagram(diagram_id)
     cur = connect.cursor()
-    n = cur.execute('DELETE FROM userinfo WHERE username=%s', (username,))
-    connect.commit()
+    cur.execute('SELECT * FROM has_metaobject WHERE metadiagram_id=%s;',(diagram_id, ))
+    rows = cur.fetchall()
+    diagram['object'] = []
+    for i in range(len(rows)):
+        diagram['object'].append(SelectMetaObject(rows[i][1]))
+    cur.execute('SELECT * FROM has_metarelationship WHERE metadiagram_id=%s;',(diagram_id, ))
+    rows = cur.fetchall()
+    diagram['relationship'] = []
+    for i in range(len(rows)):
+        diagram['relationship'].append(SelectMetaRelationship(rows[i][1]))
     cur.close()
-    connect.close()
-    if n == 0:
-        return False
-    return True
+    return diagram
 
-def DeleteUserById(id):
-  connect = MySQLdb.connect(db="clooca", host="localhost", port=3306, user="clooca", passwd="un1verse")
-  cur = connect.cursor()
-  n = cur.execute('DELETE FROM userinfo WHERE id=%s', (id,))
-  connect.commit()
-  cur.close()
-  connect.close()
-  if n == 0:
-    return False
-  return True
-
-#admin
-def GetUserList():
-  connect = MySQLdb.connect(db="clooca", host="localhost", port=3306, user="clooca", passwd="un1verse")
-  cur = connect.cursor()
-  cur.execute('SELECT id,username,password,email,role FROM userinfo')
-  rows = cur.fetchall()
-  userlist = []
-  for i in range(len(rows)):
-    userinfo = {}
-    userinfo['id'] = rows[i][0]
-    userinfo['username'] = rows[i][1]
-#    userinfo['password'] = rows[i][1]
-    userinfo['email'] = rows[i][3]
-    userinfo['role'] = rows[i][4]
-    userlist.append(userinfo)
-  cur.close()
-  connect.close()
-  return userlist
-
-def UpdateUserPassword(username, password):
-    connect = MySQLdb.connect(db="clooca", host="localhost", port=3306, user="clooca", passwd="un1verse")
+def SelectMetaDiagram(diagram_id):
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE userinfo SET password=%s WHERE username = %s;',(password,username))
-    connect.commit()
+    cur.execute('SELECT * FROM metadiagram WHERE id=%s;',(diagram_id, ))
+    rows = cur.fetchall()
     cur.close()
-    connect.close()
-    if affect_row_count == 0:
-        return False
-    return True
+    if len(rows) == 0:
+        return None
+    diagram = {}
+    diagram['id'] = rows[0][0]
+    diagram['name'] = rows[0][1]
+    return diagram
 
-def UpdateUserDetail(username, detail):
-    connect = MySQLdb.connect(db="clooca", host="localhost", port=3306, user="clooca", passwd="un1verse")
+def SelectMetaObject(metaobject_id):
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE userinfo SET detail=%s WHERE username = %s;',(detail,username))
-    connect.commit()
+    cur.execute('SELECT * FROM metaobject WHERE id=%s;',(metaobject_id, ))
+    rows = cur.fetchall()
+    cur.execute('SELECT metaproperty_id FROM metaobject_has_metaproperty WHERE metaobject_id=%s;',(metaobject_id, ))
+    prop = cur.fetchall()
     cur.close()
-    connect.close()
-    if affect_row_count == 0:
-        return False
-    return True
+    object = {}
+    object['id'] = rows[0][0]
+    object['name'] = rows[0][1]
+    object['graphic'] = rows[0][2]
+    object['property'] = []
+    for i in range(len(prop)):
+        object['property'].append(SelectMetaProperty(prop[i][0]))
+    return object
+
+def SelectMetaRelationship(metarelationship_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM metarelationship WHERE id=%s;',(metarelationship_id, ))
+    rows = cur.fetchall()
+    cur.execute('SELECT * FROM binding WHERE metarelationship_id=%s;',(metarelationship_id, ))
+    bindings = cur.fetchall()
+    cur.execute('SELECT metaproperty_id FROM metaobject_has_metaproperty WHERE metaobject_id=%s;',(metarelationship_id, ))
+    prop = cur.fetchall()
+    cur.close()
+    relationship = {}
+    relationship['id'] = rows[0][0]
+    relationship['name'] = rows[0][1]
+    relationship['arrow'] = rows[0][2]
+    relationship['bindings'] = []
+    for i in range(len(bindings)):
+        relationship['bindings'].append({'src' : bindings[i][1], 'dest' : bindings[i][2]})
+    relationship['property'] = []
+    for i in range(len(prop)):
+        relationship['property'].append(SelectMetaProperty(prop[i][0]))
+    return relationship
+
+def SelectMetaProperty(metaproperty_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM metaproperty WHERE id=%s;',(metaproperty_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    property = {}
+    property['id'] = rows[0][0]
+    property['name'] = rows[0][1]
+    property['type'] = rows[0][2]
+    return property

@@ -29,10 +29,8 @@ public class PropertyPanel {
 	static private Diagram current_graph;
 	 	
 	public PropertyPanel() {
-//		mainpanel = new HTMLPanel();
 	    Window.addResizeHandler(new ResizeHandler() {
 	        public void onResize(ResizeEvent ev) {
-//	            mainpanel.setWidth((ev.getWidth() - 32) + "px");
 	            mainpanel.setPixelSize(ev.getWidth() - 32, 150);
 	        }
 	    });
@@ -84,9 +82,10 @@ public class PropertyPanel {
 				} else if(o instanceof NodeObject) {
 					NodeObject no = (NodeObject)o;
 					ChangePropertyArea(no);
-				} else if(o instanceof CircleNode) {
-					CircleNode cn = (CircleNode)o;
-//					ChangePropertyArea(cn.getPropertyArea());
+				}else{
+					/*
+					 * unknown object error
+					 */
 				}
 			}
 		}};

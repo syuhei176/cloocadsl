@@ -3,8 +3,6 @@ package com.clooca.core.client.gopr.element;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.clooca.core.client.gopr.metamodel.MetaElement;
-import com.clooca.core.client.gopr.metamodel.MetaObject;
 import com.clooca.core.client.gopr.metamodel.MetaProperty;
 import com.clooca.core.client.gopr.metamodel.MetaRelation;
 import com.clooca.core.client.util.*;

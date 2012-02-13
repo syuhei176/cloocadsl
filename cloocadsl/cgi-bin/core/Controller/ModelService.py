@@ -4,8 +4,10 @@ import md5
 import re
 import sys
 import datetime
-sys.path.append('../../')
-from config import *
+from xml.etree.ElementTree import *
+sys.path.append('../')
+from core.Controller.CommandService import *
+import config
 
 reg_username = re.compile('\w+')
 
@@ -17,38 +19,12 @@ def CreateModel(metamodel_id, name):
     cur.close()
     connect.close()
     
-def AddDiagram(model_id, metadiagram_id, name):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
-    cur = connect.cursor()
-    cur.execute('INSERT INTO diagram (metadiagram_id, name) VALUES(%s,%s);',(metadiagram_id, name, ))
-    diagram_id = cur.lastrowid
-    cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE model SET root=%s WHERE id = %s;',(diagram_id,model_id, ))
-    connect.commit()
-    cur.close()
-    connect.close()
-
 def UpdateModel():
     affect_row_count = cur.execute('UPDATE userinfo SET password=%s WHERE username = %s;',(password,username))
     pass
 
-def LoadModel():
-    pass
-
-def MoveObject():
-    pass
-
-def AddObject():
-    pass
-
-def DeleteObject():
-    pass
-
-def AddBinding():
-    pass
-
-def AddObject():
-    pass
+def LoadProject(project_id):
+    return GetModel(project_id)
 
 def GetUserFromDB(username):
   connect = MySQLdb.connect(db="clooca", host="localhost", port=3306, user="clooca", passwd="un1verse")
@@ -68,12 +44,6 @@ def GetUserFromDB(username):
   cur.close()
   connect.close()
   return user
-
-  cur.execute('INSERT INTO userinfo (username,password, role, regist_date, detail) VALUES(%s,%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), role, d.strftime("%Y-%m-%d"), detail))
-  connect.commit()
-  cur.close()
-  connect.close()
-  return True
 
 def EnableEmail(user, email):
   return user.EnableMail(email)
@@ -171,3 +141,84 @@ def UpdateUserDetail(username, detail):
     if affect_row_count == 0:
         return False
     return True
+
+
+# Model Service
+def GetModel(model_id):
+    model = {}
+    global connect
+    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM model WHERE id=%s;',(model_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    model['id'] = rows[0][0]
+    model['root'] = GetDiagram(rows[0][1])
+    connect.close()
+    return model
+
+def GetDiagram(diagram_id):
+    diagram = {}
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM diagram WHERE id=%s;',(diagram_id, ))
+    rows = cur.fetchall()
+    diagram['id'] = rows[0][0]
+    diagram['metadiagram_id'] = rows[0][1]
+    cur.execute('SELECT * FROM has_object WHERE diagram_id=%s;',(diagram_id, ))
+    rows = cur.fetchall()
+    diagram['object'] = []
+    for i in range(len(rows)):
+        diagram['object'].append(SelectObject(rows[i][1]))
+    cur.execute('SELECT * FROM has_relationship WHERE diagram_id=%s;',(diagram_id, ))
+    rows = cur.fetchall()
+    diagram['relationship'] = []
+    for i in range(len(rows)):
+        diagram['relationship'].append(SelectRelationship(rows[i][1]))
+    cur.close()
+    return diagram
+
+def SelectDiagram(diagram_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM diagram WHERE id=%s;',(diagram_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    diagram = {}
+    diagram['id'] = rows[0][0]
+    diagram['metadiagram_id'] = rows[0][1]
+    return diagram
+
+def SelectObject(object_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM object WHERE id=%s;',(object_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    object = {}
+    object['id'] = rows[0][0]
+    object['metaobject_id'] = rows[0][1]
+    object['x'] = rows[0][2]
+    object['y'] = rows[0][3]
+    return object
+
+def SelectRelationship(relationship_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM relationship WHERE id=%s;',(relationship_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    relationship = {}
+    relationship['id'] = rows[0][0]
+    relationship['metarelationship_id'] = rows[0][1]
+    relationship['src'] = rows[0][2]
+    relationship['dest'] = rows[0][3]
+    return relationship
+
+def SelectProperty(metaproperty_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM property WHERE id=%s;',(relationship_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    property = {}
+    property['id'] = rows[0][0]
+    property['metaproperty_id'] = rows[0][1]
+    property['value'] = rows[0][2]
+    return property
+

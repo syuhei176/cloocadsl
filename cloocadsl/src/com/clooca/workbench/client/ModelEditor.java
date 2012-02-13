@@ -20,7 +20,7 @@ import com.clooca.core.client.model.LoginInfo;
 public class ModelEditor {
 	 
 	static public ToolPanel mToolPanel;
-	 
+	
 //	static private MenuPanel mMenuPanel;
 	 
 //	static public StatusTabPanel mStatusPanel;
@@ -99,7 +99,7 @@ public class ModelEditor {
 		
 		EditorPanel.add(EditorTabPanel.getPanel(), DockPanel.CENTER);
 		
-		EditorTabPanel.CreateNewTab("Sample", new mdlCanvas("Sample", "Sample", this.mToolPanel, diagram));
+		EditorTabPanel.CreateNewTab("Sample", new mdlCanvas("Sample", "Sample", mToolPanel, diagram));
 		
 	    RootLayoutPanel rp = RootLayoutPanel.get();
 	    rp.clear();

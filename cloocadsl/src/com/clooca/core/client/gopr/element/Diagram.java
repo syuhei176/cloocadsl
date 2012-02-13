@@ -6,7 +6,17 @@ import java.util.List;
 import com.clooca.core.client.diagram.GraphModificationListener;
 import com.clooca.core.client.gopr.metamodel.*;
 import com.clooca.core.client.util.*;
+import com.clooca.webutil.client.RequestGenerator;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.Window;
 
 public class Diagram extends ModelElement/* implements Cloneable*/ {
 	
@@ -81,6 +91,12 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
 		return null;
 	}
 	
+	
+	public void trasitionNode(double dx, double dy, NodeObject no) {
+		no.translate(dx, dy);
+        command_list.add("<UpdateObject object_id=\""+no.getId()+"\" x=\""+no.getLocation().getX()+"\" y=\""+no.getLocation().getY()+"\" diagram_id=\""+getId()+"\"/>");
+	}
+	
 	/**
 	 * 
 	 * @param newNode
@@ -95,6 +111,7 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
     		}
         }
         add(newNode);
+        command_list.add("<AddObject metaobject_id=\""+newNode.getMetaElement().getId()+"\" x=\""+p.getX()+"\" y=\""+p.getY()+"\" diagram_id=\""+getId()+"\"/>");
 		return true;
 	}
 	
@@ -135,18 +152,22 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
 	
 	public void removeNode(NodeObject n) {
 		nodes.remove(n);
-		/* Remove Relationship
-		ArrayList<Edge> remove_edge = new ArrayList<Edge>();
-		for(Edge e : edges) {
-			if(e.getStart().getId() == n.getId() || e.getEnd().getId() == n.getId()) {
+		//Remove Relationship
+		List<Relationship> remove_edge = new ArrayList<Relationship>();
+		for(Relationship e : relationships) {
+			if(e.getSrc().getId() == n.getId() || e.getDest().getId() == n.getId()) {
 				remove_edge.add(e);
 			}
 		}
-		for(Edge e : remove_edge) {
-			removeEdge(e);
+		for(Relationship e : remove_edge) {
+			removeRelationship(e);
 		}
-		*/
 		fireNodeRemoved(n);
+        command_list.add("<DeleteObject object_id=\""+n.getId()+"\"/>");
+	}
+	
+	public void removeRelationship(Relationship r) {
+		relationships.remove(r);
 	}
 	
 	private void add(NodeObject obj) {
@@ -182,6 +203,37 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
 		for(GraphModificationListener l : listeners) {
 			l.nodeMoved(this, node, dx, dy);
 		}
+	}
+	
+	List<String> command_list = new ArrayList<String>();
+	
+	public void clearCommand() {
+		command_list.clear();
+	}
+	
+	public void sendCommand(int pid) {
+      	RequestGenerator.send("/cgi-bin/core/save.cgi", "pid="+pid+"&command="+getCommand(), new RequestCallback(){
+
+    		@Override
+    		public void onError(Request request,
+    				Throwable exception) {
+    		}
+
+    		@Override
+    		public void onResponseReceived(Request request,
+    				Response response) {
+    			Window.alert(response.getText());
+    			command_list.clear();
+    		}});
+	}
+	
+	private String getCommand() {
+		String commands = "<Command>";
+		for(String com : command_list) {
+			commands += com;
+		}
+		commands += "</Command>";
+		return commands;
 	}
 	
 }

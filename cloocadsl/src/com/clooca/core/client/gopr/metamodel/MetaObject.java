@@ -127,4 +127,8 @@ public class MetaObject extends MetaElement {
 
 	}
 	
+	public NodeObject getInstance(JSONObject json_object) {
+		return null;
+	}
+	
 }

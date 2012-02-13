@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.clooca.core.client.diagram.shape.IShape;
-import com.clooca.core.client.gopr.metamodel.MetaElement;
 import com.clooca.core.client.gopr.metamodel.MetaObject;
 import com.clooca.core.client.gopr.metamodel.MetaProperty;
 import com.clooca.core.client.util.*;
-import com.google.gwt.core.client.GWT;
 
 public class NodeObject extends ModelElement {
 	/**
@@ -39,7 +37,6 @@ public class NodeObject extends ModelElement {
 		shape.draw(gm, bound);
 		int h = 0;
 		for(Property p : getProperty()) {
-//			GWT.log(p.getContent());
 			if(p.getContent() != null) {
 				gm.DrawText(p.getContent(), (int)bound.x, (int)bound.y + 20 + h * 20, 100/*(int)bound.width*/);
 			}

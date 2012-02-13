@@ -47,6 +47,10 @@ public abstract class ModelElement implements Serializable, Cloneable {
 		return id;
 	}
 	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
 	
 	public MetaElement getMetaElement() {
 		return metaElement;

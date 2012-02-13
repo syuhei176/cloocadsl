@@ -228,11 +228,11 @@ public class mdlCanvas implements mdlAbstractEditor,MouseDownHandler,MouseUpHand
 
 	public void doActionDelete() {
 		if(selectedElement != null) {
-			if(selectedElement instanceof Node) {
+			if(selectedElement instanceof NodeObject) {
 				diagram.removeNode((NodeObject)selectedElement);
 			}
-			if(selectedElement instanceof Edge) {
-//				diagram.removeEdge((Edge)selectedElement);
+			if(selectedElement instanceof Relationship) {
+				diagram.removeRelationship((Relationship)selectedElement);
 			}
 			selectedElement = null;
 			draw(0);
@@ -485,9 +485,13 @@ public class mdlCanvas implements mdlAbstractEditor,MouseDownHandler,MouseUpHand
 		if(dragMode == DragMode.DRAG_MOVE) {
 			double dx = mouse.getX() - lastMousePoint.getX();
 			double dy = mouse.getY() - lastMousePoint.getY();
-			if(selectedElement != null && selectedElement instanceof NodeObject) ((NodeObject)selectedElement).translate(dx, dy);
+			if(selectedElement != null && selectedElement instanceof NodeObject) {
+				diagram.trasitionNode(dx, dy, (NodeObject)selectedElement);
+			}
 			for(Object o : selectedElements) {
-				if(o instanceof NodeObject) ((NodeObject)o).translate(dx, dy);
+				if(o instanceof NodeObject) {
+					diagram.trasitionNode(dx, dy, (NodeObject)o);
+				}
 			}
 			lastMousePoint = (Point2D) mouse.clone();
 			draw(0);
