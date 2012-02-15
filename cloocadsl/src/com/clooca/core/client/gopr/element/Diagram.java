@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.clooca.core.client.diagram.GraphModificationListener;
+import com.clooca.core.client.gopr.RequestCommands;
 import com.clooca.core.client.gopr.metamodel.*;
 import com.clooca.core.client.util.*;
 import com.clooca.webutil.client.RequestGenerator;
@@ -77,6 +78,14 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
 		return null;
 	}
 	
+	public NodeObject findNode(int id) {
+		for(NodeObject n : nodes) {
+			if(n.getId() == id) return n;
+		}
+		return null;
+	}
+
+	
 	/**
 	 *  Finds a Relationship containing the given point. 
 	 *   
@@ -94,7 +103,7 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
 	
 	public void trasitionNode(double dx, double dy, NodeObject no) {
 		no.translate(dx, dy);
-        command_list.add("<UpdateObject object_id=\""+no.getId()+"\" x=\""+no.getLocation().getX()+"\" y=\""+no.getLocation().getY()+"\" diagram_id=\""+getId()+"\"/>");
+        command_list.updateObject(no.getId(), (int)no.getLocation().getX(), (int)no.getLocation().getY());
 	}
 	
 	/**
@@ -111,7 +120,7 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
     		}
         }
         add(newNode);
-        command_list.add("<AddObject metaobject_id=\""+newNode.getMetaElement().getId()+"\" x=\""+p.getX()+"\" y=\""+p.getY()+"\" diagram_id=\""+getId()+"\"/>");
+        command_list.addObject(newNode.getMetaElement().getId(), (int)p.getX(), (int)p.getY(), getId(), newNode.getId());
 		return true;
 	}
 	
@@ -128,6 +137,19 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
         NodeObject n2 = findNode(p2);
         if (n1 != null) {
         	if(checkBinding(b, n1, n2)) {
+        		command_list.addRelationship(b.getMetaElement().getId(), n1.getId(), n2.getId(), getId(), b.getId());
+            	return true;
+        	}
+        }
+		return false;
+	}
+	
+	public boolean addEdge(Relationship b, int p1id, int p2id) {
+        NodeObject n1 = findNode(p1id);
+        NodeObject n2 = findNode(p2id);
+        if (n1 != null) {
+        	if(checkBinding(b, n1, n2)) {
+        		command_list.addRelationship(b.getMetaElement().getId(), n1.getId(), n2.getId(), getId(), b.getId());
             	return true;
         	}
         }
@@ -163,11 +185,12 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
 			removeRelationship(e);
 		}
 		fireNodeRemoved(n);
-        command_list.add("<DeleteObject object_id=\""+n.getId()+"\"/>");
+        command_list.deleteObject(n.getId());
 	}
 	
 	public void removeRelationship(Relationship r) {
 		relationships.remove(r);
+		command_list.deleteRelationship(r.getId());
 	}
 	
 	private void add(NodeObject obj) {
@@ -205,14 +228,14 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
 		}
 	}
 	
-	List<String> command_list = new ArrayList<String>();
+	RequestCommands command_list = new RequestCommands();
 	
 	public void clearCommand() {
 		command_list.clear();
 	}
 	
 	public void sendCommand(int pid) {
-      	RequestGenerator.send("/cgi-bin/core/save.cgi", "pid="+pid+"&command="+getCommand(), new RequestCallback(){
+      	RequestGenerator.send("/cgi-bin/core/save.cgi", "pid="+pid+"&command="+command_list.getXML(), new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
@@ -223,17 +246,17 @@ public class Diagram extends ModelElement/* implements Cloneable*/ {
     		public void onResponseReceived(Request request,
     				Response response) {
     			Window.alert(response.getText());
+    			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
+    			JSONArray jsonArray = jsonObject.get("object_ids").isArray();
+    			for(int i=0;i < jsonArray.size();i++) {
+    				JSONObject json_objectid;
+    				json_objectid = jsonArray.get(i).isObject();
+    				int local_id = (int) json_objectid.get("local_id").isNumber().doubleValue();
+    				int global_id = (int) json_objectid.get("global_id").isNumber().doubleValue();
+    				findNode(local_id).setId(global_id);
+    			}
     			command_list.clear();
     		}});
 	}
-	
-	private String getCommand() {
-		String commands = "<Command>";
-		for(String com : command_list) {
-			commands += com;
-		}
-		commands += "</Command>";
-		return commands;
-	}
-	
+		
 }

@@ -335,16 +335,15 @@ public class MetaDiagram extends MetaElement {
 	    	}
 		}
 		
-		/*
 		if((jsonArray = json_diagram.get("relationship").isArray()) != null) {
 			for(int i=0;i < jsonArray.size();i++) {
 				JSONObject jsonObject_relations;
 	    		if((jsonObject_relations = jsonArray.get(i).isObject()) != null) {
-	    			loadRelationship(jsonObject_relations);
+	    			loadModelRelationship(jsonObject_relations, diagram);
 	    		}
 	    	}
 		}
-		*/
+		
 		diagram.clearCommand();
 		return diagram;
 	}
@@ -396,6 +395,56 @@ public class MetaDiagram extends MetaElement {
 		NodeObject no = (NodeObject) getMetaObject(metaobject_id).getInstance();
 		no.setId(id);
 		no.translate(x, y);
+		return no;
+	}
+	
+	private Relationship loadModelRelationship(JSONObject jsonObject, Diagram diagram) {
+        JSONString jsonString;
+        JSONArray jsonArray;
+        JSONNumber jsonNumber;
+		int id = 0;
+		int metarelationship_id = 0;
+		int x = 0;
+		int y = 0;
+		if((jsonNumber = jsonObject.get("id").isNumber()) != null) {
+			id = (int) jsonNumber.doubleValue();
+		}
+		if((jsonNumber = jsonObject.get("metarelationship_id").isNumber()) != null) {
+			metarelationship_id = (int) jsonNumber.doubleValue();
+		}
+		if((jsonNumber = jsonObject.get("src").isNumber()) != null) {
+			x = (int) jsonNumber.doubleValue();
+		}
+		if((jsonNumber = jsonObject.get("dest").isNumber()) != null) {
+			y = (int) jsonNumber.doubleValue();
+		}
+		/*
+		List<MetaProperty> properties = new ArrayList<MetaProperty>();
+		JSONArray jsonArray_property;
+		if((jsonArray_property = jsonObject.get("property").isArray()) != null) {
+			for(int j=0;j < jsonArray_property.size();j++) {
+				JSONObject jsonObject_property;
+				int prop_id = 0;
+				String prop_name = null;
+				String prop_type = null;
+	    		if((jsonObject_property = jsonArray_property.get(j).isObject()) != null) {
+        			if((jsonNumber = jsonObject_property.get("id").isNumber()) != null) {
+        				prop_id = (int) jsonNumber.doubleValue();
+        			}
+        			if((jsonString = jsonObject_property.get("name").isString()) != null) {
+        				prop_name = jsonString.stringValue();
+        			}
+        			if((jsonString = jsonObject_property.get("type").isString()) != null) {
+        				prop_type = jsonString.stringValue();
+       				}
+       				properties.add(new MetaProperty(prop_id, prop_name, prop_type));
+	    		}
+			}
+		}
+		*/
+		Relationship no = (Relationship) this.getMetaRelation(metarelationship_id).getInstance();
+		no.setId(id);
+		diagram.addEdge(no, x, y);
 		return no;
 	}
 	
