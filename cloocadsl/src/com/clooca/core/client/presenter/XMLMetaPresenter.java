@@ -1,0 +1,223 @@
+package com.clooca.core.client.presenter;
+
+import com.clooca.core.client.model.gopr.element.VersionElement;
+import com.clooca.core.client.model.gopr.metaelement.Binding;
+import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
+import com.clooca.core.client.model.gopr.metaelement.MetaDiagram;
+import com.clooca.core.client.model.gopr.metaelement.MetaModel;
+import com.clooca.core.client.model.gopr.metaelement.MetaObject;
+import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
+import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.xml.client.Document;
+import com.google.gwt.xml.client.Node;
+import com.google.gwt.xml.client.NodeList;
+import com.google.gwt.xml.client.XMLParser;
+
+/**
+ * 
+ * @author Syuhei Hiya
+ *
+ */
+public class XMLMetaPresenter {
+	
+	static String genModel(MetaModel model) {
+		String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><MetaModel id=\""+model.id+"\" name=\""+model.name+"\">";
+		xml += genDiaram(model.meta_diagram);
+		xml += "</MetaModel>";
+		return xml;
+	}
+	
+	static String genDiaram(MetaDiagram diagram) {
+		String xml = "<MetaDiagram id=\""+diagram.id+"\" name=\""+diagram.name+"\">";
+		xml += genVersionElement(diagram.ve);
+		for(MetaObject obj : diagram.meta_objects) {
+			xml += genObject(obj);
+		}
+		for(MetaRelation rel : diagram.meta_relations) {
+			xml += genRelationship(rel);
+		}
+		xml += "/<MetaDiagram>";
+		return xml;
+	}
+	
+	static String genObject(MetaObject obj) {
+		String xml = "<MetaObject id=\""+obj.id+"\" name=\""+obj.name+"\" x=\""+obj.pos.x+"\" y=\""+obj.pos.y+"\">";
+		xml += genVersionElement(obj.ve);
+		xml += genGraphic(obj.graphic);
+		for(MetaProperty p : obj.properties) {
+			xml += genProperty(p);
+		}
+		xml += "</MetaObject>";
+		return xml;
+	}
+	
+	static String genRelationship(MetaRelation rel) {
+		String xml = "<MetaRelationship id=\""+rel.id+"\" name=\""+rel.name+"\">";
+		xml += genVersionElement(rel.ve);
+		for(MetaProperty p : rel.properties) {
+			xml += genProperty(p);
+		}
+		for(Binding p : rel.bindings) {
+			xml += genBinding(p);
+		}
+		xml += "</MetaRelationship>";
+		return xml;
+	}
+	
+	static String genBinding(Binding binding) {
+		String xml = "<Binding id=\""+binding.src.id+"\" name=\""+binding.dest.id+"\">";
+		xml += "</Binding>";
+		return xml;
+	}
+	
+	static String genProperty(MetaProperty prop) {
+		String xml = "<MetaProperty id=\""+prop.id+"\" name=\""+prop.name+"\" data_type=\""+prop.data_type+"\" widget=\""+prop.widget+"\">";
+		xml += genVersionElement(prop.ve);
+		xml += "</MetaProperty>";
+		return xml;
+	}
+	
+	static String genGraphic(GraphicInfo g) {
+		String xml = "<Graphic id=\""+g.id+"\" shape=\""+g.shape+"\">";
+		xml += "</Graphic>";
+		return xml;
+	}
+	
+	static String genVersionElement(VersionElement ve) {
+		String xml = "<VersionElement version=\""+ve.version+"\" ver_type=\""+ve.ver_type+"\" />";
+		return xml;
+	}
+	
+	static MetaModel parse(String xml) {
+		MetaModel model = null;
+		Document doc = XMLParser.parse(xml);
+		NodeList nl = doc.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			GWT.log("load" + nl.item(i).getNodeName());
+			if(nl.item(i).getNodeName().matches("MetaModel")) {
+				model = parseModel(nl.item(i));
+			}
+		}
+		return model;
+	}
+	
+	static MetaModel parseModel(Node node) {
+		MetaModel model = new MetaModel();
+		model.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		model.name = node.getAttributes().getNamedItem("name").getNodeValue();
+		NodeList nl = node.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			if(nl.item(i).getNodeName().matches("MetaDiagram")) {
+				model.meta_diagram = parseDiagram(nl.item(i));
+			}
+		}
+		return model;
+	}
+
+	static MetaDiagram parseDiagram(Node node) {
+		MetaDiagram diagram = new MetaDiagram();
+		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		diagram.name = node.getAttributes().getNamedItem("name").getNodeValue();
+		NodeList nl = node.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			if(nl.item(i).getNodeName().matches("MetaObject")) {
+				diagram.meta_objects.add(parseObject(nl.item(i)));
+			}else if(nl.item(i).getNodeName().matches("MetaRelationship")) {
+				diagram.meta_relations.add(parseRelationship(nl.item(i)));
+			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
+				diagram.ve = parseVersionElement(nl.item(i));
+			}
+		}
+		return diagram;
+	}
+	
+	static MetaObject parseObject(Node node) {
+		MetaObject diagram = new MetaObject();
+		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		diagram.name = node.getAttributes().getNamedItem("name").getNodeValue();
+//		double x = Double.valueOf(node.getAttributes().getNamedItem("x").getNodeValue());
+//		double y = Double.valueOf(node.getAttributes().getNamedItem("y").getNodeValue());
+//		DiagramController.transition(diagram, x, y);
+		NodeList nl = node.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			if(nl.item(i).getNodeName().matches("MetaProperty")) {
+				diagram.properties.add(parseProperty(nl.item(i)));
+			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
+				diagram.ve = parseVersionElement(nl.item(i));
+			}else if(nl.item(i).getNodeName().matches("Graphic")) {
+				diagram.graphic = parseGraphicInfo(nl.item(i));
+			}
+		}
+		return diagram;
+	}
+	
+	static MetaRelation parseRelationship(Node node) {
+		MetaRelation diagram = new MetaRelation();
+		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		diagram.name = node.getAttributes().getNamedItem("name").getNodeValue();
+		NodeList nl = node.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			if(nl.item(i).getNodeName().matches("MetaProperty")) {
+				diagram.properties.add(parseProperty(nl.item(i)));
+			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
+				diagram.ve = parseVersionElement(nl.item(i));
+			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
+				diagram.bindings.add(parseBinding(nl.item(i)));
+			}
+		}
+		return diagram;
+	}
+	
+	static Binding parseBinding(Node node) {
+		int src = Integer.decode(node.getAttributes().getNamedItem("src").getNodeValue());
+		int dest = Integer.decode(node.getAttributes().getNamedItem("dest").getNodeValue());
+		Binding binding = new Binding(MetaModelController.getMetaObject(src), MetaModelController.getMetaObject(dest));
+/*		NodeList nl = node.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			if(nl.item(i).getNodeType() == com.google.gwt.xml.client.Node.TEXT_NODE) {
+				String value = nl.item(i).getNodeValue();
+				property.content = value;
+			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
+				property.ve = parseVersionElement(nl.item(i));
+			}
+		}
+		*/
+		return binding;
+	}
+
+	static MetaProperty parseProperty(Node node) {
+		MetaProperty property = new MetaProperty();
+		property.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		property.name = node.getAttributes().getNamedItem("name").getNodeValue();
+		property.data_type = node.getAttributes().getNamedItem("data_type").getNodeValue();
+		property.widget = node.getAttributes().getNamedItem("widget").getNodeValue();
+		/*
+		NodeList nl = node.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			if(nl.item(i).getNodeType() == com.google.gwt.xml.client.Node.TEXT_NODE) {
+				String value = nl.item(i).getNodeValue();
+				property.content = value;
+			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
+				property.ve = parseVersionElement(nl.item(i));
+			}
+		}
+		*/
+		return property;
+	}
+	
+	static GraphicInfo parseGraphicInfo(Node node) {
+		GraphicInfo gi = new GraphicInfo();
+		gi.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		gi.shape = node.getAttributes().getNamedItem("shape").getNodeValue();
+		return gi;
+	}
+	
+	static VersionElement parseVersionElement(Node node) {
+		VersionElement ve = new VersionElement();
+		ve.version = Integer.decode(node.getAttributes().getNamedItem("version").getNodeValue());
+		ve.ver_type = node.getAttributes().getNamedItem("version").getNodeValue();
+		return ve;
+	}
+
+}

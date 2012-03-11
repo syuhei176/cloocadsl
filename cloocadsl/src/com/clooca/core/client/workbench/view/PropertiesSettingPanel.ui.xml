@@ -1,0 +1,23 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		
+	</ui:style>
+	<g:HTMLPanel>
+		<g:AbsolutePanel height="257px" width="400px">
+			<g:at left="31" top="77">
+				<g:ListBox visibleItemCount="5" width="106px" height="138px" ui:field="properties"/>
+			</g:at>
+			<g:at left="31" top="53">
+				<g:Label text="プロパティ" width="106px" height="24px"/>
+			</g:at>
+			<g:at left="155" top="77">
+				<g:Button ui:field="add" width="58px" height="22px">追加</g:Button>
+			</g:at>
+			<g:at left="155" top="119">
+				<g:Button ui:field="delete" width="58px" height="22px">削除</g:Button>
+			</g:at>
+		</g:AbsolutePanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

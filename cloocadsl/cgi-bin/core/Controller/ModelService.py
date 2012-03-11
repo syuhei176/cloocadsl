@@ -147,6 +147,8 @@ def UpdateUserDetail(username, detail):
 def GetModel(model_id):
     model = {}
     global connect
+    global g_model_id
+    g_model_id = model_id
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT * FROM model WHERE id=%s;',(model_id, ))
@@ -164,16 +166,16 @@ def GetDiagram(diagram_id):
     rows = cur.fetchall()
     diagram['id'] = rows[0][0]
     diagram['metadiagram_id'] = rows[0][1]
-    cur.execute('SELECT * FROM has_object WHERE diagram_id=%s;',(diagram_id, ))
-    rows = cur.fetchall()
-    diagram['object'] = []
-    for i in range(len(rows)):
-        diagram['object'].append(SelectObject(rows[i][1]))
-    cur.execute('SELECT * FROM has_relationship WHERE diagram_id=%s;',(diagram_id, ))
-    rows = cur.fetchall()
-    diagram['relationship'] = []
-    for i in range(len(rows)):
-        diagram['relationship'].append(SelectRelationship(rows[i][1]))
+#    cur.execute('SELECT * FROM has_object WHERE diagram_id=%s;',(diagram_id, ))
+#    rows = cur.fetchall()
+    diagram['object'] = SelectObjects(diagram_id)
+#    for i in range(len(rows)):
+#        diagram['object'].append(SelectObject(rows[i][1]))
+#    cur.execute('SELECT * FROM has_relationship WHERE diagram_id=%s;',(diagram_id, ))
+#    rows = cur.fetchall()
+    diagram['relationship'] = SelectRelationships(diagram_id)
+#    for i in range(len(rows)):
+#        diagram['relationship'].append(SelectRelationship(rows[i][1]))
     cur.close()
     return diagram
 
@@ -189,7 +191,7 @@ def SelectDiagram(diagram_id):
 
 def SelectObject(object_id):
     cur = connect.cursor()
-    cur.execute('SELECT * FROM object WHERE id=%s;',(object_id, ))
+    cur.execute('SELECT * FROM object WHERE id=%s AND model_id=%s;',(object_id, g_model_id, ))
     rows = cur.fetchall()
     cur.close()
     object = {}
@@ -197,7 +199,26 @@ def SelectObject(object_id):
     object['metaobject_id'] = rows[0][1]
     object['x'] = rows[0][2]
     object['y'] = rows[0][3]
+    object['local_id'] = rows[0][4]
     return object
+
+def SelectObjects(diagram_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM object WHERE diagram_id=%s AND model_id=%s;',(diagram_id, g_model_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    objects = []
+    for i in range(len(rows)):
+        object = {}
+        object['id'] = rows[i][0]
+        object['metaobject_id'] = rows[i][1]
+        object['x'] = rows[i][2]
+        object['y'] = rows[i][3]
+        object['local_id'] = rows[i][4]
+        object['diagram_id'] = rows[i][5]
+        object['properties'] = SelectProperties(object['id'])
+        objects.append(object)
+    return objects
 
 def SelectRelationship(relationship_id):
     cur = connect.cursor()
@@ -211,14 +232,34 @@ def SelectRelationship(relationship_id):
     relationship['dest'] = rows[0][3]
     return relationship
 
-def SelectProperty(metaproperty_id):
+def SelectRelationships(diagram_id):
     cur = connect.cursor()
-    cur.execute('SELECT * FROM property WHERE id=%s;',(relationship_id, ))
+    cur.execute('SELECT * FROM relationship WHERE diagram_id=%s AND model_id=%s;',(diagram_id, g_model_id, ))
     rows = cur.fetchall()
     cur.close()
-    property = {}
-    property['id'] = rows[0][0]
-    property['metaproperty_id'] = rows[0][1]
-    property['value'] = rows[0][2]
-    return property
+    relationships = []
+    for i in range(len(rows)):
+        relationship = {}
+        relationship['id'] = rows[i][0]
+        relationship['metarelationship_id'] = rows[i][1]
+        relationship['src'] = rows[i][2]
+        relationship['dest'] = rows[i][3]
+        relationship['local_id'] = rows[i][4]
+        relationship['diagram_id'] = rows[i][5]
+        relationships.append(relationship)
+    return relationships
 
+def SelectProperties(object_id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM property WHERE object_id=%s AND model_id=%s;',(object_id, g_model_id, ))
+    rows = cur.fetchall()
+    cur.close()
+    properties = []
+    for i in range(len(rows)):
+        property = {}
+        property['id'] = rows[i][0]
+        property['object_id'] = rows[i][1]
+        property['metaproperty_id'] = rows[i][2]
+        property['value'] = rows[i][3]
+        properties.append(property)
+    return properties

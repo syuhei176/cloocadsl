@@ -13,16 +13,10 @@ public class ProjectInfoCell extends AbstractCell<ProjectInfo> {
 			ProjectInfo value, SafeHtmlBuilder sb) {
 		  sb.appendHtmlConstant("<table><tr><th>");
 		  sb.appendHtmlConstant(
-		    SafeHtmlUtils.fromString(value.getProjectname()).asString());
+		    SafeHtmlUtils.fromString(value.getName()).asString());
 		  sb.appendHtmlConstant("</th><td>");
 		  
-		  if(value.getBelongLesson() <= 0) {
-			  sb.appendHtmlConstant(SafeHtmlUtils.fromString("自�??プロジェク�?").asString());
-		  }else{
-			  sb.appendHtmlConstant(SafeHtmlUtils.fromString("授業プロジェク�"+value.getBelongLesson()).asString());
-		  }
 		  sb.appendHtmlConstant("</td><td>");
-		  sb.appendHtmlConstant(SafeHtmlUtils.fromString(value.getType()).asString());
 		  sb.appendHtmlConstant("</td></tr></table>");
 	}
 

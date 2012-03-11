@@ -17,12 +17,13 @@ public class GraphicManager {
 	public GraphicManager(Context2d context) {
 		this.context = context;
 		initFont();
+		this.setLineWidth(2);
 		this.context.setFont(String.valueOf(fontSize) + "px " + fontStyle);
 	}
 	
 	private void initFont()
 	{
-		fontSize = 12;
+		fontSize = 14;
 		fontStyle = "'ＭＳ Ｐゴシック'";
 		fontHeight = 16;
 		fontWidth = 16;

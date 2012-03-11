@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+<head>
+<meta name="gwt:property" content="locale=ja">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>clooca</title>
+<link rel="stylesheet" href="home.css" type="text/css" />
+<!-- <link rel="stylesheet" href="common.css" type="text/css" /> -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+<script src="/js/jquery-1.7.1.min.js"></script>
+<script src="/js/jquery-ui-1.8.18.custom.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAQr-OoUDUD8B6md7h-mq_iBRB2_XkvWJzLyCU3pCnbWbszTP00xQZ7sOVnkT-oSJ1YdcNe6Gkeyz7zA"></script>
+<script type="text/javascript">
+
+
+function init() {
+	$.post('/cgi-bin/core/checkloggedin.cgi',
+		function(data) {
+		  if(data != null) {
+			  load_models();
+			  $('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
+		  }else{
+			  $('#login').empty().append('<a href="/DashBoard.html">login</a>&nbsp;&nbsp;&nbsp;');
+		  }
+		}, "json");
+}
+
+$(function() {
+	$( "#dialogg" ).dialog();
+});
+
+function load_models() {
+	$.post('/cgi-bin/core/dashboard.cgi',
+			function(data) {
+				create_metamodels_table(data.metamodels);
+				create_projects_table(data.projects);
+			}, "json");
+
+}
+
+function create_projects_table(projects) {
+	var html = '<table><tr><td>プロジェクト名</td></tr>';
+	for(var i = 0;i < projects.length;i++) {
+		var link = '<a href="/editor.html#'+projects[i].id+'">'+projects[i].name+'</a>'
+		html += '<tr><td>'+link+'</td></tr>';
+	}
+	html += '</table>';
+	  $('#project').empty().append(html);
+}
+
+function create_metamodels_table(metamodels) {
+	var html = '<table><tr><td>メタモデル名</td><td>公開範囲</td></tr>';
+	for(var i = 0;i < metamodels.length;i++) {
+		var link = '<a href="/WorkBench.html#'+metamodels[i].id+'">'+metamodels[i].name+'</a>'
+		var vis = 'エラー';
+		if(metamodels[i].visibillity == 0) {
+			vis = '非公開';
+		}else if(metamodels[i].visibillity == 1) {
+			vis = '公開';
+		}
+		html += '<tr><td>'+link+'</td><td>'+vis+'</td></tr>';
+	}
+	html += '</table>';
+	  $('#metamodel').empty().append(html);
+}
+
+
+</script>
+</head>
+<body onload="init()">
+      <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+<p id="message"></p>
+
+
+
+<div id="dialogg" title="Basic dialog">
+<form method="POST" action="/cgi-bin/core/login.cgi">
+<div>username:<input type="text" name="username"></div>
+<div>password:<input type="password" name="password"></div>
+<input type="submit" value="ログイン">
+</form>
+</div>
+
+<div id="wrapper">
+<div id="temp">
+<div id="header">
+<div id="header-main">
+<p id="overview">
+</p>
+<!-- clooca is a web-based model-driven development tool.
+Currently, clooca is being introduced at the lesson of the Kyushu University Graduate School of Information Systems, please try it. -->
+</div>
+<div id="language">
+<div Align="right"><a href="/english/index.html">English</a></div>
+<div Align="right"><a href="/index.html">日本語</a></div>
+</div>
+</div>
+<!-- ナビゲーションバー -->
+ <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container" style="width: auto;">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <!-- <a class="brand" href="/"><img src="images/logo2.png" width="80" height="30"></img></a> -->
+        <a class="brand" href="/">clooca</a>
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="active"><a href="/index.html">Home</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/service.html">Service</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/document.html">Document</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/contact.html">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+          <p id="login" class="navbar-text pull-right"></p>
+        </div><!-- /.nav-collapse -->
+      </div>
+    </div><!-- /navbar-inner -->
+  </div><!-- /navbar -->
+  
+      <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">Platform Files</li>
+              <li><a href="/platform/cui.zip">cui.zip</a></li>
+              <li class="nav-header">Document</li>
+              <li><a href="/file/tutorial.pdf">簡易マニュアル</a></li>
+              <li class="nav-header">Links</li>
+              <li><a href="https://groups.google.com/group/clooca/topics">ディスカッション</a></li>
+              <li><a href="http://education.clooca.com">安定バージョン</a></li>
+              <li><a href="http://dev.clooca.com">開発バージョン</a></li>
+              <li><a href="http://syuhei.jpn.org">開発者のページ</a></li>
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+          <div class="hero-unit">
+            <h1>clooca</h1>
+            <h2>プロジェクト</h2>
+            <div id="project"></div>
+            <h2>メタモデル</h2>
+            <div id="metamodel"></div>
+          </div>
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
+お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
+Copyright &copy 2011 部谷修平　All Rights Reserved.
+</p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+<!--
+<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="DFBZ4Z5JC38YY">
+<input type="image" src="https://www.sandbox.paypal.com/ja_JP/JP/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal- オンラインで安全・簡単にお支払い">
+<img alt="" border="0" src="https://www.sandbox.paypal.com/ja_JP/i/scr/pixel.gif" width="1" height="1">
+</form>
+-->
+
+</div>
+<div id="footer">
+</div>
+</div>
+</div>
+</body>
+</html>

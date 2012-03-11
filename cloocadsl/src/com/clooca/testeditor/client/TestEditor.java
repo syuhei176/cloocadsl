@@ -1,6 +1,5 @@
 package com.clooca.testeditor.client;
 
-import com.clooca.testeditor.client.framework.gui.ModelEditor;
 import com.google.gwt.core.client.EntryPoint;
 
 /**
@@ -9,7 +8,7 @@ import com.google.gwt.core.client.EntryPoint;
 public class TestEditor implements EntryPoint {
 	
 	public void onModuleLoad() {
-       	ModelEditor mdl = new ModelEditor();
+       	cloocaEditor mdl = new cloocaEditor();
 	}
 	
 }

@@ -4,6 +4,7 @@ import md5
 import re
 import sys
 import datetime
+import json
 sys.path.append('../')
 import config
 
@@ -11,6 +12,9 @@ reg_username = re.compile('\w+')
 
 connect = None
 
+def GetMetaModel2(metamodel_id):
+    metamodel = {}
+    
 def GetMetaModel(metamodel_id):
     metamodel = {}
     global connect
@@ -102,4 +106,6 @@ def SelectMetaProperty(metaproperty_id):
     property['id'] = rows[0][0]
     property['name'] = rows[0][1]
     property['type'] = rows[0][2]
+    if property['type'] == 'pulldown':
+        property['extend'] = json.loads(rows[0][3])
     return property

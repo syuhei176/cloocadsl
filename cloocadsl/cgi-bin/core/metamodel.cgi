@@ -15,6 +15,6 @@ print "Content-type: text/javascript; charset=utf-8\n\n"
 content_length = int(os.environ['CONTENT_LENGTH'])
 form = cgi.parse_qs(sys.stdin.read(content_length))
 
-metamodel_id = form["id"][0]
+metamodel_id = int(form["id"][0])
 
-print json.dumps(GetMetaModel(1))
+print json.dumps(GetMetaModel(metamodel_id))

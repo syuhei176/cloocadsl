@@ -1,0 +1,44 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		
+	</ui:style>
+	<g:HTMLPanel>
+		<g:AbsolutePanel height="386px" width="370px">
+			<g:at left="181" top="79">
+				<g:TextBox ui:field="propertyName"/>
+			</g:at>
+			<g:at left="181" top="145">
+				<g:ListBox ui:field="data_type"/>
+			</g:at>
+			<g:at left="181" top="185">
+				<g:ListBox ui:field="widget"/>
+			</g:at>
+			<g:at left="72" top="42">
+				<g:Label text="プロパティを設定します" width="182px" height="24px"/>
+			</g:at>
+			<g:at left="48" top="84">
+				<g:Label text="New Label"/>
+			</g:at>
+			<g:at left="48" top="145">
+				<g:Label text="New Label"/>
+			</g:at>
+			<g:at left="48" top="189">
+				<g:Label text="New Label"/>
+			</g:at>
+			<g:at left="181" top="107">
+				<g:TextBox readOnly="true" ui:field="parentName"/>
+			</g:at>
+			<g:at left="48" top="108">
+				<g:Label text="New Label"/>
+			</g:at>
+			<g:at left="181" top="354">
+				<g:Button text="OK" width="59px" height="18px" ui:field="ok"/>
+			</g:at>
+			<g:at left="257" top="354">
+				<g:Button text="CANCEL" ui:field="cancel"/>
+			</g:at>
+		</g:AbsolutePanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 
