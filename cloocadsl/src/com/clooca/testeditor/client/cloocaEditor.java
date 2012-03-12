@@ -28,6 +28,7 @@ import com.clooca.core.client.view.DiagramEditor;
 import com.clooca.core.client.view.EditorTabView;
 import com.clooca.core.client.view.ProjectView;
 import com.clooca.core.client.view.PropertyView;
+import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
 
 /**
@@ -107,7 +108,7 @@ public class cloocaEditor {
     		@Override
     		public void onResponseReceived(Request request,
     				Response response) {
-    			Window.alert(response.getText());
+    			Console.log(response.getText());
     			JSONObject jsonobj = JSONParser.parseLenient(response.getText()).isObject();
     			if(jsonobj != null) {
     				mProjectController.load(Integer.decode(History.getToken()));

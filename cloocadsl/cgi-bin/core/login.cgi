@@ -17,7 +17,9 @@ user = Login(username, password)
 #delete passwd
 if not user == None:
     user['passwd'] = '********'
-    
+
+sys.stdout.write('Location : /dashboard.html')
+
 excgi.Content()
 
 print json.dumps(user)

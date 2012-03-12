@@ -16,20 +16,20 @@
 
 
 function init() {
+	$( "#login-dialog" ).hide();
+	$( "#create-new-p" ).hide();
+	$( "#create-new-m" ).hide();
 	$.post('/cgi-bin/core/checkloggedin.cgi',
 		function(data) {
 		  if(data != null) {
 			  load_models();
 			  $('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
 		  }else{
+			  $( "#login-dialog" ).dialog({ modal: true });
 			  $('#login').empty().append('<a href="/DashBoard.html">login</a>&nbsp;&nbsp;&nbsp;');
 		  }
 		}, "json");
 }
-
-$(function() {
-	$( "#dialogg" ).dialog();
-});
 
 function load_models() {
 	$.post('/cgi-bin/core/dashboard.cgi',
@@ -37,7 +37,6 @@ function load_models() {
 				create_metamodels_table(data.metamodels);
 				create_projects_table(data.projects);
 			}, "json");
-
 }
 
 function create_projects_table(projects) {
@@ -64,6 +63,25 @@ function create_metamodels_table(metamodels) {
 	}
 	html += '</table>';
 	  $('#metamodel').empty().append(html);
+
+		var html = '<select name="metamodel_id">';
+		for(var i = 0;i < metamodels.length;i++) {
+			html += '<option value="'+metamodels[i].id+'">'+metamodels[i].name+'</option>';
+		}
+		html += '</select>';
+	  $('#metamodel2').empty().append(html);
+}
+
+function create_new_project() {
+	$.post('/cgi-bin/core/createp.cgi', { name: "John", xml: "2pm",  metamodel_id: ""},
+			function(data) {
+			}, "json");
+}
+
+function create_new_metamodel() {
+	$.post('/cgi-bin/core/createm.cgi', { name: "John", xml: "2pm", visibillity: ""},
+			function(data) {
+			}, "json");
 }
 
 
@@ -82,15 +100,39 @@ function create_metamodels_table(metamodels) {
     </noscript>
 <p id="message"></p>
 
-
-
-<div id="dialogg" title="Basic dialog">
-<form method="POST" action="/cgi-bin/core/login.cgi">
-<div>username:<input type="text" name="username"></div>
-<div>password:<input type="password" name="password"></div>
-<input type="submit" value="ログイン">
-</form>
+<div id="login-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable ui-resizable">
+   <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+      <span id="ui-dialog-title-dialog" class="ui-dialog-title">ログインダイアログ</span>
+      <a class="ui-dialog-titlebar-close ui-corner-all" href="#"><span class="ui-icon ui-icon-closethick">close</span></a>
+   </div>
+   <div style="height: 200px; min-height: 109px; width: auto;" class="ui-dialog-content ui-widget-content" id="dialog">
+   <form method="POST" action="/cgi-bin/core/login.cgi">
+   <div>username:<input type="text" name="username"></div>
+   <div>password:<input type="password" name="password"></div>
+   <input type="submit" value="ログイン">
+   </form>
+   </div>
 </div>
+<div id="create-new-p" title="CreateNew">
+   <form method="POST" action="/cgi-bin/core/createp.cgi">
+   <div>プロジェクト名<input type="text" name="name"></div>
+	<div id="metamodel2"></div>
+   <input type="hidden" name="xml" value=" ">
+   <input type="submit" value="OK">
+   </form>
+</div>
+<div id="create-new-m" title="CreateNew">
+   <form method="POST" action="/cgi-bin/core/createm.cgi">
+   <div>メタモデル名<input type="text" name="name"></div>
+	<select name="visibillity">
+	<option value="0">非公開</option>
+	<option value="1">公開</option>
+	</select>
+   <input type="hidden" name="xml" value="">
+   <input type="submit" value="OK">
+   </form>
+</div>
+
 
 <div id="wrapper">
 <div id="temp">
@@ -165,8 +207,10 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <h1>clooca</h1>
             <h2>プロジェクト</h2>
             <div id="project"></div>
+            <p><a class="btn btn-danger btn-small" href="javascript:$('#create-new-p').dialog()">　新規作成 &raquo;　　</a></p>
             <h2>メタモデル</h2>
             <div id="metamodel"></div>
+            <p><a class="btn btn-danger btn-small" href="javascript:$('#create-new-m').dialog()">　新規作成 &raquo;　　</a></p>
           </div>
       </div><!--/row-->
 

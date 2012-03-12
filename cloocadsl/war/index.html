@@ -26,6 +26,8 @@ _gaq.push(['_trackPageview']);
 })();
 
 function init() {
+	$( "#login_dialog" ).hide();
+	$( "#register_dialog" ).hide();
     if(location.hostname == "clooca.com") {
         location.href='http://education.clooca.com/';
     }
@@ -45,16 +47,20 @@ function init() {
 			  load_models();
 			  $('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
 		  }else{
-			  $('#login').empty().append('<a href="/DashBoard.html">login</a>&nbsp;&nbsp;&nbsp;');
+			  $('#login').empty().append('<a href="javascript:login()">login</a>&nbsp;&nbsp;&nbsp;');
 		  }
 		}, "json");
 	
 
 }
 
-$(function() {
-	$( "#dialogg" ).dialog();
-});
+function login() {
+	$( "#login_dialog" ).dialog({ modal: true });
+}
+
+function register() {
+	$( "#register_dialog" ).dialog({ modal: true });
+}
 
 function load_models() {
 	$.post('/cgi-bin/core/dashboard.cgi',
@@ -106,11 +112,20 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 
 
 
-<div id="dialogg" title="Basic dialog">
+<div id="login_dialog" title="login dialog">
 <form method="POST" action="/cgi-bin/core/login.cgi">
 <div>username:<input type="text" name="username"></div>
 <div>password:<input type="password" name="password"></div>
 <input type="submit" value="ログイン">
+</form>
+</div>
+
+<div id="register_dialog" title="register dialog">
+<form method="POST" action="/cgi-bin/core/createuser.cgi">
+<div>username:<input type="text" name="username"></div>
+<div>password:<input type="password" name="password"></div>
+<div>confirm:<input type="password" name="password2"></div>
+<input type="submit" value="登録">
 </form>
 </div>
 
@@ -186,9 +201,9 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <div class="hero-unit">
             <h1>clooca DSL</h1>
             <p>cloooca DSLはソーシャルDSMLプラットフォームです。</p>
-            <p><a class="btn btn-danger btn-large" href="javascript:home_register()">　新規登録 &raquo;　　</a></p>
+            <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　　</a></p>
             <div id="home-div" name="home-div"></div>
-            <p><a class="btn btn-primary btn-large" href="/DashBoard.html">ダッシュボード &raquo;</a></p>
+            <p><a class="btn btn-primary btn-large" href="/dashboard.html">ダッシュボード &raquo;</a></p>
             <h3>最新情報</h3>
             <ul id="twitter_data"></ul>
           </div>

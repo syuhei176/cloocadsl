@@ -3,7 +3,7 @@ import os
 import sys
 
 def Header():
-    sys.stdout.write('Content-type: text/javascript; charset=utf-8')
+    sys.stdout.write('Content-type: text/javascript; charset=utf-8\n')
 
 def Content():
     sys.stdout.write('\n\n')

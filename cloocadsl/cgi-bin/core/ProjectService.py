@@ -25,15 +25,35 @@ def saveProject(pid, xml):
 def loadProject(pid):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,name,xml FROM ProjectInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT id,name,xml,metamodel_id FROM ProjectInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
     cur.close()
     project = {}
     project['id'] = rows[0][0]
     project['name'] = rows[0][1]
     project['xml'] = rows[0][2]
+    project['metamodel_id'] = rows[0][3]
     connect.close()
     return project
+
+def createProject(user, name, xml, metamodel_id):
+    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id) VALUES(%s,%s,%s);',(name, xml, metamodel_id, ))
+    connect.commit()
+    id = cur.lastrowid
+    cur.close()
+    cur = connect.cursor()
+    cur.execute('INSERT INTO hasProject (user_id,project_id) VALUES(%s,%s);',(user['id'], id, ))
+    connect.commit()
+    cur.close()
+    connect.close()
+    project = {}
+    project['id'] = id
+    project['name'] = name
+    project['xml'] = xml
+    project['metamodel_id'] = metamodel_id
+    return True
 
 def loadMyProjectList(user):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)

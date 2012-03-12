@@ -1,5 +1,7 @@
 package com.clooca.core.client.presenter;
 
+import com.clooca.core.client.model.gopr.element.Diagram;
+import com.clooca.core.client.model.gopr.element.Model;
 import com.clooca.core.client.model.gopr.element.VersionElement;
 import com.clooca.core.client.model.gopr.metaelement.Binding;
 import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
@@ -8,6 +10,7 @@ import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
+import com.clooca.core.client.util.IdGenerator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -37,7 +40,7 @@ public class XMLMetaPresenter {
 		for(MetaRelation rel : diagram.meta_relations) {
 			xml += genRelationship(rel);
 		}
-		xml += "/<MetaDiagram>";
+		xml += "</MetaDiagram>";
 		return xml;
 	}
 	
@@ -53,7 +56,7 @@ public class XMLMetaPresenter {
 	}
 	
 	static String genRelationship(MetaRelation rel) {
-		String xml = "<MetaRelationship id=\""+rel.id+"\" name=\""+rel.name+"\">";
+		String xml = "<MetaRelationship id=\""+rel.id+"\" name=\""+rel.name+"\" arrow=\""+rel.arrow_type+"\">";
 		xml += genVersionElement(rel.ve);
 		for(MetaProperty p : rel.properties) {
 			xml += genProperty(p);
@@ -66,7 +69,7 @@ public class XMLMetaPresenter {
 	}
 	
 	static String genBinding(Binding binding) {
-		String xml = "<Binding id=\""+binding.src.id+"\" name=\""+binding.dest.id+"\">";
+		String xml = "<Binding src=\""+binding.src.id+"\" dest=\""+binding.dest.id+"\">";
 		xml += "</Binding>";
 		return xml;
 	}
@@ -79,7 +82,7 @@ public class XMLMetaPresenter {
 	}
 	
 	static String genGraphic(GraphicInfo g) {
-		String xml = "<Graphic id=\""+g.id+"\" shape=\""+g.shape+"\">";
+		String xml = "<Graphic id=\""+g.id+"\" shape=\""+g.shape+"\" color=\""+g.color+"\">";
 		xml += "</Graphic>";
 		return xml;
 	}
@@ -91,13 +94,27 @@ public class XMLMetaPresenter {
 	
 	static MetaModel parse(String xml) {
 		MetaModel model = null;
-		Document doc = XMLParser.parse(xml);
+		Document doc = null;
+		try {
+			doc = XMLParser.parse(xml);
+		}catch(Exception e) {
+			
+		}finally{
+			
+		}
+		if(doc != null) {
 		NodeList nl = doc.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			GWT.log("load" + nl.item(i).getNodeName());
 			if(nl.item(i).getNodeName().matches("MetaModel")) {
 				model = parseModel(nl.item(i));
 			}
+		}
+		}
+		if(model == null) {
+			model = new MetaModel();
+			model.meta_diagram = new MetaDiagram();
+			model.meta_diagram.id = 1;
 		}
 		return model;
 	}
@@ -124,7 +141,7 @@ public class XMLMetaPresenter {
 			if(nl.item(i).getNodeName().matches("MetaObject")) {
 				diagram.meta_objects.add(parseObject(nl.item(i)));
 			}else if(nl.item(i).getNodeName().matches("MetaRelationship")) {
-				diagram.meta_relations.add(parseRelationship(nl.item(i)));
+				diagram.meta_relations.add(parseRelationship(nl.item(i), diagram));
 			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
 				diagram.ve = parseVersionElement(nl.item(i));
 			}
@@ -135,6 +152,7 @@ public class XMLMetaPresenter {
 	static MetaObject parseObject(Node node) {
 		MetaObject diagram = new MetaObject();
 		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		IdGenerator.setOffset(diagram.id);
 		diagram.name = node.getAttributes().getNamedItem("name").getNodeValue();
 //		double x = Double.valueOf(node.getAttributes().getNamedItem("x").getNodeValue());
 //		double y = Double.valueOf(node.getAttributes().getNamedItem("y").getNodeValue());
@@ -152,27 +170,33 @@ public class XMLMetaPresenter {
 		return diagram;
 	}
 	
-	static MetaRelation parseRelationship(Node node) {
+	static MetaRelation parseRelationship(Node node, MetaDiagram parent) {
 		MetaRelation diagram = new MetaRelation();
 		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		IdGenerator.setOffset(diagram.id);
 		diagram.name = node.getAttributes().getNamedItem("name").getNodeValue();
+		if(node.getAttributes().getNamedItem("arrow") != null) {
+			diagram.arrow_type = node.getAttributes().getNamedItem("arrow").getNodeValue();
+		}else{
+			diagram.arrow_type = "none";
+		}
 		NodeList nl = node.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeName().matches("MetaProperty")) {
 				diagram.properties.add(parseProperty(nl.item(i)));
 			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
 				diagram.ve = parseVersionElement(nl.item(i));
-			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
-				diagram.bindings.add(parseBinding(nl.item(i)));
+			}else if(nl.item(i).getNodeName().matches("Binding")) {
+				diagram.bindings.add(parseBinding(nl.item(i), parent));
 			}
 		}
 		return diagram;
 	}
 	
-	static Binding parseBinding(Node node) {
+	static Binding parseBinding(Node node, MetaDiagram parent) {
 		int src = Integer.decode(node.getAttributes().getNamedItem("src").getNodeValue());
 		int dest = Integer.decode(node.getAttributes().getNamedItem("dest").getNodeValue());
-		Binding binding = new Binding(MetaModelController.getMetaObject(src), MetaModelController.getMetaObject(dest));
+		Binding binding = new Binding(MetaModelController.getMetaObject(src, parent), MetaModelController.getMetaObject(dest, parent));
 /*		NodeList nl = node.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeType() == com.google.gwt.xml.client.Node.TEXT_NODE) {
@@ -210,6 +234,7 @@ public class XMLMetaPresenter {
 		GraphicInfo gi = new GraphicInfo();
 		gi.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
 		gi.shape = node.getAttributes().getNamedItem("shape").getNodeValue();
+		if(node.getAttributes().getNamedItem("color") != null) gi.color = node.getAttributes().getNamedItem("color").getNodeValue();
 		return gi;
 	}
 	

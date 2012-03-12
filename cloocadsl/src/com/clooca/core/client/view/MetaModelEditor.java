@@ -273,6 +273,7 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
 		for(Binding b : meta_rel.bindings) {
     		gm.beginPath();
     		gm.setColor("BLACK");
+    		if(this.mMetaModelController.getSelected() != null && this.mMetaModelController.getSelected().equals(meta_rel)) gm.setColor("BLUE");
     		if(b.src.id == b.dest.id) {
         		gm.moveTo(b.src.pos);
         		gm.LineTo(new Point2D(b.src.pos.x + 40, b.src.pos.y));

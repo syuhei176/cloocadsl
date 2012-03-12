@@ -12,6 +12,13 @@ public class ArrowHead {
  	
 	private List<Point2D> path;
 	
+	public static final String NONE = "none";
+	public static final String V = "v";
+	public static final String TRIANGLE = "triabgle";
+	public static final String BLACK_TRIANGLE = "black triangle";
+	public static final String DIAMOND = "diamond";
+	public static final String BLACK_DIAMOND = "black diamond";
+
 	public enum ArrowType {NONE, V, TRIANGLE, BLACK_TRIANGLE, DIAMOND, BLACK_DIAMOND};
 	
 	private ArrowType type;

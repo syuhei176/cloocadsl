@@ -6,9 +6,11 @@ import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.element.Property;
+import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
+import com.clooca.core.client.util.ArrowHead;
 import com.clooca.core.client.util.ElementSelectionListener;
 import com.clooca.core.client.util.IdGenerator;
 import com.google.gwt.core.client.GWT;
@@ -173,7 +175,7 @@ public class PropertyView {
 	static private void ChangePropertyArea(final MetaObject obj) {
 		mainpanel.clear();
 		final TextBox nTextBox = new TextBox();
-		final TextBox gTextBox = new TextBox();
+		final ListBox gListBox = new ListBox();
 		nTextBox.setText(obj.name);
 		nTextBox.addChangeHandler(new ChangeHandler(){
 
@@ -182,22 +184,27 @@ public class PropertyView {
 				obj.name = nTextBox.getText();
 			}
 			});
-		gTextBox.setText(obj.graphic.shape);
-		gTextBox.addChangeHandler(new ChangeHandler(){
+		gListBox.addItem(GraphicInfo.RECT);
+		gListBox.addItem(GraphicInfo.ROUNDED);
+		gListBox.addItem(GraphicInfo.CIRCLE);
+		for(int i=0;i < gListBox.getItemCount();i++) {
+			if(gListBox.getItemText(i).matches(obj.graphic.shape)) gListBox.setSelectedIndex(i);
+		}
+		gListBox.addChangeHandler(new ChangeHandler(){
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				obj.graphic.shape = gTextBox.getText();
+				obj.graphic.shape = gListBox.getItemText(gListBox.getSelectedIndex());
 			}
 			});
 		mainpanel.add(nTextBox, "name");
-		mainpanel.add(gTextBox, "graphic");
+		mainpanel.add(gListBox, "graphic");
 	}
 	
 	static private void ChangePropertyArea(final MetaRelation rel) {
 		mainpanel.clear();
 		final TextBox nTextBox = new TextBox();
-		final TextBox gTextBox = new TextBox();
+		final ListBox gListBox = new ListBox();
 		nTextBox.setText(rel.name);
 		nTextBox.addChangeHandler(new ChangeHandler(){
 
@@ -206,18 +213,25 @@ public class PropertyView {
 				rel.name = nTextBox.getText();
 			}
 			});
-		/*
-		gTextBox.setText(obj.graphic.shape);
-		gTextBox.addChangeHandler(new ChangeHandler(){
+		gListBox.addItem(ArrowHead.NONE);
+		gListBox.addItem(ArrowHead.V);
+		gListBox.addItem(ArrowHead.TRIANGLE);
+		gListBox.addItem(ArrowHead.BLACK_TRIANGLE);
+		gListBox.addItem(ArrowHead.DIAMOND);
+		gListBox.addItem(ArrowHead.BLACK_DIAMOND);
+		for(int i=0;i < gListBox.getItemCount();i++) {
+			GWT.log(rel.arrow_type);
+			if(gListBox.getItemText(i).matches(rel.arrow_type)) gListBox.setSelectedIndex(i);
+		}
+		gListBox.addChangeHandler(new ChangeHandler(){
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				obj.graphic.shape = gTextBox.getText();
+				rel.arrow_type = gListBox.getItemText(gListBox.getSelectedIndex());
 			}
 			});
-		*/
 		mainpanel.add(nTextBox, "name");
-//		mainpanel.add(gTextBox, "graphic");
+		mainpanel.add(gListBox, "arrow");
 	}
 
 }

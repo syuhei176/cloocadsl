@@ -6,10 +6,12 @@ import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Property;
 import com.clooca.core.client.model.gopr.element.Relationship;
+import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
 import com.clooca.core.client.presenter.DiagramController;
+import com.clooca.core.client.util.ArrowHead;
 import com.clooca.core.client.util.GraphicManager;
 import com.clooca.core.client.util.Line2D;
 import com.clooca.core.client.util.Point2D;
@@ -270,10 +272,13 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 			h++;
 		}
 		Rectangle2D bound = new Rectangle2D(obj.pos.x, obj.pos.y, obj.bound.width, obj.bound.height);
-		if(obj.meta.graphic.shape.matches("rect")) {
+		if(obj.meta.graphic.shape.matches(GraphicInfo.RECT)) {
 			gm.StrokeRect(bound);
-		}else{
-			gm.StrokeRect(bound);
+		}else if(obj.meta.graphic.shape.matches(GraphicInfo.ROUNDED)) {
+			gm.StrokeRoundRect(bound, 6);
+		}else if(obj.meta.graphic.shape.matches(GraphicInfo.CIRCLE)) {
+	    	Point2D s = new Point2D((bound.x + bound.width / 2), (bound.y + bound.height / 2));
+			gm.StrokeCircle(s, 16);
 		}
 		gm.stroke();
 		gm.closePath();
@@ -285,12 +290,21 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		gm.beginPath();
 		gm.setColor("BLACK");
 		if(this.mDiagramController.getSelected() != null && this.mDiagramController.getSelected().equals(rel)) gm.setColor("BLUE");
-		gm.moveTo(getConnectionPoint(new Line2D(s, e), rel.src.bound));
-		gm.LineTo(getConnectionPoint(new Line2D(e, s), rel.dest.bound));
-//		gm.moveTo(s);
-//		gm.LineTo(e);
+		Point2D start = getConnectionPoint(new Line2D(s, e), rel.src.bound);
+		Point2D end = getConnectionPoint(new Line2D(e, s), rel.dest.bound);
+		gm.moveTo(start);
+		gm.LineTo(end);
 		gm.stroke();
 		gm.closePath();
+		ArrowHead ah = null;
+		if(rel.meta.arrow_type.matches(ArrowHead.NONE)) {
+			ah = new ArrowHead(ArrowHead.ArrowType.NONE);
+		}else if(rel.meta.arrow_type.matches(ArrowHead.V)) {
+			ah = new ArrowHead(ArrowHead.ArrowType.V);
+		}else if(rel.meta.arrow_type.matches(ArrowHead.TRIANGLE)) {
+			ah = new ArrowHead(ArrowHead.ArrowType.TRIANGLE);
+		}
+		if(ah != null) ah.draw(gm, start, end);
     }
 
     

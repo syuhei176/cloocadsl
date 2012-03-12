@@ -20,10 +20,12 @@ public class ProjectView {
 		Button o_button = new Button("open");
 		Button m_button = new Button("meta open");
 		Button meta_save_button = new Button("meta save");
+		Button gen_button = new Button("Generate");
 		mainpanel.add(open_button);
 		mainpanel.add(o_button);
-		mainpanel.add(m_button);
-		mainpanel.add(meta_save_button);
+//		mainpanel.add(m_button);
+//		mainpanel.add(meta_save_button);
+		mainpanel.add(gen_button);
 		open_button.addClickHandler(new ClickHandler(){
 
 			@Override
@@ -52,6 +54,12 @@ public class ProjectView {
 			@Override
 			public void onClick(ClickEvent event) {
 				mProjectController.saveMetaModel();
+			}});
+		gen_button.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				mProjectController.generate();
 			}});
 	}
 	

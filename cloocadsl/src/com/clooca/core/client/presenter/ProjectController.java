@@ -1,6 +1,8 @@
 package com.clooca.core.client.presenter;
 
 import com.clooca.core.client.model.ProjectInfo;
+import com.clooca.core.client.presenter.MetaModelController.LoadedListener;
+import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -21,7 +23,7 @@ public class ProjectController {
 	public ProjectController() {
 		mModelController = new ModelController();
 		mMetaModelController = new MetaModelController(null);
-		mMetaModelController.create_sample();
+//		mMetaModelController.create_sample();
 	}
 	public void load(int pid) {
 		loadRequest(pid);
@@ -63,6 +65,22 @@ public class ProjectController {
 		return this.projectInfo;
 	}
 	
+	public void generate() {
+      	RequestGenerator.send("/cgi-bin/core/gen.cgi", "pid="+projectInfo.getId(), new RequestCallback(){
+
+    		@Override
+    		public void onError(Request request,
+    				Throwable exception) {
+    		}
+
+    		@Override
+    		public void onResponseReceived(Request request,
+    				Response response) {
+    			Window.alert(response.getText());
+//    			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
+    		}});
+	}
+	
 	private void saveRequest(String request) {
       	RequestGenerator.send("/cgi-bin/core/save.cgi", "pid="+projectInfo.getId()+"&xml="+request, new RequestCallback(){
 
@@ -74,7 +92,7 @@ public class ProjectController {
     		@Override
     		public void onResponseReceived(Request request,
     				Response response) {
-    			Window.alert(response.getText());
+    			Console.log(response.getText());
 //    			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
     		}});
     }
@@ -96,10 +114,17 @@ public class ProjectController {
     		@Override
     		public void onResponseReceived(Request request,
     				Response response) {
-    			Window.alert(response.getText());
+    			Console.log(response.getText());
     			JSONObject jsonobj = JSONParser.parseLenient(response.getText()).isObject();
     			projectInfo = new ProjectInfo(jsonobj);
-    			projectInfo.model = XMLPresenter.parse(projectInfo.getXml());
+//    			loadMetaModel(projectInfo.getMetaModelId());
+    			mMetaModelController.loadRequest(projectInfo.getMetaModelId(), new LoadedListener(){
+
+					@Override
+					public void onLoaded() {
+		    			projectInfo.model = XMLPresenter.parse(projectInfo.getXml());
+		    			projectInfo.model.id = (int) projectInfo.getId();
+					}});
     			db.hide();
     		}});
     }

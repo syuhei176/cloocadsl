@@ -22,6 +22,7 @@ public class MetaRelation {
 	public String name;
 	public List<Binding> bindings = new ArrayList<Binding>();
 	public List<MetaProperty> properties = new ArrayList<MetaProperty>();
+	public String arrow_type = "none";
 	public VersionElement ve = new VersionElement();
 	
 	public MetaRelation(int id, String name, List<Binding> bindings, List<MetaProperty> properties) {

@@ -7,6 +7,7 @@ import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Property;
 import com.clooca.core.client.model.gopr.element.Relationship;
+import com.clooca.core.client.model.gopr.metaelement.Binding;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
@@ -17,6 +18,7 @@ import com.clooca.core.client.util.Point2D;
 import com.clooca.core.client.util.Rectangle2D;
 import com.clooca.core.client.view.DiagramEditor;
 import com.clooca.core.client.view.DiagramEditor.Tool;
+import com.google.gwt.core.client.GWT;
 
 public class DiagramController {
 	Diagram diagram;
@@ -171,6 +173,7 @@ public class DiagramController {
 			obj.properties.add(prop);
 		}
 		diagram.nodes.add(obj);
+		this.transition(obj, pos.x, pos.y);
 		return obj;
 	}
 	
@@ -178,6 +181,7 @@ public class DiagramController {
 		NodeObject start = findNode(s);
 		NodeObject end = findNode(e);
 		if(start != null && end != null) {
+			if(!checkBinding(meta_rel, start, end)) return null;
 			Relationship rel = new Relationship();
 			rel.id = IdGenerator.getNewLongId();
 			rel.meta = meta_rel;
@@ -192,6 +196,18 @@ public class DiagramController {
 			return rel;
 		}
 		return null;
+	}
+	
+	private boolean checkBinding(MetaRelation mr, NodeObject n1, NodeObject n2) {
+		for(Binding b : mr.bindings) {
+			GWT.log(b.src.id + "," + b.dest.id);
+			if(b.src.id == n1.meta.id) {
+				if(b.dest.id == n2.meta.id) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	private NodeObject findNode(Point2D p) {

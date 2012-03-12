@@ -33,6 +33,7 @@ public class MetaModelView {
 
 			@Override
 			public void onClick(ClickEvent event) {
+				mMetaModelController.compile();
 				Model model = new Model();
 				model.id = 1;
 				model.root = new Diagram();
@@ -41,7 +42,7 @@ public class MetaModelView {
 				DiagramController dc = new DiagramController(model.getRootDiagram());
 				
 				dc.addListeners(PropertyView.GetElementSelectionListener());
-				EditorTabView.CreateNewTab("Sample", new DiagramEditor(dc));
+				EditorTabView.CreateNewTab("Preview", new DiagramEditor(dc));
 			}});
 		m_button.addClickHandler(new ClickHandler(){
 

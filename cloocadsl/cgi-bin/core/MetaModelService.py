@@ -25,15 +25,31 @@ def saveMetaModel(pid, xml):
 def loadMetaModel(pid):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,name,xml FROM MetaModelInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT id,name,xml,template FROM MetaModelInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
     cur.close()
     project = {}
     project['id'] = rows[0][0]
     project['name'] = rows[0][1]
     project['xml'] = rows[0][2]
+    project['template'] = rows[0][3]
     connect.close()
     return project
+
+def createMetaModel(name, xml, visibillity):
+    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity) VALUES(%s,%s,%s);',(name, xml, visibillity, ))
+    connect.commit()
+    id = cur.lastrowid
+    cur.close()
+    connect.close()
+    project = {}
+    project['id'] = id
+    project['name'] = name
+    project['xml'] = xml
+    project['visibillity'] = visibillity
+    return True
 
 def loadMyMetaModelList(user):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)

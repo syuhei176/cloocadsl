@@ -21,6 +21,7 @@ import com.clooca.core.client.util.Point2D;
 import com.clooca.core.client.util.Rectangle2D;
 import com.clooca.core.client.view.DiagramEditor;
 import com.clooca.core.client.view.DiagramEditor.Tool;
+import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
@@ -152,13 +153,29 @@ public class MetaModelController {
 	}
 	
 	private boolean clickedge(double x, double y) {
-		for(MetaRelation rel : this.metamodel.meta_diagram.meta_relations) {
-			Point2D s, e;
-//			s = rel.src.pos;
-//			e = rel.dest.pos;
-//			if((new Line2D(s, e)).ptSegDist(new Point2D(x, y)) < 14) {
-//				return true;
-//			}
+		for(MetaRelation meta_rel : this.metamodel.meta_diagram.meta_relations) {
+			for(Binding b : meta_rel.bindings) {
+				Point2D s, e;
+				s = b.src.pos;
+				e = b.dest.pos;
+				if(b.src.id == b.dest.id) {
+					boolean flg = false;
+					if(Line2D.ptSegDist(b.src.pos.x, b.src.pos.y, b.src.pos.x + 40, b.src.pos.y, x, y) < 14) flg = true;
+					if(Line2D.ptSegDist(b.src.pos.x + 40, b.src.pos.y, b.src.pos.x + 40, b.src.pos.y - 40, x, y) < 14) flg = true;
+					if(Line2D.ptSegDist(b.src.pos.x + 40, b.src.pos.y - 40, b.src.pos.x, b.src.pos.y - 40, x, y) < 14) flg = true;
+					if(flg) {
+		    			selected = meta_rel;
+		    			this.fireSelectElement(selected);
+						return true;
+					}
+				}else{
+					if((new Line2D(s, e)).ptSegDist(new Point2D(x, y)) < 14) {
+		    			selected = meta_rel;
+		    			this.fireSelectElement(selected);
+						return true;
+					}
+				}
+			}
 		}
 		return false;
 	}
@@ -262,6 +279,15 @@ public class MetaModelController {
 		return null;
 	}
 	
+	static public MetaObject getMetaObject(int id, MetaDiagram meta_diagram) {
+		for(MetaObject obj : meta_diagram.meta_objects) {
+			if(obj.id == id) {
+				return obj;
+			}
+		}
+		return null;
+	}
+	
 	static public MetaRelation getMetaRelationship(int id) {
 		for(MetaRelation obj : metamodel.meta_diagram.meta_relations) {
 			if(obj.id == id) {
@@ -296,12 +322,15 @@ public class MetaModelController {
     		@Override
     		public void onResponseReceived(Request request,
     				Response response) {
-    			Window.alert(response.getText());
+    			Console.log(response.getText());
 //    			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
     		}});
     }
 	
 	public void loadRequest(int pid) {
+		loadRequest(pid, null);
+	}
+	public void loadRequest(int pid, final LoadedListener listener) {
 		final DialogBox db = new DialogBox();
 		db.setTitle("読み込み中");
 		db.setText("読み込み中");
@@ -312,13 +341,14 @@ public class MetaModelController {
     		@Override
     		public void onError(Request request,
     				Throwable exception) {
+    			Console.log(exception.getMessage());
     			db.hide();
     		}
 
     		@Override
     		public void onResponseReceived(Request request,
     				Response response) {
-    			Window.alert(response.getText());
+    			Console.log(response.getText());
     			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
     	        JSONArray jsonArray;
     	        JSONString jsonString;
@@ -346,17 +376,37 @@ public class MetaModelController {
     			metamodel.id = id;
     			metamodel.name = name;
     			db.hide();
+    			if(listener != null) listener.onLoaded();
     		}});
     }
 	
-	private void saitekika() {
+	public void compile() {
 		int x = 50;
 		int y = 50;
 		for(MetaObject obj : this.metamodel.meta_diagram.meta_objects) {
 			obj.pos.x = x;
 			x += 50;
 		}
+		compileMetaRelation();
 	}
-
-
+	
+	private void compileMetaRelation() {
+		MetaRelation r1 = null, r2 = null;
+		for(MetaRelation meta_rel : this.metamodel.meta_diagram.meta_relations) {
+			for(MetaRelation meta_rel2 : this.metamodel.meta_diagram.meta_relations) {
+				if(meta_rel.id != meta_rel2.id && meta_rel.name.matches(meta_rel2.name)) {
+					r1 = meta_rel;
+					r2 = meta_rel2;
+				}
+			}
+		}
+		if(r1 != null && r2 != null) {
+			r1.bindings.addAll(r2.bindings);
+			this.metamodel.meta_diagram.meta_relations.remove(r2);
+		}
+	}
+	
+	public interface LoadedListener {
+		public void onLoaded();
+	}
 }

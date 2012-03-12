@@ -36,7 +36,7 @@ public class XMLPresenter {
 		for(Relationship rel : diagram.relationships) {
 			xml += genRelationship(rel);
 		}
-		xml += "/<Diagram>";
+		xml += "</Diagram>";
 		return xml;
 	}
 	
@@ -62,8 +62,8 @@ public class XMLPresenter {
 	
 	static String genProperty(Property prop) {
 		String xml = "<Property id=\""+prop.id+"\" meta_id=\""+prop.meta.id+"\">";
-		xml += genVersionElement(prop.ve);
 		xml += prop.content;
+		xml += genVersionElement(prop.ve);
 		xml += "</Property>";
 		return xml;
 	}
@@ -75,13 +75,28 @@ public class XMLPresenter {
 	
 	static Model parse(String xml) {
 		Model model = null;
-		Document doc = XMLParser.parse(xml);
+		Document doc = null;
+		try {
+			doc = XMLParser.parse(xml);
+		}catch(Exception e) {
+			
+		}finally{
+			
+		}
+		if(doc != null) {
 		NodeList nl = doc.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			GWT.log("load" + nl.item(i).getNodeName());
 			if(nl.item(i).getNodeName().matches("Model")) {
 				model = parseModel(nl.item(i));
 			}
+		}
+		}
+		if(model == null) {
+			model = new Model();
+			model.root = new Diagram();
+			model.root.meta = MetaModelController.metamodel.meta_diagram;
+			model.root.id = 1;
 		}
 		return model;
 	}
