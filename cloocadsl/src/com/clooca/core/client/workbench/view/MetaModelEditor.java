@@ -1,24 +1,15 @@
-package com.clooca.core.client.view;
+package com.clooca.core.client.workbench.view;
 
-import java.util.List;
-
-import com.clooca.core.client.model.gopr.element.Diagram;
-import com.clooca.core.client.model.gopr.element.NodeObject;
-import com.clooca.core.client.model.gopr.element.Property;
-import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.metaelement.Binding;
 import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
-import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
-import com.clooca.core.client.presenter.DiagramController;
-import com.clooca.core.client.presenter.MetaModelController;
 import com.clooca.core.client.util.GraphicManager;
 import com.clooca.core.client.util.Point2D;
 import com.clooca.core.client.util.Rectangle2D;
+import com.clooca.core.client.view.AbstractEditor;
+import com.clooca.core.client.view.SimpleDialogBox;
 import com.clooca.core.client.view.DiagramEditor.Tool;
-import com.clooca.core.client.workbench.view.PropertiesSettingPanel;
-import com.clooca.core.client.workbench.view.PropertySettingPanel;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -223,23 +214,39 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
       	    popupPanel.hide();
         	  if(mMetaModelController.getSelected() instanceof MetaObject) {
         		  MetaObject mo = (MetaObject)mMetaModelController.getSelected();
-          		SimpleDialogBox db = new SimpleDialogBox(new PropertiesSettingPanel(mo.properties), "setting");
-          		db.show();
-          		db.center();
+        		  SimpleDialogBox db = new SimpleDialogBox(new MetaObjectSettingPanel(mo), "MetaObject Setting");
+        		  db.show();
+        		  db.center();
+        	  }else if(mMetaModelController.getSelected() instanceof MetaRelation) {
+        		  MetaRelation mo = (MetaRelation)mMetaModelController.getSelected();
+        		  SimpleDialogBox db = new SimpleDialogBox(new MetaRelationSettingPanel(mo), "MetaRelation Setting");
+        		  db.show();
+        		  db.center();
         	  }
       	  }
       	};
+      	
+        Command com_delete = new Command() {
+        	  public void execute() {
+        		  popupPanel.hide();
+        		  mMetaModelController.deleteObject();
+        	  }
+        	};
+        	
     private void createPopupMenu() {
     	popupPanel.clear();
     	MenuBar popupMenuBar = new MenuBar(true);
     	MenuItem closeItem = new MenuItem("閉じる", true, com_close);
     	MenuItem propertyItem = new MenuItem("プロパティ", true, com_property);
+    	MenuItem deleteItem = new MenuItem("削除", true, com_delete);
   	    
     	popupPanel.setStyleName("contextmenu");
     	closeItem.addStyleName("contextmenu_item");
     	propertyItem.addStyleName("contextmenu_item");
+    	deleteItem.addStyleName("contextmenu_item");
     	popupMenuBar.addItem(closeItem);
     	popupMenuBar.addItem(propertyItem);
+    	popupMenuBar.addItem(deleteItem);
     	
 
     	popupMenuBar.setVisible(true);

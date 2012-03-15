@@ -13,8 +13,14 @@ reg_username = re.compile('\w+')
 connect = None
 g_model_id = None
 
-def saveProject(pid, xml):
+def saveProject(user, pid, xml):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
     cur = connect.cursor()
     affect_row_count = cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id = %s;',(xml, pid, ))
     connect.commit()
@@ -22,8 +28,14 @@ def saveProject(pid, xml):
     connect.close()
     return True
 
-def loadProject(pid):
+def loadProject(user, pid):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml,metamodel_id FROM ProjectInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
@@ -61,8 +73,8 @@ def loadMyProjectList(user):
     cur.execute('SELECT project_id FROM hasProject WHERE user_id=%s;',(user['id'], ))
     rows = cur.fetchall()
     projects = []
+    cur.close()
     for i in range(len(rows)):
-        cur.close()
         cur = connect.cursor()
         cur.execute('SELECT id,name,xml FROM ProjectInfo WHERE id=%s;',(rows[i][0], ))
         metamodel_rows = cur.fetchall()
@@ -73,4 +85,20 @@ def loadMyProjectList(user):
         projects.append(project)
         cur.close()
     connect.close()
+    return projects
+
+def loadLessonProjectList(user, metamodel_id):
+    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT id,name,xml FROM ProjectInfo WHERE metamodel_id=%s;',(metamodel_id, ))
+    rows = cur.fetchall()
+    projects = []
+    cur.close()
+    connect.close()
+    for i in range(len(rows)):
+        project = {}
+        project['id'] = rows[i][0]
+        project['name'] = rows[i][1]
+        project['xml'] = rows[i][2]
+        projects.append(project)
     return projects

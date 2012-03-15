@@ -11,6 +11,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.user.client.ui.TextArea;
 
 public class PropertySettingPanel extends Composite {
 
@@ -20,8 +22,7 @@ public class PropertySettingPanel extends Composite {
 	@UiField TextBox parentName;
 	@UiField ListBox data_type;
 	@UiField ListBox widget;
-	@UiField Button ok;
-	@UiField Button cancel;
+	@UiField TextArea exfield;
 	MetaProperty metaproperty;
 	
 	interface PropertySettingPanelUiBinder extends
@@ -36,12 +37,36 @@ public class PropertySettingPanel extends Composite {
 		data_type.addItem(MetaProperty.COLLECTION);
 		widget.addItem(MetaProperty.INPUT_FIELD);
 		widget.addItem(MetaProperty.FIXED_LIST);
+		propertyName.setText(metaproperty.name);
+		for(int i=0;i < data_type.getItemCount();i++) {
+			if(data_type.getItemText(i).matches(metaproperty.data_type)) {
+				data_type.setSelectedIndex(i);
+			}
+		}
+		for(int i=0;i < widget.getItemCount();i++) {
+			if(widget.getItemText(i).matches(metaproperty.widget)) {
+				widget.setSelectedIndex(i);
+			}
+		}
+		exfield.setText(metaproperty.exfield);
+	}
+	
+	@UiHandler("propertyName")
+	void onPropertyNameChange(ChangeEvent event) {
+		metaproperty.name = propertyName.getText();
+	}
+	
+	@UiHandler("data_type")
+	void onData_typeChange(ChangeEvent event) {
+		metaproperty.data_type = data_type.getItemText(data_type.getSelectedIndex());
 	}
 
-	@UiHandler("ok")
-	void onOkClick(ClickEvent event) {
-		metaproperty.name = propertyName.getText();
-		metaproperty.data_type = data_type.getItemText(data_type.getSelectedIndex());
+	@UiHandler("widget")
+	void onWidgetChange(ChangeEvent event) {
 		metaproperty.widget = widget.getItemText(widget.getSelectedIndex());
+	}
+	@UiHandler("exfield")
+	void onExfieldChange(ChangeEvent event) {
+		metaproperty.exfield = exfield.getText();
 	}
 }

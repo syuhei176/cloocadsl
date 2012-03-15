@@ -6,6 +6,7 @@ import sys
 import json
 from util import excgi
 from MetaModelService import *
+from UserService import *
 
 print 'Content-type: text/javascript; charset=utf-8'
 
@@ -14,4 +15,11 @@ id = form["id"]
 xml= form["xml"]
 
 print ''
-print json.dumps(saveMetaModel(id, xml))
+
+user = GetUser()
+
+if user == None:
+    print('null')
+    sys.exit()
+
+print json.dumps(saveMetaModel(user, id, xml))

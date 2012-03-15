@@ -28,7 +28,7 @@ if not form.has_key("password"):
 
 username = form["username"]
 password = form["password"]
-email = form["email"][0]
+#email = form["email"][0]
 
 if CreateUser(username, password):
 	print "\ntrue"

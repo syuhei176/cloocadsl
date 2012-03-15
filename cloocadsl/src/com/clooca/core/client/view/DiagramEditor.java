@@ -235,7 +235,6 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     	popupMenuBar.addItem(closeItem);
     	popupMenuBar.addItem(deleteItem);
     	
-
     	popupMenuBar.setVisible(true);
     	popupPanel.add(popupMenuBar);
     }
@@ -260,6 +259,7 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		int h = 01;
 		for(Property prop : obj.properties) {
 			MetaProperty metaprop = prop.meta;
+			if(metaprop == null) continue;
 			if(metaprop.data_type.matches(MetaProperty.STRING)) {
 //				obj.properties.
 				gm.DrawText(prop.content, (int)obj.pos.x + 4, (int)obj.pos.y+20*h - 4, 100);

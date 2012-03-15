@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SimpleDialogBox extends DialogBox {
@@ -18,7 +19,7 @@ public class SimpleDialogBox extends DialogBox {
 	public SimpleDialogBox(Widget w, String title) {
 		this.setTitle(title);
 		this.setText(title);
-		HorizontalPanel panel = new HorizontalPanel();
+		VerticalPanel panel = new VerticalPanel();
 		panel.add(w);
 		Button close = new Button("閉じる");
 		panel.add(close);

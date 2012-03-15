@@ -7,6 +7,7 @@ import com.clooca.core.client.model.gopr.element.Property;
 import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.element.VersionElement;
 import com.clooca.core.client.util.IdGenerator;
+import com.clooca.core.client.workbench.view.MetaModelController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -61,6 +62,7 @@ public class XMLPresenter {
 	}
 	
 	static String genProperty(Property prop) {
+		if(prop.meta == null) return "";
 		String xml = "<Property id=\""+prop.id+"\" meta_id=\""+prop.meta.id+"\">";
 		xml += prop.content;
 		xml += genVersionElement(prop.ve);
@@ -95,7 +97,7 @@ public class XMLPresenter {
 		if(model == null) {
 			model = new Model();
 			model.root = new Diagram();
-			model.root.meta = MetaModelController.metamodel.meta_diagram;
+			model.root.meta = MetaModelController.getMetaModel().meta_diagram;
 			model.root.id = 1;
 		}
 		return model;

@@ -1,4 +1,4 @@
-package com.clooca.core.client.presenter;
+package com.clooca.core.client.workbench.view;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
+import com.clooca.core.client.presenter.XMLMetaPresenter;
 import com.clooca.core.client.util.ElementSelectionListener;
 import com.clooca.core.client.util.IdGenerator;
 import com.clooca.core.client.util.Line2D;
@@ -35,6 +36,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.sun.org.apache.regexp.internal.RE;
 
 public class MetaModelController {
 	static MetaModel metamodel;
@@ -179,7 +181,24 @@ public class MetaModelController {
 		}
 		return false;
 	}
-
+	
+	public void deleteObject() {
+		if(selected instanceof MetaObject) {
+			MetaObject obj = (MetaObject)selected;
+			List<MetaRelation> remove_rels = new ArrayList<MetaRelation>();
+			for(MetaRelation rel : this.metamodel.meta_diagram.meta_relations) {
+				List<Binding> remove_bins = new ArrayList<Binding>();
+				for(Binding b : rel.bindings) {
+					if(b.src.id == obj.id || b.dest.id == obj.id) {
+						remove_bins.add(b);
+					}
+				}
+				rel.bindings.removeAll(remove_bins);
+				if(rel.bindings.size() == 0) remove_rels.add(rel);
+			}
+			this.metamodel.meta_diagram.meta_objects.remove(obj);
+		}
+	}
 	
 	public void transition() {
 		

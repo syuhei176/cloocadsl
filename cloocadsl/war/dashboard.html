@@ -29,11 +29,34 @@ function init() {
 			  $('#login').empty().append('<a href="/DashBoard.html">login</a>&nbsp;&nbsp;&nbsp;');
 		  }
 		}, "json");
+	
+	$("#loginform").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        username = $form.find( 'input[name="username"]' ).val(),
+	        password = $form.find( 'input[name="password"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { username: username, password: password },
+	      function( data ) {
+//	    	window.alert(data);
+	    	if(data != null) {
+	    		$('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
+	    		$( "#login_dialog" ).dialog('close');
+	    	}
+	      }, "json");
+	  });
 }
 
 function load_models() {
 	$.post('/cgi-bin/core/dashboard.cgi',
 			function(data) {
+				create_mymetamodels_table(data.mymetamodels);
 				create_metamodels_table(data.metamodels);
 				create_projects_table(data.projects);
 			}, "json");
@@ -49,7 +72,7 @@ function create_projects_table(projects) {
 	  $('#project').empty().append(html);
 }
 
-function create_metamodels_table(metamodels) {
+function create_mymetamodels_table(metamodels) {
 	var html = '<table><tr><td>メタモデル名</td><td>公開範囲</td></tr>';
 	for(var i = 0;i < metamodels.length;i++) {
 		var link = '<a href="/WorkBench.html#'+metamodels[i].id+'">'+metamodels[i].name+'</a>'
@@ -62,8 +85,10 @@ function create_metamodels_table(metamodels) {
 		html += '<tr><td>'+link+'</td><td>'+vis+'</td></tr>';
 	}
 	html += '</table>';
-	  $('#metamodel').empty().append(html);
+	$('#metamodel').empty().append(html);
+}
 
+function create_metamodels_table(metamodels) {
 		var html = '<select name="metamodel_id">';
 		for(var i = 0;i < metamodels.length;i++) {
 			html += '<option value="'+metamodels[i].id+'">'+metamodels[i].name+'</option>';
@@ -106,7 +131,7 @@ function create_new_metamodel() {
       <a class="ui-dialog-titlebar-close ui-corner-all" href="#"><span class="ui-icon ui-icon-closethick">close</span></a>
    </div>
    <div style="height: 200px; min-height: 109px; width: auto;" class="ui-dialog-content ui-widget-content" id="dialog">
-   <form method="POST" action="/cgi-bin/core/login.cgi">
+   <form id="loginform" method="POST" action="/cgi-bin/core/login.cgi">
    <div>username:<input type="text" name="username"></div>
    <div>password:<input type="password" name="password"></div>
    <input type="submit" value="ログイン">
@@ -128,7 +153,7 @@ function create_new_metamodel() {
 	<option value="0">非公開</option>
 	<option value="1">公開</option>
 	</select>
-   <input type="hidden" name="xml" value="">
+   <input type="hidden" name="xml" value=" ">
    <input type="submit" value="OK">
    </form>
 </div>

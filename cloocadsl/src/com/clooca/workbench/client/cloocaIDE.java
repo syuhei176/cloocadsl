@@ -23,7 +23,6 @@ import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.metaelement.MetaDiagram;
 import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.presenter.DiagramController;
-import com.clooca.core.client.presenter.MetaModelController;
 import com.clooca.core.client.presenter.ModelController;
 import com.clooca.core.client.presenter.ProjectController;
 import com.clooca.core.client.presenter.XMLPresenter;
@@ -31,6 +30,7 @@ import com.clooca.core.client.view.DiagramEditor;
 import com.clooca.core.client.view.EditorTabView;
 import com.clooca.core.client.view.ProjectView;
 import com.clooca.core.client.view.PropertyView;
+import com.clooca.core.client.workbench.view.MetaModelController;
 import com.clooca.core.client.workbench.view.MetaModelView;
 import com.clooca.webutil.client.RequestGenerator;
 

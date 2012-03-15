@@ -62,4 +62,13 @@ public class Converter {
 		}
 		return output;
 	}
+	
+	static public String decode_xml(String input) {
+		return input.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&");
+	}
+
+	static public String convert_xml(String input) {
+		return input.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("&", "&amp;");
+	}
+
 }

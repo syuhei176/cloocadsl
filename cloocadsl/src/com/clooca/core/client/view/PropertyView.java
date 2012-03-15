@@ -104,6 +104,16 @@ public class PropertyView {
 		for(MetaProperty mp : obj.meta.getProperties()) {
 			if(mp.widget.matches(MetaProperty.INPUT_FIELD)) {
 				final TextBox tb = new TextBox();
+				/*
+				 * 急にメタモデルが変更され、プロパティが増えた場合。
+				 */
+				if(obj.properties.size() <= tmp) {
+					Property p = new Property();
+					p.id = IdGenerator.getNewLongId();
+					p.meta = mp;
+					obj.properties.add(p);
+				}
+				
 				final Property property = obj.properties.get(tmp);
 				tb.addChangeHandler(new ChangeHandler(){
 
@@ -114,9 +124,19 @@ public class PropertyView {
 				mainpanel.add(tb, mp.getName());
 			}else if(mp.widget.matches(MetaProperty.FIXED_LIST)) {
 				final ListBox lb = new ListBox();
-//				for(String str : mp.getPullDownList()) {
-//					lb.addItem(str);
-//				}
+				String[] list = mp.exfield.split("&");
+				for(String str : list) {
+					lb.addItem(str);
+				}
+				/*
+				 * 急にメタモデルが変更され、プロパティが増えた場合。
+				 */
+				if(obj.properties.size() <= tmp) {
+					Property p = new Property();
+					p.id = IdGenerator.getNewLongId();
+					p.meta = mp;
+					obj.properties.add(p);
+				}
 				final com.clooca.core.client.model.gopr.element.Property property = obj.properties.get(tmp);
 				lb.addChangeHandler(new ChangeHandler(){
 
@@ -136,6 +156,9 @@ public class PropertyView {
 		for(MetaProperty mp : obj.meta.getProperties()) {
 			if(mp.widget.matches(MetaProperty.INPUT_FIELD)) {
 				final TextBox tb = new TextBox();
+				/*
+				 * 急にメタモデルが変更され、プロパティが増えた場合。
+				 */
 				if(obj.properties.size() <= tmp) {
 					Property p = new Property();
 					p.id = IdGenerator.getNewLongId();
@@ -156,9 +179,20 @@ public class PropertyView {
 				mainpanel.add(tb, mp.getName());
 			}else if(mp.widget.matches(MetaProperty.FIXED_LIST)) {
 				final ListBox lb = new ListBox();
-//				for(String str : mp.getPullDownList()) {
-//					lb.addItem(str);
-//				}
+				String[] list = mp.exfield.split("&");
+				for(String str : list) {
+					lb.addItem(str);
+				}
+				/*
+				 * 急にメタモデルが変更され、プロパティが増えた場合。
+				 */
+				if(obj.properties.size() <= tmp) {
+					Property p = new Property();
+					p.id = IdGenerator.getNewLongId();
+					p.meta = mp;
+					obj.properties.add(p);
+				}else{
+				}
 				final com.clooca.core.client.model.gopr.element.Property property = obj.properties.get(tmp);
 				lb.addChangeHandler(new ChangeHandler(){
 

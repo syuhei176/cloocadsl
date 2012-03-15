@@ -130,7 +130,6 @@ public class DiagramController {
 			this.diagram.nodes.remove(obj);
 		}
 	}
-
 	
 	static public void transition(NodeObject selected_obj, double x, double y) {
 		selected_obj.pos.x = x - 5;

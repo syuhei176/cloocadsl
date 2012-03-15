@@ -1,7 +1,5 @@
 package com.clooca.core.client.presenter;
 
-import com.clooca.core.client.model.gopr.element.Diagram;
-import com.clooca.core.client.model.gopr.element.Model;
 import com.clooca.core.client.model.gopr.element.VersionElement;
 import com.clooca.core.client.model.gopr.metaelement.Binding;
 import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
@@ -10,7 +8,9 @@ import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
+import com.clooca.core.client.util.Converter;
 import com.clooca.core.client.util.IdGenerator;
+import com.clooca.core.client.workbench.view.MetaModelController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -24,7 +24,7 @@ import com.google.gwt.xml.client.XMLParser;
  */
 public class XMLMetaPresenter {
 	
-	static String genModel(MetaModel model) {
+	static public String genModel(MetaModel model) {
 		String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><MetaModel id=\""+model.id+"\" name=\""+model.name+"\">";
 		xml += genDiaram(model.meta_diagram);
 		xml += "</MetaModel>";
@@ -76,6 +76,7 @@ public class XMLMetaPresenter {
 	
 	static String genProperty(MetaProperty prop) {
 		String xml = "<MetaProperty id=\""+prop.id+"\" name=\""+prop.name+"\" data_type=\""+prop.data_type+"\" widget=\""+prop.widget+"\">";
+		xml += "<Exfield>"+Converter.convert_xml(prop.exfield)+"</Exfield>";
 		xml += genVersionElement(prop.ve);
 		xml += "</MetaProperty>";
 		return xml;
@@ -92,7 +93,7 @@ public class XMLMetaPresenter {
 		return xml;
 	}
 	
-	static MetaModel parse(String xml) {
+	public static MetaModel parse(String xml) {
 		MetaModel model = null;
 		Document doc = null;
 		try {
@@ -216,17 +217,18 @@ public class XMLMetaPresenter {
 		property.name = node.getAttributes().getNamedItem("name").getNodeValue();
 		property.data_type = node.getAttributes().getNamedItem("data_type").getNodeValue();
 		property.widget = node.getAttributes().getNamedItem("widget").getNodeValue();
-		/*
 		NodeList nl = node.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
-			if(nl.item(i).getNodeType() == com.google.gwt.xml.client.Node.TEXT_NODE) {
-				String value = nl.item(i).getNodeValue();
-				property.content = value;
-			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
-				property.ve = parseVersionElement(nl.item(i));
+			if(nl.item(i).getNodeName().matches("Exfield")) {
+				NodeList nl2 = nl.item(i).getChildNodes();
+				for(int j = 0;j < nl2.getLength();j++) {
+					if(nl2.item(j).getNodeType() == com.google.gwt.xml.client.Node.TEXT_NODE) {
+						String value = nl2.item(j).getNodeValue();
+						property.exfield = Converter.decode_xml(value);
+					}
+				}
 			}
 		}
-		*/
 		return property;
 	}
 	

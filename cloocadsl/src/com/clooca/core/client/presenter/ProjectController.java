@@ -1,7 +1,8 @@
 package com.clooca.core.client.presenter;
 
 import com.clooca.core.client.model.ProjectInfo;
-import com.clooca.core.client.presenter.MetaModelController.LoadedListener;
+import com.clooca.core.client.workbench.view.MetaModelController;
+import com.clooca.core.client.workbench.view.MetaModelController.LoadedListener;
 import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
 import com.google.gwt.http.client.Request;
@@ -82,11 +83,17 @@ public class ProjectController {
 	}
 	
 	private void saveRequest(String request) {
+		final DialogBox db = new DialogBox();
+		db.setTitle("読み込み中");
+		db.setText("読み込み中");
+		db.show();
+		db.center();
       	RequestGenerator.send("/cgi-bin/core/save.cgi", "pid="+projectInfo.getId()+"&xml="+request, new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
     				Throwable exception) {
+    			db.hide();
     		}
 
     		@Override
@@ -94,6 +101,7 @@ public class ProjectController {
     				Response response) {
     			Console.log(response.getText());
 //    			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
+    			db.hide();
     		}});
     }
 	

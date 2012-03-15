@@ -5,7 +5,7 @@
 		
 	</ui:style>
 	<g:HTMLPanel>
-		<g:AbsolutePanel height="386px" width="370px">
+		<g:AbsolutePanel height="291px" width="370px">
 			<g:at left="181" top="79">
 				<g:TextBox ui:field="propertyName"/>
 			</g:at>
@@ -19,25 +19,25 @@
 				<g:Label text="プロパティを設定します" width="182px" height="24px"/>
 			</g:at>
 			<g:at left="48" top="84">
-				<g:Label text="New Label"/>
+				<g:Label text="name"/>
 			</g:at>
 			<g:at left="48" top="145">
-				<g:Label text="New Label"/>
+				<g:Label text="data type"/>
 			</g:at>
 			<g:at left="48" top="189">
-				<g:Label text="New Label"/>
+				<g:Label text="widget"/>
 			</g:at>
 			<g:at left="181" top="107">
 				<g:TextBox readOnly="true" ui:field="parentName"/>
 			</g:at>
 			<g:at left="48" top="108">
-				<g:Label text="New Label"/>
+				<g:Label text="parent"/>
 			</g:at>
-			<g:at left="181" top="354">
-				<g:Button text="OK" width="59px" height="18px" ui:field="ok"/>
+			<g:at left="181" top="222">
+				<g:TextArea ui:field="exfield"/>
 			</g:at>
-			<g:at left="257" top="354">
-				<g:Button text="CANCEL" ui:field="cancel"/>
+			<g:at left="48" top="222">
+				<g:Label text="exfield"/>
 			</g:at>
 		</g:AbsolutePanel>
 	</g:HTMLPanel>

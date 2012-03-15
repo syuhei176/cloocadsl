@@ -1,5 +1,6 @@
 import sys
 import os
+import shutil
 import MySQLdb
 from mako.template import Template
 from mako.lookup import TemplateLookup
@@ -21,24 +22,58 @@ def GenerateClass(dict):
 
 class BaseGenerator(object):
     
-    def __init__(self, outpath):
-        self.outpath = config.CLOOCA_CGI + '/out/' + outpath
+    def __init__(self):
+        self.input = config.CLOOCA_CGI + '/template'
+        self.outpath = config.CLOOCA_CGI + '/out'
+        self.userpath = None
+        self.projectpath = None
+        self.model = None
     
-    def GenerateCode(self, pid):
-        project = loadProject(pid)
-        metamodel = loadMetaModel(project['metamodel_id'])
-        model = parse(project['xml'])
-        print Template(metamodel['template']).render(root = model)
+    def GenerateCode(self, user, pid):
+        project = loadProject(user, pid)
+        metamodel = loadMetaModel(user, project['metamodel_id'])
+        self.input = self.input + '/t' + str(metamodel['id'])
+        self.userpath = self.outpath + '/' + user['uname']
+        self.projectpath = self.userpath + '/p' + str(project['id'])
+        if not os.path.exists(self.userpath):
+            os.mkdir(self.userpath)
+        if not os.path.exists(self.projectpath):
+            os.mkdir(self.projectpath)
+        self.model = parse(project['xml'])
+        self.parseXML(metamodel['template'])
+#        print Template(metamodel['template']).render(root = model)
 #        self.FileGen(model, config.CLOOCA_CGI + '/template/t1.mako', self.outpath)
 #        self.FileGen(model, 'template/t1.mako', self.outpath)
     
-    def FileGen(self, model, in_path, outpath):
-        mylookup = TemplateLookup(directories=["../"], output_encoding="utf-8", encoding_errors='replace')
-        tmpl = mylookup.get_template(in_path)
+    def parseXML(self, xml):
+        elem = fromstring(xml)
+        if elem.tag == 'DirTemp':
+            return self.parseDirTemp(elem)
+    
+    def parseDirTemp(self, elem):
+        for e in elem.findall(".//Template"):
+            self.parseTemplate(e)
+        for e in elem.findall(".//Copy"):
+            self.parseTemplate(e)
+    
+    def parseTemplate(self, elem):
+        src = elem.get('src')
+        dest = elem.get('dest')
+        self.FileGen(src, dest)
+    
+    def parseCopy(self, elem):
+        src = elem.get('src')
+        dest = elem.get('dest')
+        shutil.copy(self.input + '/' + src, self.projectpath + '/' + dest)
+    
+    def FileGen(self, src, dest):
+        mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", encoding_errors='replace')
+        tmpl = mylookup.get_template(src)
         buf = StringIO()
+        model = self.model
         ctx = Context(buf, root = model)
         tmpl.render_context(ctx)
-        hf = open(outpath, 'w')
+        hf = open(self.projectpath + '/' + dest, 'w')
         hf.write(buf.getvalue())
         hf.close()
 

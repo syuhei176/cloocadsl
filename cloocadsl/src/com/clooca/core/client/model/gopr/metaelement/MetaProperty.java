@@ -41,6 +41,11 @@ public class MetaProperty {
 	public static final String INPUT_FIELD = "input field";
 	public static final String FIXED_LIST = "fixed list";
 	
+	/**
+	 * extended field
+	 */
+	public String exfield = "";
+	
 	public MetaProperty() {
 	}
 

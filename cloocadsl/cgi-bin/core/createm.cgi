@@ -11,15 +11,14 @@ from UserService import *
 print('Content-type: text/javascript; charset=utf-8')
 
 form = excgi.getForm()
-id = form["id"]
-
-print('')
+name = form["name"]
+xml = form["xml"]
+visibillity = form["visibillity"]
 
 user = GetUser()
-
 if user == None:
-    print('null')
     sys.exit()
 
-project = loadMetaModel(user, id)
+print('')
+project = createMetaModel(user, name, xml, visibillity)
 print(json.dumps(project))

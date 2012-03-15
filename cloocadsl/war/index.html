@@ -51,7 +51,27 @@ function init() {
 		  }
 		}, "json");
 	
+	$("#loginform").submit(function(event) {
 
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        username = $form.find( 'input[name="username"]' ).val(),
+	        password = $form.find( 'input[name="password"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { username: username, password: password },
+	      function( data ) {
+//	    	window.alert(data);
+	    	if(data != null) {
+	    		$('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
+	    		$( "#login_dialog" ).dialog('close');
+	    	}
+	      }, "json");
+	  });
 }
 
 function login() {
@@ -71,6 +91,25 @@ function load_models() {
 			}, "json");
 
 }
+
+
+
+$("#register-form").submit(function(event) {
+
+    /* stop form from submitting normally */
+    event.preventDefault(); 
+        
+    /* get some values from elements on the page: */
+    var $form = $( this ),
+        term = $form.find( 'input[name="s"]' ).val(),
+        url = $form.attr( 'action' );
+
+    /* Send the data using post and put the results in a div */
+    $.post( url, { s: term },
+      function( data ) {
+    	window.alert(data);
+      }, "json");
+  });
 
 var twitter_id = 'clooca';
 var twitter_count = 5;
@@ -113,7 +152,7 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 
 
 <div id="login_dialog" title="login dialog">
-<form method="POST" action="/cgi-bin/core/login.cgi">
+<form id="loginform" action="/cgi-bin/core/login.cgi">
 <div>username:<input type="text" name="username"></div>
 <div>password:<input type="password" name="password"></div>
 <input type="submit" value="ログイン">
@@ -121,7 +160,7 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 </div>
 
 <div id="register_dialog" title="register dialog">
-<form method="POST" action="/cgi-bin/core/createuser.cgi">
+<form id="register-form" action="/cgi-bin/core/register.cgi">
 <div>username:<input type="text" name="username"></div>
 <div>password:<input type="password" name="password"></div>
 <div>confirm:<input type="password" name="password2"></div>

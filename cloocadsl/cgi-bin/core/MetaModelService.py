@@ -13,8 +13,14 @@ reg_username = re.compile('\w+')
 connect = None
 g_model_id = None
 
-def saveMetaModel(pid, xml):
+def saveMetaModel(user, pid, xml):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
     cur = connect.cursor()
     affect_row_count = cur.execute('UPDATE MetaModelInfo SET xml=%s WHERE id = %s;',(xml, pid, ))
     connect.commit()
@@ -22,8 +28,14 @@ def saveMetaModel(pid, xml):
     connect.close()
     return True
 
-def loadMetaModel(pid):
+def loadMetaModel(user, pid):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+#    cur = connect.cursor()
+#    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
+#    has_rows = cur.fetchall()
+#    cur.close()
+#    if len(has_rows) == 0:
+#        return None
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml,template FROM MetaModelInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
@@ -36,12 +48,16 @@ def loadMetaModel(pid):
     connect.close()
     return project
 
-def createMetaModel(name, xml, visibillity):
+def createMetaModel(user, name, xml, visibillity):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
     cur = connect.cursor()
     cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity) VALUES(%s,%s,%s);',(name, xml, visibillity, ))
     connect.commit()
     id = cur.lastrowid
+    cur.close()
+    cur = connect.cursor()
+    cur.execute('INSERT INTO hasMetaModel (user_id,metamodel_id) VALUES(%s,%s);',(user['id'], id, ))
+    connect.commit()
     cur.close()
     connect.close()
     project = {}
@@ -72,7 +88,7 @@ def loadMyMetaModelList(user):
     connect.close()
     return metamodels
 
-def loadMetaModelList(pid):
+def loadMetaModelList():
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml FROM MetaModelInfo WHERE visibillity=%s;',(1, ))

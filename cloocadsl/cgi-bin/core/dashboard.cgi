@@ -18,9 +18,13 @@ excgi.Content()
 
 user = GetUser()
 
+if user == None:
+    print('null')
+    sys.exit()
+    
 dashboard = {}
 
-dashboard['metamodels'] = loadMyMetaModelList(user)
+dashboard['mymetamodels'] = loadMyMetaModelList(user)
 dashboard['projects'] = loadMyProjectList(user)
-
+dashboard['metamodels'] = loadMetaModelList()
 print(json.dumps(dashboard))
