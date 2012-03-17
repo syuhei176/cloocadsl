@@ -1,7 +1,9 @@
 package com.clooca.core.client.view;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.clooca.core.client.listener.DiagramModificationListener;
 import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Property;
@@ -25,6 +27,10 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.Command;
@@ -33,6 +39,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -82,7 +89,8 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     	this.metamodeltables = c.getMetaModelTables();
     	this.modeltables = c.getModelTables();
     	*/
-    	initEditor(init(), "diagram", "diageam");
+    	initEditor(init(), "diagram", "diageam"+this.diagram.id);
+		draw();
     }
     
 	private Widget init() {
@@ -124,10 +132,10 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		Tool[] tools = new Tool[length];
 		tools[0] = new Tool("select");
     	for(int i = 0;i < nodes.size();i++) {
-       		tools[i+1] = new Tool(nodes.get(i), "class");
+       		tools[i+1] = new Tool(nodes.get(i), nodes.get(i).name, "class");
     	}
     	for(int i = 0;i < edges.size();i++) {
-       		tools[i+nodes.size()+1] = new Tool(edges.get(i), "association1");
+       		tools[i+nodes.size()+1] = new Tool(edges.get(i), edges.get(i).name, "association1");
     	}
     	return tools;
 	}
@@ -136,7 +144,9 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		tools = getTools(this.diagram);
 		buttons = new ToggleButton[tools.length];
     	for(int i = 0;i < tools.length;i++) {
-            final ToggleButton button = new ToggleButton(new Image("images/"+tools[i].getLabel()+".png"));
+    		String label = tools[i].getLabel();
+    		final String tool_name = tools[i].getName();
+            final ToggleButton button = new ToggleButton(new Image("images/"+label+".png"));
             button.addClickHandler(new ClickHandler() {
             	
     			@Override
@@ -145,6 +155,20 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 //    				selected_tool = nodes.get(i);
     			}
             });
+			final ToolPopup toolPopup = new ToolPopup(tool_name);
+            button.addMouseOverHandler(new MouseOverHandler(){
+
+				@Override
+				public void onMouseOver(MouseOverEvent event) {
+					toolPopup.setPopupPosition(button.getAbsoluteLeft()+button.getOffsetWidth(), button.getAbsoluteTop());
+					toolPopup.show();
+				}});
+            button.addMouseOutHandler(new MouseOutHandler(){
+
+				@Override
+				public void onMouseOut(MouseOutEvent event) {
+					toolPopup.hide();
+				}});
             buttons[i] = button;
             toolpanel.add(button);
     	}
@@ -161,6 +185,13 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		}
 	}
 	
+	private class ToolPopup extends PopupPanel {
+		public ToolPopup(String text){
+			super(true, false); 
+			setWidget(new Label(text));
+		}
+	}
+	  
 	@Override
 	public void onDoubleClick(DoubleClickEvent event) {
 		// TODO Auto-generated method stub
@@ -177,8 +208,7 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 	public void onMouseMove(MouseMoveEvent event) {
 		mouse.x = event.getX();
 		mouse.y = event.getY();
-		this.mDiagramController.moveAction(mouse.x, mouse.y);
-		draw();
+		if(mDiagramController.moveAction(mouse.x, mouse.y)) draw();
 	}
 
 	@Override
@@ -219,21 +249,33 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
         Command com_delete = new Command() {
       	  public void execute() {
       		  popupPanel.hide();
-      		  mDiagramController.deleteObject();
+      		  mDiagramController.deleteElement();
+      		  draw();
       	  }
       	};
+
+        Command com_deletepoint = new Command() {
+        	  public void execute() {
+        		  popupPanel.hide();
+        		  mDiagramController.deletePoint();
+        		  draw();
+        	  }
+        	};
 
     private void createPopupMenu() {
     	popupPanel.clear();
     	MenuBar popupMenuBar = new MenuBar(true);
     	MenuItem closeItem = new MenuItem("閉じる", true, com_close);
     	MenuItem deleteItem = new MenuItem("削除", true, com_delete);
+    	MenuItem deletePointItem = new MenuItem("ポイントを削除", true, com_deletepoint);
   	    
     	popupPanel.setStyleName("contextmenu");
     	closeItem.addStyleName("contextmenu_item");
     	deleteItem.addStyleName("contextmenu_item");
+    	deletePointItem.addStyleName("contextmenu_item");
     	popupMenuBar.addItem(closeItem);
     	popupMenuBar.addItem(deleteItem);
+    	popupMenuBar.addItem(deletePointItem);
     	
     	popupMenuBar.setVisible(true);
     	popupPanel.add(popupMenuBar);
@@ -248,6 +290,7 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     	for(Relationship rel : this.diagram.relationships) {
     		draw(gm, rel);
     	}
+    	mDiagramController.draw(gm);
     }
     
     public void draw(GraphicManager gm, NodeObject obj) {
@@ -256,6 +299,7 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		if(this.mDiagramController.getSelected() != null && this.mDiagramController.getSelected().equals(obj)) gm.setColor("BLUE");
 		obj.bound.width = 60;
 		obj.bound.height = obj.properties.size() * 20;
+		if(obj.properties.size() == 0) obj.bound.height = 20;
 		int h = 01;
 		for(Property prop : obj.properties) {
 			MetaProperty metaprop = prop.meta;
@@ -265,7 +309,8 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 				gm.DrawText(prop.content, (int)obj.pos.x + 4, (int)obj.pos.y+20*h - 4, 100);
 				if(obj.bound.width < prop.content.length() * 8) obj.bound.width = prop.content.length() * 8;
 			}else if(metaprop.data_type.matches(MetaProperty.NUMBER)) {
-//				obj.properties.
+				gm.DrawText(prop.content, (int)obj.pos.x + 4, (int)obj.pos.y+20*h - 4, 100);
+				if(obj.bound.width < prop.content.length() * 8) obj.bound.width = prop.content.length() * 8;
 			}else if(metaprop.data_type.matches(MetaProperty.COLLECTION)) {
 //				obj.properties.
 			}
@@ -293,7 +338,15 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		Point2D start = getConnectionPoint(new Line2D(s, e), rel.src.bound);
 		Point2D end = getConnectionPoint(new Line2D(e, s), rel.dest.bound);
 		gm.moveTo(start);
+		for(Point2D p : rel.points) {
+			gm.LineTo(p);
+		}
 		gm.LineTo(end);
+		if(this.mDiagramController.getSelected() != null && this.mDiagramController.getSelected().equals(rel)) {
+			for(Point2D p : rel.points) {
+				gm.StrokeRect(new Rectangle2D(p.x - 5, p.y - 5, 10, 10));
+			}
+		}
 		gm.stroke();
 		gm.closePath();
 		ArrowHead ah = null;
@@ -305,8 +358,23 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 			ah = new ArrowHead(ArrowHead.ArrowType.TRIANGLE);
 		}
 		if(ah != null) ah.draw(gm, start, end);
-    }
+		
+		/*
+		 * propertyを表示
+		 */
+		for(Property prop : rel.properties) {
+			MetaProperty metaprop = prop.meta;
+			if(metaprop == null) continue;
+			if(metaprop.data_type.matches(MetaProperty.STRING)) {
+				gm.DrawText(prop.content, (int)(start.x+end.x) / 2, (int)(start.y + end.y) / 2, 100);
+			}else if(metaprop.data_type.matches(MetaProperty.NUMBER)) {
+				gm.DrawText(prop.content, (int)(start.x+end.x) / 2, (int)(start.y + end.y) / 2, 100);
+			}else if(metaprop.data_type.matches(MetaProperty.COLLECTION)) {
+//				obj.properties.
+			}
+		}
 
+    }
     
 	public Point2D getConnectionPoint(Line2D d, Rectangle2D bound) {
 		if(d.intersectsLine(bound.x, bound.y, bound.x+bound.width, bound.y)) {
@@ -326,20 +394,24 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 	
 	public class Tool {		
 		String label;
+		String name;
 		Object ToolKind;
 
 		public Tool(String l) {
 			label = l;
+			this.name = l;
 			ToolKind = null;
 		}
 
-		public Tool(MetaObject n, String l) {
+		public Tool(MetaObject n, String name, String l) {
 			label = l;
+			this.name = name;
 			ToolKind = n;
 		}
 		
-		public Tool(MetaRelation e, String l) {
+		public Tool(MetaRelation e, String name, String l) {
 			label = l;
+			this.name = name;
 			ToolKind = e;
 		}
 		
@@ -347,8 +419,13 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 			return label;
 		}
 		
+		public String getName() {
+			return name;
+		}
+		
 		public Object getToolKind() {
 			return ToolKind;
 		}
 	}
+	
 }

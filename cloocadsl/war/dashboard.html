@@ -47,7 +47,49 @@ function init() {
 //	    	window.alert(data);
 	    	if(data != null) {
 	    		$('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
-	    		$( "#login_dialog" ).dialog('close');
+	    		$( "#login-dialog" ).dialog('close');
+	    		load_models();
+	    	}
+	      }, "json");
+	  });
+
+	$("#create-project-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        name = $form.find( 'input[name="name"]' ).val(),
+	        metamodel_id = $form.find( 'select[name="metamodel_id"]' ).val(),
+	        xml = $form.find( 'input[name="xml"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml },
+	      function( data ) {
+	    	if(data != null) {
+	    		$( "#create-new-p" ).dialog('close');
+	    	}
+	      }, "json");
+	  });
+	$("#create-metamodel-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        name = $form.find( 'input[name="name"]' ).val(),
+	        visibillity = $form.find( 'select[name="visibillity"]' ).val(),
+	        xml = $form.find( 'input[name="xml"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { name: name, visibillity: visibillity, xml: xml },
+	      function( data ) {
+	    	if(data != null) {
+	    		$( "#create-new-m" ).dialog('close');
 	    	}
 	      }, "json");
 	  });
@@ -63,10 +105,11 @@ function load_models() {
 }
 
 function create_projects_table(projects) {
-	var html = '<table><tr><td>プロジェクト名</td></tr>';
+	var html = '<table><tr><td>プロジェクト名</td><td></td></tr>';
 	for(var i = 0;i < projects.length;i++) {
-		var link = '<a href="/editor.html#'+projects[i].id+'">'+projects[i].name+'</a>'
-		html += '<tr><td>'+link+'</td></tr>';
+		var link = '<a href="/editor.html#'+projects[i].id+'">'+projects[i].name+'</a>';
+		var del = '<a href="javascript:delete_project('+projects[i].id+',\''+projects[i].name+'\')">削除</a>';
+		html += '<tr><td>'+link+'</td><td>'+del+'</td></tr>';
 	}
 	html += '</table>';
 	  $('#project').empty().append(html);
@@ -97,16 +140,17 @@ function create_metamodels_table(metamodels) {
 	  $('#metamodel2').empty().append(html);
 }
 
-function create_new_project() {
-	$.post('/cgi-bin/core/createp.cgi', { name: "John", xml: "2pm",  metamodel_id: ""},
-			function(data) {
-			}, "json");
-}
-
-function create_new_metamodel() {
-	$.post('/cgi-bin/core/createm.cgi', { name: "John", xml: "2pm", visibillity: ""},
-			function(data) {
-			}, "json");
+function delete_project(pid, pname) {
+	if(window.confirm("プロジェクト"+pname+"を削除しますか。")) {
+		$.post('/cgi-bin/core/deletep.cgi', { pid : pid },
+				function(data) {
+					if(data) {
+						/*
+						TODO:行の削除処理
+						*/
+					}
+				}, "json");
+	}
 }
 
 
@@ -139,7 +183,7 @@ function create_new_metamodel() {
    </div>
 </div>
 <div id="create-new-p" title="CreateNew">
-   <form method="POST" action="/cgi-bin/core/createp.cgi">
+   <form id="create-project-form" method="POST" action="/cgi-bin/core/createp.cgi">
    <div>プロジェクト名<input type="text" name="name"></div>
 	<div id="metamodel2"></div>
    <input type="hidden" name="xml" value=" ">
@@ -147,7 +191,7 @@ function create_new_metamodel() {
    </form>
 </div>
 <div id="create-new-m" title="CreateNew">
-   <form method="POST" action="/cgi-bin/core/createm.cgi">
+   <form id="create-metamodel-form" method="POST" action="/cgi-bin/core/createm.cgi">
    <div>メタモデル名<input type="text" name="name"></div>
 	<select name="visibillity">
 	<option value="0">非公開</option>
@@ -183,7 +227,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <span class="icon-bar"></span>
         </a>
         <!-- <a class="brand" href="/"><img src="images/logo2.png" width="80" height="30"></img></a> -->
-        <a class="brand" href="/">clooca</a>
+        <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
             <li class="active"><a href="/index.html">Home</a></li>
@@ -193,16 +237,6 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <li><a href="/document.html">Document</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/contact.html">Contact</a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-              </ul>
-            </li>
           </ul>
           <p id="login" class="navbar-text pull-right"></p>
         </div><!-- /.nav-collapse -->
@@ -215,21 +249,18 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <div class="span3">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
-              <li class="nav-header">Platform Files</li>
-              <li><a href="/platform/cui.zip">cui.zip</a></li>
-              <li class="nav-header">Document</li>
+              <li class="nav-header">Manual</li>
               <li><a href="/file/tutorial.pdf">簡易マニュアル</a></li>
               <li class="nav-header">Links</li>
               <li><a href="https://groups.google.com/group/clooca/topics">ディスカッション</a></li>
-              <li><a href="http://education.clooca.com">安定バージョン</a></li>
-              <li><a href="http://dev.clooca.com">開発バージョン</a></li>
+              <li><a href="http://www.clooca.com">clooca</a></li>
               <li><a href="http://syuhei.jpn.org">開発者のページ</a></li>
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span9">
           <div class="hero-unit">
-            <h1>clooca</h1>
+            <h1>clooca DSL</h1>
             <h2>プロジェクト</h2>
             <div id="project"></div>
             <p><a class="btn btn-danger btn-small" href="javascript:$('#create-new-p').dialog()">　新規作成 &raquo;　　</a></p>

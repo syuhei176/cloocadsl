@@ -15,6 +15,7 @@ import com.clooca.core.client.model.gopr.element.ModelElement;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.VersionElement;
 import com.clooca.core.client.util.Point2D;
+import com.clooca.core.client.util.Rectangle2D;
 import com.clooca.webutil.client.RequestGenerator;
 
 public class MetaObject {
@@ -26,6 +27,7 @@ public class MetaObject {
 	public List<MetaProperty> properties = new ArrayList<MetaProperty>();
 	public VersionElement ve = new VersionElement();
 	public Point2D pos = new Point2D();
+	public Rectangle2D bound = new Rectangle2D(0,0,65,40);
 	
 	public MetaObject() {
 		

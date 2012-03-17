@@ -2,7 +2,7 @@
 
 LABEL = 'dev1'
 CLOOCA_CGI = '/Users/hiyashuuhei/git/cloocadsl/cloocadsl/cgi-bin'
-#CLOOCA_CGI = '/home/ec2-user/dev/cgi-bin'
+#CLOOCA_CGI = '/home/ec2-user/dsl/cgi-bin'
 CLOOCA_WAR = '/Users/hiyashuuhei/git/cloocadsl/cloocadsl/war'
 
 DB_NAME = 'clooca'

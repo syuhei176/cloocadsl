@@ -30,7 +30,7 @@ import com.clooca.core.client.view.DiagramEditor;
 import com.clooca.core.client.view.EditorTabView;
 import com.clooca.core.client.view.ProjectView;
 import com.clooca.core.client.view.PropertyView;
-import com.clooca.core.client.workbench.view.MetaModelController;
+import com.clooca.core.client.workbench.presenter.MetaModelController;
 import com.clooca.core.client.workbench.view.MetaModelView;
 import com.clooca.webutil.client.RequestGenerator;
 

@@ -5,11 +5,13 @@ import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
 import com.clooca.core.client.util.GraphicManager;
+import com.clooca.core.client.util.Line2D;
 import com.clooca.core.client.util.Point2D;
 import com.clooca.core.client.util.Rectangle2D;
 import com.clooca.core.client.view.AbstractEditor;
 import com.clooca.core.client.view.SimpleDialogBox;
 import com.clooca.core.client.view.DiagramEditor.Tool;
+import com.clooca.core.client.workbench.presenter.MetaModelController;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -229,7 +231,7 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
         Command com_delete = new Command() {
         	  public void execute() {
         		  popupPanel.hide();
-        		  mMetaModelController.deleteObject();
+        		  mMetaModelController.deleteElement();
         	  }
         	};
         	
@@ -270,7 +272,7 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
 		if(this.mMetaModelController.getSelected() != null && this.mMetaModelController.getSelected().equals(obj)) gm.setColor("BLUE");
 		gm.DrawText(obj.name, (int)obj.pos.x+4, (int)obj.pos.y+20-4, 100);
 		gm.DrawText(obj.graphic.shape, (int)obj.pos.x+4, (int)obj.pos.y+40-4, 100);
-		Rectangle2D bound = new Rectangle2D(obj.pos.x, obj.pos.y, 60, 40);
+		Rectangle2D bound = new Rectangle2D(obj.pos.x, obj.pos.y, obj.bound.width, obj.bound.height);
 		gm.StrokeRect(bound);
 		gm.stroke();
 		gm.closePath();
@@ -288,12 +290,32 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
         		gm.LineTo(new Point2D(b.src.pos.x, b.src.pos.y - 40));
         		gm.LineTo(b.dest.pos);
     		}else{
-        		gm.moveTo(b.src.pos);
-        		gm.LineTo(b.dest.pos);
+    	    	Point2D s = new Point2D((b.src.pos.x + b.src.bound.width / 2), (b.src.pos.y + b.src.bound.height / 2));
+    	    	Point2D e = new Point2D((b.dest.pos.x + b.dest.bound.width / 2), (b.dest.pos.y + b.dest.bound.height / 2));
+        		Point2D start = getConnectionPoint(new Line2D(s, e), b.src.bound);
+        		Point2D end = getConnectionPoint(new Line2D(e, s), b.dest.bound);
+        		gm.moveTo(start);
+        		gm.LineTo(end);
     		}
     		gm.stroke();
     		gm.closePath();
 		}
     }
-
+    
+	public Point2D getConnectionPoint(Line2D d, Rectangle2D bound) {
+		if(d.intersectsLine(bound.x, bound.y, bound.x+bound.width, bound.y)) {
+			return d.getConnect(new Line2D(bound.x, bound.y, bound.x+bound.width, bound.y));
+		}
+		if(d.intersectsLine(bound.x+bound.width, bound.y, bound.x+bound.width, bound.y+bound.height)) {
+			return d.getConnect(new Line2D(bound.x+bound.width, bound.y, bound.x+bound.width, bound.y+bound.height));
+		}
+		if(d.intersectsLine(bound.x+bound.width, bound.y+bound.height, bound.x, bound.y+bound.height)) {
+			return d.getConnect(new Line2D(bound.x+bound.width, bound.y+bound.height, bound.x, bound.y+bound.height));
+		}
+		if(d.intersectsLine(bound.x, bound.y+bound.height, bound.x, bound.y)) {
+			return d.getConnect(new Line2D(bound.x, bound.y+bound.height, bound.x, bound.y));
+		}
+		return new Point2D(bound.getX(), bound.getY());
+	}
+	
 }

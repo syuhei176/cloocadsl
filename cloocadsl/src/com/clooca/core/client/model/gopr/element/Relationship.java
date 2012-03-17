@@ -16,6 +16,7 @@ public class Relationship {
 	public NodeObject dest;
 	public List<Property> properties = new ArrayList<Property>();
 	public VersionElement ve = new VersionElement();
+	public List<Point2D> points = new ArrayList<Point2D>();
 	
 	/**
 	 * 

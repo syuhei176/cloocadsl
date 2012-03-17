@@ -3,15 +3,13 @@ package com.clooca.core.client.workbench.view;
 import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.Model;
 import com.clooca.core.client.presenter.DiagramController;
-import com.clooca.core.client.presenter.ModelController;
-import com.clooca.core.client.presenter.ProjectController;
 import com.clooca.core.client.view.DiagramEditor;
 import com.clooca.core.client.view.EditorTabView;
 import com.clooca.core.client.view.PropertyView;
+import com.clooca.core.client.workbench.presenter.MetaModelController;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 

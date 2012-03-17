@@ -1,4 +1,4 @@
-package com.clooca.core.client.workbench.view;
+package com.clooca.core.client.workbench.presenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +24,7 @@ import com.clooca.core.client.view.DiagramEditor;
 import com.clooca.core.client.view.DiagramEditor.Tool;
 import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -129,8 +130,9 @@ public class MetaModelController {
 		}else if(dragMode == DragMode.DRAG_MOVE) {
 			if(selected instanceof MetaObject) {
 				MetaObject selected_obj = (MetaObject)selected;
-				selected_obj.pos.x = x - 5;
-				selected_obj.pos.y = y - 5;
+				transition(selected_obj, x, y);
+//				selected_obj.pos.x = x - 5;
+//				selected_obj.pos.y = y - 5;
 			}
 		}else if(dragMode == DragMode.DRAG_RUBBERBAND) {
 		}
@@ -182,26 +184,40 @@ public class MetaModelController {
 		return false;
 	}
 	
-	public void deleteObject() {
+	public void deleteElement() {
 		if(selected instanceof MetaObject) {
-			MetaObject obj = (MetaObject)selected;
-			List<MetaRelation> remove_rels = new ArrayList<MetaRelation>();
-			for(MetaRelation rel : this.metamodel.meta_diagram.meta_relations) {
-				List<Binding> remove_bins = new ArrayList<Binding>();
-				for(Binding b : rel.bindings) {
-					if(b.src.id == obj.id || b.dest.id == obj.id) {
-						remove_bins.add(b);
-					}
-				}
-				rel.bindings.removeAll(remove_bins);
-				if(rel.bindings.size() == 0) remove_rels.add(rel);
-			}
-			this.metamodel.meta_diagram.meta_objects.remove(obj);
+			deleteObject((MetaObject)selected);
+		}
+		if(selected instanceof MetaRelation) {
+			deleteRelationship((MetaRelation)selected);
 		}
 	}
 	
-	public void transition() {
-		
+	private void deleteObject(MetaObject obj) {
+		List<MetaRelation> remove_rels = new ArrayList<MetaRelation>();
+		for(MetaRelation rel : this.metamodel.meta_diagram.meta_relations) {
+			List<Binding> remove_bins = new ArrayList<Binding>();
+			for(Binding b : rel.bindings) {
+				if(b.src.id == obj.id || b.dest.id == obj.id) {
+					remove_bins.add(b);
+				}
+			}
+			rel.bindings.removeAll(remove_bins);
+			if(rel.bindings.size() == 0) remove_rels.add(rel);
+		}
+		this.metamodel.meta_diagram.meta_objects.remove(obj);
+		this.metamodel.meta_diagram.meta_relations.removeAll(remove_rels);
+	}
+	
+	private void deleteRelationship(MetaRelation rel) {
+		this.metamodel.meta_diagram.meta_relations.remove(rel);
+	}
+	
+	public void transition(MetaObject selected_obj, double x, double y) {
+		selected_obj.pos.x = x - 5;
+		selected_obj.pos.y = y - 5;
+		selected_obj.bound.x = selected_obj.pos.x;
+		selected_obj.bound.y = selected_obj.pos.y;
 	}
 	
 	public Object getSelected() {
@@ -331,16 +347,23 @@ public class MetaModelController {
 	}
 	
 	public void saveRequest(int pid) {
+		final DialogBox db = new DialogBox();
+		db.setTitle("読み込み中");
+		db.setText("読み込み中");
+		db.show();
+		db.center();
       	RequestGenerator.send("/cgi-bin/core/msave.cgi", "id="+pid+"&xml="+URL.encodeQueryString(XMLMetaPresenter.genModel(metamodel)), new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
     				Throwable exception) {
+    			db.hide();
     		}
 
     		@Override
     		public void onResponseReceived(Request request,
     				Response response) {
+    			db.hide();
     			Console.log(response.getText());
 //    			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
     		}});
@@ -401,10 +424,10 @@ public class MetaModelController {
 	
 	public void compile() {
 		int x = 50;
-		int y = 50;
+		int y = 70;
 		for(MetaObject obj : this.metamodel.meta_diagram.meta_objects) {
-			obj.pos.x = x;
-			x += 50;
+			this.transition(obj, x, y);
+			x += obj.bound.width + 20;
 		}
 		compileMetaRelation();
 	}

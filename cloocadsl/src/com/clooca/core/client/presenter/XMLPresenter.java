@@ -7,7 +7,8 @@ import com.clooca.core.client.model.gopr.element.Property;
 import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.element.VersionElement;
 import com.clooca.core.client.util.IdGenerator;
-import com.clooca.core.client.workbench.view.MetaModelController;
+import com.clooca.core.client.util.Point2D;
+import com.clooca.core.client.workbench.presenter.MetaModelController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -54,6 +55,9 @@ public class XMLPresenter {
 	static String genRelationship(Relationship rel) {
 		String xml = "<Relationship id=\""+rel.id+"\" meta_id=\""+rel.meta.id+"\" src=\""+rel.src.id+"\" dest=\""+rel.dest.id+"\">";
 		xml += genVersionElement(rel.ve);
+		for(Point2D p : rel.points) {
+			xml += "<Point x=\""+p.x+"\" y=\""+p.y+"\"/>";
+		}
 		for(Property p : rel.properties) {
 			xml += genProperty(p);
 		}
@@ -168,11 +172,20 @@ public class XMLPresenter {
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeName().matches("Property")) {
 				diagram.properties.add(parseProperty(nl.item(i)));
+			}else if(nl.item(i).getNodeName().matches("Point")) {
+				diagram.points.add(parsePoint(nl.item(i)));
 			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
 				diagram.ve = parseVersionElement(nl.item(i));
 			}
 		}
 		return diagram;
+	}
+	
+	static Point2D parsePoint(Node node) {
+		Point2D p = new Point2D(0, 0);
+		p.x = Integer.decode(node.getAttributes().getNamedItem("x").getNodeValue());
+		p.y = Integer.decode(node.getAttributes().getNamedItem("y").getNodeValue());
+		return p;
 	}
 
 	static Property parseProperty(Node node) {

@@ -1,0 +1,42 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		
+	</ui:style>
+	<g:HTMLPanel>
+		<g:HorizontalPanel width="428px" height="100px">
+			<g:AbsolutePanel height="257px" width="175px">
+			<g:at left="10" top="52">
+				<g:Label text="id"/>
+			</g:at>
+			<g:at left="10" top="104">
+				<g:Label text="name"/>
+			</g:at>
+			<g:at left="10" top="75">
+				<g:IntegerBox ui:field="idbox"/>
+			</g:at>
+			<g:at left="10" top="128">
+				<g:TextBox ui:field="name"/>
+			</g:at>
+		</g:AbsolutePanel>
+			<g:AbsolutePanel height="256px" width="251px">
+				<g:at left="167" top="147">
+					<g:Button ui:field="delete" width="58px" height="22px">削除</g:Button>
+				</g:at>
+				<g:at left="167" top="118">
+					<g:Button width="58px" height="22px" ui:field="update">更新</g:Button>
+				</g:at>
+				<g:at left="167" top="90">
+					<g:Button ui:field="add" width="58px" height="22px">追加</g:Button>
+				</g:at>
+				<g:at left="44" top="90">
+					<g:ListBox visibleItemCount="5" width="106px" height="138px" ui:field="properties"/>
+				</g:at>
+				<g:at left="44" top="60">
+					<g:Label text="プロパティ" width="106px" height="24px"/>
+				</g:at>
+			</g:AbsolutePanel>
+		</g:HorizontalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

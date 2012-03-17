@@ -20,6 +20,7 @@ def saveProject(user, pid, xml):
     has_rows = cur.fetchall()
     cur.close()
     if len(has_rows) == 0:
+        connect.close()
         return None
     cur = connect.cursor()
     affect_row_count = cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id = %s;',(xml, pid, ))
@@ -35,6 +36,7 @@ def loadProject(user, pid):
     has_rows = cur.fetchall()
     cur.close()
     if len(has_rows) == 0:
+        connect.close()
         return None
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml,metamodel_id FROM ProjectInfo WHERE id=%s;',(pid, ))
@@ -47,6 +49,23 @@ def loadProject(user, pid):
     project['metamodel_id'] = rows[0][3]
     connect.close()
     return project
+
+def deleteProject(user, pid):
+    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        connect.close()
+        return False
+    cur = connect.cursor()
+    cur.execute('DELETE FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
+    cur.execute('DELETE FROM ProjectInfo WHERE id=%s;',(pid, ))
+    connect.commit()
+    cur.close()
+    connect.close()
+    return True
 
 def createProject(user, name, xml, metamodel_id):
     connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)

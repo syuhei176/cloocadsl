@@ -10,7 +10,7 @@ import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
 import com.clooca.core.client.util.Converter;
 import com.clooca.core.client.util.IdGenerator;
-import com.clooca.core.client.workbench.view.MetaModelController;
+import com.clooca.core.client.workbench.presenter.MetaModelController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;

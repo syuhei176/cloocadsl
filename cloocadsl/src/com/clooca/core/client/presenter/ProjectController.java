@@ -1,8 +1,8 @@
 package com.clooca.core.client.presenter;
 
 import com.clooca.core.client.model.ProjectInfo;
-import com.clooca.core.client.workbench.view.MetaModelController;
-import com.clooca.core.client.workbench.view.MetaModelController.LoadedListener;
+import com.clooca.core.client.workbench.presenter.MetaModelController;
+import com.clooca.core.client.workbench.presenter.MetaModelController.LoadedListener;
 import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
 import com.google.gwt.http.client.Request;

@@ -72,6 +72,31 @@ function init() {
 	    	}
 	      }, "json");
 	  });
+	
+	$("#register-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+        username = $form.find( 'input[name="username"]' ).val(),
+        password = $form.find( 'input[name="password"]' ).val(),
+        password_confirm = $form.find( 'input[name="password-confirm"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    if(password != password_confirm) {
+	    	window.alert('passwordが一致しません！');
+	    	return;
+	    }
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { username: username, password: password },
+	      function( data ) {
+//	    	window.alert(data);
+    		$( "#register_dialog" ).dialog('close');
+	      }, "json");
+	  });
+
 }
 
 function login() {
@@ -91,25 +116,6 @@ function load_models() {
 			}, "json");
 
 }
-
-
-
-$("#register-form").submit(function(event) {
-
-    /* stop form from submitting normally */
-    event.preventDefault(); 
-        
-    /* get some values from elements on the page: */
-    var $form = $( this ),
-        term = $form.find( 'input[name="s"]' ).val(),
-        url = $form.attr( 'action' );
-
-    /* Send the data using post and put the results in a div */
-    $.post( url, { s: term },
-      function( data ) {
-    	window.alert(data);
-      }, "json");
-  });
 
 var twitter_id = 'clooca';
 var twitter_count = 5;
@@ -149,8 +155,7 @@ document.getElementById(twitter_elem_id).innerHTML = html;
     </noscript>
 <p id="message"></p>
 
-
-
+<!-- ログイン　ダイアログ -->
 <div id="login_dialog" title="login dialog">
 <form id="loginform" action="/cgi-bin/core/login.cgi">
 <div>username:<input type="text" name="username"></div>
@@ -159,11 +164,12 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 </form>
 </div>
 
+<!-- 登録　ダイアログ -->
 <div id="register_dialog" title="register dialog">
 <form id="register-form" action="/cgi-bin/core/register.cgi">
 <div>username:<input type="text" name="username"></div>
 <div>password:<input type="password" name="password"></div>
-<div>confirm:<input type="password" name="password2"></div>
+<div>confirm:<input type="password" name="password-confirm"></div>
 <input type="submit" value="登録">
 </form>
 </div>
@@ -192,7 +198,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <span class="icon-bar"></span>
         </a>
         <!-- <a class="brand" href="/"><img src="images/logo2.png" width="80" height="30"></img></a> -->
-        <a class="brand" href="/">clooca</a>
+        <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
             <li class="active"><a href="/index.html">Home</a></li>
@@ -202,16 +208,6 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <li><a href="/document.html">Document</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/contact.html">Contact</a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-              </ul>
-            </li>
           </ul>
           <p id="login" class="navbar-text pull-right"></p>
         </div><!-- /.nav-collapse -->
@@ -224,14 +220,11 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <div class="span3">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
-              <li class="nav-header">Platform Files</li>
-              <li><a href="/platform/cui.zip">cui.zip</a></li>
-              <li class="nav-header">Document</li>
+              <li class="nav-header">Manual</li>
               <li><a href="/file/tutorial.pdf">簡易マニュアル</a></li>
               <li class="nav-header">Links</li>
               <li><a href="https://groups.google.com/group/clooca/topics">ディスカッション</a></li>
-              <li><a href="http://education.clooca.com">安定バージョン</a></li>
-              <li><a href="http://dev.clooca.com">開発バージョン</a></li>
+              <li><a href="http://www.clooca.com">clooca</a></li>
               <li><a href="http://syuhei.jpn.org">開発者のページ</a></li>
             </ul>
           </div><!--/.well -->
@@ -241,7 +234,6 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <h1>clooca DSL</h1>
             <p>cloooca DSLはソーシャルDSMLプラットフォームです。</p>
             <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　　</a></p>
-            <div id="home-div" name="home-div"></div>
             <p><a class="btn btn-primary btn-large" href="/dashboard.html">ダッシュボード &raquo;</a></p>
             <h3>最新情報</h3>
             <ul id="twitter_data"></ul>
@@ -249,34 +241,17 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <div class="row-fluid">
             <div class="span4">
               <h2>ブラウザで使用可能</h2>
-              <p>MDDツールであるcloocaのモデルエディタはブラウザさえあれば、いつでも、どこでも使うことができる。</p>
+              <p>cloocaのモデルエディタはブラウザさえあれば、いつでも、どこでも使うことができる。</p>
               <p><a class="btn" href="#">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="span4">
               <h2>Editor</h2>
-              <p>MDDツールであるcloocaのモデルシミュレータはブラウザさえあれば、いつでも、どこでも使うことができる。</p>
+              <p>cloocaでは直感的なモデル図（DSML）を用いて開発することができる。</p>
               <p><a class="btn" href="#">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="span4">
               <h2>Workbench</h2>
-              <p>cloocaではボタンひとつでモデル図からソースコードを出力することができる。</p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
-            </div><!--/span-->
-          </div><!--/row-->
-          <div class="row-fluid">
-            <div class="span4">
-              <h2>授業用の機能</h2>
-              <p>cloocaは現在、授業で使用することを想定しているため。授業に特化した機能を持っている。例えば・・・</p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
-            </div><!--/span-->
-            <div class="span4">
-              <h2>モデルリポジトリ</h2>
-              <p>モデルリポジトリにより、モデル図をバージョン管理することができる。</p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
-            </div><!--/span-->
-            <div class="span4">
-              <h2>ソースコード生成規則のカスタマイズ</h2>
-              <p>cloocaでは、独自のソースコード生成規則（テンプレート）を書くことで、ソースコード生成器をプロジェクトによってカスタマイズできる。</p>
+              <p>DSMLをブラウザで構築することができる。</p>
               <p><a class="btn" href="#">View details &raquo;</a></p>
             </div><!--/span-->
           </div><!--/row-->
