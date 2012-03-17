@@ -138,6 +138,14 @@ public class PropertyView {
 					obj.properties.add(p);
 				}
 				final com.clooca.core.client.model.gopr.element.Property property = obj.properties.get(tmp);
+				/*
+				 * 現在の値をセット
+				 */
+				for(int i=0;i < lb.getItemCount();i++) {
+					if(lb.getItemText(i).matches(property.getContent())) {
+						lb.setSelectedIndex(i);
+					}
+				}
 				lb.addChangeHandler(new ChangeHandler(){
 
 					@Override
@@ -194,6 +202,14 @@ public class PropertyView {
 				}else{
 				}
 				final com.clooca.core.client.model.gopr.element.Property property = obj.properties.get(tmp);
+				/*
+				 * 現在の値をセット
+				 */
+				for(int i=0;i < lb.getItemCount();i++) {
+					if(lb.getItemText(i).matches(property.getContent())) {
+						lb.setSelectedIndex(i);
+					}
+				}
 				lb.addChangeHandler(new ChangeHandler(){
 
 					@Override
