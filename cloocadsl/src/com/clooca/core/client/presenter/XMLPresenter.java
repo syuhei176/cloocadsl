@@ -8,7 +8,7 @@ import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.element.VersionElement;
 import com.clooca.core.client.util.IdGenerator;
 import com.clooca.core.client.util.Point2D;
-import com.clooca.core.client.workbench.presenter.MetaModelController;
+import com.clooca.core.client.workbench.presenter.WorkbenchController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -101,7 +101,7 @@ public class XMLPresenter {
 		if(model == null) {
 			model = new Model();
 			model.root = new Diagram();
-			model.root.meta = MetaModelController.getMetaModel().meta_diagram;
+			model.root.meta = WorkbenchController.getMetaModel().meta_diagram;
 			model.root.id = 1;
 		}
 		return model;
@@ -124,7 +124,7 @@ public class XMLPresenter {
 		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
 		IdGenerator.setOffset(diagram.id);
 		int meta_id = Integer.decode(node.getAttributes().getNamedItem("meta_id").getNodeValue());
-		diagram.meta = MetaModelController.getMetaDiagram(meta_id);
+		diagram.meta = WorkbenchController.getMetaDiagram(meta_id);
 		NodeList nl = node.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeName().matches("Object")) {
@@ -143,7 +143,7 @@ public class XMLPresenter {
 		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
 		IdGenerator.setOffset(diagram.id);
 		int meta_id = Integer.decode(node.getAttributes().getNamedItem("meta_id").getNodeValue());
-		diagram.meta = MetaModelController.getMetaObject(meta_id);
+		diagram.meta = WorkbenchController.getMetaObject(meta_id);
 		GWT.log(node.getAttributes().getNamedItem("x").getNodeValue());
 		GWT.log(node.getAttributes().getNamedItem("y").getNodeValue());
 		double x = Double.valueOf(node.getAttributes().getNamedItem("x").getNodeValue());
@@ -165,7 +165,7 @@ public class XMLPresenter {
 		diagram.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
 		IdGenerator.setOffset(diagram.id);
 		int meta_id = Integer.decode(node.getAttributes().getNamedItem("meta_id").getNodeValue());
-		diagram.meta = MetaModelController.getMetaRelationship(meta_id);
+		diagram.meta = WorkbenchController.getMetaRelationship(meta_id);
 		diagram.src = DiagramController.getObject(parent, Integer.decode(node.getAttributes().getNamedItem("src").getNodeValue()));
 		diagram.dest = DiagramController.getObject(parent, Integer.decode(node.getAttributes().getNamedItem("dest").getNodeValue()));
 		NodeList nl = node.getChildNodes();
@@ -192,7 +192,7 @@ public class XMLPresenter {
 		Property property = new Property();
 		property.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
 		int meta_id = Integer.decode(node.getAttributes().getNamedItem("meta_id").getNodeValue());
-		property.meta = MetaModelController.getMetaProperty(meta_id);
+		property.meta = WorkbenchController.getMetaProperty(meta_id);
 		NodeList nl = node.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeType() == com.google.gwt.xml.client.Node.TEXT_NODE) {

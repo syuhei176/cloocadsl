@@ -1,0 +1,304 @@
+<!doctype html>
+<html>
+<head>
+<meta name="gwt:property" content="locale=ja">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>clooca</title>
+<link rel="stylesheet" href="home.css" type="text/css" />
+<!-- <link rel="stylesheet" href="common.css" type="text/css" /> -->
+<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+<script src="/static/js/jquery-1.7.1.min.js"></script>
+<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAQr-OoUDUD8B6md7h-mq_iBRB2_XkvWJzLyCU3pCnbWbszTP00xQZ7sOVnkT-oSJ1YdcNe6Gkeyz7zA"></script>
+<script type="text/javascript">
+
+
+function init() {
+	$( "#login-dialog" ).hide();
+	$( "#create-new-p" ).hide();
+	$( "#create-new-m" ).hide();
+	{% if loggedin %}
+	  $('#login').empty().append('<a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
+	  load_models();
+	{% else %}
+	  $( "#login-dialog" ).dialog({ modal: true });
+	  $('#login').empty().append('<a href="/dashboard">login</a>&nbsp;&nbsp;&nbsp;');
+	{% endif %}
+	$("#loginform").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        username = $form.find( 'input[name="username"]' ).val(),
+	        password = $form.find( 'input[name="password"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { username: username, password: password },
+	      function( data ) {
+//	    	window.alert(data);
+	    	if(data != null) {
+	    		$('#login').empty().append('<a href="/logout">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
+	    		$( "#login-dialog" ).dialog('close');
+	    		load_models();
+	    	}
+	      }, "json");
+	  });
+
+	$("#create-project-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        name = $form.find( 'input[name="name"]' ).val(),
+	        metamodel_id = $form.find( 'select[name="metamodel_id"]' ).val(),
+	        xml = $form.find( 'input[name="xml"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    if(name.length == 0) {
+	    	window.alert("プロジェクト名を入力してください。");
+	    	return;
+	    }
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml },
+	      function( data ) {
+	    	if(data != null) {
+	    		$( "#create-new-p" ).dialog('close');
+	    	}
+	      }, "json");
+	  });
+	$("#create-metamodel-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        name = $form.find( 'input[name="name"]' ).val(),
+	        visibillity = $form.find( 'select[name="visibillity"]' ).val(),
+	        xml = $form.find( 'input[name="xml"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    if(name.length == 0) return;
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { name: name, visibillity: visibillity, xml: xml },
+	      function( data ) {
+	    	if(data != null) {
+	    		$( "#create-new-m" ).dialog('close');
+	    	}
+	      }, "json");
+	  });
+}
+
+function load_models() {
+	create_mymetamodels_table({{ mymetamodel|safe }});
+	create_metamodels_table({{ metamodel|safe }});
+	create_projects_table({{ myproject|safe }});
+	/*
+	$.post('/cgi-bin/core/dashboard.cgi',
+			function(data) {
+				create_mymetamodels_table(data.mymetamodels);
+				create_metamodels_table(data.metamodels);
+				create_projects_table(data.projects);
+			}, "json");
+	*/
+}
+
+function create_projects_table(projects) {
+	var html = '<table><tr><td>プロジェクト名</td><td></td></tr>';
+	for(var i = 0;i < projects.length;i++) {
+		var link = '<a href="/editor#'+projects[i].id+'">'+projects[i].name+'</a>';
+		var del = '<a href="javascript:delete_project('+projects[i].id+',\''+projects[i].name+'\')">削除</a>';
+		html += '<tr><td>'+link+'</td><td>'+del+'</td></tr>';
+	}
+	html += '</table>';
+	  $('#project').empty().append(html);
+}
+
+function create_mymetamodels_table(metamodels) {
+	var html = '<table><tr><td>メタモデル名</td><td>公開範囲</td></tr>';
+	for(var i = 0;i < metamodels.length;i++) {
+		var link = '<a href="/workbench#'+metamodels[i].id+'">'+metamodels[i].name+'</a>'
+		var vis = 'エラー';
+		if(metamodels[i].visibillity == 0) {
+			vis = '非公開';
+		}else if(metamodels[i].visibillity == 1) {
+			vis = '公開';
+		}
+		html += '<tr><td>'+link+'</td><td>'+vis+'</td></tr>';
+	}
+	html += '</table>';
+	$('#metamodel').empty().append(html);
+}
+
+function create_metamodels_table(metamodels) {
+		var html = '<select name="metamodel_id">';
+		for(var i = 0;i < metamodels.length;i++) {
+			html += '<option value="'+metamodels[i].id+'">'+metamodels[i].name+'</option>';
+		}
+		html += '</select>';
+	  $('#metamodel2').empty().append(html);
+}
+
+function delete_project(pid, pname) {
+	if(window.confirm("プロジェクト"+pname+"を削除しますか。")) {
+		$.post('/deletep', { pid : pid },
+				function(data) {
+					if(data) {
+						/*
+						TODO:行の削除処理
+						*/
+					}
+				}, "json");
+	}
+}
+
+
+</script>
+</head>
+<body onload="init()">
+      <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+<p id="message"></p>
+
+<div id="login-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable ui-resizable">
+   <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+      <span id="ui-dialog-title-dialog" class="ui-dialog-title">ログインダイアログ</span>
+      <a class="ui-dialog-titlebar-close ui-corner-all" href="#"><span class="ui-icon ui-icon-closethick">close</span></a>
+   </div>
+   <div style="height: 200px; min-height: 109px; width: auto;" class="ui-dialog-content ui-widget-content" id="dialog">
+   <form id="loginform" method="POST" action="/cgi-bin/core/login.cgi">
+   <div>username:<input type="text" name="username"></div>
+   <div>password:<input type="password" name="password"></div>
+   <input type="submit" value="ログイン">
+   </form>
+   </div>
+</div>
+<div id="create-new-p" title="CreateNew">
+   <form id="create-project-form" method="POST" action="/cgi-bin/core/createp.cgi">
+   <div>プロジェクト名<input type="text" name="name"></div>
+	<div id="metamodel2"></div>
+   <input type="hidden" name="xml" value=" ">
+   <input type="submit" value="OK">
+   </form>
+</div>
+<div id="create-new-m" title="CreateNew">
+   <form id="create-metamodel-form" method="POST" action="/cgi-bin/core/createm.cgi">
+   <div>メタモデル名<input type="text" name="name"></div>
+	<select name="visibillity">
+	<option value="0">非公開</option>
+	<option value="1">公開</option>
+	</select>
+   <input type="hidden" name="xml" value=" ">
+   <input type="submit" value="OK">
+   </form>
+</div>
+
+
+<div id="wrapper">
+<div id="temp">
+<div id="header">
+<div id="header-main">
+<p id="overview">
+</p>
+<!-- clooca is a web-based model-driven development tool.
+Currently, clooca is being introduced at the lesson of the Kyushu University Graduate School of Information Systems, please try it. -->
+</div>
+<div id="language">
+<div Align="right"><a href="/english/index.html">English</a></div>
+<div Align="right"><a href="/index.html">日本語</a></div>
+</div>
+</div>
+<!-- ナビゲーションバー -->
+ <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container" style="width: auto;">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <!-- <a class="brand" href="/"><img src="images/logo2.png" width="80" height="30"></img></a> -->
+        <a class="brand" href="/">clooca DSL</a>
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="active"><a href="/index.html">Home</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/service.html">Service</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/document.html">Document</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+          <p id="login" class="navbar-text pull-right"></p>
+        </div><!-- /.nav-collapse -->
+      </div>
+    </div><!-- /navbar-inner -->
+  </div><!-- /navbar -->
+  
+      <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">Manual</li>
+              <li><a href="/file/tutorial.pdf">簡易マニュアル</a></li>
+              <li class="nav-header">Links</li>
+              <li><a href="https://groups.google.com/group/clooca/topics">ディスカッション</a></li>
+              <li><a href="http://www.clooca.com">clooca</a></li>
+              <li><a href="http://syuhei.jpn.org">開発者のページ</a></li>
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+          <div class="hero-unit">
+            <h1>clooca DSL</h1>
+            <h2>プロジェクト</h2>
+            <div id="project"></div>
+            <p><a class="btn btn-danger btn-small" href="javascript:$('#create-new-p').dialog()">　新規作成 &raquo;　　</a></p>
+            <h2>メタモデル</h2>
+            <div id="metamodel"></div>
+            <p><a class="btn btn-danger btn-small" href="javascript:$('#create-new-m').dialog()">　新規作成 &raquo;　　</a></p>
+          </div>
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
+お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
+Copyright &copy 2011 部谷修平　All Rights Reserved.
+</p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+<!--
+<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="DFBZ4Z5JC38YY">
+<input type="image" src="https://www.sandbox.paypal.com/ja_JP/JP/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal- オンラインで安全・簡単にお支払い">
+<img alt="" border="0" src="https://www.sandbox.paypal.com/ja_JP/i/scr/pixel.gif" width="1" height="1">
+</form>
+-->
+
+</div>
+<div id="footer">
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -21,7 +21,7 @@ public class MyTabPanel extends Composite {
 	SimplePanel deck = new SimplePanel();
 //	HashMap<Integer,Widget> widgetMap = new HashMap<Integer,Widget>();
 	List<Widget> widgets = new ArrayList<Widget>();
-	List<MyTabPanelListener> listeners;
+	List<MyTabPanelListener> listeners = null;
 	int selectedIndex = 0;
 	
 	public interface MyTabPanelListener {
@@ -34,7 +34,7 @@ public class MyTabPanel extends Composite {
 		initWidget(panel);
 		panel.add(tabpanel);
 		panel.add(deck);
-
+		panel.setStyleName("mycanvas_tab");
 //		 tabBar.addSelectionHandler(this);
 	}
 	

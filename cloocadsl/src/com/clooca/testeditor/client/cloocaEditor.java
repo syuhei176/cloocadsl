@@ -67,7 +67,7 @@ public class cloocaEditor {
 		EditorPanel.setBorderWidth(1);
 		EditorPanel.setStyleName("editor-dock-panel");
 		
-		new EditorTabView();
+		EditorTabView.init();
 		
 		EditorPanel.add(PropertyView.getpanel(), DockPanel.SOUTH);
 		EditorPanel.setCellHeight(PropertyView.getpanel(), "150px");
@@ -88,7 +88,8 @@ public class cloocaEditor {
 	    rp.clear();
 	    rp.add(EditorPanel);
 	    
-	    check();
+		mProjectController.load(Integer.decode(History.getToken()));
+//	    check();
 	}
 	
 	private void check() {

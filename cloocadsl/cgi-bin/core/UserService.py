@@ -5,12 +5,13 @@ import re
 import sys
 import datetime
 import config
-from util import MySession
+from flask import session
+#from util import MySession
 
 reg_username = re.compile('\w+')
 
 def GetUserFromDB(username):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT id,uname,passwd FROM UserInfo WHERE uname = %s;', username)
     rows = cur.fetchall()
@@ -27,18 +28,21 @@ def GetUserFromDB(username):
     return user
 
 def GetUser():
-    session = MySession.GetSession()
-    if session._is_new():
-        return None
-    user = session.getAttribute("user")
-    return user
+    if 'user' in session:
+        return session['user']
+    return None
+#    session = MySession.GetSession()
+#    if session._is_new():
+#        return None
+#    user = session.getAttribute("user")
+#    return user
 
 def CreateUser(username, password):
     if not reg_username.match(username):
         return False
     if len(password) < 5:
         return False
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT uname FROM UserInfo WHERE uname = %s;', (username,))
     rows = cur.fetchall()
@@ -66,10 +70,12 @@ def EnableEmail(user, email):
 def Login(username, password):
     if not reg_username.match(username):
         return None
-    session = MySession.GetSession()
+#    session = MySession.GetSession()
     user = GetUserFromDB(username)
     if md5.new(password).hexdigest() == user['passwd']:
-        session.setAttribute('user', user)
+#        session.setAttribute('user', user)
+        session['user'] = user
+        user['passwd'] = '*****'
         return user
     else:
         return None

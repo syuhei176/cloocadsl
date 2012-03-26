@@ -1,9 +1,7 @@
 package com.clooca.core.client.view;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.clooca.core.client.listener.DiagramModificationListener;
 import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Property;
@@ -146,7 +144,7 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     	for(int i = 0;i < tools.length;i++) {
     		String label = tools[i].getLabel();
     		final String tool_name = tools[i].getName();
-            final ToggleButton button = new ToggleButton(new Image("images/"+label+".png"));
+            final ToggleButton button = new ToggleButton(new Image("/static/images/"+label+".png"));
             button.addClickHandler(new ClickHandler() {
             	
     			@Override
@@ -295,7 +293,8 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     
     public void draw(GraphicManager gm, NodeObject obj) {
 		gm.beginPath();
-		gm.setColor("BLACK");
+		gm.setColor("WHITE");
+		gm.setFillStyle("WHITE");
 		if(this.mDiagramController.getSelected() != null && this.mDiagramController.getSelected().equals(obj)) gm.setColor("BLUE");
 		obj.bound.width = 60;
 		obj.bound.height = obj.properties.size() * 20;
@@ -324,6 +323,11 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		}else if(obj.meta.graphic.shape.matches(GraphicInfo.CIRCLE)) {
 	    	Point2D s = new Point2D((bound.x + bound.width / 2), (bound.y + bound.height / 2));
 			gm.StrokeCircle(s, 16);
+		}else{
+			gm.beginPath();
+//			gm.moveTo(p);
+//			gm.LineTo(p);
+			gm.closePath();
 		}
 		gm.stroke();
 		gm.closePath();
@@ -333,7 +337,8 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     	Point2D s = new Point2D((rel.src.pos.x + rel.src.bound.width / 2), (rel.src.pos.y + rel.src.bound.height / 2));
     	Point2D e = new Point2D((rel.dest.pos.x + rel.dest.bound.width / 2), (rel.dest.pos.y + rel.dest.bound.height / 2));
 		gm.beginPath();
-		gm.setColor("BLACK");
+		gm.setColor("WHITE");
+		gm.setFillStyle("WHITE");
 		if(this.mDiagramController.getSelected() != null && this.mDiagramController.getSelected().equals(rel)) gm.setColor("BLUE");
 		Point2D start = getConnectionPoint(new Line2D(s, e), rel.src.bound);
 		Point2D end = getConnectionPoint(new Line2D(e, s), rel.dest.bound);
@@ -362,13 +367,18 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		/*
 		 * propertyを表示
 		 */
+		Point2D prop_pos = new Point2D((start.x+end.x) / 2, (start.y + end.y) / 2);
+		if(rel.points.size() > 0) {
+			prop_pos.x = (rel.points.get(0).x + prop_pos.x) / 2;
+			prop_pos.y = (rel.points.get(0).y + prop_pos.y) / 2;
+		}
 		for(Property prop : rel.properties) {
 			MetaProperty metaprop = prop.meta;
 			if(metaprop == null) continue;
 			if(metaprop.data_type.matches(MetaProperty.STRING)) {
-				gm.DrawText(prop.content, (int)(start.x+end.x) / 2, (int)(start.y + end.y) / 2, 100);
+				gm.DrawText(prop.content, (int)prop_pos.getX(), (int)prop_pos.getY(), 100);
 			}else if(metaprop.data_type.matches(MetaProperty.NUMBER)) {
-				gm.DrawText(prop.content, (int)(start.x+end.x) / 2, (int)(start.y + end.y) / 2, 100);
+				gm.DrawText(prop.content, (int)prop_pos.getX(), (int)prop_pos.getY(), 100);
 			}else if(metaprop.data_type.matches(MetaProperty.COLLECTION)) {
 //				obj.properties.
 			}

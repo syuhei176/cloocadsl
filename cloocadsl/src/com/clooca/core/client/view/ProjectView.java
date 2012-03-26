@@ -51,7 +51,7 @@ public class ProjectView {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				Window.open("/cgi-bin/core/download.cgi?pid="+mProjectController.getProjectInfo().getId(), "", "");
+				Window.open("/download?pid="+mProjectController.getProjectInfo().getId(), "", "");
 			}});
 	}
 	

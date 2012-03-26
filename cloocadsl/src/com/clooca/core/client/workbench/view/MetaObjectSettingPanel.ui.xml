@@ -6,21 +6,27 @@
 	</ui:style>
 	<g:HTMLPanel>
 		<g:HorizontalPanel>
-			<g:AbsolutePanel height="257px" width="154px">
-				<g:at left="10" top="54">
+			<g:AbsolutePanel height="257px" width="160px">
+				<g:at left="10" top="37">
 					<g:Label text="id" width="58px" height="18px"/>
 				</g:at>
-				<g:at left="10" top="109">
+				<g:at left="10" top="86">
 					<g:Label text="name"/>
 				</g:at>
-				<g:at left="10" top="84">
-					<g:IntegerBox ui:field="idbox" width="96px" height="13px"/>
+				<g:at left="10" top="61">
+					<g:IntegerBox ui:field="idbox" width="134px" height="13px"/>
 				</g:at>
-				<g:at left="10" top="142">
-					<g:TextBox ui:field="name" width="96px" height="13px"/>
+				<g:at left="10" top="110">
+					<g:TextBox ui:field="name" width="134px" height="13px"/>
+				</g:at>
+				<g:at left="10" top="135">
+					<g:Label text="GraphicInfo"/>
+				</g:at>
+				<g:at left="10" top="159">
+					<g:ListBox width="136px" height="18px" ui:field="graphicBox"/>
 				</g:at>
 			</g:AbsolutePanel>
-			<g:AbsolutePanel height="257px" width="260px">
+			<g:AbsolutePanel height="257px" width="254px">
 			<g:at left="32" top="81">
 				<g:ListBox visibleItemCount="5" width="106px" height="138px" ui:field="properties"/>
 			</g:at>

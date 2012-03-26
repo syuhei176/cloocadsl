@@ -11,7 +11,7 @@ import com.clooca.core.client.util.Rectangle2D;
 import com.clooca.core.client.view.AbstractEditor;
 import com.clooca.core.client.view.SimpleDialogBox;
 import com.clooca.core.client.view.DiagramEditor.Tool;
-import com.clooca.core.client.workbench.presenter.MetaModelController;
+import com.clooca.core.client.workbench.presenter.WorkbenchController;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -44,7 +44,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,MouseUpHandler,MouseMoveHandler,ClickHandler, DoubleClickHandler {
 	MetaModel metamodel;
-	private MetaModelController mMetaModelController;
+	private WorkbenchController mMetaModelController;
 	
 	private Canvas canvas;
 	
@@ -69,7 +69,7 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
      * @param c
      * @param mc
      */
-    public MetaModelEditor(MetaModelController c) {
+    public MetaModelEditor(WorkbenchController c) {
     	super();
     	this.mMetaModelController = c;
     	this.metamodel = c.getMetaModel();
@@ -113,7 +113,7 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
 
 	private void createButton() {
 		buttons = new ToggleButton[3];
-		final ToggleButton sel_button = new ToggleButton(new Image("images/select.png"));
+		final ToggleButton sel_button = new ToggleButton(new Image("/static/images/select.png"));
 		sel_button.addClickHandler(new ClickHandler() {
         	
 			@Override
@@ -123,7 +123,7 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
         });
         toolpanel.add(sel_button);
 
-		final ToggleButton button = new ToggleButton(new Image("images/class.png"));
+		final ToggleButton button = new ToggleButton(new Image("/static/images/class.png"));
             button.addClickHandler(new ClickHandler() {
             	
     			@Override
@@ -132,7 +132,7 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
     			}
             });
             toolpanel.add(button);
-    		final ToggleButton button2 = new ToggleButton(new Image("images/association1.png"));
+    		final ToggleButton button2 = new ToggleButton(new Image("/static/images/association1.png"));
             button2.addClickHandler(new ClickHandler() {
             	
     			@Override
@@ -268,7 +268,8 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
     
     public void draw(GraphicManager gm, MetaObject obj) {
 		gm.beginPath();
-		gm.setColor("BLACK");
+		gm.setColor("WHITE");
+		gm.setFillStyle("WHITE");
 		if(this.mMetaModelController.getSelected() != null && this.mMetaModelController.getSelected().equals(obj)) gm.setColor("BLUE");
 		gm.DrawText(obj.name, (int)obj.pos.x+4, (int)obj.pos.y+20-4, 100);
 		gm.DrawText(obj.graphic.shape, (int)obj.pos.x+4, (int)obj.pos.y+40-4, 100);
@@ -281,7 +282,8 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
     public void draw(GraphicManager gm, MetaRelation meta_rel) {
 		for(Binding b : meta_rel.bindings) {
     		gm.beginPath();
-    		gm.setColor("BLACK");
+    		gm.setColor("WHITE");
+    		gm.setFillStyle("WHITE");
     		if(this.mMetaModelController.getSelected() != null && this.mMetaModelController.getSelected().equals(meta_rel)) gm.setColor("BLUE");
     		if(b.src.id == b.dest.id) {
         		gm.moveTo(b.src.pos);

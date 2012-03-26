@@ -1,5 +1,6 @@
 package com.clooca.core.client.workbench.view;
 
+import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.util.IdGenerator;
@@ -30,6 +31,7 @@ public class MetaObjectSettingPanel extends Composite {
 	@UiField TextBox name;
 	@UiField IntegerBox idbox;
 	@UiField Button update;
+	@UiField ListBox graphicBox;
 	MetaObject metaObj;
 	
 	interface MetaObjectSettingPanelUiBinder extends
@@ -43,6 +45,12 @@ public class MetaObjectSettingPanel extends Composite {
 		idbox.setValue(this.metaObj.id);
 		for(MetaProperty mp : metaObj.properties) {
 			properties.addItem(mp.name);
+		}
+		graphicBox.addItem(GraphicInfo.RECT);
+		graphicBox.addItem(GraphicInfo.ROUNDED);
+		graphicBox.addItem(GraphicInfo.CIRCLE);
+		for(int i=0;i < graphicBox.getItemCount();i++) {
+			if(graphicBox.getItemText(i).matches(metaObj.graphic.shape)) graphicBox.setSelectedIndex(i);
 		}
 	}
 
@@ -97,5 +105,9 @@ public class MetaObjectSettingPanel extends Composite {
 			@Override
 			public void onClose(CloseEvent event) {
 			}});
+	}
+	@UiHandler("graphicBox")
+	void onGraphicBoxChange(ChangeEvent event) {
+		this.metaObj.graphic.shape = this.graphicBox.getItemText(this.graphicBox.getSelectedIndex());
 	}
 }

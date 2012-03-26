@@ -121,7 +121,7 @@ public class DiagramController {
 			return true;
 		}else if(dragMode == DragMode.DRAG_POINT) {
 			if(selected instanceof Relationship) {
-				this.movePoint((Relationship)selected, drag_start, drag_move);
+//				this.movePoint((Relationship)selected, drag_start, drag_move);
 			}
 		}
 		return true;

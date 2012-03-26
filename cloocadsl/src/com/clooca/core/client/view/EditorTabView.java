@@ -14,12 +14,12 @@ import com.clooca.webutil.client.MyTabPanel.MyTabPanelListener;
  * add function MakeNewEventEditorTab
  * add function openExEvents
  */
-public class EditorTabView implements MyTabPanelListener {
+public class EditorTabView {
 	
 	/**
 	 * 
 	 */
-	static private MyTabPanel mainpanel;
+	static private MyTabPanel mainpanel = new MyTabPanel();
 	
 	/**
 	 * 
@@ -35,14 +35,24 @@ public class EditorTabView implements MyTabPanelListener {
 	/**
 	 * 
 	 */
-	static private List<AbstractEditor> editors;
+	static private List<AbstractEditor> editors =  new ArrayList<AbstractEditor>();
 	
 	public EditorTabView() {
-		mainpanel = new MyTabPanel();
-		mainpanel.setStyleName("mycanvas_tab");
-		mainpanel.addSelectionHandler(this);
-//		listeners = new ArrayList<DiagramSelectionListener>();
-		editors = new ArrayList<AbstractEditor>();
+		
+	}
+	
+	static public void init() {
+		mainpanel.addSelectionHandler(new MyTabPanelListener(){
+
+			@Override
+			public void onSelection(int index) {
+				current_canvas = editors.get(index);
+			}
+
+			@Override
+			public void onClose(int index) {
+				editors.remove(index);
+			}});
 	}
 	
 	/**
@@ -130,23 +140,6 @@ public class EditorTabView implements MyTabPanelListener {
 	static public void clear() {
 		mainpanel.clear();
 		editors.clear();
-	}
-
-	@Override
-	public void onSelection(int index) {
-		current_canvas = editors.get(index);
-//				for(DiagramSelectionListener l : listeners) {
-//					l.OnSelectDiagram(this.getCurrentCanvas().getDiagram());
-//				}
-	}
-
-	@Override
-	public void onClose(int index) {
-//		for(DiagramSelectionListener l : listeners) {
-//			AbstractEditor ae = editors.get(index);
-//			l.OnCloseOther(ae.getKey());
-//		}
-		editors.remove(index);
 	}
 
 }

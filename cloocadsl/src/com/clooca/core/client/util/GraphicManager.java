@@ -37,6 +37,11 @@ public class GraphicManager {
 	public void setColor(String color) {
 		context.setStrokeStyle(color);
 	}
+	
+	public void setFillStyle(String color) {
+		context.setFillStyle(color);
+	}
+
 
 	public void StrokeRect(Rectangle2D r) {
 		context.strokeRect(r.x, r.y, r.width, r.height);
@@ -67,6 +72,8 @@ public class GraphicManager {
 	
 	public void clearRect(Rectangle2D r) {
 		context.clearRect(r.x, r.y, r.width, r.height);
+		context.setFillStyle("rgb(0, 0, 0)");
+		context.fillRect(r.x, r.y, r.width, r.height);
 	}
 	
 	public void moveTo(Point2D p) {

@@ -3,11 +3,6 @@ package com.clooca.core.client.workbench.presenter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.clooca.core.client.model.ProjectInfo;
-import com.clooca.core.client.model.gopr.element.Diagram;
-import com.clooca.core.client.model.gopr.element.NodeObject;
-import com.clooca.core.client.model.gopr.element.Property;
-import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.metaelement.Binding;
 import com.clooca.core.client.model.gopr.metaelement.MetaDiagram;
 import com.clooca.core.client.model.gopr.metaelement.MetaModel;
@@ -20,11 +15,8 @@ import com.clooca.core.client.util.IdGenerator;
 import com.clooca.core.client.util.Line2D;
 import com.clooca.core.client.util.Point2D;
 import com.clooca.core.client.util.Rectangle2D;
-import com.clooca.core.client.view.DiagramEditor;
-import com.clooca.core.client.view.DiagramEditor.Tool;
 import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -35,19 +27,17 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.sun.org.apache.regexp.internal.RE;
 
-public class MetaModelController {
+public class WorkbenchController {
 	static MetaModel metamodel;
 //	DiagramEditor deditor;
 	
-	public MetaModelController() {
+	public WorkbenchController() {
 		
 	}
 	
-	public MetaModelController(MetaModel metamodel) {
+	public WorkbenchController(MetaModel metamodel) {
 		this.metamodel = metamodel;
 	}
 	
@@ -352,38 +342,46 @@ public class MetaModelController {
 		db.setText("読み込み中");
 		db.show();
 		db.center();
-      	RequestGenerator.send("/cgi-bin/core/msave.cgi", "id="+pid+"&xml="+URL.encodeQueryString(XMLMetaPresenter.genModel(metamodel)), new RequestCallback(){
+      	RequestGenerator.send("/msave", "id="+pid+"&xml="+URL.encodeQueryString(XMLMetaPresenter.genModel(metamodel)), new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
     				Throwable exception) {
+    			Console.error(exception.getMessage());
     			db.hide();
     		}
 
     		@Override
     		public void onResponseReceived(Request request,
     				Response response) {
-    			db.hide();
     			Console.log(response.getText());
+    			db.hide();
 //    			JSONObject jsonObject = JSONParser.parseLenient(response.getText()).isObject();
     		}});
     }
 	
+	List<LoadedListener> loadListeners = new ArrayList<LoadedListener>();
+	
+	public void addLoadListener(LoadedListener l) {
+		loadListeners.add(l);
+	}
+	
 	public void loadRequest(int pid) {
 		loadRequest(pid, null);
 	}
+	
 	public void loadRequest(int pid, final LoadedListener listener) {
 		final DialogBox db = new DialogBox();
 		db.setTitle("読み込み中");
 		db.setText("読み込み中");
 		db.show();
 		db.center();
-      	RequestGenerator.send("/cgi-bin/core/mload.cgi", "id="+pid, new RequestCallback(){
+      	RequestGenerator.send("/mload", "id="+pid, new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
     				Throwable exception) {
-    			Console.log(exception.getMessage());
+    			Console.error(exception.getMessage());
     			db.hide();
     		}
 
@@ -400,6 +398,7 @@ public class MetaModelController {
     	        int id = 0;
     	        String name = "";
     	        String xml = "";
+    	        String gen_prop = "";
     			if(jsonObject != null) {
     				
     				if((jsonNumber = jsonObject.get("id").isNumber()) != null) {
@@ -412,13 +411,20 @@ public class MetaModelController {
     				if((jsonString = jsonObject.get("xml").isString()) != null) {
     					xml = jsonString.stringValue();
     				}
+    				if((jsonString = jsonObject.get("template").isString()) != null) {
+    					gen_prop = jsonString.stringValue();
+    				}
     			}
-
+    			
     			metamodel = XMLMetaPresenter.parse(xml);
     			metamodel.id = id;
     			metamodel.name = name;
+    			metamodel.gen_property = gen_prop;
     			db.hide();
     			if(listener != null) listener.onLoaded();
+    			for(LoadedListener l : loadListeners) {
+    				l.onLoaded();
+    			}
     		}});
     }
 	
@@ -450,5 +456,12 @@ public class MetaModelController {
 	
 	public interface LoadedListener {
 		public void onLoaded();
+	}
+	
+	/*
+	 * Workbwnch
+	 */
+	public void setGenProp(String prop) {
+		this.metamodel.gen_property = prop;
 	}
 }

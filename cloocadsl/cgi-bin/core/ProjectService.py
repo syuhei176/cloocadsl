@@ -14,7 +14,7 @@ connect = None
 g_model_id = None
 
 def saveProject(user, pid, xml):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
     has_rows = cur.fetchall()
@@ -30,7 +30,7 @@ def saveProject(user, pid, xml):
     return True
 
 def loadProject(user, pid):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
     has_rows = cur.fetchall()
@@ -51,7 +51,7 @@ def loadProject(user, pid):
     return project
 
 def deleteProject(user, pid):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
     has_rows = cur.fetchall()
@@ -68,7 +68,7 @@ def deleteProject(user, pid):
     return True
 
 def createProject(user, name, xml, metamodel_id):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id) VALUES(%s,%s,%s);',(name, xml, metamodel_id, ))
     connect.commit()
@@ -87,7 +87,7 @@ def createProject(user, name, xml, metamodel_id):
     return True
 
 def loadMyProjectList(user):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT project_id FROM hasProject WHERE user_id=%s;',(user['id'], ))
     rows = cur.fetchall()
@@ -107,7 +107,7 @@ def loadMyProjectList(user):
     return projects
 
 def loadLessonProjectList(user, metamodel_id):
-    connect = MySQLdb.connect(db=config.DB2_NAME, host=config.DB2_HOST, port=config.DB2_PORT, user=config.DB2_USER, passwd=config.DB2_PASSWD)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml FROM ProjectInfo WHERE metamodel_id=%s;',(metamodel_id, ))
     rows = cur.fetchall()

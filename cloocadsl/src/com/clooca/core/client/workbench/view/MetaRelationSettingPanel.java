@@ -3,6 +3,7 @@ package com.clooca.core.client.workbench.view;
 
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
+import com.clooca.core.client.util.ArrowHead;
 import com.clooca.core.client.util.IdGenerator;
 import com.clooca.core.client.view.SimpleDialogBox;
 import com.google.gwt.core.client.GWT;
@@ -31,6 +32,7 @@ public class MetaRelationSettingPanel extends Composite {
 	@UiField IntegerBox idbox;
 	@UiField TextBox name;
 	@UiField Button update;
+	@UiField ListBox arrowBox;
 	MetaRelation metaRel;
 	
 	interface MetaRelationSettingPanelUiBinder extends
@@ -44,6 +46,15 @@ public class MetaRelationSettingPanel extends Composite {
 		name.setText(this.metaRel.name);
 		for(MetaProperty mp : metaRel.properties) {
 			properties.addItem(mp.name);
+		}
+		arrowBox.addItem(ArrowHead.NONE);
+		arrowBox.addItem(ArrowHead.V);
+		arrowBox.addItem(ArrowHead.TRIANGLE);
+		arrowBox.addItem(ArrowHead.BLACK_TRIANGLE);
+		arrowBox.addItem(ArrowHead.DIAMOND);
+		arrowBox.addItem(ArrowHead.BLACK_DIAMOND);
+		for(int i=0;i < arrowBox.getItemCount();i++) {
+			if(arrowBox.getItemText(i).matches(metaRel.arrow_type)) arrowBox.setSelectedIndex(i);
 		}
 	}
 
@@ -96,4 +107,8 @@ public class MetaRelationSettingPanel extends Composite {
 			}});
 	}
 	
+	@UiHandler("arrowBox")
+	void onArrowBoxChange(ChangeEvent event) {
+		this.metaRel.arrow_type = arrowBox.getItemText(arrowBox.getSelectedIndex());
+	}
 }

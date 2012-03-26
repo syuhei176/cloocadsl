@@ -10,7 +10,7 @@ import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
 import com.clooca.core.client.util.Converter;
 import com.clooca.core.client.util.IdGenerator;
-import com.clooca.core.client.workbench.presenter.MetaModelController;
+import com.clooca.core.client.workbench.presenter.WorkbenchController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Node;
@@ -197,7 +197,7 @@ public class XMLMetaPresenter {
 	static Binding parseBinding(Node node, MetaDiagram parent) {
 		int src = Integer.decode(node.getAttributes().getNamedItem("src").getNodeValue());
 		int dest = Integer.decode(node.getAttributes().getNamedItem("dest").getNodeValue());
-		Binding binding = new Binding(MetaModelController.getMetaObject(src, parent), MetaModelController.getMetaObject(dest, parent));
+		Binding binding = new Binding(WorkbenchController.getMetaObject(src, parent), WorkbenchController.getMetaObject(dest, parent));
 /*		NodeList nl = node.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeType() == com.google.gwt.xml.client.Node.TEXT_NODE) {

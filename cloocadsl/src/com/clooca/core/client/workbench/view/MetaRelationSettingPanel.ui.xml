@@ -19,6 +19,12 @@
 			<g:at left="10" top="128">
 				<g:TextBox ui:field="name"/>
 			</g:at>
+			<g:at left="10" top="157">
+				<g:Label text="arrow"/>
+			</g:at>
+			<g:at left="10" top="181">
+				<g:ListBox width="125px" height="18px" ui:field="arrowBox"/>
+			</g:at>
 		</g:AbsolutePanel>
 			<g:AbsolutePanel height="256px" width="251px">
 				<g:at left="167" top="147">

@@ -54,7 +54,7 @@ class BaseGenerator(object):
         for e in elem.findall(".//Template"):
             self.parseTemplate(e)
         for e in elem.findall(".//Copy"):
-            self.parseTemplate(e)
+            self.parseCopy(e)
     
     def parseTemplate(self, elem):
         src = elem.get('src')
@@ -108,9 +108,11 @@ def parse_diagram(elem):
 def parse_object(elem):
     class klass: pass
     id = elem.get('id')
+    meta_id = elem.get('meta_id')
     x = elem.get('x')
     y = elem.get('y')
     setattr(klass, 'id', id)
+    setattr(klass, 'meta_id', meta_id)
     setattr(klass, 'x', x)
     setattr(klass, 'y', y)
     setattr(klass, 'properties', [])

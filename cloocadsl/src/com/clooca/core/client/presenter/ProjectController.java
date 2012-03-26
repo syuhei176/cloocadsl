@@ -1,8 +1,8 @@
 package com.clooca.core.client.presenter;
 
 import com.clooca.core.client.model.ProjectInfo;
-import com.clooca.core.client.workbench.presenter.MetaModelController;
-import com.clooca.core.client.workbench.presenter.MetaModelController.LoadedListener;
+import com.clooca.core.client.workbench.presenter.WorkbenchController;
+import com.clooca.core.client.workbench.presenter.WorkbenchController.LoadedListener;
 import com.clooca.webutil.client.Console;
 import com.clooca.webutil.client.RequestGenerator;
 import com.google.gwt.http.client.Request;
@@ -19,11 +19,11 @@ public class ProjectController {
 	
 	ProjectInfo projectInfo;
 	public ModelController mModelController;
-	public MetaModelController mMetaModelController;
+	public WorkbenchController mMetaModelController;
 	
 	public ProjectController() {
 		mModelController = new ModelController();
-		mMetaModelController = new MetaModelController(null);
+		mMetaModelController = new WorkbenchController(null);
 //		mMetaModelController.create_sample();
 	}
 	public void load(int pid) {
@@ -67,7 +67,7 @@ public class ProjectController {
 	}
 	
 	public void generate() {
-      	RequestGenerator.send("/cgi-bin/core/gen.cgi", "pid="+projectInfo.getId(), new RequestCallback(){
+      	RequestGenerator.send("/gen", "pid="+projectInfo.getId(), new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
@@ -88,7 +88,7 @@ public class ProjectController {
 		db.setText("読み込み中");
 		db.show();
 		db.center();
-      	RequestGenerator.send("/cgi-bin/core/save.cgi", "pid="+projectInfo.getId()+"&xml="+request, new RequestCallback(){
+      	RequestGenerator.send("/psave", "pid="+projectInfo.getId()+"&xml="+request, new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
@@ -111,7 +111,7 @@ public class ProjectController {
 		db.setText("読み込み中");
 		db.show();
 		db.center();
-      	RequestGenerator.send("/cgi-bin/core/load.cgi", "pid="+pid, new RequestCallback(){
+      	RequestGenerator.send("/pload", "pid="+pid, new RequestCallback(){
 
     		@Override
     		public void onError(Request request,
