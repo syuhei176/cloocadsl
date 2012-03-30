@@ -11,10 +11,35 @@ cgi-bin		いずれ消す
 static		HTMLや画像等の静的ファイル
 templates	HTMLテンプレートファイル
 
+
+============
+=  インストール方法  =
+============
+* Flaskをインストール
+sudo easy_install Werkzeug
+sudo easy_install Jinja2
+sudo easy_install Flask
+
+* MySQLdbをインストール
+http://mysql-python.sourceforge.net/
+
+* makoをインストール
+sudo easy_install mako
+
+
 ============
 =  実行方法  =
 ============
-python application.pyで実行
+1) config.pyをデータベースにあわせて設定
+DB_NAME = 'cloocadsl'
+DB_HOST = 'localhost'
+DB_PORT = 3306
+DB_USER = 'root'
+DB_PASSWD = ''
+
+2) python application.pyで実行
+
+3) http://127.0.0.1:5000/index にアクセス
 
 ===========
 =  その他  =
