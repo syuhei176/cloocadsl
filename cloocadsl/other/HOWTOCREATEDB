@@ -1,0 +1,10 @@
+インポート手順
+
+> mysql -u root 
+
+mysql> CREATE DATABASE cloocadsl;
+mysql> connect cloocadsl;
+mysql> exit
+
+> mysql -u root --default-character-set=utf8 cloocadsl < cloocadsl.sql 
+
