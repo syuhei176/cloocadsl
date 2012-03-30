@@ -44,6 +44,9 @@ DB_PASSWD = ''
 ===========
 =  その他  =
 ===========
+GWT関係
+EclipseでメニューのProject-Property-Web ApplicationのWAR DIRECTORYを"static"に変更すること。
+
 プロジェクトのXMLの仕様はXMLPresenter.java
 メタモデルのXMLの仕様はXMLMetaPresenter.java
 を参照
