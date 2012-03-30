@@ -28,9 +28,10 @@ public class UserInfo implements Serializable {
 			if((jsonNumber = jsonObject.get("id").isNumber()) != null) {
 				id = (long) (jsonNumber.doubleValue());
 			}
-			if((jsonString = jsonObject.get("username").isString()) != null) {
+			if((jsonString = jsonObject.get("uname").isString()) != null) {
 				username = jsonString.stringValue();
 			}
+			/*
 			if((jsonString = jsonObject.get("email").isString()) != null) {
 				email = jsonString.stringValue();
 			}
@@ -38,6 +39,7 @@ public class UserInfo implements Serializable {
 				if(jsonNumber.doubleValue() == 1) role = true;
 				else role = false;
 			}
+			*/
 		}
 	}
 	

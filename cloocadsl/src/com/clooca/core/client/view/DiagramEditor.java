@@ -5,6 +5,7 @@ import java.util.List;
 import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Property;
+import com.clooca.core.client.model.gopr.element.PropertyList;
 import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
@@ -292,6 +293,7 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     }
     
     public void draw(GraphicManager gm, NodeObject obj) {
+    	if(obj.ve.ver_type.matches("delete")) return;
 		gm.beginPath();
 		gm.setColor("WHITE");
 		gm.setFillStyle("WHITE");
@@ -300,16 +302,16 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 		obj.bound.height = obj.properties.size() * 20;
 		if(obj.properties.size() == 0) obj.bound.height = 20;
 		int h = 01;
-		for(Property prop : obj.properties) {
-			MetaProperty metaprop = prop.meta;
+		for(PropertyList prop : obj.properties) {
+			MetaProperty metaprop = prop.get(0).meta;
 			if(metaprop == null) continue;
 			if(metaprop.data_type.matches(MetaProperty.STRING)) {
 //				obj.properties.
-				gm.DrawText(prop.content, (int)obj.pos.x + 4, (int)obj.pos.y+20*h - 4, 100);
-				if(obj.bound.width < prop.content.length() * 8) obj.bound.width = prop.content.length() * 8;
+				gm.DrawText(prop.get(0).content, (int)obj.pos.x + 4, (int)obj.pos.y+20*h - 4, 100);
+				if(obj.bound.width < prop.get(0).content.length() * 8) obj.bound.width = prop.get(0).content.length() * 8;
 			}else if(metaprop.data_type.matches(MetaProperty.NUMBER)) {
-				gm.DrawText(prop.content, (int)obj.pos.x + 4, (int)obj.pos.y+20*h - 4, 100);
-				if(obj.bound.width < prop.content.length() * 8) obj.bound.width = prop.content.length() * 8;
+				gm.DrawText(prop.get(0).content, (int)obj.pos.x + 4, (int)obj.pos.y+20*h - 4, 100);
+				if(obj.bound.width < prop.get(0).content.length() * 8) obj.bound.width = prop.get(0).content.length() * 8;
 			}else if(metaprop.data_type.matches(MetaProperty.COLLECTION)) {
 //				obj.properties.
 			}
@@ -334,6 +336,7 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
     }
     
     public void draw(GraphicManager gm, Relationship rel) {
+    	if(rel.ve.ver_type.matches("delete")) return;
     	Point2D s = new Point2D((rel.src.pos.x + rel.src.bound.width / 2), (rel.src.pos.y + rel.src.bound.height / 2));
     	Point2D e = new Point2D((rel.dest.pos.x + rel.dest.bound.width / 2), (rel.dest.pos.y + rel.dest.bound.height / 2));
 		gm.beginPath();
@@ -372,13 +375,13 @@ public class DiagramEditor extends AbstractEditor implements MouseDownHandler,Mo
 			prop_pos.x = (rel.points.get(0).x + prop_pos.x) / 2;
 			prop_pos.y = (rel.points.get(0).y + prop_pos.y) / 2;
 		}
-		for(Property prop : rel.properties) {
+		for(PropertyList prop : rel.properties) {
 			MetaProperty metaprop = prop.meta;
 			if(metaprop == null) continue;
 			if(metaprop.data_type.matches(MetaProperty.STRING)) {
-				gm.DrawText(prop.content, (int)prop_pos.getX(), (int)prop_pos.getY(), 100);
+				gm.DrawText(prop.get(0).content, (int)prop_pos.getX(), (int)prop_pos.getY(), 100);
 			}else if(metaprop.data_type.matches(MetaProperty.NUMBER)) {
-				gm.DrawText(prop.content, (int)prop_pos.getX(), (int)prop_pos.getY(), 100);
+				gm.DrawText(prop.get(0).content, (int)prop_pos.getX(), (int)prop_pos.getY(), 100);
 			}else if(metaprop.data_type.matches(MetaProperty.COLLECTION)) {
 //				obj.properties.
 			}

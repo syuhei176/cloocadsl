@@ -20,10 +20,12 @@ public class ProjectView {
 		Button save_button = new Button(" Save ");
 		Button gen_button = new Button("Generate");
 		Button download_button = new Button("Download");
+		Button commit_button = new Button("Commit");
 		mainpanel.add(open_button);
 		mainpanel.add(save_button);
 		mainpanel.add(gen_button);
 		mainpanel.add(download_button);
+		mainpanel.add(commit_button);
 		save_button.addClickHandler(new ClickHandler(){
 
 			@Override
@@ -52,6 +54,12 @@ public class ProjectView {
 			@Override
 			public void onClick(ClickEvent event) {
 				Window.open("/download?pid="+mProjectController.getProjectInfo().getId(), "", "");
+			}});
+		commit_button.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				mProjectController.commit();
 			}});
 	}
 	

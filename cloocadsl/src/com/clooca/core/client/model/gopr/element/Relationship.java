@@ -14,7 +14,7 @@ public class Relationship {
 	public MetaRelation meta;
 	public NodeObject src;
 	public NodeObject dest;
-	public List<Property> properties = new ArrayList<Property>();
+	public List<PropertyList> properties = new ArrayList<PropertyList>();
 	public VersionElement ve = new VersionElement();
 	public List<Point2D> points = new ArrayList<Point2D>();
 	

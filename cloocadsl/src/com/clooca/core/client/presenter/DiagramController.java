@@ -7,6 +7,7 @@ import com.clooca.core.client.listener.DiagramModificationListener;
 import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Property;
+import com.clooca.core.client.model.gopr.element.PropertyList;
 import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.metaelement.Binding;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
@@ -40,7 +41,7 @@ public class DiagramController {
 	}
 	
 	private enum DragMode {DRAG_RUBBERBAND, DRAG_MOVE, DRAG_NONE, DRAG_POINT, DRAG_RANGE};
-
+	
 	private DragMode dragMode = DragMode.DRAG_NONE;
 	
 	Point2D drag_move = new Point2D();
@@ -135,6 +136,7 @@ public class DiagramController {
 	 */
 	private boolean clicknode(double x, double y) {
     	for(NodeObject obj : this.diagram.nodes) {
+        	if(obj.ve.ver_type.matches("delete")) continue;
     		Rectangle2D bound = new Rectangle2D(obj.pos.x, obj.pos.y, obj.bound.width, obj.bound.height);
     		if(bound.contains(x, y)) {
     			selected = obj;
@@ -153,6 +155,7 @@ public class DiagramController {
 	}
 	
 	private boolean ckick_a_edge(Relationship rel, double x, double y) {
+    	if(rel.ve.ver_type.matches("delete")) return false;
 		List<Point2D> points = new ArrayList<Point2D>();
     	Point2D s = new Point2D((rel.src.pos.x + rel.src.bound.width / 2), (rel.src.pos.y + rel.src.bound.height / 2));
     	Point2D e = new Point2D((rel.dest.pos.x + rel.dest.bound.width / 2), (rel.dest.pos.y + rel.dest.bound.height / 2));
@@ -216,14 +219,16 @@ public class DiagramController {
 	}
 
 	private void deleteObject(NodeObject obj) {
+		obj.ve.ver_type = "delete";
 			List<Relationship> remove_rels = new ArrayList<Relationship>();
 			for(Relationship rel : this.diagram.relationships) {
 				if(rel.src.id == obj.id || rel.dest.id == obj.id) {
-					remove_rels.add(rel);
+					rel.ve.ver_type = "delete";
+//					remove_rels.add(rel);
 				}
 			}
-			this.diagram.relationships.removeAll(remove_rels);
-			this.diagram.nodes.remove(obj);
+//			this.diagram.relationships.removeAll(remove_rels);
+//			this.diagram.nodes.remove(obj);
 			this.fireOnDeleteObject(obj);
 	}
 	
@@ -237,6 +242,9 @@ public class DiagramController {
 		selected_obj.pos.y = y - 5;
 		selected_obj.bound.x = selected_obj.pos.x;
 		selected_obj.bound.y = selected_obj.pos.y;
+		if(!selected_obj.ve.ver_type.matches("add")) {
+			selected_obj.ve.ver_type = "update";
+		}
 	}
 	
 	public Object getSelected() {
@@ -263,9 +271,13 @@ public class DiagramController {
 		obj.id = IdGenerator.getNewLongId();
 		obj.meta = meta_obj;
 		obj.pos = pos;
+		obj.ve.ver_type = "add";
 		for(MetaProperty metaprop : obj.meta.properties) {
+			PropertyList proplist = new PropertyList();
+			proplist.meta = metaprop;
 			Property prop = new Property();
 			prop.meta = metaprop;
+			prop.ve.ver_type = "add";
 			/*
 			 * setting default value
 			 */
@@ -273,7 +285,8 @@ public class DiagramController {
 				String[] list = prop.meta.exfield.split("&");
 				prop.content = list[0];
 			}
-			obj.properties.add(prop);
+			proplist.add(prop);
+			obj.properties.add(proplist);
 		}
 		diagram.nodes.add(obj);
 		this.transition(obj, pos.x, pos.y);
@@ -291,9 +304,16 @@ public class DiagramController {
 			rel.meta = meta_rel;
 			rel.src = start;
 			rel.dest = end;
+			rel.ve.ver_type = "add";
 			for(MetaProperty metaprop : rel.meta.properties) {
+				/*
+				 * １つ目のプロパティをセットする
+				 */
+				PropertyList proplist = new PropertyList();
+				proplist.meta = metaprop;
 				Property prop = new Property();
 				prop.meta = metaprop;
+				prop.ve.ver_type = "add";
 				/*
 				 * setting default value
 				 */
@@ -301,7 +321,8 @@ public class DiagramController {
 					String[] list = prop.meta.exfield.split("&");
 					prop.content = list[0];
 				}
-				rel.properties.add(prop);
+				proplist.add(prop);
+				rel.properties.add(proplist);
 			}
 			diagram.relationships.add(rel);
 			this.fireOnAddRelationship(rel);

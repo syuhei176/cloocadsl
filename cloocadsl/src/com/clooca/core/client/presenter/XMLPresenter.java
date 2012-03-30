@@ -1,9 +1,12 @@
 package com.clooca.core.client.presenter;
 
+import java.util.HashMap;
+
 import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.Model;
 import com.clooca.core.client.model.gopr.element.NodeObject;
 import com.clooca.core.client.model.gopr.element.Property;
+import com.clooca.core.client.model.gopr.element.PropertyList;
 import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.element.VersionElement;
 import com.clooca.core.client.util.IdGenerator;
@@ -23,7 +26,7 @@ import com.google.gwt.xml.client.XMLParser;
 public class XMLPresenter {
 	
 	static String genModel(Model model) {
-		String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Model id=\""+model.id+"\">";
+		String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Model id=\""+model.id+"\" current_version=\""+model.current_version+"\">";
 		xml += genDiaram(model.root);
 		xml += "</Model>";
 		return xml;
@@ -45,8 +48,13 @@ public class XMLPresenter {
 	static String genObject(NodeObject obj) {
 		String xml = "<Object id=\""+obj.id+"\" meta_id=\""+obj.meta.id+"\" x=\""+obj.pos.x+"\" y=\""+obj.pos.y+"\">";
 		xml += genVersionElement(obj.ve);
-		for(Property p : obj.properties) {
-			xml += genProperty(p);
+		for(PropertyList pl : obj.properties) {
+			xml += genPropertyList(pl);
+			/*
+			for(Property p : pl) {
+				xml += genProperty(p);
+			}
+			*/
 		}
 		xml += "</Object>";
 		return xml;
@@ -58,10 +66,21 @@ public class XMLPresenter {
 		for(Point2D p : rel.points) {
 			xml += "<Point x=\""+p.x+"\" y=\""+p.y+"\"/>";
 		}
-		for(Property p : rel.properties) {
-			xml += genProperty(p);
+		for(PropertyList pl : rel.properties) {
+			xml += genPropertyList(pl);
 		}
 		xml += "</Relationship>";
+		return xml;
+	}
+	
+	static String genPropertyList(PropertyList pl) {
+//		if(prop.meta == null) return "";
+//		String xml = "<PropertyList meta_id=\""+pl.meta.id+"\">";
+		String xml = "";
+		for(Property p : pl) {
+			xml += genProperty(p);
+		}
+//		xml += "</PropertyList>";
 		return xml;
 	}
 	
@@ -75,6 +94,7 @@ public class XMLPresenter {
 	}
 	
 	static String genVersionElement(VersionElement ve) {
+		/* user_id=\""+ProjectController.userInfo.getId()+"\"*/
 		String xml = "<VersionElement version=\""+ve.version+"\" ver_type=\""+ve.ver_type+"\" />";
 		return xml;
 	}
@@ -90,13 +110,13 @@ public class XMLPresenter {
 			
 		}
 		if(doc != null) {
-		NodeList nl = doc.getChildNodes();
-		for(int i = 0;i < nl.getLength();i++) {
-			GWT.log("load" + nl.item(i).getNodeName());
-			if(nl.item(i).getNodeName().matches("Model")) {
-				model = parseModel(nl.item(i));
+			NodeList nl = doc.getChildNodes();
+			for(int i = 0;i < nl.getLength();i++) {
+				GWT.log("load" + nl.item(i).getNodeName());
+				if(nl.item(i).getNodeName().matches("Model")) {
+					model = parseModel(nl.item(i));
+				}
 			}
-		}
 		}
 		if(model == null) {
 			model = new Model();
@@ -110,6 +130,7 @@ public class XMLPresenter {
 	static Model parseModel(Node node) {
 		Model model = new Model();
 		model.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
+		model.current_version = Integer.decode(node.getAttributes().getNamedItem("current_version").getNodeValue());
 		NodeList nl = node.getChildNodes();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeName().matches("Diagram")) {
@@ -150,9 +171,18 @@ public class XMLPresenter {
 		double y = Double.valueOf(node.getAttributes().getNamedItem("y").getNodeValue());
 		DiagramController.transition(diagram, x, y);
 		NodeList nl = node.getChildNodes();
+		HashMap<Integer, PropertyList> meta_map = new HashMap<Integer, PropertyList>();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeName().matches("Property")) {
-				diagram.properties.add(parseProperty(nl.item(i)));
+				Property p = parseProperty(nl.item(i));
+				if(meta_map.containsKey(p.meta.id)) {
+					meta_map.get(p.meta.id).add(p);
+				}else{
+					PropertyList propertylist = new PropertyList();
+					propertylist.meta = p.meta;
+					diagram.properties.add(propertylist);
+					propertylist.add(p);
+				}
 			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
 				diagram.ve = parseVersionElement(nl.item(i));
 			}
@@ -169,9 +199,18 @@ public class XMLPresenter {
 		diagram.src = DiagramController.getObject(parent, Integer.decode(node.getAttributes().getNamedItem("src").getNodeValue()));
 		diagram.dest = DiagramController.getObject(parent, Integer.decode(node.getAttributes().getNamedItem("dest").getNodeValue()));
 		NodeList nl = node.getChildNodes();
+		HashMap<Integer, PropertyList> meta_map = new HashMap<Integer, PropertyList>();
 		for(int i = 0;i < nl.getLength();i++) {
 			if(nl.item(i).getNodeName().matches("Property")) {
-				diagram.properties.add(parseProperty(nl.item(i)));
+				Property p = parseProperty(nl.item(i));
+				if(meta_map.containsKey(p.meta.id)) {
+					meta_map.get(p.meta.id).add(p);
+				}else{
+					PropertyList propertylist = new PropertyList();
+					propertylist.meta = p.meta;
+					diagram.properties.add(propertylist);
+					propertylist.add(p);
+				}
 			}else if(nl.item(i).getNodeName().matches("Point")) {
 				diagram.points.add(parsePoint(nl.item(i)));
 			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
@@ -187,7 +226,22 @@ public class XMLPresenter {
 		p.y = Integer.decode(node.getAttributes().getNamedItem("y").getNodeValue());
 		return p;
 	}
-
+	
+	static PropertyList parsePropertyList(Node node) {
+		PropertyList propertylist = new PropertyList();
+		int meta_id = Integer.decode(node.getAttributes().getNamedItem("meta_id").getNodeValue());
+		propertylist.meta = WorkbenchController.getMetaProperty(meta_id);
+		NodeList nl = node.getChildNodes();
+		for(int i = 0;i < nl.getLength();i++) {
+			if(nl.item(i).getNodeName().matches("Property")) {
+				propertylist.add(parseProperty(nl.item(i)));
+			}else if(nl.item(i).getNodeName().matches("VersionElement")) {
+//				property.ve = parseVersionElement(nl.item(i));
+			}
+		}
+		return propertylist;
+	}
+	
 	static Property parseProperty(Node node) {
 		Property property = new Property();
 		property.id = Integer.decode(node.getAttributes().getNamedItem("id").getNodeValue());
@@ -208,7 +262,7 @@ public class XMLPresenter {
 	static VersionElement parseVersionElement(Node node) {
 		VersionElement ve = new VersionElement();
 		ve.version = Integer.decode(node.getAttributes().getNamedItem("version").getNodeValue());
-		ve.ver_type = node.getAttributes().getNamedItem("version").getNodeValue();
+		ve.ver_type = node.getAttributes().getNamedItem("ver_type").getNodeValue();
 		return ve;
 	}
 

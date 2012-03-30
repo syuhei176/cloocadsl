@@ -69,8 +69,8 @@ public class MetaDiagram {
 		HashMap<String, MetaObject> objectmap = new HashMap<String, MetaObject>();
 		for(NodeObject no : diagram.getNodeObjects()) {
 			if(no.meta.id == 0) {
-				String name = no.properties.get(0).getContent();
-				String graphic = no.properties.get(1).getContent();
+				String name = no.properties.get(0).get(0).getContent();
+				String graphic = no.properties.get(1).get(0).getContent();
 				List<MetaProperty> properties = new ArrayList<MetaProperty>();
 				if(objectmap.containsKey("Object"+name)) {
 					
@@ -93,7 +93,7 @@ public class MetaDiagram {
 					objectmap.get("Object" + r.dest.properties.get(0).getContent()));
 			bindings.add(binding);
 			*/
-			String name = r.properties.get(0).getContent();
+			String name = r.properties.get(0).get(0).getContent();
 			if(relationtmap.containsKey(name)) {
 //				relationtmap.get(name).add(binding);
 			}else{

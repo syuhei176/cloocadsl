@@ -216,12 +216,12 @@ public class MetaModelEditor extends AbstractEditor implements MouseDownHandler,
       	    popupPanel.hide();
         	  if(mMetaModelController.getSelected() instanceof MetaObject) {
         		  MetaObject mo = (MetaObject)mMetaModelController.getSelected();
-        		  SimpleDialogBox db = new SimpleDialogBox(new MetaObjectSettingPanel(mo), "MetaObject Setting");
+        		  SimpleDialogBox db = new SimpleDialogBox(new MetaObjectSettingPanel(mo, metamodel), "MetaObject Setting");
         		  db.show();
         		  db.center();
         	  }else if(mMetaModelController.getSelected() instanceof MetaRelation) {
         		  MetaRelation mo = (MetaRelation)mMetaModelController.getSelected();
-        		  SimpleDialogBox db = new SimpleDialogBox(new MetaRelationSettingPanel(mo), "MetaRelation Setting");
+        		  SimpleDialogBox db = new SimpleDialogBox(new MetaRelationSettingPanel(mo, metamodel), "MetaRelation Setting");
         		  db.show();
         		  db.center();
         	  }

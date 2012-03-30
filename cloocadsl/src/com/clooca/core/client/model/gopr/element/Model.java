@@ -5,6 +5,7 @@ import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 public class Model {
 	public int id;
 	public Diagram root;
+	public int current_version;
 	
 	public Model() {
 //		root = (Diagram) metamodel.getMetaDiagram().getInstance();

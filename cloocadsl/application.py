@@ -14,6 +14,7 @@ from core import MetaModelService
 from core import ProjectService
 from core import ModelCompiler
 from core import FileService
+from mvcs import CommitService
 
 app = Flask(__name__)
 
@@ -40,6 +41,12 @@ def dashboard(name=None):
 def editor():
     if 'user' in session:
         return render_template('editor.html', loggedin = True, username = session['user']['uname'])
+    return render_template('index.html', loggedin = False, username = '')
+
+@app.route('/editorjs')
+def editorjs():
+    if 'user' in session:
+        return render_template('editorjs.html', loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
 @app.route('/workbench')
@@ -93,7 +100,7 @@ def pload():
         return 'false'
 
 @app.route('/psave', methods=['POST'])
-def save():
+def psave():
     return json.dumps(ProjectService.saveProject(session['user'], request.form['pid'], request.form['xml']))
 
 @app.route('/mload', methods=['POST'])
@@ -143,6 +150,22 @@ def tree():
     if 'user' in session:
         result = FileService.GetFileTree(session['user'], request.form['id'])
         return json.dumps(result)
+
+@app.route('/create_rep', methods=['POST'])
+def create_rep():
+    if 'user' in session:
+        pass
+
+@app.route('/commit', methods=['POST'])
+def commit():
+    if 'user' in session:
+        CommitService.commit(request.form['pid'])
+        return ""
+
+@app.route('/update', methods=['POST'])
+def update():
+    project = MetaModelService.loadMetaModel(session['user'], request.form['id'])
+    return json.dumps(project)
 
 with app.test_request_context():
     print url_for('index')

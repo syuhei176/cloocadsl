@@ -1,6 +1,7 @@
 package com.clooca.core.client.presenter;
 
 import com.clooca.core.client.model.ProjectInfo;
+import com.clooca.core.client.model.UserInfo;
 import com.clooca.core.client.workbench.presenter.WorkbenchController;
 import com.clooca.core.client.workbench.presenter.WorkbenchController.LoadedListener;
 import com.clooca.webutil.client.Console;
@@ -17,6 +18,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 
 public class ProjectController {
 	
+	static UserInfo userInfo;
 	ProjectInfo projectInfo;
 	public ModelController mModelController;
 	public WorkbenchController mMetaModelController;
@@ -26,6 +28,15 @@ public class ProjectController {
 		mMetaModelController = new WorkbenchController(null);
 //		mMetaModelController.create_sample();
 	}
+	
+	static public void setUserInfo(UserInfo _userInfo) {
+		userInfo = _userInfo;
+	}
+	
+	static public UserInfo getUserInfo() {
+		return userInfo;
+	}
+	
 	public void load(int pid) {
 		loadRequest(pid);
 	}
@@ -47,7 +58,7 @@ public class ProjectController {
 	}
 	
 	public void commit() {
-		
+		commit(projectInfo.getId());
 	}
 	
 	public void update() {
@@ -133,6 +144,28 @@ public class ProjectController {
 		    			projectInfo.model = XMLPresenter.parse(projectInfo.getXml());
 		    			projectInfo.model.id = (int) projectInfo.getId();
 					}});
+    			db.hide();
+    		}});
+    }
+	
+	private void commit(long pid) {
+		final DialogBox db = new DialogBox();
+		db.setTitle("読み込み中");
+		db.setText("読み込み中");
+		db.show();
+		db.center();
+      	RequestGenerator.send("/commit", "pid="+pid, new RequestCallback(){
+
+    		@Override
+    		public void onError(Request request,
+    				Throwable exception) {
+    			db.hide();
+    		}
+
+    		@Override
+    		public void onResponseReceived(Request request,
+    				Response response) {
+    			Console.log(response.getText());
     			db.hide();
     		}});
     }

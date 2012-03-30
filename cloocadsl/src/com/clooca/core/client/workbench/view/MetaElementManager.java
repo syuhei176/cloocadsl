@@ -86,7 +86,7 @@ public class MetaElementManager extends Composite {
 
 	@UiHandler("editObj")
 	void onEditObjClick(ClickEvent event) {
-		  SimpleDialogBox db = new SimpleDialogBox(new MetaObjectSettingPanel(selectedMetaObject), "MetaObject Setting");
+		  SimpleDialogBox db = new SimpleDialogBox(new MetaObjectSettingPanel(selectedMetaObject, metamodel), "MetaObject Setting");
 		  db.show();
 		  db.center();
 	}
@@ -104,7 +104,7 @@ public class MetaElementManager extends Composite {
 	
 	@UiHandler("editRel")
 	void onEditRelClick(ClickEvent event) {
-		  SimpleDialogBox db = new SimpleDialogBox(new MetaRelationSettingPanel(selectedMetaRelation), "MetaObject Setting");
+		  SimpleDialogBox db = new SimpleDialogBox(new MetaRelationSettingPanel(selectedMetaRelation, metamodel), "MetaObject Setting");
 		  db.show();
 		  db.center();
 	}

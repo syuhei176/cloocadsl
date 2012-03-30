@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
-import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.util.*;
 
 public class NodeObject {
@@ -20,12 +19,14 @@ public class NodeObject {
 	
 //	IShape shape;
 //	Rectangle2D bound;
-	public List<Property> properties = new ArrayList<Property>();
+	public List<PropertyList> properties = new ArrayList<PropertyList>();
 	public VersionElement ve = new VersionElement();
+	public Diagram diagram;
 	
 	public NodeObject() {
 		bound = new Rectangle2D();
 	}
+	
 	/*
 	public NodeObject(MetaObject metaitem, IShape shape) {
 		super(metaitem);

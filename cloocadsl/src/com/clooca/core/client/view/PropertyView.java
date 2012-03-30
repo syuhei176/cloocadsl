@@ -1,9 +1,7 @@
 package com.clooca.core.client.view;
 
-import java.util.List;
-
-import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.element.NodeObject;
+import com.clooca.core.client.model.gopr.element.PropertyList;
 import com.clooca.core.client.model.gopr.element.Relationship;
 import com.clooca.core.client.model.gopr.element.Property;
 import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
@@ -13,6 +11,8 @@ import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
 import com.clooca.core.client.util.ArrowHead;
 import com.clooca.core.client.util.ElementSelectionListener;
 import com.clooca.core.client.util.IdGenerator;
+import com.clooca.webutil.client.ListPropertyPanel;
+import com.clooca.webutil.client.ListPropertyPanel.ListPropertyChangeHandler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -43,31 +43,6 @@ public class PropertyView {
 		
 	}
 	
-//	public static DiagramSelectionListener GetDiagramSelectionListener() {
-//		return dslistener;
-		
-//	}
-
-	/*
-	static DiagramSelectionListener dslistener = new DiagramSelectionListener(){
-		
-		@Override
-		public void OnSelectDiagram(Diagram g) {
-			Clear();
-		}
-
-		@Override
-		public void OnCloseDiagram(Graph g) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void OnCloseOther(String key) {
-			// TODO Auto-generated method stub
-			
-		}};
-	*/
 	static ElementSelectionListener eslistener = new ElementSelectionListener(){
 
 		@Override
@@ -111,10 +86,10 @@ public class PropertyView {
 					Property p = new Property();
 					p.id = IdGenerator.getNewLongId();
 					p.meta = mp;
-					obj.properties.add(p);
+					obj.properties.get(0).add(p);
 				}
 				
-				final Property property = obj.properties.get(tmp);
+				final Property property = obj.properties.get(0).get(tmp);
 				tb.addChangeHandler(new ChangeHandler(){
 
 					@Override
@@ -135,9 +110,9 @@ public class PropertyView {
 					Property p = new Property();
 					p.id = IdGenerator.getNewLongId();
 					p.meta = mp;
-					obj.properties.add(p);
+					obj.properties.get(0).add(p);
 				}
-				final com.clooca.core.client.model.gopr.element.Property property = obj.properties.get(tmp);
+				final com.clooca.core.client.model.gopr.element.Property property = obj.properties.get(0).get(tmp);
 				/*
 				 * 現在の値をセット
 				 */
@@ -161,9 +136,8 @@ public class PropertyView {
 	static private void ChangePropertyArea(NodeObject obj) {
 		mainpanel.clear();
 		int tmp = 0;
-		for(MetaProperty mp : obj.meta.getProperties()) {
+		for(final MetaProperty mp : obj.meta.getProperties()) {
 			if(mp.widget.matches(MetaProperty.INPUT_FIELD)) {
-				final TextBox tb = new TextBox();
 				/*
 				 * 急にメタモデルが変更され、プロパティが増えた場合。
 				 */
@@ -171,20 +145,49 @@ public class PropertyView {
 					Property p = new Property();
 					p.id = IdGenerator.getNewLongId();
 					p.meta = mp;
-					obj.properties.add(p);
+//					obj.properties.add(p);
 				}else{
 				}
+				if(mp.data_type.matches(MetaProperty.COLLECTION_STRING)) {
+					ListPropertyPanel lpp = new ListPropertyPanel();
+					final PropertyList propertylist = obj.properties.get(tmp);
+					for(Property p : propertylist) {
+						lpp.addListPropertyPanel(p.content);
+					}
+					lpp.addChangeHandler(new ListPropertyChangeHandler(){
 
-				final Property property = obj.properties.get(tmp);
-				
-				tb.setText(property.getContent());
-				tb.addChangeHandler(new ChangeHandler(){
+						@Override
+						public void onChange(int index, String text) {
+							propertylist.get(index).content = text;
+						}
 
-					@Override
-					public void onChange(ChangeEvent event) {
-						property.setContent(tb.getText());
-					}});
-				mainpanel.add(tb, mp.getName());
+						@Override
+						public void onAdded(int index, String text) {
+							Property p = new Property();
+							p.meta = mp;
+							p.content = text;
+							propertylist.add(p);
+						}
+
+						@Override
+						public void onDeleted(int index, String text) {
+							propertylist.remove(index);
+						}});
+					mainpanel.add(lpp.getPanel(), mp.getName());
+				}else{
+					final TextBox tb = new TextBox();
+
+					final PropertyList propertylist = obj.properties.get(tmp);
+					
+					tb.setText(propertylist.get(0).getContent());
+					tb.addChangeHandler(new ChangeHandler(){
+
+						@Override
+						public void onChange(ChangeEvent event) {
+							propertylist.get(0).setContent(tb.getText());
+						}});
+					mainpanel.add(tb, mp.getName());
+				}
 			}else if(mp.widget.matches(MetaProperty.FIXED_LIST)) {
 				final ListBox lb = new ListBox();
 				String[] list = mp.exfield.split("&");
@@ -198,15 +201,15 @@ public class PropertyView {
 					Property p = new Property();
 					p.id = IdGenerator.getNewLongId();
 					p.meta = mp;
-					obj.properties.add(p);
+//					obj.properties.add(p);
 				}else{
 				}
-				final com.clooca.core.client.model.gopr.element.Property property = obj.properties.get(tmp);
+				final PropertyList propertylist = obj.properties.get(tmp);
 				/*
 				 * 現在の値をセット
 				 */
 				for(int i=0;i < lb.getItemCount();i++) {
-					if(lb.getItemText(i).matches(property.getContent())) {
+					if(lb.getItemText(i).matches(propertylist.get(0).getContent())) {
 						lb.setSelectedIndex(i);
 					}
 				}
@@ -214,7 +217,7 @@ public class PropertyView {
 
 					@Override
 					public void onChange(ChangeEvent event) {
-						property.setContent(lb.getItemText(lb.getSelectedIndex()));
+						propertylist.get(0).setContent(lb.getItemText(lb.getSelectedIndex()));
 					}});
 				mainpanel.add(lb, mp.getName());
 			}

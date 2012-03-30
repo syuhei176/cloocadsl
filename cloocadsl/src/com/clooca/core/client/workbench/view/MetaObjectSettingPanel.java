@@ -1,6 +1,7 @@
 package com.clooca.core.client.workbench.view;
 
 import com.clooca.core.client.model.gopr.metaelement.GraphicInfo;
+import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.model.gopr.metaelement.MetaObject;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.util.IdGenerator;
@@ -33,14 +34,16 @@ public class MetaObjectSettingPanel extends Composite {
 	@UiField Button update;
 	@UiField ListBox graphicBox;
 	MetaObject metaObj;
+	MetaModel metamodel;
 	
 	interface MetaObjectSettingPanelUiBinder extends
 			UiBinder<Widget, MetaObjectSettingPanel> {
 	}
 
-	public MetaObjectSettingPanel(MetaObject metaObj) {
+	public MetaObjectSettingPanel(MetaObject metaObj, MetaModel metamodel) {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.metaObj = metaObj;
+		this.metamodel = metamodel;
 		name.setText(this.metaObj.name);
 		idbox.setValue(this.metaObj.id);
 		for(MetaProperty mp : metaObj.properties) {
@@ -63,7 +66,7 @@ public class MetaObjectSettingPanel extends Composite {
 		new_metaprop.id = IdGenerator.getNewLongId();
 		new_metaprop.data_type = MetaProperty.STRING;
 		new_metaprop.widget = MetaProperty.INPUT_FIELD;
-		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(new_metaprop), "setting");
+		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(new_metaprop, metamodel), "setting");
 		db.show();
 		db.center();
 		db.addCloseHandler(new CloseHandler(){
@@ -97,7 +100,7 @@ public class MetaObjectSettingPanel extends Composite {
 	}
 	@UiHandler("update")
 	void onUpdateClick(ClickEvent event) {
-		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(metaObj.properties.get(properties.getSelectedIndex())), "setting");
+		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(metaObj.properties.get(properties.getSelectedIndex()), metamodel), "setting");
 		db.show();
 		db.center();
 		db.addCloseHandler(new CloseHandler(){

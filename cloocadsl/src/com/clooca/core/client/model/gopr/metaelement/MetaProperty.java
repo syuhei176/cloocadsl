@@ -26,6 +26,9 @@ public class MetaProperty {
 	public static final String STRING = "string";
 	public static final String NUMBER = "number";
 	public static final String COLLECTION = "collection";
+	public static final String COLLECTION_STRING = "collection_String";
+	
+	public MetaObject collection_type;
 	
 	/**
 	 * Input Field: a normal one-line text entry field (the default).

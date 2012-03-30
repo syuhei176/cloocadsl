@@ -1,6 +1,7 @@
 package com.clooca.core.client.workbench.view;
 
 
+import com.clooca.core.client.model.gopr.metaelement.MetaModel;
 import com.clooca.core.client.model.gopr.metaelement.MetaProperty;
 import com.clooca.core.client.model.gopr.metaelement.MetaRelation;
 import com.clooca.core.client.util.ArrowHead;
@@ -34,12 +35,13 @@ public class MetaRelationSettingPanel extends Composite {
 	@UiField Button update;
 	@UiField ListBox arrowBox;
 	MetaRelation metaRel;
+	MetaModel metamodel;
 	
 	interface MetaRelationSettingPanelUiBinder extends
 			UiBinder<Widget, MetaRelationSettingPanel> {
 	}
 
-	public MetaRelationSettingPanel(MetaRelation metaRel) {
+	public MetaRelationSettingPanel(MetaRelation metaRel, MetaModel metamodel) {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.metaRel = metaRel;
 		idbox.setValue(this.metaRel.id);
@@ -61,7 +63,7 @@ public class MetaRelationSettingPanel extends Composite {
 	@UiHandler("add")
 	void onAddClick(ClickEvent event) {
 		final MetaProperty new_metaprop = new MetaProperty();
-		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(new_metaprop), "setting");
+		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(new_metaprop, metamodel), "setting");
 		db.show();
 		db.center();
 		db.addCloseHandler(new CloseHandler(){
@@ -97,7 +99,7 @@ public class MetaRelationSettingPanel extends Composite {
 	
 	@UiHandler("update")
 	void onUpdateClick(ClickEvent event) {
-		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(metaRel.properties.get(properties.getSelectedIndex())), "setting");
+		SimpleDialogBox db = new SimpleDialogBox(new PropertySettingPanel(metaRel.properties.get(properties.getSelectedIndex()), metamodel), "setting");
 		db.show();
 		db.center();
 		db.addCloseHandler(new CloseHandler(){

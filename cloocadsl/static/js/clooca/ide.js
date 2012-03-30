@@ -14,25 +14,7 @@ new Ext.Panel({
 html:'CENTER PANEL',
 width:'100px',
 region:'center',
-items : [
-{
-	id:'tabs',
-	xtype:'tabpanel',
-	activeTab: 'firstTab',
-	items: [
-{
-id:'firstTab',
-title: 'タブパネル1',
-html: '<h1>１つ目のタブパネル</h1>',
-closable: 'true',
-},{
-id:'secondTab',
-title: 'タブパネル2',
-html: '<h1>2つ目のタブパネル</h1>',
-closable: 'true',
-}]
-}
-]
+items : [create_tabs()]
 }),
 new Ext.Panel({
 margins:'0 3 0 3',
@@ -51,7 +33,18 @@ title:'EAST',
 html:'EAST PANEL',
 margins:'0 3 0 3',
 region:'east',
-collapsible:true
+collapsible:true,
+items: [
+        {
+        	id:'toolpanel',
+        	title: 'Tool',
+        	html: '',
+        	layout: {
+        	    type: 'vbox',
+        	    align: 'center'
+        	}
+        }
+        ]
 }),
 new Ext.Panel({
 title:'WEST',
@@ -64,21 +57,44 @@ split:true
 ]
 });
 
+function create_tabs() {
+	var tabs = Ext.create('Ext.tab.Panel', {
+	    items: [
+	        {
+	            title: 'Tab 1',
+	            html : 'A simple tab',
+	            closable: 'true'
+	        },
+	        {
+	            id   : 'remove-this-tab',
+	            title: 'Tab 2',
+	            html : 'Another one',
+		        closable: 'true'
+	        }
+	    ],
+	});
+	editor_tabs = tabs;
+	return tabs;
+}
+
 function create_menu() {
 	return {
         tbar: [{
             xtype:'splitbutton',
             text: 'Menu Button',
             iconCls: 'add16',
-            menu: [{text: 'Menu Button 1'}]
+            menu: [{text: 'Menu Button 1'}],
+        	handler : onItemClick
         },'-',{
             xtype:'splitbutton',
             text: 'Cut',
             iconCls: 'add16',
-            menu: [{text: 'Cut Menu Item'}]
+            menu: [{text: 'Cut Menu Item'}],
+        	handler : onItemClick
         },{
             text: 'Copy',
-            iconCls: 'add16'
+            iconCls: 'add16',
+            handler : onItemClick
         },{
             text: 'Paste',
             iconCls: 'add16',
@@ -88,6 +104,12 @@ function create_menu() {
             iconCls: 'add16'
         }]
     }
+}
+
+function onItemClick(item){
+	editor = new DiagramEditor('test', 'test'+new Date().getTime(), create_sample());
+	window.alert('item'+ item.txt);
+//    Ext.example.msg('Menu Click', 'You clicked the "{0}" menu item.', item.text);
 }
 /*
 var viewport = new Ext.Viewport({

@@ -1,0 +1,24 @@
+=============
+= フォルダ構成 =
+=============
+src			GWT用
+test		GWT用テストコード
+cgi-bin		いずれ消す
+ -core		サーバサイド コア
+ -mvcs		サーバサイド モデルリポジトリ
+ -out		出力結果
+ -template	DSML用テンプレート
+static		HTMLや画像等の静的ファイル
+templates	HTMLテンプレートファイル
+
+============
+=  実行方法  =
+============
+python application.pyで実行
+
+===========
+=  その他  =
+===========
+プロジェクトのXMLの仕様はXMLPresenter.java
+メタモデルのXMLの仕様はXMLMetaPresenter.java
+を参照

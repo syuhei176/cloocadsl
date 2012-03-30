@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.clooca.core.client.model.LoginInfo;
+import com.clooca.core.client.model.UserInfo;
 import com.clooca.core.client.model.gopr.element.Diagram;
 import com.clooca.core.client.model.gopr.metaelement.MetaDiagram;
 import com.clooca.core.client.model.gopr.metaelement.MetaModel;
@@ -112,6 +113,8 @@ public class cloocaEditor {
     			Console.log(response.getText());
     			JSONObject jsonobj = JSONParser.parseLenient(response.getText()).isObject();
     			if(jsonobj != null) {
+        			UserInfo userInfo = new UserInfo(jsonobj);
+        			ProjectController.setUserInfo(userInfo);
     				mProjectController.load(Integer.decode(History.getToken()));
     			}
     			db.hide();

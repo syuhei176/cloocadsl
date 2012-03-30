@@ -50,6 +50,7 @@ public class ModelController {
 	}
 	*/
 	
+	/*
 	private NodeObject addObject(Point2D pos) {
 		NodeObject obj = new NodeObject();
 		obj.id = IdGenerator.getNewLongId();
@@ -63,6 +64,7 @@ public class ModelController {
 		model.root.nodes.add(obj);
 		return obj;
 	}
+	*/
 	
 	public Model getModel() {
 		return model;
