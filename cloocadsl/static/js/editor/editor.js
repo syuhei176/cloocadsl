@@ -22,11 +22,14 @@ new Ext.Viewport({
 	    	   items: [create_menu()]
 	       }),
 	       new Ext.Panel({
+	    	   id:'propertypanel',
 	    	   html:'SOUTH PANEL',
 	    	   margins:'3 3 3 3',
 	    	   region:'south',
 	    	   collapsible:true,
-	    	   split:true
+	    	   split:true,
+	    	   items : [
+	    	            ]
 	    	   }),
 	       new Ext.Panel({
 	     	   id:'toolpanel',
@@ -67,17 +70,11 @@ function create_tabs() {
 	var tabs = Ext.create('Ext.tab.Panel', {
 	    items: [
 	        {
-	            title: 'Tab 1',
-	            html : 'A simple tab',
+	            title: 'Welcome',
+	            html : 'Welcome to the clooca DSL.',
 	            closable: 'true'
-	        },
-	        {
-	            id   : 'remove-this-tab',
-	            title: 'Tab 2',
-	            html : 'Another one',
-		        closable: 'true'
 	        }
-	    ],
+	        ],
 	});
 	editor_tabs = tabs;
 	return tabs;
@@ -98,14 +95,26 @@ function create_menu() {
             menu: [{text: 'Cut Menu Item'}],
         	handler : onItemClick
         },{
-            text: 'MetaOpen',
-            iconCls: 'add16',
-            handler : onItemClick
-        },{
-            text: 'Paste',
+            text: 'Workbench',
             iconCls: 'add16',
             menu: [
-                   {text: 'Paste Menu Item'}
+                   {
+                	   text: 'MetaSave',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
+                	   text: 'MetaObj',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
+                	   text: 'MetaRel',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
+                	   text: 'MetaJSON',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   }
                    ]
         },'-',{
             text: 'Format',
@@ -118,9 +127,16 @@ function onItemClick(item){
 	window.alert('item'+ item.text);
 	if(item.text == 'Save') {
 		saveModel(10);
-	}else if(item.text == 'MetaOpen') {
+	}else if(item.text == 'MetaSave') {
+		saveMetaModel(6);
+	}else if(item.text == 'MetaObj') {
 		MetaModelEditor(g_metamodel.metadiagram.metaobjects);
+	}else if(item.text == 'MetaRel') {
+		MetaRelationEditor(g_metamodel.metadiagram.metarelations);
+	}else if(item.text == 'MetaJSON') {
+		MetaJSONEditor(g_metamodel.metadiagram);
 	}else{
+		
 	}
 //    Ext.example.msg('Menu Click', 'You clicked the "{0}" menu item.', item.text);
 }
@@ -159,7 +175,7 @@ function createModelExplorer() {
 	        expanded: true,
 	        children: [
 	            { text: "root", expanded: true, children: [
-	                { id: "1", text: "book report", leaf: true },
+	                { id: "1", text: "diagram", leaf: true },
 	                { id: "2", text: "alegrbra", leaf: true}
 	            ] }
 	        ]
@@ -175,7 +191,7 @@ function createModelExplorer() {
 	modelExplorer.on('itemclick',function(view, record, item, index, event) {
     	console.log('click '+record.data.id);
     	if(record.data.id == 1) {
-    		editor = new DiagramEditor('test', 'test'+new Date().getTime(), g_model.root);
+    		editor = new DiagramEditor(record.data.text, 'test'+new Date().getTime(), g_model.root);
     	}
     });
 	Ext.getCmp('modelexplorer').add(modelExplorer);

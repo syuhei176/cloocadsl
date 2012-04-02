@@ -9,21 +9,33 @@ function Diagram() {
 	this.relationships = new Array();
 }
 
-function Object() {
-	this.meta_id = 1;
-	this.id = 1;
-	this.x = 50;
-	this.y = 50;
-	this.width = 50;
-	this.height = 50;
+function Object(meta_id) {
+	this.meta_id = meta_id;
+	this.id = object_IdGenerator.getNewId();
+	this.bound = new Rectangle2D(50, 50, 50, 50);
+	this.properties = new Array();
+	this.ve = new VersionElement();
 }
 
-function Relationship() {
-	this.meta_id = 1;
-	this.id = 1;
+function Relationship(meta_id) {
+	this.meta_id = meta_id;
+	this.id = relationship_IdGenerator.getNewId();
 	this.src = null;
 	this.dest = null;
 	this.points = new Array();
+	this.properties = new Array();
+	this.ve = new VersionElement();
+}
+
+function PropertyList() {
+	this.meta_id = null;
+	this.children = new Array();
+}
+
+function Property() {
+//	this.values = new Array();
+	this.value = '';
+	this.ve = new VersionElement();
 }
 
 function VersionElement() {
@@ -31,36 +43,25 @@ function VersionElement() {
 	this.ver_type = "none";
 }
 
-function MetaModel() {
-	this.version = 0;
-	this.ver_type = "none";
+
+function ModelController() {}
+ModelController.getObject = function(diagram, id) {
+	for(var i=0;i < diagram.objects.length;i++) {
+		if(diagram.objects[i].id == id) {
+			return diagram.objects[i];
+		}
+	}
 }
 
-function MetaDiagram() {
-	this.version = 0;
-	this.ver_type = "none";
+function MetaModelController(){}
+MetaModelController.getMetaObject = function(metadiagram, id) {
+	for(var i=0;i < metadiagram.metaobjects.length;i++) {
+		if(metadiagram.metaobjects[i].id == id) {
+			return metadiagram.metaobjects[i];
+		}
+	}
 }
 
-
-function MetaObject() {
-	this.version = 0;
-	this.ver_type = "none";
-}
-
-function MetaRelationship() {
-	this.version = 0;
-	this.ver_type = "none";
-}
-
-function Binding() {
-	this.src = null;
-	this.dest = null;
-}
-
-
-function getObject(id) {
-	
-}
 
 function create_sample() {
 	d = new Diagram();
@@ -82,12 +83,23 @@ function create_sample() {
 	return d;
 }
 
-var idcount = 0;
-
-function getNewId() {
-	idcount++;
-	return idcount;
+function IdGenerator() {
+	this.idcount = 0;
 }
+
+IdGenerator.prototype.setOffset = function(offset) {
+	if(this.idcount < offset) this.idcount = offset;	
+}
+
+IdGenerator.prototype.getNewId = function() {
+	this.idcount++;
+	return this.idcount;
+}
+
+var object_IdGenerator = new IdGenerator();
+var relationship_IdGenerator = new IdGenerator();
+var metaobject_IdGenerator = new IdGenerator();
+var metarelation_IdGenerator = new IdGenerator();
 
 /**
  * Meta Model
@@ -106,6 +118,7 @@ function MetaDiagram(id, name) {
 }
 
 function MetaObject(id, name) {
+	this.classname = 'MetaObject';
 	this.id = id;
 	this.name = name;
 	this.properties = new Array();
@@ -114,6 +127,7 @@ function MetaObject(id, name) {
 }
 
 function MetaRelation(id, name) {
+	this.classname = 'MetaRelation';
 	this.id = id;
 	this.name = name;
 	this.properties = new Array();

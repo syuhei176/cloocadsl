@@ -36,22 +36,57 @@ function DiagramEditor(name, key, diagram) {
 			  height: 400,
 			  fromCenter: false});
 		for(var i=0;i < self.diagram.objects.length;i++) {
+			var obj = self.diagram.objects[i];
+			var col = '#000';
+			if(self.diagram.objects[i] == self.selected) {
+				col = '#00f';
+			}
 			self.canvas.drawRect({
-				  strokeStyle: "#000",
+				  strokeStyle: col,
 				  strokeWidth: 2,
-				  x: self.diagram.objects[i].x, y: self.diagram.objects[i].y,
-				  width: 50,
-				  height: 50,
+				  x: self.diagram.objects[i].bound.x, y: self.diagram.objects[i].bound.y,
+				  width: self.diagram.objects[i].bound.width,
+				  height: self.diagram.objects[i].bound.height,
 				  fromCenter: false
 			});
+//			var meta_obj = MetaModelController.getMetaObject(g_metamodel.metadiagram, obj.meta_id)
+			for(var j=0;j < obj.properties.length;j++) {
+			/*
+			for(var j=0;j < meta_obj.properties.length;j++) {
+				var props = new Array();
+				for(var k=0;k < obj.properties.length;k++) {
+					if(obj.properties[k].meta_id == meta_obj.properties[j].meta_id) {
+						props.push(obj.properties[k]);
+					}
+				}*/
+				var prop = obj.properties[j];
+				for(var k=0;k < prop.children.length;k++) {
+					$("canvas").drawText({
+						  fillStyle: "#729fcf",
+						  strokeStyle: "#000",
+						  strokeWidth: 5,
+						  x: obj.bound.x, y: obj.bound.y,
+						  text: prop.children[k].value,
+						  align: "center",
+						  baseline: "middle",
+						  font: "normal 14pt Verdana, sans-serif"
+						});
+				}
+			}
 		}
 		for(var i=0;i < self.diagram.relationships.length;i++) {
-			var startx = self.diagram.relationships[i].src.x;
-			var starty = self.diagram.relationships[i].src.y;
-			var endx = self.diagram.relationships[i].dest.x;
-			var endy = self.diagram.relationships[i].dest.y;
+			var col = '#000';
+			if(self.diagram.relationships[i] == self.selected) {
+				col = '#00f';
+			}
+			var src = ModelController.getObject(self.diagram, self.diagram.relationships[i].src);
+			var dest = ModelController.getObject(self.diagram, self.diagram.relationships[i].dest);
+			var startx = src.bound.x;
+			var starty = src.bound.y;
+			var endx = dest.bound.x;
+			var endy = dest.bound.y;
 			self.canvas.drawLine({
-				  strokeStyle: "#000",
+				  strokeStyle: col,
 				  strokeWidth: 2,
 				  strokeCap: "round",
 				  strokeJoin: "miter",
@@ -99,8 +134,8 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
-			this.selected.x = x - 10;
-			this.selected.y = y - 10;
+			this.selected.bound.x = x - 10;
+			this.selected.bound.y = y - 10;
 		}
 	}
 }
@@ -109,9 +144,16 @@ DiagramEditor.prototype.ActionDown = function(x, y) {
 	if(this.tool == null) {
 		if(this.clicknode(x, y)) {
 			this.dragMode = DiagramEditor.DRAG_MOVE;
+		}else if(this.clickedge(x, y)) {
+			
+		}else{
+			this.dragMode = DiagramEditor.DRAG_NONE;
+			this.selected = null;
 		}
-	}else{
+	}else if(this.tool.classname == 'MetaObject'){
 		this.addObject(x, y);
+	}else if(this.tool.classname == 'MetaRelation'){
+		this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
 	}
 	this.drag_start.x = x;
 	this.drag_start.y = y;
@@ -120,10 +162,21 @@ DiagramEditor.prototype.ActionDown = function(x, y) {
 DiagramEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.x = x;
 	this.drag_end.y = y;
+	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+		this.addRelationship(this.drag_start, this.drag_end);
+	}
 	this.dragMode = DiagramEditor.DRAG_NONE;
 }
 
 DiagramEditor.prototype.clicknode = function(x, y) {
+	var obj = this.findNode(new Point2D(x, y));
+	if(obj != null) {
+		if(obj.ve.ver_type == "delete") return false;
+		this.selected = obj;
+		this.fireSelectElement(this.selected)
+		return true;
+	}
+	/*
 	for(var i=0;i < this.diagram.objects.length;i++) {
 		if(this.diagram.objects[i].x < x &&  x < this.diagram.objects[i].x + 50) {
 			if(this.diagram.objects[i].y < y && y < this.diagram.objects[i].y + 50) {
@@ -132,8 +185,38 @@ DiagramEditor.prototype.clicknode = function(x, y) {
 			}
 		}
 	}
+	*/
 	return false;
 }
+
+DiagramEditor.prototype.clickedge = function(x, y) {
+	for(var i=0;i < this.diagram.relationships.length;i++) {
+		if(this.click_a_edge(this.diagram.relationships[i], x, y)) return true;
+	}
+	return false;
+}
+
+DiagramEditor.prototype.click_a_edge = function(rel, x, y) {
+	if(rel.ve.ver_type == "delete") return false;
+	var points = new Array();
+	var src = ModelController.getObject(this.diagram, rel.src);
+	var dest = ModelController.getObject(this.diagram, rel.dest);
+	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
+	var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
+	points.push(s);
+	points = points.concat(rel.points);
+	points.push(e);
+	for(var i=0;i < points.length - 1;i++) {
+		if((new Line2D(points[i], points[i+1])).ptSegDist(x, y) < 14) {
+			this.selected = rel;
+			this.fireSelectElement(this.selected);
+			return true;
+		}
+	}
+	return false;
+}
+
+
 
 DiagramEditor.prototype.createButton = function() {
 	var self = this;
@@ -145,6 +228,8 @@ DiagramEditor.prototype.createButton = function() {
 		var b = Ext.create('Ext.Button', {
 		    text     : 'Button',
 /*		    renderTo : Ext.get('toolpanel'),*/
+		    enableToggle: true,
+		    toggleGroup: 'tools',
 		    listeners: {
 		        click: function() {
 		    		var tool = tools[this.index];
@@ -157,12 +242,13 @@ DiagramEditor.prototype.createButton = function() {
 		            self.tool = tool;
 		        },
 		        mouseover: function() {
-		        	/*
-		            if (!this.mousedOver) {
-		                this.mousedOver = true;
-		                alert('You moused over a button!\n\nI wont do this again.');
-		            }
-		            */
+		    		var tool = tools[this.index];
+		            // this == the button, as we are in the local scope
+		    		if(tool == null) {
+			            this.setText('Select');
+		    		}else{
+			            this.setText('Obj '+tool.name);
+		    		}
 		        }
 		    }
 		});
@@ -177,16 +263,95 @@ DiagramEditor.prototype.createButton = function() {
 }
 
 DiagramEditor.prototype.addObject = function(x,y) {
-	obj = new Object();
-	obj.id = getNewId();
-	obj.x = x;
-	obj.y = y;
+	obj = new Object(this.tool.id);
+	obj.bound.x = x;
+	obj.bound.y = y;
 	this.diagram.objects.push(obj);
 }
 
+DiagramEditor.prototype.addRelationship = function(s,e) {
+	var start = this.findNode(s);
+	var end = this.findNode(e);
+	if(start != null && end != null) {
+//		if(!checkBinding(meta_rel, start, end)) return null;
+		var rel = new Relationship(this.tool.id);
+//		rel.id = IdGenerator.getNewLongId();
+//		rel.meta = meta_rel;
+		rel.src = start.id;
+		rel.dest = end.id;
+		/*
+		rel.ve.ver_type = "add";
+		for(MetaProperty metaprop : rel.meta.properties) {
+			PropertyList proplist = new PropertyList();
+			proplist.meta = metaprop;
+			Property prop = new Property();
+			prop.meta = metaprop;
+			prop.ve.ver_type = "add";
+			if(prop.meta.widget.matches(MetaProperty.FIXED_LIST)) {
+				String[] list = prop.meta.exfield.split("&");
+				prop.content = list[0];
+			}
+			proplist.add(prop);
+			rel.properties.add(proplist);
+		}
+		*/
+		this.diagram.relationships.push(rel);
+//		this.fireOnAddRelationship(rel);
+		return rel;
+	}
+	return null;
+}
+
+DiagramEditor.prototype.findNode = function(p) {
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj = this.diagram.objects[i];
+		console.log("x="+p.x+", y="+p.y+", obj.x="+obj.bound.x+", obj.y="+obj.bound.y);
+		if(Rectangle2D.contains(obj.bound, p)) {
+			console.log("click");
+			return obj;
+		}
+	}
+	return null;
+}
+
 function addRelationship(src, dest) {
-	rel = new Relationshi();
-	rel.id = getNewId();
+	rel = new Relationship(this.tool.id);
 	rel.src = src;
 	rel.dest = dest;
+}
+
+DiagramEditor.prototype.fireSelectElement = function(selected) {
+	Ext.getCmp('propertypanel').removeAll();
+	var meta_obj = MetaModelController.getMetaObject(g_metamodel.metadiagram, selected.meta_id)
+	var property_tabs = Ext.create('Ext.tab.Panel', {
+	    items: []
+	});
+	for(var i=0;i < meta_obj.properties.length;i++) {
+			if(selected.properties[i] == undefined) {
+					selected.properties[i] = new PropertyList();
+					selected.properties[i].children[0] = new Property();
+			}
+		var prop_tab = {
+	            title: meta_obj.properties[i].name,
+	            html : 'Welcome to the clooca DSL.',
+	            items: [
+	                  {
+		  	        	   xtype: 'textarea',
+	  	        		   value: selected.properties[i].children[0].value,
+	  	        		   index: i,
+	  	        		   listeners: {
+	  	        			   change: {
+	  	        				   fn: function(field, newValue, oldValue, opt) {
+	 	        						console.log('change'+this.index);
+	  	        					 selected.properties[this.index].children[0].value = newValue;
+	  	        				   }
+	  	        			   }
+	  	        		   }
+	                  }
+	                  ]
+			};
+		prop_tab.index = i;
+		property_tabs.add(prop_tab);
+	}
+	Ext.getCmp('propertypanel').add(property_tabs);
 }
