@@ -8,6 +8,10 @@ function DiagramEditor(name, key, diagram) {
 	this.name = name;
 	this.key = key;
 	this.diagram = diagram;
+	this.tool = null;
+	this.drag_start = new Point2D();
+	this.drag_move = new Point2D();
+	this.drag_end = new Point2D();
 	this.selected = null;
 	this.dragMode = 0;
 	var self = this;
@@ -75,14 +79,25 @@ function DiagramEditor(name, key, diagram) {
 		var rect = e.target.getBoundingClientRect();
 		mouseX = e.clientX - rect.left;
 		mouseY = e.clientY - rect.top;
+		self.ActionUp(mouseX, mouseY)
 		draw();
-		self.dragMode = 0;
 	});
 	draw();
 }
 
+/**
+ * static変数
+ */
+DiagramEditor.DRAG_NONE = 0;
+DiagramEditor.DRAG_RUBBERBAND = 1;
+DiagramEditor.DRAG_MOVE = 2;
+DiagramEditor.DRAG_POINT = 3;
+DiagramEditor.DRAG_RANGE = 4;
+
 DiagramEditor.prototype.ActionMove = function(x, y) {
-	if(this.dragMode == 1) {
+	this.drag_move.x = x;
+	this.drag_move.y = y;
+	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
 			this.selected.x = x - 10;
 			this.selected.y = y - 10;
@@ -91,9 +106,21 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
-	if(this.clicknode(x, y)) {
-		this.dragMode = 1;
+	if(this.tool == null) {
+		if(this.clicknode(x, y)) {
+			this.dragMode = DiagramEditor.DRAG_MOVE;
+		}
+	}else{
+		this.addObject(x, y);
 	}
+	this.drag_start.x = x;
+	this.drag_start.y = y;
+}
+
+DiagramEditor.prototype.ActionUp = function(x, y) {
+	this.drag_end.x = x;
+	this.drag_end.y = y;
+	this.dragMode = DiagramEditor.DRAG_NONE;
 }
 
 DiagramEditor.prototype.clicknode = function(x, y) {
@@ -109,33 +136,52 @@ DiagramEditor.prototype.clicknode = function(x, y) {
 }
 
 DiagramEditor.prototype.createButton = function() {
-	for(var i=0;i < 2;i++) {
-		b = Ext.create('Ext.Button', {
+	var self = this;
+	var toolpanel = Ext.getCmp('toolpanel');
+	toolpanel.removeAll();
+	var tools = g_metamodel.metadiagram.metaobjects.concat(g_metamodel.metadiagram.metarelations);
+	tools.unshift(null);
+	for(var i=0;i < tools.length;i++) {
+		var b = Ext.create('Ext.Button', {
 		    text     : 'Button',
 /*		    renderTo : Ext.get('toolpanel'),*/
 		    listeners: {
 		        click: function() {
+		    		var tool = tools[this.index];
 		            // this == the button, as we are in the local scope
-		            this.setText('I was clicked!');
+		    		if(tool == null) {
+			            this.setText('Select');
+		    		}else{
+			            this.setText('Obj '+tool.name);
+		    		}
+		            self.tool = tool;
 		        },
 		        mouseover: function() {
-		            // set a new config which says we moused over, if not already set
+		        	/*
 		            if (!this.mousedOver) {
 		                this.mousedOver = true;
 		                alert('You moused over a button!\n\nI wont do this again.');
 		            }
+		            */
 		        }
 		    }
 		});
-		Ext.getCmp('toolpanel').items.add(b);
+		b.index = i;
+
+		toolpanel.add(b);
+//		b.render('toolpanel');
 	}
+	console.log("create button");
+//	toolpanel.render('toolpanel');
+//	Ext.getCmp('toolpanel').add(toolpanel);
 }
 
-function addObject(x, y) {
+DiagramEditor.prototype.addObject = function(x,y) {
 	obj = new Object();
 	obj.id = getNewId();
 	obj.x = x;
 	obj.y = y;
+	this.diagram.objects.push(obj);
 }
 
 function addRelationship(src, dest) {

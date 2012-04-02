@@ -8,53 +8,59 @@ Ext.require([
 
 Ext.onReady(function(){
 new Ext.Viewport({
-layout:'border',
-items:[
-new Ext.Panel({
-html:'CENTER PANEL',
-width:'100px',
-region:'center',
-items : [create_tabs()]
-}),
-new Ext.Panel({
-margins:'0 3 0 3',
-region:'north',
-items: [create_menu()]
-}),
-new Ext.Panel({
-html:'SOUTH PANEL',
-margins:'3 3 3 3',
-region:'south',
-collapsible:true,
-split:true
-}),
-new Ext.Panel({
-title:'EAST',
-html:'EAST PANEL',
-margins:'0 3 0 3',
-region:'east',
-collapsible:true,
-items: [
-        {
-        	id:'toolpanel',
-        	title: 'Tool',
-        	html: '',
-        	layout: {
-        	    type: 'vbox',
-        	    align: 'center'
-        	}
-        }
-        ]
-}),
-new Ext.Panel({
-title:'WEST',
-html:'WEST PANEL',
-margins:'0 0 0 3',
-region:'west',
-collapsible:true,
-split:true
-}),
-]
+	layout:'border',
+	items:[
+	       new Ext.Panel({
+	    	   html:'CENTER PANEL',
+	    	   width:'100px',
+	    	   region:'center',
+	    	   items : [create_tabs()]
+	       }),
+	       new Ext.Panel({
+	    	   margins:'0 3 0 3',
+	    	   region:'north',
+	    	   items: [create_menu()]
+	       }),
+	       new Ext.Panel({
+	    	   html:'SOUTH PANEL',
+	    	   margins:'3 3 3 3',
+	    	   region:'south',
+	    	   collapsible:true,
+	    	   split:true
+	    	   }),
+	       new Ext.Panel({
+	     	   id:'toolpanel',
+	    	   title:'EAST',
+	    	   html:'EAST PANEL',
+	    	   margins:'0 3 0 3',
+	    	   region:'east',
+	    	   collapsible:true,
+	       layout: {
+	    	    type: 'vbox',
+	    	    align : 'stretch',
+	    	    pack  : 'start'
+	    	},
+	    	items: [
+	    	    {html:'panel 1', flex:1},
+	    	    {html:'panel 3', flex:2}
+	    	]
+	       }),
+	       new Ext.Panel({
+	    	   id:'modelexplorer',
+	    	   title:'WEST',
+	    	   html:'WEST PANEL',
+	    	   margins:'0 0 0 3',
+	    	   region:'west',
+	    	   collapsible:true,
+	    	   split:true,
+	    	   items: []
+	       }),
+	       ]
+});
+
+loadModel(10);
+loadMetaModel(6);
+
 });
 
 function create_tabs() {
@@ -87,18 +93,20 @@ function create_menu() {
         	handler : onItemClick
         },'-',{
             xtype:'splitbutton',
-            text: 'Cut',
+            text: 'Save',
             iconCls: 'add16',
             menu: [{text: 'Cut Menu Item'}],
         	handler : onItemClick
         },{
-            text: 'Copy',
+            text: 'MetaOpen',
             iconCls: 'add16',
             handler : onItemClick
         },{
             text: 'Paste',
             iconCls: 'add16',
-            menu: [{text: 'Paste Menu Item'}]
+            menu: [
+                   {text: 'Paste Menu Item'}
+                   ]
         },'-',{
             text: 'Format',
             iconCls: 'add16'
@@ -107,8 +115,13 @@ function create_menu() {
 }
 
 function onItemClick(item){
-	editor = new DiagramEditor('test', 'test'+new Date().getTime(), create_sample());
-	window.alert('item'+ item.txt);
+	window.alert('item'+ item.text);
+	if(item.text == 'Save') {
+		saveModel(10);
+	}else if(item.text == 'MetaOpen') {
+		MetaModelEditor(g_metamodel.metadiagram.metaobjects);
+	}else{
+	}
 //    Ext.example.msg('Menu Click', 'You clicked the "{0}" menu item.', item.text);
 }
 /*
@@ -138,7 +151,37 @@ html: '<h1>2つ目のタブパネル</h1>'
 }
 });
 */
-});
+
+
+function createModelExplorer() {
+	var store = Ext.create('Ext.data.TreeStore', {
+	    root: {
+	        expanded: true,
+	        children: [
+	            { text: "root", expanded: true, children: [
+	                { id: "1", text: "book report", leaf: true },
+	                { id: "2", text: "alegrbra", leaf: true}
+	            ] }
+	        ]
+	    }
+	});
+	var modelExplorer = Ext.create('Ext.tree.Panel', {
+	    title: 'Model Explorer',
+	    width: 200,
+	    height: 150,
+	    store: store,
+	    rootVisible: false
+	});
+	modelExplorer.on('itemclick',function(view, record, item, index, event) {
+    	console.log('click '+record.data.id);
+    	if(record.data.id == 1) {
+    		editor = new DiagramEditor('test', 'test'+new Date().getTime(), g_model.root);
+    	}
+    });
+	Ext.getCmp('modelexplorer').add(modelExplorer);
+	console.log('a');
+	return modelExplorer;
+}
 
 /*
 Ext.Loader.setConfig({enabled: true});
