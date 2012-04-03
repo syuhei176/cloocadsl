@@ -1,6 +1,7 @@
 function Model() {
 	this.id = 1;
 	this.root = null;
+	this.current_version = 1;
 }
 
 function Diagram() {
@@ -33,6 +34,7 @@ function PropertyList() {
 }
 
 function Property() {
+	this.id = property_IdGenerator.getNewId();
 //	this.values = new Array();
 	this.value = '';
 	this.ve = new VersionElement();
@@ -40,7 +42,7 @@ function Property() {
 
 function VersionElement() {
 	this.version = 0;
-	this.ver_type = "none";
+	this.ver_type = "add";
 }
 
 
@@ -58,6 +60,13 @@ MetaModelController.getMetaObject = function(metadiagram, id) {
 	for(var i=0;i < metadiagram.metaobjects.length;i++) {
 		if(metadiagram.metaobjects[i].id == id) {
 			return metadiagram.metaobjects[i];
+		}
+	}
+}
+MetaModelController.getMetaRelation = function(metadiagram, id) {
+	for(var i=0;i < metadiagram.metarelations.length;i++) {
+		if(metadiagram.metarelations[i].id == id) {
+			return metadiagram.metarelations[i];
 		}
 	}
 }
@@ -98,6 +107,7 @@ IdGenerator.prototype.getNewId = function() {
 
 var object_IdGenerator = new IdGenerator();
 var relationship_IdGenerator = new IdGenerator();
+var property_IdGenerator = new IdGenerator();
 var metaobject_IdGenerator = new IdGenerator();
 var metarelation_IdGenerator = new IdGenerator();
 

@@ -6,72 +6,71 @@ Ext.require([
     'Ext.layout.container.Table'
 ]);
 
-Ext.onReady(function(){
-new Ext.Viewport({
-	layout:'border',
-	items:[
-	       new Ext.Panel({
-	    	   html:'CENTER PANEL',
-	    	   width:'100px',
-	    	   region:'center',
-	    	   items : [create_tabs()]
-	       }),
-	       new Ext.Panel({
-	    	   margins:'0 3 0 3',
-	    	   region:'north',
-	    	   items: [create_menu()]
-	       }),
-	       new Ext.Panel({
-	    	   id:'propertypanel',
-	    	   html:'SOUTH PANEL',
-	    	   margins:'3 3 3 3',
-	    	   region:'south',
-	    	   collapsible:true,
-	    	   split:true,
-	    	   items : [
-	    	            ]
-	    	   }),
-	       new Ext.Panel({
-	     	   id:'toolpanel',
-	    	   title:'EAST',
-	    	   html:'EAST PANEL',
-	    	   margins:'0 3 0 3',
-	    	   region:'east',
-	    	   collapsible:true,
-	       layout: {
-	    	    type: 'vbox',
-	    	    align : 'stretch',
-	    	    pack  : 'start'
-	    	},
-	    	items: [
-	    	    {html:'panel 1', flex:1},
-	    	    {html:'panel 3', flex:2}
-	    	]
-	       }),
-	       new Ext.Panel({
-	    	   id:'modelexplorer',
-	    	   title:'WEST',
-	    	   html:'WEST PANEL',
-	    	   margins:'0 0 0 3',
-	    	   region:'west',
-	    	   collapsible:true,
-	    	   split:true,
-	    	   items: []
-	       }),
-	       ]
-});
+function init_clooca(pid) {
+	new Ext.Viewport({
+		layout:'border',
+		items:[
+		       new Ext.Panel({
+		    	   html:'',
+		    	   width:'100px',
+		    	   region:'center',
+		    	   items : [create_tabs()]
+		       }),
+		       new Ext.Panel({
+		    	   margins:'0 3 0 3',
+		    	   region:'north',
+		    	   items: [create_menu()]
+		       }),
+		       new Ext.Panel({
+		    	   id:'propertypanel',
+		    	   html:'',
+		    	   margins:'3 3 3 3',
+		    	   region:'south',
+		    	   collapsible:true,
+		    	   split:true,
+		    	   items : [
+		    	            ]
+		    	   }),
+		       new Ext.Panel({
+		     	   id:'toolpanel',
+		    	   title:'EAST',
+		    	   html:'EAST PANEL',
+		    	   margins:'0 3 0 3',
+		    	   region:'east',
+		    	   collapsible:true,
+		       layout: {
+		    	    type: 'vbox',
+		    	    align : 'stretch',
+		    	    pack  : 'start'
+		    	},
+		    	items: [
+		    	    {html:'panel 1', flex:1},
+		    	    {html:'panel 3', flex:2}
+		    	]
+		       }),
+		       new Ext.Panel({
+		    	   id:'modelexplorer',
+		    	   title:'WEST',
+		    	   html:'WEST PANEL',
+		    	   margins:'0 0 0 3',
+		    	   region:'west',
+		    	   collapsible:true,
+		    	   split:true,
+		    	   items: []
+		       }),
+		       ]
+	});
 
-loadModel(10);
-loadMetaModel(6);
-
-});
+	loadModel(pid);
+//	loadMetaModel(6);
+}
 
 function create_tabs() {
 	var tabs = Ext.create('Ext.tab.Panel', {
 	    items: [
 	        {
 	            title: 'Welcome',
-	            html : 'Welcome to the clooca DSL.',
+	            html : 'Welcome to the clooca DSL.<br><br>test',
 	            closable: 'true'
 	        }
 	        ],
@@ -84,9 +83,15 @@ function create_menu() {
 	return {
         tbar: [{
             xtype:'splitbutton',
-            text: 'Menu Button',
+            text: 'Edit',
             iconCls: 'add16',
-            menu: [{text: 'Menu Button 1'}],
+            menu: [
+                   {
+                	   text: 'delete',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   }
+                   ],
         	handler : onItemClick
         },'-',{
             xtype:'splitbutton',
@@ -94,6 +99,16 @@ function create_menu() {
             iconCls: 'add16',
             menu: [{text: 'Cut Menu Item'}],
         	handler : onItemClick
+        },{
+            text: 'Project',
+            iconCls: 'add16',
+            menu: [
+                   {
+                	   text: 'Generate',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   }
+                   ]
         },{
             text: 'Workbench',
             iconCls: 'add16',
@@ -127,6 +142,8 @@ function onItemClick(item){
 	window.alert('item'+ item.text);
 	if(item.text == 'Save') {
 		saveModel(10);
+	}else if(item.text == 'Generate') {
+		Generate(10);
 	}else if(item.text == 'MetaSave') {
 		saveMetaModel(6);
 	}else if(item.text == 'MetaObj') {
@@ -135,6 +152,8 @@ function onItemClick(item){
 		MetaRelationEditor(g_metamodel.metadiagram.metarelations);
 	}else if(item.text == 'MetaJSON') {
 		MetaJSONEditor(g_metamodel.metadiagram);
+	}else if(item.text == 'delete') {
+		current_editor.deleteSelected();
 	}else{
 		
 	}

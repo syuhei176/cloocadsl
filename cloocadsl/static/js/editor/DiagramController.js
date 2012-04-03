@@ -21,9 +21,10 @@ function DiagramEditor(name, key, diagram) {
 	var tab = editor_tabs.add({
 		id: key,
 		title: name,
-		html : '<canvas id="canvas_'+self.key+'" width=400 height=400></canvas>',
+		html : '<canvas id="canvas_'+self.key+'" width=500 height=400></canvas>',
 		closable: 'true',
 	});
+	current_editor = this;
 	editor_tabs.setActiveTab(tab);
 	this.canvas = $('#canvas_'+key);
 //	window.alert("canvas = "+this.canvas);
@@ -32,11 +33,12 @@ function DiagramEditor(name, key, diagram) {
 		self.canvas.drawRect({
 			  fillStyle: "#fff",
 			  x: 0, y: 0,
-			  width: 400,
+			  width: 500,
 			  height: 400,
 			  fromCenter: false});
 		for(var i=0;i < self.diagram.objects.length;i++) {
 			var obj = self.diagram.objects[i];
+			if(obj.ve.ver_type == 'delete') continue;
 			var col = '#000';
 			if(self.diagram.objects[i] == self.selected) {
 				col = '#00f';
@@ -50,31 +52,27 @@ function DiagramEditor(name, key, diagram) {
 				  fromCenter: false
 			});
 //			var meta_obj = MetaModelController.getMetaObject(g_metamodel.metadiagram, obj.meta_id)
+			var h = 0;
 			for(var j=0;j < obj.properties.length;j++) {
-			/*
-			for(var j=0;j < meta_obj.properties.length;j++) {
-				var props = new Array();
-				for(var k=0;k < obj.properties.length;k++) {
-					if(obj.properties[k].meta_id == meta_obj.properties[j].meta_id) {
-						props.push(obj.properties[k]);
-					}
-				}*/
 				var prop = obj.properties[j];
 				for(var k=0;k < prop.children.length;k++) {
 					$("canvas").drawText({
-						  fillStyle: "#729fcf",
-						  strokeStyle: "#000",
-						  strokeWidth: 5,
-						  x: obj.bound.x, y: obj.bound.y,
+						  fillStyle: "#000",
+//						  strokeStyle: "#000",
+//						  strokeWidth: 5,
+						  x: obj.bound.x+20, y: obj.bound.y + h * 20 + 16,
 						  text: prop.children[k].value,
 						  align: "center",
 						  baseline: "middle",
-						  font: "normal 14pt Verdana, sans-serif"
+						  font: "16px 'ＭＳ ゴシック'"
 						});
+					h++;
 				}
 			}
 		}
 		for(var i=0;i < self.diagram.relationships.length;i++) {
+			var rel = self.diagram.relationships[i];
+			if(rel.ve.ver_type == 'delete') continue;
 			var col = '#000';
 			if(self.diagram.relationships[i] == self.selected) {
 				col = '#00f';
@@ -173,7 +171,7 @@ DiagramEditor.prototype.clicknode = function(x, y) {
 	if(obj != null) {
 		if(obj.ve.ver_type == "delete") return false;
 		this.selected = obj;
-		this.fireSelectElement(this.selected)
+		this.fireSelectObject(this.selected)
 		return true;
 	}
 	/*
@@ -207,12 +205,14 @@ DiagramEditor.prototype.click_a_edge = function(rel, x, y) {
 	points = points.concat(rel.points);
 	points.push(e);
 	for(var i=0;i < points.length - 1;i++) {
-		if((new Line2D(points[i], points[i+1])).ptSegDist(x, y) < 14) {
+		if((new Line2D(points[i].x, points[i].y, points[i+1].x, points[i+1].y)).ptSegDist(x, y) < 16) {
+			console.log("click_a_edge true");
 			this.selected = rel;
-			this.fireSelectElement(this.selected);
+			this.fireSelectRelationship(this.selected);
 			return true;
 		}
 	}
+	console.log("click_a_edge false");
 	return false;
 }
 
@@ -225,8 +225,14 @@ DiagramEditor.prototype.createButton = function() {
 	var tools = g_metamodel.metadiagram.metaobjects.concat(g_metamodel.metadiagram.metarelations);
 	tools.unshift(null);
 	for(var i=0;i < tools.length;i++) {
+		var button_text = '';
+		if(tools[i] == null) {
+			button_text = 'select';
+		}else{
+			button_text = tools[i].name;
+		}
 		var b = Ext.create('Ext.Button', {
-		    text     : 'Button',
+		    text     : button_text,
 /*		    renderTo : Ext.get('toolpanel'),*/
 		    enableToggle: true,
 		    toggleGroup: 'tools',
@@ -234,21 +240,10 @@ DiagramEditor.prototype.createButton = function() {
 		        click: function() {
 		    		var tool = tools[this.index];
 		            // this == the button, as we are in the local scope
-		    		if(tool == null) {
-			            this.setText('Select');
-		    		}else{
-			            this.setText('Obj '+tool.name);
-		    		}
 		            self.tool = tool;
 		        },
 		        mouseover: function() {
-		    		var tool = tools[this.index];
 		            // this == the button, as we are in the local scope
-		    		if(tool == null) {
-			            this.setText('Select');
-		    		}else{
-			            this.setText('Obj '+tool.name);
-		    		}
 		        }
 		    }
 		});
@@ -262,13 +257,33 @@ DiagramEditor.prototype.createButton = function() {
 //	Ext.getCmp('toolpanel').add(toolpanel);
 }
 
+/**
+ * deleteSelected: 要素を削除する。要素はObjectかRelationshipのいずれか
+ */
+DiagramEditor.prototype.deleteSelected = function() {
+	if(this.selected != null) {
+		this.selected.ve.ver_type = 'delete';
+	}
+}
+
+/**
+ * addObject: Objectを追加する
+ * @param x
+ * @param y
+ */
 DiagramEditor.prototype.addObject = function(x,y) {
 	obj = new Object(this.tool.id);
 	obj.bound.x = x;
 	obj.bound.y = y;
+	obj.ve.ver_type = 'add';
 	this.diagram.objects.push(obj);
 }
 
+/**
+ * addRelationship: Relationshipを追加する
+ * @param s:開始位置
+ * @param e:終端位置
+ */
 DiagramEditor.prototype.addRelationship = function(s,e) {
 	var start = this.findNode(s);
 	var end = this.findNode(e);
@@ -279,6 +294,7 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 //		rel.meta = meta_rel;
 		rel.src = start.id;
 		rel.dest = end.id;
+		rel.ve.ver_type = 'add';
 		/*
 		rel.ve.ver_type = "add";
 		for(MetaProperty metaprop : rel.meta.properties) {
@@ -305,9 +321,8 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 DiagramEditor.prototype.findNode = function(p) {
 	for(var i=0;i < this.diagram.objects.length;i++) {
 		var obj = this.diagram.objects[i];
-		console.log("x="+p.x+", y="+p.y+", obj.x="+obj.bound.x+", obj.y="+obj.bound.y);
+//		console.log("x="+p.x+", y="+p.y+", obj.x="+obj.bound.x+", obj.y="+obj.bound.y);
 		if(Rectangle2D.contains(obj.bound, p)) {
-			console.log("click");
 			return obj;
 		}
 	}
@@ -320,38 +335,212 @@ function addRelationship(src, dest) {
 	rel.dest = dest;
 }
 
-DiagramEditor.prototype.fireSelectElement = function(selected) {
-	Ext.getCmp('propertypanel').removeAll();
+DiagramEditor.prototype.fireSelectObject = function(selected) {
 	var meta_obj = MetaModelController.getMetaObject(g_metamodel.metadiagram, selected.meta_id)
+	this.createPropertyPanel(meta_obj, selected);
+}
+
+DiagramEditor.prototype.fireSelectRelationship = function(selected) {
+	var meta_rel = MetaModelController.getMetaRelation(g_metamodel.metadiagram, selected.meta_id)
+	this.createPropertyPanel(meta_rel, selected);
+}
+
+/**
+ * createPropertyPanel
+ * プロパティパネルを作成する
+ * @param meta_ele
+ * @param ele
+ */
+DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
+	var self = this;
+	Ext.getCmp('propertypanel').removeAll();
 	var property_tabs = Ext.create('Ext.tab.Panel', {
 	    items: []
 	});
-	for(var i=0;i < meta_obj.properties.length;i++) {
-			if(selected.properties[i] == undefined) {
-					selected.properties[i] = new PropertyList();
-					selected.properties[i].children[0] = new Property();
+	for(var i=0;i < meta_ele.properties.length;i++) {
+		if(ele.properties[i] == undefined) {
+			ele.properties[i] = new PropertyList();
+			ele.properties[i].children[0] = new Property();
+		}
+		var prop_tab = null;
+		if(meta_ele.properties[i].data_type == MetaProperty.COLLECTION_STRING) {
+			prop_tab = PropertyPanel.CollectionString(meta_ele.properties[i], ele.properties[i], ele)
+		}else{
+			if(meta_ele.properties[i].widget == MetaProperty.INPUT_FIELD) {
+				prop_tab = PropertyPanel.InputField(meta_ele.properties[i], ele.properties[i], ele)
+			}else if(meta_ele.properties[i].widget == MetaProperty.FIXED_LIST) {
+				prop_tab = PropertyPanel.FixedList(meta_ele.properties[i], ele.properties[i], ele)
 			}
-		var prop_tab = {
-	            title: meta_obj.properties[i].name,
-	            html : 'Welcome to the clooca DSL.',
-	            items: [
-	                  {
-		  	        	   xtype: 'textarea',
-	  	        		   value: selected.properties[i].children[0].value,
-	  	        		   index: i,
-	  	        		   listeners: {
-	  	        			   change: {
-	  	        				   fn: function(field, newValue, oldValue, opt) {
-	 	        						console.log('change'+this.index);
-	  	        					 selected.properties[this.index].children[0].value = newValue;
-	  	        				   }
-	  	        			   }
-	  	        		   }
-	                  }
-	                  ]
-			};
+		}
 		prop_tab.index = i;
 		property_tabs.add(prop_tab);
 	}
 	Ext.getCmp('propertypanel').add(property_tabs);
+
+}
+
+function PropertyPanel(){}
+
+PropertyPanel.InputField = function(meta_prop, prop, ele) {
+	var prop_tab = {
+            title: meta_prop.name,
+            html : '',
+            items: [{
+	  	        	   xtype: 'textfield',
+  	        		   value: prop.children[0].value,
+//  	        		   index: i,
+  	        		   listeners: {
+  	        			   change: {
+  	        				   fn: function(field, newValue, oldValue, opt) {
+ 	        						console.log('change'+this.index);
+ 	        						prop.children[0].value = newValue;
+//  	        					 ele.properties[this.index].children[0].value = newValue;
+  	        					 calObjHeight(ele);
+  	        				   }
+  	        			   }
+  	        		   }
+                  }]
+		};
+	return prop_tab;
+}
+PropertyPanel.FixedList = function(meta_prop, prop, ele) {
+	var strs = meta_prop.exfield.split('&');
+	var datas = new Array();
+	for(var j=0;j < strs.length;j++) datas.push({"name":strs[j]});
+	var states = Ext.create('Ext.data.Store', {
+	    fields: ['name'],
+	    data : datas
+	});
+	var prop_tab = {
+            title: meta_prop.name,
+            html : '',
+            items: [
+                  {
+	  	        	   xtype: 'combobox',
+	  	        	   store: states,
+	  	        	    queryMode: 'local',
+	  	        	    displayField: 'name',
+	  	        	    valueField: 'name',
+  	        		   value: prop.children[0].value,
+//  	        		   index: i,
+  	        		   listeners: {
+  	        			   change: {
+  	        				   fn: function(field, newValue, oldValue, opt) {
+ 	        						console.log('change'+this.index);
+ 	        						prop.children[0].value = newValue;
+//  	        					 ele.properties[this.index].children[0].value = newValue;
+  	        					 calObjHeight(ele);
+  	        				   }
+  	        			   }
+  	        		   }
+                  }
+                  ]
+		};
+	return prop_tab;
+}
+PropertyPanel.selected = new Array();
+PropertyPanel.CollectionString = function(meta_prop, prop, ele) {
+	 var selModel = Ext.create('Ext.selection.CheckboxModel', {
+	        listeners: {
+	            selectionchange: function(sm, selections) {
+	                grid4.down('#removeButton').setDisabled(selections.length == 0);
+	                for(var i=0;i < selections.length;i++) {
+	                	PropertyPanel.selected = new Array();
+	                	PropertyPanel.selected.push(selections[i].index);
+	                	/*
+	                	for(var j=0;j < prop.children.length;j++) {
+	                		prop.children[j]
+	                	}
+	                	*/
+	                	console.log(selections[i].index);
+	                }
+	            }
+	        }
+	    });
+	    Ext.define('Collection', {
+	        extend: 'Ext.data.Model',
+	        fields: [{name: 'string'}]
+	    });
+	 var dummy = new Array();
+	 for(var i=0;i < prop.children.length;i++) {
+		 dummy.push(prop.children[i].value);
+	 }
+	 var store = Ext.create('Ext.data.ArrayStore', {
+         model: 'Collection',
+         data: dummy
+     });
+	 var additem = function() {
+		 prop.children.push(new Property());
+	 }
+	 var optionitem = function() {
+		 Ext.Msg.prompt('','',function(btn,text){
+			 if(btn != 'cancel') {
+				 prop.children[PropertyPanel.selected[0]].value = text;
+			 }
+		 },null,true);
+	 }
+	 var deleteitem = function() {
+		 for(var i=0;i<PropertyPanel.selected.length;i++) {
+			 prop.children.splice(PropertyPanel.selected[i], 1);
+		 }
+	 }
+	    var grid4 = Ext.create('Ext.grid.Panel', {
+	        id:'button-grid',
+	        store: store,
+	        columns: [
+	            {text: "string", flex: 1, sortable: true, dataIndex: 'string'}
+	        ],
+	        columnLines: true,
+	        selModel: selModel,
+
+	        // inline buttons
+	        dockedItems: [{
+	            xtype: 'toolbar',
+	            dock: 'bottom',
+	            ui: 'footer',
+	            layout: {
+	                pack: 'center'
+	            },
+	            items: []
+	        }, {
+	            xtype: 'toolbar',
+	            items: [{
+	                text:'Add Something',
+	                tooltip:'Add a new row',
+	                iconCls:'add',
+	                handler : additem
+	            }, '-', {
+	                text:'Options',
+	                tooltip:'Set options',
+	                iconCls:'option',
+	                handler : optionitem
+	            },'-',{
+	                itemId: 'removeButton',
+	                text:'Remove Something',
+	                tooltip:'Remove the selected item',
+	                iconCls:'remove',
+	                disabled: true,
+	                handler : deleteitem
+	            }]
+	        }],
+	        
+	        width: 500,
+	        height: 160,
+	        frame: true,
+	        title: meta_prop.name,
+	        iconCls: 'icon-grid'
+	    });
+	    return grid4;
+}
+
+
+function calObjHeight(obj) {
+	var h = 0;
+	for(var j=0;j < obj.properties.length;j++) {
+		var prop = obj.properties[j];
+		for(var k=0;k < prop.children.length;k++) {
+			h++;
+		}
+	}
+	obj.bound.height = h * 20 + 10;
 }
