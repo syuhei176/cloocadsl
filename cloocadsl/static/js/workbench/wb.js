@@ -101,7 +101,7 @@ function create_menu() {
             iconCls: 'add16',
             menu: [{text: 'Cut Menu Item'}],
         	handler : onItemClick
-        },{
+        }/*,{
             text: 'Project',
             iconCls: 'add16',
             menu: [
@@ -111,11 +111,15 @@ function create_menu() {
                 	   handler : onItemClick
                    }
                    ]
-        },{
+        }*/,{
             text: 'Workbench',
             iconCls: 'add16',
             menu: [
                    {
+                	   text: 'Preview',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
                 	   text: 'MetaSave',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
@@ -143,9 +147,12 @@ function create_menu() {
 function onItemClick(item){
 	window.alert('item'+ item.text);
 	if(item.text == 'Save') {
-		saveModel(g_project_id);
-	}else if(item.text == 'Generate') {
-		Generate(g_project_id);
+//		saveModel(g_project_id);
+		saveMetaModel(g_metamodel_id);
+	}else if(item.text == 'Preview') {
+		g_model = new Model();
+		g_model.root = new Diagram();
+		editor = new DiagramEditor('preview', 'preview'+new Date().getTime(), g_model.root);
 	}else if(item.text == 'MetaSave') {
 		saveMetaModel(g_metamodel_id);
 	}else if(item.text == 'MetaObj') {

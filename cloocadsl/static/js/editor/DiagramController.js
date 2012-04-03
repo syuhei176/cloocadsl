@@ -505,18 +505,18 @@ PropertyPanel.CollectionString = function(meta_prop, prop, ele) {
 	        }, {
 	            xtype: 'toolbar',
 	            items: [{
-	                text:'Add Something',
+	                text:'追加',
 	                tooltip:'Add a new row',
 	                iconCls:'add',
 	                handler : additem
 	            }, '-', {
-	                text:'Options',
+	                text:'編集',
 	                tooltip:'Set options',
 	                iconCls:'option',
 	                handler : optionitem
 	            },'-',{
 	                itemId: 'removeButton',
-	                text:'Remove Something',
+	                text:'削除',
 	                tooltip:'Remove the selected item',
 	                iconCls:'remove',
 	                disabled: true,

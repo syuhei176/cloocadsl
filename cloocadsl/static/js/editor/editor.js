@@ -102,7 +102,7 @@ function create_menu() {
             menu: [{text: 'Cut Menu Item'}],
         	handler : onItemClick
         },{
-            text: 'Project',
+            text: 'プロジェクト',
             iconCls: 'add16',
             menu: [
                    {
@@ -111,7 +111,7 @@ function create_menu() {
                 	   handler : onItemClick
                    }
                    ]
-        },{
+        }/*,{
             text: 'Workbench',
             iconCls: 'add16',
             menu: [
@@ -133,7 +133,7 @@ function create_menu() {
                 	   handler : onItemClick
                    }
                    ]
-        },'-',{
+        }*/,'-',{
             text: 'Format',
             iconCls: 'add16'
         }]
