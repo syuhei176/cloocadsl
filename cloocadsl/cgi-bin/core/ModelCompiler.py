@@ -2,6 +2,7 @@ import sys
 import os
 import shutil
 import MySQLdb
+import json
 from mako.template import Template
 from mako.lookup import TemplateLookup
 from mako.runtime import Context
@@ -39,7 +40,7 @@ class BaseGenerator(object):
             os.mkdir(self.userpath)
         if not os.path.exists(self.projectpath):
             os.mkdir(self.projectpath)
-        self.model = parse(project['xml'])
+        self.model = parseJSON(project['xml'])
         self.parseXML(metamodel['template'])
 #        print Template(metamodel['template']).render(root = model)
 #        self.FileGen(model, config.CLOOCA_CGI + '/template/t1.mako', self.outpath)
@@ -77,7 +78,73 @@ class BaseGenerator(object):
         hf.write(buf.getvalue())
         hf.close()
 
-class Model: pass
+def parseJSON(xml):
+    return parse_model_JSON(json.loads(xml))
+
+def parse_model_JSON(model_dict):
+    class Model: pass
+    setattr(Model, 'root', None)
+    ret = Model()
+    ret.root = parse_diagram_JSON(model_dict['root'])
+    return ret
+
+def parse_diagram_JSON(diagram):
+    class klass: pass
+    id = diagram['id']
+    setattr(klass, 'id', id)
+    setattr(klass, 'objects', [])
+    setattr(klass, 'relationships', [])
+    ret = klass()
+    for i in range(len(diagram['objects'])):
+        ret.objects.append(parse_object_JSON(diagram['objects'][i]))
+    for i in range(len(diagram['relationships'])):
+        ret.relationships.append(parse_relationship_JSON(diagram['relationships'][i]))
+    return ret
+
+def parse_object_JSON(dict):
+    class klass: pass
+    id = dict['id']
+    meta_id = dict['meta_id']
+    x = dict['bound']['x']
+    y = dict['bound']['y']
+    setattr(klass, 'id', id)
+    setattr(klass, 'meta_id', meta_id)
+    setattr(klass, 'x', x)
+    setattr(klass, 'y', y)
+    setattr(klass, 'properties', [])
+    ret = klass()
+    for i in range(len(dict['properties'])):
+        ret.properties.append(parse_propertylist_JSON(dict['properties'][i]))
+    return ret
+
+def parse_relationship_JSON(dict):
+    class klass: pass
+    setattr(klass, 'id', dict['id'])
+    setattr(klass, 'meta_id', dict['meta_id'])
+    setattr(klass, 'src', dict['src'])
+    setattr(klass, 'dest', dict['dest'])
+    setattr(klass, 'properties', [])
+    ret = klass()
+    for i in range(len(dict['properties'])):
+        ret.properties.append(parse_propertylist_JSON(dict['properties'][i]))
+    return ret
+
+def parse_propertylist_JSON(plist):
+    class klass: pass
+    setattr(klass, 'meta_id', plist['meta_id'])
+    setattr(klass, 'children', [])
+    ret = klass()
+    for i in range(len(plist['children'])):
+        ret.children.append(parse_property_JSON(i, plist['children'][i]))
+    return ret
+
+def parse_property_JSON(i, prop):
+    class klass: pass
+#    setattr(klass, 'id', prop['id'])
+    setattr(klass, 'value', '')
+    ret = klass();
+    ret.value = prop['value']
+    return ret
 
 def parse(xml):
     elem = fromstring(xml)
