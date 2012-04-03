@@ -25,15 +25,16 @@ def index():
     return render_template('index.html', loggedin = False, username = '')
 
 @app.route('/dashboard')
-@app.route('/dashboard/<name>')
-def dashboard(name=None):
+@app.route('/dashboard/<type>')
+def dashboard(type='js'):
     if 'user' in session:
         return render_template('dashboard.html',
                                loggedin = True,
                                username = session['user']['uname'],
                                mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'])),
                                myproject = json.dumps(ProjectService.loadMyProjectList(session['user'])),
-                               metamodel = json.dumps(MetaModelService.loadMetaModelList())
+                               metamodel = json.dumps(MetaModelService.loadMetaModelList()),
+                               type = type
                                )
     return render_template('dashboard.html', loggedin = False, username = '')
 
@@ -44,15 +45,23 @@ def editor():
     return render_template('index.html', loggedin = False, username = '')
 
 @app.route('/editorjs')
-def editorjs():
+@app.route('/editorjs/<pid>')
+def editorjs(pid=None):
     if 'user' in session:
-        return render_template('editorjs.html', loggedin = True, username = session['user']['uname'])
+        return render_template('editorjs.html', pid = pid, loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
 @app.route('/workbench')
 def workbench():
     if 'user' in session:
         return render_template('workbench.html', loggedin = True, username = session['user']['uname'])
+    return render_template('index.html', loggedin = False, username = '')
+
+@app.route('/workbenchjs')
+@app.route('/workbenchjs/<id>')
+def workbenchjs(id=None):
+    if 'user' in session:
+        return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
 @app.route('/register', methods=['POST'])
@@ -86,7 +95,7 @@ def createp():
 @app.route('/deletep', methods=['POST'])
 def deletep():
     if 'user' in session:
-        result = deleteProject(session['user'], request.form['pid'])
+        result = ProjectService.deleteProject(session['user'], request.form['pid'])
         return json.dumps(result)
     else:
         return 'false'

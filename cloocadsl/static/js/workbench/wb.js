@@ -6,9 +6,9 @@ Ext.require([
     'Ext.layout.container.Table'
 ]);
 
-var g_project_id = 0;
-function init_clooca(pid) {
-	g_project_id = pid;
+var g_metamodel_id = 0;
+function init_wb(id) {
+	g_metamodel_id = id;
 	new Ext.Viewport({
 		layout:'border',
 		items:[
@@ -63,8 +63,8 @@ function init_clooca(pid) {
 		       ]
 	});
 
-	loadModel(pid);
-//	loadMetaModel(6);
+//	loadModel(pid);
+	loadMetaModel(id);
 }
 
 function create_tabs() {
@@ -196,7 +196,8 @@ function createModelExplorer() {
 	        expanded: true,
 	        children: [
 	            { text: "root", expanded: true, children: [
-	                { id: "1", text: "diagram", leaf: true }
+	                { id: "1", text: "diagram", leaf: true },
+	                { id: "2", text: "alegrbra", leaf: true}
 	            ] }
 	        ]
 	    }

@@ -40,7 +40,7 @@ class BaseGenerator(object):
             os.mkdir(self.userpath)
         if not os.path.exists(self.projectpath):
             os.mkdir(self.projectpath)
-        self.model = parseJSON(project['xml'])
+        self.model = parseJSON(project['xml'], metamodel['xml'])
         self.parseXML(metamodel['template'])
 #        print Template(metamodel['template']).render(root = model)
 #        self.FileGen(model, config.CLOOCA_CGI + '/template/t1.mako', self.outpath)
@@ -78,27 +78,41 @@ class BaseGenerator(object):
         hf.write(buf.getvalue())
         hf.close()
 
-def parseJSON(xml):
-    return parse_model_JSON(json.loads(xml))
+def parseJSON(xml, meta_text):
+    return parse_model_JSON(json.loads(xml), json.loads(meta_text))
 
-def parse_model_JSON(model_dict):
+def parse_model_JSON(model_dict, metamodel_dict):
     class Model: pass
-    setattr(Model, 'root', None)
+    setattr(Model, metamodel_dict['metadiagram']['name'], None)
     ret = Model()
-    ret.root = parse_diagram_JSON(model_dict['root'])
+    setattr(ret, metamodel_dict['metadiagram']['name'], parse_diagram_JSON(model_dict['root'], metamodel_dict['metadiagram']))
     return ret
 
-def parse_diagram_JSON(diagram):
+def parse_diagram_JSON(diagram, metadiagram_dict):
     class klass: pass
     id = diagram['id']
     setattr(klass, 'id', id)
     setattr(klass, 'objects', [])
     setattr(klass, 'relationships', [])
+    for i in range(len(metadiagram_dict['metaobjects'])):
+        setattr(klass, metadiagram_dict['metaobjects'][i]['name'], [])
+    for i in range(len(metadiagram_dict['metarelations'])):
+        setattr(klass, metadiagram_dict['metarelations'][i]['name'], [])
     ret = klass()
     for i in range(len(diagram['objects'])):
-        ret.objects.append(parse_object_JSON(diagram['objects'][i]))
+        if diagram['objects'][i]['ve']['ver_type'] == 'delete':
+            continue
+        meta_id = diagram['objects'][i]['meta_id']
+        obj = parse_object_JSON(diagram['objects'][i])
+        getattr(ret, metadiagram_dict['metaobjects'][meta_id-1]['name']).append(obj)
+        ret.objects.append(obj)
     for i in range(len(diagram['relationships'])):
-        ret.relationships.append(parse_relationship_JSON(diagram['relationships'][i]))
+        if diagram['relationships'][i]['ve']['ver_type'] == 'delete':
+            continue
+        meta_id = diagram['relationships'][i]['meta_id']
+        rel = parse_relationship_JSON(diagram['relationships'][i])
+        getattr(ret, metadiagram_dict['metarelations'][meta_id-1]['name']).append(rel)
+        ret.relationships.append(rel)
     return ret
 
 def parse_object_JSON(dict):
@@ -209,3 +223,13 @@ def parse_property(elem):
     setattr(klass, 'id', id)
     setattr(klass, 'value', value)
     return klass()
+
+def parse_JSON_metamodel(xml):
+    return parse_metamodel_JSON(json.loads(xml))
+
+def parse_metamodel_JSON(metamodel_dict):
+    class Model: pass
+    setattr(Model, 'root', None)
+    ret = Model()
+    ret.root = parse_diagram_JSON(metamodel_dict['metadiagram'])
+    return ret

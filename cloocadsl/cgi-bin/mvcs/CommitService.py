@@ -34,7 +34,6 @@ def CreateRepository(project_id, rep_id):
 
 '''
  ワークスペースからモデルリポジトリにコミットする。
- commit workspace to model repository.
 '''
 def commit(project_id):
     #select project xml
@@ -269,3 +268,63 @@ def parseProperty(elem, parent_id):
         return True
     else:
         return False
+
+def InsertJSON2REP(text, model_id):
+    global project_id
+    project_id = model_id
+    parse_model_JSON(json.loads(text))
+
+def parse_model_JSON(model):
+    id = model['id']
+    version = int(model['current_version'])
+    global next_version
+    next_version = version + 1
+    root = parseDiagramJSON(model['root'])
+    cur = connect.cursor()
+    cur.execute('UPDATE model SET root=%s,current_version=%s WHERE id=%s;', (root,next_version,project_id,))
+    connect.commit()
+    cur.close()
+
+def parseDiagramJSON(diagram):
+    children_edited = False
+    id = diagram['id']
+    meta_id = diagram['meta_id']
+    edited_type = diagram['ve']['ver_type']
+    version = int(diagram['ve']['version'])
+    for e in range(len(diagram['objects'])):
+        if parseObject(e, id, version):
+            children_edited = True
+    for e in range(len(diagram['relationships'])):
+        if parseRelationship(e, id, version):
+            children_edited = True
+    if edited_type == 'update':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+#        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,project_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,meta_id,project_id,next_version))
+        connect.commit()
+        cur.close()
+    elif edited_type == 'add':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+#        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,project_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,meta_id,project_id,next_version))
+        connect.commit()
+        cur.close()
+    elif edited_type == 'delete':
+        cur = connect.cursor()
+        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,model_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,meta_id,project_id,next_version))
+        connect.commit()
+        cur.close()
+    elif children_edited:
+        cur = connect.cursor()
+#        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,project_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,meta_id,project_id,next_version))
+        connect.commit()
+        cur.close()
+    else:
+        pass
+    return id

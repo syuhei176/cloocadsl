@@ -113,7 +113,11 @@ function load_models() {
 function create_projects_table(projects) {
 	var html = '<table><tr><td>プロジェクト名</td><td></td></tr>';
 	for(var i = 0;i < projects.length;i++) {
+		{% if type == 'js' %}
+		var link = '<a href="/editorjs/'+projects[i].id+'">'+projects[i].name+'</a>';
+		{% else %}
 		var link = '<a href="/editor#'+projects[i].id+'">'+projects[i].name+'</a>';
+		{% endif %}
 		var del = '<a href="javascript:delete_project('+projects[i].id+',\''+projects[i].name+'\')">削除</a>';
 		html += '<tr><td>'+link+'</td><td>'+del+'</td></tr>';
 	}
@@ -124,7 +128,11 @@ function create_projects_table(projects) {
 function create_mymetamodels_table(metamodels) {
 	var html = '<table><tr><td>メタモデル名</td><td>公開範囲</td></tr>';
 	for(var i = 0;i < metamodels.length;i++) {
+		{% if type == 'js' %}
+		var link = '<a href="/workbenchjs/'+metamodels[i].id+'">'+metamodels[i].name+'</a>'
+		{% else %}
 		var link = '<a href="/workbench#'+metamodels[i].id+'">'+metamodels[i].name+'</a>'
+		{% endif %}
 		var vis = 'エラー';
 		if(metamodels[i].visibillity == 0) {
 			vis = '非公開';

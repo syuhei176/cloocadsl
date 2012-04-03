@@ -42,7 +42,7 @@ function init() {
 	}
 	twitter_init();
 	{% if loggedin %}
-	  $('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
+	  $('#login').empty().append('<a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
 	{% else %}
 	  $('#login').empty().append('<a href="javascript:login()">login</a>&nbsp;&nbsp;&nbsp;');
 	{% endif %}
@@ -207,7 +207,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="/index.html">Home</a></li>
+            <li class="active"><a href="/index">Home</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/service.html">Service</a></li>
             <li class="divider-vertical"></li>

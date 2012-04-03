@@ -81,11 +81,14 @@ def deleteProject(user, pid):
 clean_xml = '''
 <?xml version="1.0" encoding="utf-8"?><Model id="0" current_version="1"><Diagram id="1" meta_id="1"><VersionElement version="1" ver_type="add" /></Diagram></Model>
 '''
+clean_json = '''
+{"id":1,"current_version":1,"root":{"id":1,"objects":[],"relationships":[]}}
+'''
 
 def createProject(user, name, xml, metamodel_id):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id) VALUES(%s,%s,%s);',(name, clean_xml, metamodel_id, ))
+    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id) VALUES(%s,%s,%s);',(name, clean_json, metamodel_id, ))
     connect.commit()
     id = cur.lastrowid
     cur.close()
@@ -97,7 +100,7 @@ def createProject(user, name, xml, metamodel_id):
     project = {}
     project['id'] = id
     project['name'] = name
-    project['xml'] = clean_xml
+    project['xml'] = clean_json
     project['metamodel_id'] = metamodel_id
     return True
 
