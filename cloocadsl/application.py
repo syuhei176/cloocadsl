@@ -18,6 +18,7 @@ from mvcs import CommitService
 
 app = Flask(__name__)
 
+@app.route('/')
 @app.route('/index')
 def index():
     if 'user' in session:
