@@ -56,7 +56,7 @@ function DiagramEditor(name, key, diagram) {
 			for(var j=0;j < obj.properties.length;j++) {
 				var prop = obj.properties[j];
 				for(var k=0;k < prop.children.length;k++) {
-					$("canvas").drawText({
+					self.canvas.drawText({
 						  fillStyle: "#000",
 //						  strokeStyle: "#000",
 //						  strokeWidth: 5,
@@ -364,7 +364,7 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 		}
 		var prop_tab = null;
 		if(meta_ele.properties[i].data_type == MetaProperty.COLLECTION_STRING) {
-			prop_tab = PropertyPanel.CollectionString(meta_ele.properties[i], ele.properties[i], ele)
+			prop_tab = PropertyPanel.CollectionString(this, meta_ele.properties[i], ele.properties[i], ele)
 		}else{
 			if(meta_ele.properties[i].widget == MetaProperty.INPUT_FIELD) {
 				prop_tab = PropertyPanel.InputField(meta_ele.properties[i], ele.properties[i], ele)
@@ -377,6 +377,13 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 	}
 	Ext.getCmp('propertypanel').add(property_tabs);
 
+}
+
+/**
+ * @param type:"png" or "jpg"
+ */
+DiagramEditor.prototype.getImage = function(type) {
+	window.open(this.canvas.getCanvasImage(type))
 }
 
 function PropertyPanel(){}
@@ -439,7 +446,7 @@ PropertyPanel.FixedList = function(meta_prop, prop, ele) {
 	return prop_tab;
 }
 PropertyPanel.selected = new Array();
-PropertyPanel.CollectionString = function(meta_prop, prop, ele) {
+PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 	 var selModel = Ext.create('Ext.selection.CheckboxModel', {
 	        listeners: {
 	            selectionchange: function(sm, selections) {
@@ -471,6 +478,7 @@ PropertyPanel.CollectionString = function(meta_prop, prop, ele) {
      });
 	 var additem = function() {
 		 prop.children.push(new Property());
+		 dc.createPropertyPanel()
 	 }
 	 var optionitem = function() {
 		 Ext.Msg.prompt('','',function(btn,text){

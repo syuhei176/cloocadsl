@@ -92,6 +92,14 @@ function create_menu() {
                 	   text: 'delete',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
+                   },{
+                	   text: 'png',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
+                	   text: 'jpg',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
                    }
                    ],
         	handler : onItemClick
@@ -144,6 +152,10 @@ function onItemClick(item){
 	window.alert('item'+ item.text);
 	if(item.text == 'Save') {
 		saveModel(g_project_id);
+	}else if(item.text == 'png') {
+		current_editor.getImage('png');
+	}else if(item.text == 'jpg') {
+		current_editor.getImage('jpg');
 	}else if(item.text == 'Generate') {
 		Generate(g_project_id);
 	}else if(item.text == 'MetaSave') {
