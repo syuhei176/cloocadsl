@@ -15,6 +15,7 @@ from core import ProjectService
 from core import ModelCompiler
 from core import FileService
 from mvcs import CommitService
+from mvcs import UpdateServiceJSON
 
 app = Flask(__name__)
 
@@ -174,8 +175,8 @@ def commit():
 
 @app.route('/update', methods=['POST'])
 def update():
-    project = MetaModelService.loadMetaModel(session['user'], request.form['id'])
-    return json.dumps(project)
+    jsontext = UpdateServiceJSON.LoadHeadRevision(request.form['pid'])
+    return json.dumps(jsontext)
 
 with app.test_request_context():
     print url_for('index')

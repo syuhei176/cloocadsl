@@ -114,10 +114,19 @@ function create_menu() {
             iconCls: 'add16',
             menu: [
                    {
-                	   text: 'Generate',
+                	   text: 'generate',
                 	   iconCls: 'add16',
-                	   handler : onItemClick
+                	   handler : onProjItemClick
+                   },{
+                	   text: 'commit',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
+                   },{
+                	   text: 'update',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
                    }
+
                    ]
         }/*,{
             text: 'Workbench',
@@ -149,15 +158,13 @@ function create_menu() {
 }
 
 function onItemClick(item){
-	window.alert('item'+ item.text);
+//	window.alert('item'+ item.text);
 	if(item.text == 'Save') {
 		saveModel(g_project_id);
 	}else if(item.text == 'png') {
 		current_editor.getImage('png');
 	}else if(item.text == 'jpg') {
 		current_editor.getImage('jpg');
-	}else if(item.text == 'Generate') {
-		Generate(g_project_id);
 	}else if(item.text == 'MetaSave') {
 		saveMetaModel(g_metamodel_id);
 	}else if(item.text == 'MetaObj') {
@@ -173,6 +180,17 @@ function onItemClick(item){
 	}
 //    Ext.example.msg('Menu Click', 'You clicked the "{0}" menu item.', item.text);
 }
+
+function onProjItemClick(item){
+	if(item.text == 'generate') {
+		Generate(g_project_id);
+	}else if(item.text == 'commit') {
+		commit(g_project_id);
+	}else if(item.text == 'update') {
+		update(g_project_id);
+	}
+}
+
 /*
 var viewport = new Ext.Viewport({
 id:'viewport',
@@ -223,7 +241,7 @@ function createModelExplorer() {
 	modelExplorer.on('itemclick',function(view, record, item, index, event) {
     	console.log('click '+record.data.id);
     	if(record.data.id == 1) {
-    		editor = new DiagramEditor(record.data.text, 'test'+new Date().getTime(), g_model.root);
+    		editor = new DiagramEditor(record.data.text, 'test'+new Date().getTime(), g_model.diagrams[g_model.root]);
     	}
     });
 	Ext.getCmp('modelexplorer').add(modelExplorer);

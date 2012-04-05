@@ -186,11 +186,11 @@ function MetaJSONEditor(metadiagram) {
 		  	        	   xtype: 'textarea',
 		  	        		   width: 240,
 		  	        		   height: 240,
-		  	        		   value: JSON.stringify(metadiagram),
+		  	        		   value: JSON.stringify(g_metamodel),
 		  	        		   listeners: {
 		  	        			   change: {
 		  	        				   fn: function(field, newValue, oldValue, opt) {
-		  	        						g_metamodel.metadiagram = eval('('+newValue+')');
+		  	        						g_metamodel = eval('('+newValue+')');
 		  	        						console.log('change');
 		  	        				   }
 		  	        			   }

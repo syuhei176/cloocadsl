@@ -37,48 +37,59 @@ function DiagramEditor(name, key, diagram) {
 			  height: 400,
 			  fromCenter: false});
 		for(var i=0;i < self.diagram.objects.length;i++) {
-			var obj = self.diagram.objects[i];
+			var obj_id = self.diagram.objects[i];			
+			var obj = g_model.objects[obj_id];
 			if(obj.ve.ver_type == 'delete') continue;
 			var col = '#000';
-			if(self.diagram.objects[i] == self.selected) {
+			if(obj == self.selected) {
 				col = '#00f';
 			}
 			self.canvas.drawRect({
 				  strokeStyle: col,
 				  strokeWidth: 2,
-				  x: self.diagram.objects[i].bound.x, y: self.diagram.objects[i].bound.y,
-				  width: self.diagram.objects[i].bound.width,
-				  height: self.diagram.objects[i].bound.height,
+				  x: obj.bound.x, y: obj.bound.y,
+				  width: obj.bound.width,
+				  height: obj.bound.height,
 				  fromCenter: false
 			});
-//			var meta_obj = MetaModelController.getMetaObject(g_metamodel.metadiagram, obj.meta_id)
+			var meta_ele = g_metamodel.metaobjects[obj.meta_id];//MetaModelController.getMetaObject(g_metamodel.metadiagram, obj.meta_id)
 			var h = 0;
-			for(var j=0;j < obj.properties.length;j++) {
-				var prop = obj.properties[j];
-				for(var k=0;k < prop.children.length;k++) {
-					self.canvas.drawText({
-						  fillStyle: "#000",
-//						  strokeStyle: "#000",
-//						  strokeWidth: 5,
-						  x: obj.bound.x+20, y: obj.bound.y + h * 20 + 16,
-						  text: prop.children[k].value,
-						  align: "center",
-						  baseline: "middle",
-						  font: "16px 'ＭＳ ゴシック'"
-						});
-					h++;
+			for(var l=0;l < meta_ele.properties.length;l++) {
+				var prop = null;
+				for(var j=0;j<obj.properties.length;j++) {
+					if(obj.properties[j].meta_id == meta_ele.properties[l]) {
+						prop = obj.properties[j];
+					}
+				}
+				if(prop != null) {
+					for(var k=0;k < prop.children.length;k++) {
+						var p = g_model.properties[prop.children[k]]
+						if(p.ve.ver_type == 'delete') continue;
+						self.canvas.drawText({
+							  fillStyle: "#000",
+//							  strokeStyle: "#000",
+//							  strokeWidth: 5,
+							  x: obj.bound.x+20, y: obj.bound.y + h * 20 + 16,
+							  text: p.value,
+							  align: "center",
+							  baseline: "middle",
+							  font: "16px 'ＭＳ ゴシック'"
+							});
+						h++;
+					}
 				}
 			}
 		}
 		for(var i=0;i < self.diagram.relationships.length;i++) {
-			var rel = self.diagram.relationships[i];
+			var rel_id = self.diagram.relationships[i];
+			var rel = g_model.relationships[rel_id];
 			if(rel.ve.ver_type == 'delete') continue;
 			var col = '#000';
-			if(self.diagram.relationships[i] == self.selected) {
+			if(rel == self.selected) {
 				col = '#00f';
 			}
-			var src = ModelController.getObject(self.diagram, self.diagram.relationships[i].src);
-			var dest = ModelController.getObject(self.diagram, self.diagram.relationships[i].dest);
+			var src = ModelController.getObject(self.diagram, rel.src);
+			var dest = ModelController.getObject(self.diagram, rel.dest);
 			var startx = src.bound.x;
 			var starty = src.bound.y;
 			var endx = dest.bound.x;
@@ -132,10 +143,15 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
-			this.selected.bound.x = x - 10;
-			this.selected.bound.y = y - 10;
+			this.updateObject(this.selected,x-10,y-10);
 		}
 	}
+}
+
+DiagramEditor.prototype.updateObject = function(obj, x, y) {
+	obj.bound.x = x - 10;
+	obj.bound.y = y - 10;
+	VersionElement.update(obj.ve);
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
@@ -189,7 +205,7 @@ DiagramEditor.prototype.clicknode = function(x, y) {
 
 DiagramEditor.prototype.clickedge = function(x, y) {
 	for(var i=0;i < this.diagram.relationships.length;i++) {
-		if(this.click_a_edge(this.diagram.relationships[i], x, y)) return true;
+		if(this.click_a_edge(g_model.relationships[this.diagram.relationships[i]], x, y)) return true;
 	}
 	return false;
 }
@@ -222,7 +238,17 @@ DiagramEditor.prototype.createButton = function() {
 	var self = this;
 	var toolpanel = Ext.getCmp('toolpanel');
 	toolpanel.removeAll();
-	var tools = g_metamodel.metadiagram.metaobjects.concat(g_metamodel.metadiagram.metarelations);
+	var tools = [];
+	this.metadiagram = g_metamodel.metadiagrams[this.diagram.meta_id];
+	for(var i=0;i < this.metadiagram.metaobjects.length;i++) {
+		tools.push(g_metamodel.metaobjects[this.metadiagram.metaobjects[i]]);
+	}
+	for(var i=0;i < this.metadiagram.metarelations.length;i++) {
+		tools.push(g_metamodel.metarelations[this.metadiagram.metarelations[i]]);
+	}
+	/*
+	 * selectツールを追加
+	 */
 	tools.unshift(null);
 	for(var i=0;i < tools.length;i++) {
 		var button_text = '';
@@ -262,7 +288,30 @@ DiagramEditor.prototype.createButton = function() {
  */
 DiagramEditor.prototype.deleteSelected = function() {
 	if(this.selected != null) {
-		this.selected.ve.ver_type = 'delete';
+		if(this.selected.ve == 'add') {
+			var rm = -1;
+			for(var i=0;i < this.diagram.objects.length;i++) {
+				if(this.diagram.objects[i] == this.selected.id) {
+					rm = i;
+				}
+			}
+			if(rm != -1) {
+				this.diagram.objects.splice(rm, 1);
+				g_model.objects.splice(this.selected.id, 1);
+				return;
+			}
+			for(var i=0;i < this.diagram.relationships.length;i++) {
+				if(this.diagram.relationships[i] == this.selected.id) {
+					rm = i;
+				}
+			}
+			if(rm != -1) {
+				this.diagram.relationships.splice(rm, 1);
+				g_model.relationships.splice(this.selected.id, 1);
+			}
+		}else{
+			this.selected.ve.ver_type = 'delete';
+		}
 	}
 }
 
@@ -276,7 +325,9 @@ DiagramEditor.prototype.addObject = function(x,y) {
 	obj.bound.x = x;
 	obj.bound.y = y;
 	obj.ve.ver_type = 'add';
-	this.diagram.objects.push(obj);
+	console.log(obj.id);
+	g_model.objects[obj.id] = obj;
+	this.diagram.objects.push(obj.id);
 }
 
 /**
@@ -311,7 +362,8 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 			rel.properties.add(proplist);
 		}
 		*/
-		this.diagram.relationships.push(rel);
+		g_model.relationships[rel.id] = rel;
+		this.diagram.relationships.push(rel.id);
 //		this.fireOnAddRelationship(rel);
 		return rel;
 	}
@@ -320,7 +372,8 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 
 DiagramEditor.prototype.findNode = function(p) {
 	for(var i=0;i < this.diagram.objects.length;i++) {
-		var obj = this.diagram.objects[i];
+		var obj_id = this.diagram.objects[i];
+		var obj = g_model.objects[obj_id];
 //		console.log("x="+p.x+", y="+p.y+", obj.x="+obj.bound.x+", obj.y="+obj.bound.y);
 		if(Rectangle2D.contains(obj.bound, p)) {
 			return obj;
@@ -358,18 +411,30 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 	    items: []
 	});
 	for(var i=0;i < meta_ele.properties.length;i++) {
-		if(ele.properties[i] == undefined) {
-			ele.properties[i] = new PropertyList();
-			ele.properties[i].children[0] = new Property();
+		var meta_prop = g_metamodel.metaproperties[meta_ele.properties[i]];
+		var prop = null;
+		for(var j=0;j<ele.properties.length;j++) {
+			if(ele.properties[j].meta_id == meta_ele.properties[i]) {
+				prop = ele.properties[j];
+			}
+		}
+		if(prop == null) {
+			plist = new PropertyList();
+			plist.meta_id = meta_prop.id;
+			var new_p = new Property();
+			g_model.properties[new_p.id] = new_p;
+			plist.children[0] = new_p.id;
+			ele.properties.push(plist);
+			prop = plist;
 		}
 		var prop_tab = null;
-		if(meta_ele.properties[i].data_type == MetaProperty.COLLECTION_STRING) {
-			prop_tab = PropertyPanel.CollectionString(this, meta_ele.properties[i], ele.properties[i], ele)
+		if(meta_prop.data_type == MetaProperty.COLLECTION_STRING) {
+			prop_tab = PropertyPanel.CollectionString(this, meta_prop, prop, ele)
 		}else{
-			if(meta_ele.properties[i].widget == MetaProperty.INPUT_FIELD) {
-				prop_tab = PropertyPanel.InputField(meta_ele.properties[i], ele.properties[i], ele)
-			}else if(meta_ele.properties[i].widget == MetaProperty.FIXED_LIST) {
-				prop_tab = PropertyPanel.FixedList(meta_ele.properties[i], ele.properties[i], ele)
+			if(meta_prop.widget == MetaProperty.INPUT_FIELD) {
+				prop_tab = PropertyPanel.InputField(meta_prop, prop, ele)
+			}else if(meta_prop.widget == MetaProperty.FIXED_LIST) {
+				prop_tab = PropertyPanel.FixedList(meta_prop, prop, ele)
 			}
 		}
 		prop_tab.index = i;
@@ -389,18 +454,20 @@ DiagramEditor.prototype.getImage = function(type) {
 function PropertyPanel(){}
 
 PropertyPanel.InputField = function(meta_prop, prop, ele) {
+	var p = g_model.properties[prop.children[0]];
 	var prop_tab = {
             title: meta_prop.name,
             html : '',
             items: [{
 	  	        	   xtype: 'textfield',
-  	        		   value: prop.children[0].value,
+  	        		   value: p.value,
 //  	        		   index: i,
   	        		   listeners: {
   	        			   change: {
   	        				   fn: function(field, newValue, oldValue, opt) {
  	        						console.log('change'+this.index);
- 	        						prop.children[0].value = newValue;
+ 	        						p.value = newValue;
+ 	        						VersionElement.update(p.ve);
 //  	        					 ele.properties[this.index].children[0].value = newValue;
   	        					 calObjHeight(ele);
   	        				   }
@@ -411,6 +478,7 @@ PropertyPanel.InputField = function(meta_prop, prop, ele) {
 	return prop_tab;
 }
 PropertyPanel.FixedList = function(meta_prop, prop, ele) {
+	var p = g_model.properties[prop.children[0]];
 	var strs = meta_prop.exfield.split('&');
 	var datas = new Array();
 	for(var j=0;j < strs.length;j++) datas.push({"name":strs[j]});
@@ -428,13 +496,14 @@ PropertyPanel.FixedList = function(meta_prop, prop, ele) {
 	  	        	    queryMode: 'local',
 	  	        	    displayField: 'name',
 	  	        	    valueField: 'name',
-  	        		   value: prop.children[0].value,
+  	        		   value: p.value,
 //  	        		   index: i,
   	        		   listeners: {
   	        			   change: {
   	        				   fn: function(field, newValue, oldValue, opt) {
- 	        						console.log('change'+this.index);
- 	        						prop.children[0].value = newValue;
+ 	        						p.value = newValue;
+ 	        						g_model.properties[prop.children[0]].value = newValue;
+ 	        						VersionElement.update(p.ve);
 //  	        					 ele.properties[this.index].children[0].value = newValue;
   	        					 calObjHeight(ele);
   	        				   }
@@ -470,26 +539,36 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 	    });
 	 var dummy = new Array();
 	 for(var i=0;i < prop.children.length;i++) {
-		 dummy.push(prop.children[i].value);
+		var p = g_model.properties[prop.children[i]];
+		if(p.ve.ver_type != 'delete') dummy.push(p.value);
 	 }
 	 var store = Ext.create('Ext.data.ArrayStore', {
          model: 'Collection',
          data: dummy
      });
 	 var additem = function() {
-		 prop.children.push(new Property());
-		 dc.createPropertyPanel()
+		 var new_p = new Property();
+		 g_model.properties[new_p.id] = new_p;
+		 prop.children.push(new_p.id);
+//		 dc.createPropertyPanel()
 	 }
 	 var optionitem = function() {
 		 Ext.Msg.prompt('','',function(btn,text){
 			 if(btn != 'cancel') {
-				 prop.children[PropertyPanel.selected[0]].value = text;
+				 var p = g_model.properties[prop.children[PropertyPanel.selected[0]]];
+				 p.value = text;
+				 VersionElement.update(p.ve);
 			 }
 		 },null,true);
 	 }
 	 var deleteitem = function() {
 		 for(var i=0;i<PropertyPanel.selected.length;i++) {
-			 prop.children.splice(PropertyPanel.selected[i], 1);
+			 if(p.ve.ver_type == 'add') {
+				 delete g_model.properties[prop.children[PropertyPanel.selected[i]]];
+				 prop.children.splice(PropertyPanel.selected[i], 1);
+			 }else{
+				 g_model.properties[prop.children[PropertyPanel.selected[i]]].ve.ver_type = 'delete';
+			 }
 		 }
 	 }
 	    var grid4 = Ext.create('Ext.grid.Panel', {
