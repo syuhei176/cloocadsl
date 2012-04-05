@@ -151,8 +151,10 @@ function onItemClick(item){
 		saveMetaModel(g_metamodel_id);
 	}else if(item.text == 'Preview') {
 		g_model = new Model();
-		g_model.root = new Diagram();
-		editor = new DiagramEditor('preview', 'preview'+new Date().getTime(), g_model.root);
+		g_model.root = 1;
+		g_model.diagrams[1] = new Diagram();
+		g_model.diagrams[1].meta_id = 1;
+		editor = new DiagramEditor('preview', 'preview'+new Date().getTime(), g_model.diagrams[1]);
 	}else if(item.text == 'MetaSave') {
 		saveMetaModel(g_metamodel_id);
 	}else if(item.text == 'MetaObj') {

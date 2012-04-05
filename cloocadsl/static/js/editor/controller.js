@@ -78,26 +78,30 @@ function loadModel(pid) {
 					}
 					g_metamodel_id = data.metamodel_id;
 					loadMetaModel(data.metamodel_id);
-//					g_model = parseModelXML(data.xml);
 					/*
 					 * IDジェネレータの初期値を設定する。
 					 */
 					for(var i=0;i < g_model.objects.length;i++) {
-						var obj = g_model.objects[i];
-						if(obj == null) continue;
-						object_IdGenerator.setOffset(obj.id);
-					}
-					for(var i=0;i < g_model.relationships.length;i++) {
-						var obj = g_model.relationships[i];
-						if(obj == null) continue;
-						object_IdGenerator.setOffset(obj.id);
-					}
-					for(var i=0;i < g_model.properties.length;i++) {
-						var prop = g_model.properties[i];
-						if(prop) continue;
-						property_IdGenerator.setOffset(prop.id);
+						if(g_model.objects[i] != null) {
+							object_IdGenerator.setOffset(g_model.objects[i].id);
+						}
 					}
 
+					for(var key in g_model.objects) {
+						obj = g_model.objects[key]
+						if(obj == null) continue;
+						object_IdGenerator.setOffset(obj.id);
+					}
+					for(var key in g_model.relationships) {
+						obj = g_model.objects[key]
+						if(obj == null) continue;
+						object_IdGenerator.setOffset(obj.id);
+					}
+					for(var key in g_model.properties) {
+						var prop = g_model.properties[key];
+						if(prop == null) continue;
+						property_IdGenerator.setOffset(prop.id);
+					}
 					createModelExplorer();
 				}
 			}, "json");

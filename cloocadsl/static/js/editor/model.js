@@ -107,7 +107,10 @@ function IdGenerator() {
 }
 
 IdGenerator.prototype.setOffset = function(offset) {
-	if(this.idcount < offset) this.idcount = offset;	
+	if(this.idcount < offset) {
+		this.idcount = offset;
+		console.log('offset='+this.idcount);
+	}
 }
 
 IdGenerator.prototype.getNewId = function() {

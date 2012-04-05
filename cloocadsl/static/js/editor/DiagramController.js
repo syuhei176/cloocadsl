@@ -325,7 +325,7 @@ DiagramEditor.prototype.addObject = function(x,y) {
 	obj.bound.x = x;
 	obj.bound.y = y;
 	obj.ve.ver_type = 'add';
-	console.log(obj.id);
+//	console.log(obj.id);
 	g_model.objects[obj.id] = obj;
 	this.diagram.objects.push(obj.id);
 }
