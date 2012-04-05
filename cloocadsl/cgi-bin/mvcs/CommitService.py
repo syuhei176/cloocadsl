@@ -4,6 +4,7 @@ import MySQLdb
 import md5
 import re
 import sys
+import json
 sys.path.append('../')
 from xml.etree.ElementTree import *
 import config
@@ -47,7 +48,8 @@ def commit(project_id):
         return None
     #xml to rep (xml include version infomation)
     xml = rows[0][2]
-    InsertXML2REP(xml, rows[0][4])
+    InsertJSON2REP(xml, rows[0][4])
+#    InsertXML2REP(xml, rows[0][4])
     connect.close()
 
 
@@ -222,7 +224,6 @@ def parseRelationship(elem, parent_id, parent_ver):
     else:
         return False
 
-
 def parsePropertyList(elem, parent_id):
     children_edited = False
     for e in elem.findall(".//Property"):
@@ -291,11 +292,11 @@ def parseDiagramJSON(diagram):
     meta_id = diagram['meta_id']
     edited_type = diagram['ve']['ver_type']
     version = int(diagram['ve']['version'])
-    for e in range(len(diagram['objects'])):
-        if parseObject(e, id, version):
+    for e in diagram['objects']:
+        if parseObjectJSON(e, id, version):
             children_edited = True
-    for e in range(len(diagram['relationships'])):
-        if parseRelationship(e, id, version):
+    for e in diagram['relationships']:
+        if parseRelationshipJSON(e, id, version):
             children_edited = True
     if edited_type == 'update':
         cur = connect.cursor()
@@ -328,3 +329,142 @@ def parseDiagramJSON(diagram):
     else:
         pass
     return id
+
+def parseObjectJSON(obj, parent_id, parent_ver):
+    children_edited = False
+    id = obj['id']
+    meta_id = obj['meta_id']
+    x = obj['bound']['x']
+    y = obj['bound']['y']
+    edited_type = obj['ve']['ver_type']
+    version = int(obj['ve']['version'])
+    if not edited_type == 'delete':
+        for e in obj['properties']:
+            if parsePropertyListJSON(e, id):
+                children_edited = True
+    if edited_type == 'update':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,parent_id,project_id,next_version,0))
+        connect.commit()
+        cur.close()
+        return True
+    elif edited_type == 'add':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,parent_id,project_id,next_version,1))
+        connect.commit()
+        cur.close()
+        return True
+    elif edited_type == 'delete':
+        cur = connect.cursor()
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,parent_id,project_id,next_version,2))
+        connect.commit()
+        cur.close()
+        return True
+    elif children_edited:
+        cur = connect.cursor()
+        cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,parent_id,project_id,next_version,0))
+        connect.commit()
+        cur.close()
+        return True
+    else:
+        return False
+
+def parseRelationshipJSON(rel, parent_id, parent_ver):
+    id = rel['id']
+    meta_id = rel['meta_id']
+    src = rel['src']
+    dest = rel['dest']
+    edited_type = rel['ve']['ver_type']
+    version = int(rel['ve']['version'])
+    property = ""
+    if not edited_type == 'delete':
+        for e in rel['properties']:
+            if parsePropertyListJSON(e, id):
+                children_edited = True
+    if edited_type == 'update':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM relationship where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,property,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,property,parent_id,project_id,next_version,0))
+        connect.commit()
+        cur.close()
+        return True
+    elif edited_type == 'add':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM relationship where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,property,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,property,parent_id,project_id,next_version,1))
+        connect.commit()
+        cur.close()
+        return True
+    elif edited_type == 'delete':
+        cur = connect.cursor()
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,property,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,property,parent_id,project_id,next_version,2))
+        connect.commit()
+        cur.close()
+        return True
+    elif children_edited:
+        cur = connect.cursor()
+        cur.execute('DELETE FROM relationship where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,property,diagram_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,property,parent_id,project_id,next_version,0))
+        connect.commit()
+        cur.close()
+        return True
+    else:
+        return False
+
+def parsePropertyListJSON(plist, parent_id):
+    children_edited = False
+    meta_id = plist['meta_id']
+    for p in plist['children']:
+        if parsePropertyJSON(p,meta_id,parent_id):
+            children_edited = True
+    return children_edited
+
+def parsePropertyJSON(prop, meta_id, parent_id):
+    children_edited = False
+    id = prop['id']
+    content = prop['value']
+    edited_type = prop['ve']['ver_type']
+    version = int(prop['ve']['version'])
+    if edited_type == 'update':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM property where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content,project_id,next_version,0))
+        connect.commit()
+        cur.close()
+        return True
+    elif edited_type == 'add':
+        cur = connect.cursor()
+        cur.execute('DELETE FROM has_property where property_id=%s AND model_id=%s AND parent_id=%s;', (id,project_id,parent_id))
+        cur.execute('DELETE FROM property where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO has_property (parent_id,property_id,model_id) VALUES(%s,%s,%s);', (parent_id,id,project_id))
+        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content,project_id,next_version,1))
+        connect.commit()
+        cur.close()
+        return True
+    elif edited_type == 'delete':
+        cur = connect.cursor()
+        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content,project_id,next_version,2))
+        connect.commit()
+        cur.close()
+        return True
+    elif children_edited:
+        cur = connect.cursor()
+        cur.execute('DELETE FROM property where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content,project_id,next_version,0))
+        connect.commit()
+        cur.close()
+        return True
+    else:
+        return False

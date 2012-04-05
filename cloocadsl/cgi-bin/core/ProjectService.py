@@ -82,7 +82,7 @@ clean_xml = '''
 <?xml version="1.0" encoding="utf-8"?><Model id="0" current_version="1"><Diagram id="1" meta_id="1"><VersionElement version="1" ver_type="add" /></Diagram></Model>
 '''
 clean_json = '''
-{"id":1,"current_version":1,"root":{"id":1,"objects":[],"relationships":[]}}
+{"id":1,"current_version":1,"root":{"id":1,"meta_id":1,"objects":[],"relationships":[],"ve":{"version":1,"ver_type":"add"}}}
 '''
 
 def createProject(user, name, xml, metamodel_id):

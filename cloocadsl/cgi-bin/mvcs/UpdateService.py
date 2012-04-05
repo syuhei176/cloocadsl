@@ -3,7 +3,6 @@ import MySQLdb
 import md5
 import re
 import sys
-from core.model.User import *
 import config
 
 connect = None
@@ -70,7 +69,7 @@ def LoadModelOfHead(id):
     if len(rows) == 0:
         return None
     xml = '<?xml version="1.0" encoding="UTF-8" ?>'
-    xml += '<Model id="'+rows[0][0]+'" current_version="'+str(rows[0][1])+'">'
+    xml += '<Model id="'+str(rows[0][0])+'" current_version="'+str(rows[0][1])+'">'
     xml += LoadDiagram(rows[0][2], id, rows[0][1])
     xml += '</Model>'
     cur.close()
@@ -98,7 +97,7 @@ def LoadDiagram(id, project_id, ver):
     if len(rows) == 0:
         return None
     meta_id = int(rows[0][1])
-    xml = '<Diagram id="'+str(rows[0][0])+'" meta_id="'+rows[0][1]+'">'
+    xml = '<Diagram id="'+str(rows[0][0])+'" meta_id="'+srows[0][1]+'">'
     xml += '<VersionElement version="'+str(rows[0][2])+'" ver_type="none"/>'
     xml += LoadObjects(id, project_id, ver)
     xml += LoadRelationships(id, project_id, ver)
