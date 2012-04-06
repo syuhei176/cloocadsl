@@ -1,7 +1,7 @@
 # coding: utf-8
 
-#CLOOCA_ROOT = '/Users/hiyashuuhei/git/cloocadsl/cloocadsl'
-CLOOCA_ROOT = '/home/www-dsl'
+CLOOCA_ROOT = '/Users/hiyashuuhei/git/cloocadsl/cloocadsl'
+#CLOOCA_ROOT = '/home/www-dsl'
 CLOOCA_CGI = CLOOCA_ROOT + '/cgi-bin'
 CLOOCA_WAR = CLOOCA_ROOT + '/static'
 
