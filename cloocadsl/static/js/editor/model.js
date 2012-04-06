@@ -18,7 +18,7 @@ function Model() {
 }
 
 function Diagram(meta_id) {
-	this.id = 1;
+	this.id = diagram_IdGenerator.getNewId();
 	this.meta_id = meta_id;
 	//Objectへの参照
 	this.objects = new Array();
@@ -33,6 +33,7 @@ function Object(meta_id) {
 	this.bound = new Rectangle2D(50, 50, 50, 50);
 	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
 	this.ve = new VersionElement();
+	this.diagram = null;
 }
 
 function Relationship(meta_id) {
@@ -118,6 +119,7 @@ IdGenerator.prototype.getNewId = function() {
 	return this.idcount;
 }
 
+var diagram_IdGenerator = new IdGenerator();
 var object_IdGenerator = new IdGenerator();
 var property_IdGenerator = new IdGenerator();
 var metaobject_IdGenerator = new IdGenerator();

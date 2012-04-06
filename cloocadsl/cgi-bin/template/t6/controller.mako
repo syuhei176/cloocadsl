@@ -70,9 +70,7 @@ function execute(event) {
 % for i in root.json.state:
 //(${i.x}, ${i.y})
 	case STATE_${i.id}:
-%  for p in i.properties:
-		sys_${p.children[0].value}();
-%  endfor
+		sys_${i.action.children[0].value}();
 	break;
 % endfor
 	}

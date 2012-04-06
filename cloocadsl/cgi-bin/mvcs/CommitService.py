@@ -280,11 +280,24 @@ def parse_model_JSON(model):
     version = int(model['current_version'])
     global next_version
     next_version = version + 1
+    for key in model['diagrams']:
+        parseDiagramJSON(model['diagrams'][key])
+    model['objects']
+    model['relationships']
+    model['properties']
     root = parseDiagramJSON(model['root'])
     cur = connect.cursor()
     cur.execute('UPDATE model SET root=%s,current_version=%s WHERE id=%s;', (root,next_version,project_id,))
     connect.commit()
     cur.close()
+
+def parseDiagramsJSON(diagram):
+    diagram['id']
+    diagram['meta_id']
+    diagram['ve']['ver_type']
+    diagram['ve']['version']
+    diagram['objects']
+    diagram['relationships']
 
 def parseDiagramJSON(diagram):
     children_edited = False

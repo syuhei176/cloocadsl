@@ -25,6 +25,8 @@ function MetaObject(id, name) {
 	this.properties = new Array();	//propertyへの参照
 	this.abstractable = false;
 	this.graphic = null;
+	//
+	this.decomposition = null;
 }
 
 function MetaRelation(id, name) {

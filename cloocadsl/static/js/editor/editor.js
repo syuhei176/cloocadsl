@@ -93,6 +93,10 @@ function create_menu() {
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
+                	   text: 'diagram',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
                 	   text: 'png',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
@@ -161,6 +165,12 @@ function onItemClick(item){
 //	window.alert('item'+ item.text);
 	if(item.text == 'Save') {
 		saveModel(g_project_id);
+	}else if(item.text == 'diagram') {
+		var d = new Diagram();
+		d.meta_id = g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition;
+		current_editor.selected.diagram = d.id;
+		g_model.diagrams[d.id] = d;
+		createModelExplorer();
 	}else if(item.text == 'png') {
 		current_editor.getImage('png');
 	}else if(item.text == 'jpg') {
@@ -221,13 +231,16 @@ html: '<h1>2つ目のタブパネル</h1>'
 
 
 function createModelExplorer() {
+	var diagrams = [];
+	for(var key in g_model.diagrams) {
+		console.log("createModelExplorer "+key);
+		diagrams.push({id: key, text: "diagram"+key, leaf: true});
+	}
 	var store = Ext.create('Ext.data.TreeStore', {
 	    root: {
 	        expanded: true,
 	        children: [
-	            { text: "root", expanded: true, children: [
-	                { id: "1", text: "diagram", leaf: true }
-	            ] }
+	            { text: "root", expanded: true, children: diagrams }
 	        ]
 	    }
 	});
@@ -240,12 +253,10 @@ function createModelExplorer() {
 	});
 	modelExplorer.on('itemclick',function(view, record, item, index, event) {
     	console.log('click '+record.data.id);
-    	if(record.data.id == 1) {
-    		editor = new DiagramEditor(record.data.text, 'test'+new Date().getTime(), g_model.diagrams[g_model.root]);
-    	}
+		editor = new DiagramEditor(record.data.text, record.data.text, g_model.diagrams[record.data.id]);
     });
+	Ext.getCmp('modelexplorer').removeAll();
 	Ext.getCmp('modelexplorer').add(modelExplorer);
-	console.log('a');
 	return modelExplorer;
 }
 

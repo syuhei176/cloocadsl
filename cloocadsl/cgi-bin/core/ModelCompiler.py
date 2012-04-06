@@ -112,7 +112,7 @@ def parse_diagram_JSON(diagram, metadiagram_dict):
         if obj_dict['ve']['ver_type'] == 'delete':
             continue
         meta_id = obj_dict['meta_id']
-        obj = parse_object_JSON(obj_dict)
+        obj = parse_object_JSON(obj_dict, g_metamodel_dict['metaobjects'][meta_id])
         getattr(ret, g_metamodel_dict['metaobjects'][meta_id]['name']).append(obj)
         ret.objects.append(obj)
     for i in range(len(diagram['relationships'])):
@@ -125,7 +125,7 @@ def parse_diagram_JSON(diagram, metadiagram_dict):
         ret.relationships.append(rel)
     return ret
 
-def parse_object_JSON(dict):
+def parse_object_JSON(dict, metaobject_dict):
     class klass: pass
     id = dict['id']
     meta_id = dict['meta_id']
@@ -135,10 +135,16 @@ def parse_object_JSON(dict):
     setattr(klass, 'meta_id', meta_id)
     setattr(klass, 'x', x)
     setattr(klass, 'y', y)
+#    for k in range(len(metaobject_dict['properties'])):
+#        meta_prop = g_metamodel_dict['metaproperties'][metaobject_dict['properties'][k]]
+#        setattr(klass, meta_prop['name'], None)
     setattr(klass, 'properties', [])
     ret = klass()
     for i in range(len(dict['properties'])):
-        ret.properties.append(parse_propertylist_JSON(dict['properties'][i]))
+        meta_prop = g_metamodel_dict['metaproperties'][dict['properties'][i]['meta_id']]
+        prop = parse_propertylist_JSON(dict['properties'][i])
+        setattr(klass, meta_prop['name'], prop)
+        ret.properties.append(prop)
     return ret
 
 def parse_relationship_JSON(dict):

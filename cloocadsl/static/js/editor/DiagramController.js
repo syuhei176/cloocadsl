@@ -19,25 +19,21 @@ function DiagramEditor(name, key, diagram) {
 	this.createButton();
 	
 	var tab = editor_tabs.add({
-		id: key,
+		id: this.key,
 		title: name,
-		html : '<canvas id="canvas_'+self.key+'" width=500 height=400></canvas>',
+		html : '<canvas id="canvas_'+this.key+'" width=500 height=400></canvas>',
 		closable: 'true',
 	});
 	current_editor = this;
 	editor_tabs.setActiveTab(tab);
-	this.canvas = $('#canvas_'+key);
+	this.canvas = $('#canvas_'+this.key);
 //	window.alert("canvas = "+this.canvas);
 	var draw = function() {
+//		console.log('draw '+self.key)
 //		window.alert("draw" + editor_key);
-		self.canvas.drawRect({
-			  fillStyle: "#fff",
-			  x: 0, y: 0,
-			  width: 500,
-			  height: 400,
-			  fromCenter: false});
+		self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: 500,height: 400, fromCenter: false});
 		for(var i=0;i < self.diagram.objects.length;i++) {
-			var obj_id = self.diagram.objects[i];			
+			var obj_id = self.diagram.objects[i];
 			var obj = g_model.objects[obj_id];
 			if(obj.ve.ver_type == 'delete') continue;
 			var col = '#000';
@@ -288,7 +284,7 @@ DiagramEditor.prototype.createButton = function() {
  */
 DiagramEditor.prototype.deleteSelected = function() {
 	if(this.selected != null) {
-		if(this.selected.ve == 'add') {
+		if(this.selected.ve.ver_type == 'add') {
 			var rm = -1;
 			for(var i=0;i < this.diagram.objects.length;i++) {
 				if(this.diagram.objects[i] == this.selected.id) {
@@ -297,7 +293,8 @@ DiagramEditor.prototype.deleteSelected = function() {
 			}
 			if(rm != -1) {
 				this.diagram.objects.splice(rm, 1);
-				g_model.objects.splice(this.selected.id, 1);
+//				g_model.objects.splice(this.selected.id, 1);
+				delete g_model.objects[this.selected.id]
 				return;
 			}
 			for(var i=0;i < this.diagram.relationships.length;i++) {
@@ -307,7 +304,8 @@ DiagramEditor.prototype.deleteSelected = function() {
 			}
 			if(rm != -1) {
 				this.diagram.relationships.splice(rm, 1);
-				g_model.relationships.splice(this.selected.id, 1);
+//				g_model.relationships.splice(this.selected.id, 1);
+				delete g_model.relationships[this.selected.id]
 			}
 		}else{
 			this.selected.ve.ver_type = 'delete';
@@ -325,7 +323,7 @@ DiagramEditor.prototype.addObject = function(x,y) {
 	obj.bound.x = x;
 	obj.bound.y = y;
 	obj.ve.ver_type = 'add';
-//	console.log(obj.id);
+	VersionElement.update(this.diagram.ve);
 	g_model.objects[obj.id] = obj;
 	this.diagram.objects.push(obj.id);
 }
@@ -346,6 +344,7 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 		rel.src = start.id;
 		rel.dest = end.id;
 		rel.ve.ver_type = 'add';
+		VersionElement.update(this.diagram.ve);
 		/*
 		rel.ve.ver_type = "add";
 		for(MetaProperty metaprop : rel.meta.properties) {

@@ -36,7 +36,8 @@ function update(pid) {
 			function(data) {
 				if(data) {
 					console.log('loaded json string = '+data);
-					g_model = eval('(' + data + ')');
+					g_model = JSON.parse(data);
+//					g_model = eval('(' + data + ')');
 					/*
 					g_metamodel_id = data.metamodel_id;
 					loadMetaModel(data.metamodel_id);
@@ -73,20 +74,21 @@ function loadModel(pid) {
 						g_model = new Model();
 						g_model.root = 1;
 						g_model.diagrams[1] = new Diagram(1);
+						diagram_IdGenerator.setOffset(1);
 					}else{
-						g_model = eval('(' + data.xml + ')');
+//						g_model = eval('(' + data.xml + ')');
+						g_model = JSON.parse(data.xml);
 					}
 					g_metamodel_id = data.metamodel_id;
 					loadMetaModel(data.metamodel_id);
 					/*
 					 * IDジェネレータの初期値を設定する。
 					 */
-					for(var i=0;i < g_model.objects.length;i++) {
-						if(g_model.objects[i] != null) {
-							object_IdGenerator.setOffset(g_model.objects[i].id);
-						}
+					for(var key in g_model.diagrams) {
+						obj = g_model.diagrams[key]
+						if(obj == null) continue;
+						diagram_IdGenerator.setOffset(obj.id);
 					}
-
 					for(var key in g_model.objects) {
 						obj = g_model.objects[key]
 						if(obj == null) continue;
@@ -132,7 +134,8 @@ function loadMetaModel(id) {
 			function(data) {
 				if(data) {
 					console.log('loaded json string = '+data.xml);
-					g_metamodel = eval('(' + data.xml + ')');
+//					g_metamodel = eval('(' + data.xml + ')');
+					g_metamodel = JSON.parse(data.xml);
 					for(var i=0;i < g_metamodel.metaobjects.length;i++) {
 						if(g_metamodel.metaobjects[i] != null) {
 							metaobject_IdGenerator.setOffset(g_metamodel.metaobjects[i].id);
