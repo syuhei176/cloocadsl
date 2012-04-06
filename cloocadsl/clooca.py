@@ -8,7 +8,8 @@ deploy
 from flask import Flask, url_for, render_template, session, request, make_response
 import sys
 import json
-sys.path.append('cgi-bin/')
+import config
+sys.path.append(config.CLOOCA_CGI)
 from core import UserService
 from core import MetaModelService
 from core import ProjectService
@@ -185,18 +186,5 @@ with app.test_request_context():
 #sercret key
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
  
-argvs = sys.argv  # コマンドライン引数を格納したリストの取得
-argc = len(argvs) # 引数の個数
-
-if argc == 2:
-    if argvs[1] == 'run':
-        app.run()
-    if argvs[1] == 'sync':
-        pass
-    if argvs[1] == 'deploy':
-        pass
-else:
-    pass
-
 if __name__ == '__main__':
     app.run(debug=True)

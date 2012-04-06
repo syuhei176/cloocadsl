@@ -305,32 +305,34 @@ def parseDiagramJSON(diagram):
     meta_id = diagram['meta_id']
     edited_type = diagram['ve']['ver_type']
     version = int(diagram['ve']['version'])
+    """
     for e in diagram['objects']:
         if parseObjectJSON(e, id, version):
             children_edited = True
     for e in diagram['relationships']:
         if parseRelationshipJSON(e, id, version):
             children_edited = True
+    """
     if edited_type == 'update':
         cur = connect.cursor()
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
         connect.commit()
-#        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,project_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,meta_id,project_id,next_version))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s);', (id,meta_id,project_id,next_version,0))
         connect.commit()
         cur.close()
     elif edited_type == 'add':
         cur = connect.cursor()
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
         connect.commit()
-#        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,project_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,meta_id,project_id,next_version))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s);', (id,meta_id,project_id,next_version,1))
         connect.commit()
         cur.close()
     elif edited_type == 'delete':
         cur = connect.cursor()
-        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,model_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,meta_id,project_id,next_version))
+        cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,project_id,next_version))
+        connect.commit()
+#        cur.execute('INSERT INTO object_has_diagram (id,diagram_id,model_id) VALUES(%s,%s,%s);', (id,parent_id,project_id))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s);', (id,meta_id,project_id,next_version,2))
         connect.commit()
         cur.close()
     elif children_edited:
