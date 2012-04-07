@@ -139,9 +139,9 @@ Line2D.prototype.getBounds2D = function() {
 }
 
 Line2D.prototype.getConnect = function(l) {
-	var dBunbo	= (getX2() - getX1() )
+	var dBunbo	= (this.getX2() - this.getX1() )
     	 		* ( l.getY2() - l.getY1() )
-    	 		- ( getY2() - getY1() )
+    	 		- ( this.getY2() - this.getY1() )
     	 		* ( l.getX2() - l.getX1());
     	 
     	 if( 0 == dBunbo )
@@ -149,12 +149,12 @@ Line2D.prototype.getConnect = function(l) {
     		 return null;
     	 }
     	 
-    	 var vectorAC = new Point2D(l.getX1() - getX1(), l.getY1() - getY1());
+    	 var vectorAC = new Point2D(l.getX1() - this.getX1(), l.getY1() - this.getY1());
     	 
     	 var dR = ( ( l.getY2() - l.getY1() ) * vectorAC.x - ( l.getX2() - l.getX1() ) * vectorAC.y ) / dBunbo;
 //    	 double dS = ( ( getY2() - getY1() ) * vectorAC.x - ( getX2() - getX1() ) * vectorAC.y ) / dBunbo;
     	 
-    	 return new Point2D(getX1() + dR * (getX2() - getX1()), getY1() + dR * (getY2() - getY1()));
+    	 return new Point2D(this.getX1() + dR * (this.getX2() - this.getX1()), this.getY1() + dR * (this.getY2() - this.getY1()));
     	 }
 
 /**
@@ -199,15 +199,15 @@ Line2D.prototype.relativeCCW = function(p) {
 }
     	
 Line2D.linesIntersect = function(x1, y1, x2, y2, x3, y3, x4, y4) {
-	return ((relativeCCW(x1, y1, x2, y2, x3, y3) *
-			relativeCCW(x1, y1, x2, y2, x4, y4) <= 0)
-			&& (relativeCCW(x3, y3, x4, y4, x1, y1) *
-			relativeCCW(x3, y3, x4, y4, x2, y2) <= 0));
+	return ((Line2D.relativeCCW(x1, y1, x2, y2, x3, y3) *
+			Line2D.relativeCCW(x1, y1, x2, y2, x4, y4) <= 0)
+			&& (Line2D.relativeCCW(x3, y3, x4, y4, x1, y1) *
+					Line2D.relativeCCW(x3, y3, x4, y4, x2, y2) <= 0));
 }
 
 Line2D.prototype.intersectsLine = function(x1, y1, x2, y2) {
-	return linesIntersect(x1, y1, x2, y2,
-	         getX1(), getY1(), getX2(), getY2());
+	return Line2D.linesIntersect(x1, y1, x2, y2,
+	         this.getX1(), this.getY1(), this.getX2(), this.getY2());
 }
 
 /*

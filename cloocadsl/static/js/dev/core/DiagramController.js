@@ -16,7 +16,7 @@ function DiagramEditor(name, key, diagram) {
 	this.dragMode = 0;
 	var self = this;
 	
-	this.createButton();
+//	this.createButton();
 	
 	var tab = editor_tabs.add({
 		id: this.key,
@@ -24,6 +24,7 @@ function DiagramEditor(name, key, diagram) {
 		html : '<canvas id="canvas_'+this.key+'" width=500 height=400></canvas>',
 		closable: 'true',
 	});
+	tab.on('activate', function(){self.createButton();});
 	current_editor = this;
 	editor_tabs.setActiveTab(tab);
 	this.canvas = $('#canvas_'+this.key);
@@ -80,24 +81,7 @@ function DiagramEditor(name, key, diagram) {
 			var rel_id = self.diagram.relationships[i];
 			var rel = g_model.relationships[rel_id];
 			if(rel.ve.ver_type == 'delete') continue;
-			var col = '#000';
-			if(rel == self.selected) {
-				col = '#00f';
-			}
-			var src = ModelController.getObject(self.diagram, rel.src);
-			var dest = ModelController.getObject(self.diagram, rel.dest);
-			var startx = src.bound.x;
-			var starty = src.bound.y;
-			var endx = dest.bound.x;
-			var endy = dest.bound.y;
-			self.canvas.drawLine({
-				  strokeStyle: col,
-				  strokeWidth: 2,
-				  strokeCap: "round",
-				  strokeJoin: "miter",
-				  x1: startx, y1: starty,
-				  x2: endx, y2: endy
-				});
+			self.draw_relationship(rel);
 		}
 	}
 //	var context = this.canvas.getContext('2d');
@@ -621,6 +605,7 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 
 
 function calObjHeight(obj) {
+	if(obj.bound == undefined) return;
 	var h = 0;
 	for(var j=0;j < obj.properties.length;j++) {
 		var prop = obj.properties[j];

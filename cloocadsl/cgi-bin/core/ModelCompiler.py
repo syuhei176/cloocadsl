@@ -1,3 +1,4 @@
+# coding: utf-8
 import sys
 import os
 import shutil
@@ -54,6 +55,8 @@ class BaseGenerator(object):
     def parseDirTemp(self, elem):
         for e in elem.findall(".//Template"):
             self.parseTemplate(e)
+        for e in elem.findall(".//TemplateForDiagram"):
+            self.parseTemplateForDiagram(e)
         for e in elem.findall(".//Copy"):
             self.parseCopy(e)
     
@@ -61,6 +64,14 @@ class BaseGenerator(object):
         src = elem.get('src')
         dest = elem.get('dest')
         self.FileGen(src, dest)
+
+    def parseTemplateForDiagram(self, elem):
+        src = elem.get('src')
+        dest = elem.get('dest')
+        dname = elem.get('diagram')
+        for key in self.model.diagrams:
+            if str(self.model.diagrams[key].meta_id) == str(dname):
+                self.FileGenByDiagram(src, dest+str(self.model.diagrams[key].id), self.model.diagrams[key])
     
     def parseCopy(self, elem):
         src = elem.get('src')
@@ -77,9 +88,108 @@ class BaseGenerator(object):
         hf = open(self.projectpath + '/' + dest, 'w')
         hf.write(buf.getvalue())
         hf.close()
+    
+    def FileGenByDiagram(self, src, dest, diagram):
+        mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", encoding_errors='replace')
+        tmpl = mylookup.get_template(src)
+        buf = StringIO()
+        model = diagram
+        ctx = Context(buf, root = model)
+        tmpl.render_context(ctx)
+        hf = open(self.projectpath + '/' + dest, 'w')
+        hf.write(buf.getvalue())
+        hf.close()
 
 def parseJSON(xml, meta_text):
-    return parse_model_JSON(json.loads(xml), json.loads(meta_text))
+    global g_metamodel_dict
+    global g_model_dict
+    g_metamodel_dict = json.loads(meta_text)
+    g_model_dict = json.loads(xml)
+    ConfigureEntity()
+    ConfigureReference()
+    return g_model
+
+"""
+実体を構成する。
+"""
+def ConfigureEntity():
+    global g_model
+    class klass: pass
+    setattr(klass, 'diagrams', {})
+    setattr(klass, 'objects', {})
+    setattr(klass, 'relationships', {})
+    setattr(klass, 'properties', {})
+    g_model = klass()
+    for key in g_model_dict['diagrams']:
+        g_model.diagrams[key] = dict2object(g_model_dict['diagrams'][key])
+    for key in g_model_dict['objects']:
+        g_model.objects[key] = dict2object(g_model_dict['objects'][key])
+    for key in g_model_dict['relationships']:
+        g_model.relationships[key] = dict2object(g_model_dict['relationships'][key])
+    for key in g_model_dict['properties']:
+        g_model.properties[key] = dict2object(g_model_dict['properties'][key])
+
+def dict2object(d):
+    class klass: pass
+    for key in d:
+        if isinstance(d[key], dict):
+            setattr(klass, key, dict2object(d[key]))
+        elif isinstance(d[key], list):
+            setattr(klass, key, list2object(d[key]))
+        else:
+            setattr(klass, key, d[key])
+    return klass()
+
+def list2object(l):
+    ret = []
+    for e in l:
+        if isinstance(e, dict):
+            ret.append(dict2object(e))
+        elif isinstance(e, list):
+            ret.append(list2object(e))
+        else:
+            ret.append(e)
+    return ret
+
+
+def ConfigureReference():
+    diagram = g_model.diagrams[str(g_model_dict['root'])]
+    meta_diagram = g_metamodel_dict['metadiagrams'][diagram.meta_id]
+    setattr(g_model, meta_diagram['name'], diagram)
+    for key in g_model.diagrams:
+        for obj_id in g_model.diagrams[key].objects:
+            obj = g_model.objects[str(obj_id)]
+            meta_name = g_metamodel_dict['metaobjects'][obj.meta_id]['name']
+            if not hasattr(g_model.diagrams[key], meta_name):
+                setattr(g_model.diagrams[key], meta_name, [])
+            getattr(g_model.diagrams[key], meta_name).append(obj)
+        for rel_id in g_model.diagrams[key].relationships:
+            rel = g_model.relationships[str(rel_id)]
+            meta_name = g_metamodel_dict['metarelations'][rel.meta_id]['name']
+            if not hasattr(g_model.diagrams[key], meta_name):
+                setattr(g_model.diagrams[key], meta_name, [])
+            getattr(g_model.diagrams[key], meta_name).append(rel)
+    for key in g_model.objects:
+        if not g_model.objects[key].diagram == None:
+            g_model.objects[key].diagram = g_model.diagrams[str(g_model.objects[key].diagram)]
+        for plist in g_model.objects[key].properties:
+            for prop_id in plist.children:
+                prop = g_model.properties[str(prop_id)]
+                meta_name = g_metamodel_dict['metaproperties'][plist.meta_id]['name']
+                if not hasattr(g_model.objects[key], meta_name):
+                    setattr(g_model.objects[key], meta_name, [])
+                getattr(g_model.objects[key], meta_name).append(prop)
+    for key in g_model.relationships:
+        g_model.relationships[key].src = g_model.objects[str(g_model.relationships[key].src)]
+        g_model.relationships[key].dest = g_model.objects[str(g_model.relationships[key].dest)]
+        for plist in g_model.relationships[key].properties:
+            for prop_id in plist.children:
+                prop = g_model.properties[str(prop_id)]
+                meta_name = g_metamodel_dict['metaproperties'][plist.meta_id]['name']
+                if not hasattr(g_model.relationships[key], meta_name):
+                    setattr(g_model.relationships[key], meta_name, [])
+                getattr(g_model.relationships[key], meta_name).append(prop)
+
 
 def parse_model_JSON(model_dict, metamodel_dict):
     global g_metamodel_dict
@@ -90,9 +200,27 @@ def parse_model_JSON(model_dict, metamodel_dict):
     meta_diagram = metamodel_dict['metadiagrams'][diagram['meta_id']]
     class Model: pass
     setattr(Model, meta_diagram['name'], None)
-    ret = Model()
-    setattr(ret, meta_diagram['name'], parse_diagram_JSON(diagram, meta_diagram))
-    return ret
+    global g_model
+    g_model = Model()
+    setattr(g_model, 'objects', {})
+    for key in g_model_dict['objects']:
+        obj = g_model_dict['objects'][key]
+        meta_obj = g_metamodel_dict['metaobjects'][obj['meta_id']]
+        g_model.objects[key] = parse_object_JSON(obj, meta_obj)
+    setattr(g_model, meta_diagram['name'], parse_diagram_JSON(diagram, meta_diagram))
+    setattr(g_model, 'diagrams', {})
+    for key in g_metamodel_dict['metadiagrams']:
+        if key == None:
+            continue
+        meta_diagram = key
+        getattr(g_model, 'diagrams')[meta_diagram['name']] = []
+    for key in g_model_dict['diagrams']:
+        if key == None:
+            continue
+        diagram = g_model_dict['diagrams'][key]
+        meta_diagram = g_metamodel_dict['metadiagrams'][diagram['meta_id']]
+        getattr(g_model, 'diagrams')[meta_diagram['name']].append(parse_diagram_JSON(diagram, meta_diagram))
+    return g_model
 
 def parse_diagram_JSON(diagram, metadiagram_dict):
     class klass: pass
@@ -131,6 +259,11 @@ def parse_object_JSON(dict, metaobject_dict):
     meta_id = dict['meta_id']
     x = dict['bound']['x']
     y = dict['bound']['y']
+    diagram_id = dict['diagram']
+    if not diagram_id == None:
+        diagram = g_model_dict['diagrams'][str(diagram_id)]
+        meta_diagram = g_metamodel_dict['metadiagrams'][diagram['meta_id']]
+        setattr(klass, meta_diagram['name'], parse_diagram_JSON(diagram,meta_diagram))
     setattr(klass, 'id', id)
     setattr(klass, 'meta_id', meta_id)
     setattr(klass, 'x', x)
@@ -151,8 +284,10 @@ def parse_relationship_JSON(dict):
     class klass: pass
     setattr(klass, 'id', dict['id'])
     setattr(klass, 'meta_id', dict['meta_id'])
-    setattr(klass, 'src', dict['src'])
-    setattr(klass, 'dest', dict['dest'])
+    setattr(klass, 'src_id', dict['src'])
+    setattr(klass, 'dest_id', dict['dest'])
+#    setattr(klass, 'src', g_model.objects[str(dict['src'])])
+#    setattr(klass, 'dest', g_model.objects[str(dict['dest'])])
     setattr(klass, 'properties', [])
     ret = klass()
     for i in range(len(dict['properties'])):
@@ -175,70 +310,6 @@ def parse_property_JSON(i, prop):
     ret = klass();
     ret.value = prop['value']
     return ret
-
-def parse(xml):
-    elem = fromstring(xml)
-    if elem.tag == 'Model':
-        return parse_model(elem)
-
-def parse_model(elem):
-    model = Model()
-    id = elem.get('id')
-    for e in elem.findall(".//Diagram"):
-        setattr(model, 'root', None)
-        model.root = parse_diagram(e)
-    return model
-
-def parse_diagram(elem):
-    class klass: pass
-    id = elem.get('id')
-    setattr(klass, 'id', id)
-    setattr(klass, 'objects', [])
-    setattr(klass, 'relationships', [])
-    diagram = klass()
-    for e in elem.findall(".//Object"):
-        diagram.objects.append(parse_object(e))
-    for e in elem.findall(".//Relationship"):
-        diagram.relationships.append(parse_relationship(e))
-    return diagram
-
-def parse_object(elem):
-    class klass: pass
-    id = elem.get('id')
-    meta_id = elem.get('meta_id')
-    x = elem.get('x')
-    y = elem.get('y')
-    setattr(klass, 'id', id)
-    setattr(klass, 'meta_id', meta_id)
-    setattr(klass, 'x', x)
-    setattr(klass, 'y', y)
-    setattr(klass, 'properties', [])
-    obj = klass()
-    for e in elem.findall(".//Property"):
-        obj.properties.append(parse_property(e))
-    return obj
-
-def parse_relationship(elem):
-    class klass: pass
-    id = elem.get('id')
-    src = elem.get('src')
-    dest = elem.get('dest')
-    setattr(klass, 'id', id)
-    setattr(klass, 'src', src)
-    setattr(klass, 'dest', dest)
-    setattr(klass, 'properties', [])
-    rel = klass()
-    for e in elem.findall(".//Property"):
-        rel.properties.append(parse_property(e))
-    return rel
-
-def parse_property(elem):
-    class klass: pass
-    id = elem.get('id')
-    value = elem.text
-    setattr(klass, 'id', id)
-    setattr(klass, 'value', value)
-    return klass()
 
 def parse_JSON_metamodel(xml):
     return parse_metamodel_JSON(json.loads(xml))
