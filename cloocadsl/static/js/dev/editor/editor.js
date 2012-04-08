@@ -25,18 +25,18 @@ function init_clooca(pid) {
 		       }),
 		       new Ext.Panel({
 		    	   id:'propertypanel',
+		    	   title: 'property',
 		    	   html:'',
 		    	   margins:'3 3 3 3',
 		    	   region:'south',
 		    	   collapsible:true,
 		    	   split:true,
-		    	   items : [
-		    	            ]
+		    	   items : []
 		    	   }),
 		       new Ext.Panel({
 		     	   id:'toolpanel',
-		    	   title:'EAST',
-		    	   html:'EAST PANEL',
+		    	   title:'Tool',
+		    	   html:'',
 		    	   margins:'0 3 0 3',
 		    	   region:'east',
 		    	   collapsible:true,
@@ -52,8 +52,8 @@ function init_clooca(pid) {
 		       }),
 		       new Ext.Panel({
 		    	   id:'modelexplorer',
-		    	   title:'WEST',
-		    	   html:'WEST PANEL',
+		    	   title:'Model Explorer',
+		    	   html:'',
 		    	   margins:'0 0 0 3',
 		    	   region:'west',
 		    	   collapsible:true,
@@ -245,7 +245,7 @@ function createModelExplorer() {
 	    }
 	});
 	var modelExplorer = Ext.create('Ext.tree.Panel', {
-	    title: 'Model Explorer',
+//	    title: 'Model Explorer',
 	    width: 200,
 	    height: 150,
 	    store: store,
