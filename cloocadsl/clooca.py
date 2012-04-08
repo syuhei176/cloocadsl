@@ -7,6 +7,8 @@ deploy
 
 from flask import Flask, url_for, render_template, session, request, make_response
 import sys
+import os
+import zipfile
 import json
 import config
 sys.path.append(config.CLOOCA_CGI)
@@ -124,6 +126,11 @@ def mload():
 def msave():
     return json.dumps(MetaModelService.saveMetaModel(session['user'], request.form['id'], request.form['xml']))
 
+@app.route('/tcsave', methods=['POST'])
+def tcsave():
+    return json.dumps(MetaModelService.saveTempConfig(session['user'], request.form['id'], request.form['tc']))
+
+
 @app.route('/gen', methods=['POST'])
 def gen():
     if 'user' in session:
@@ -133,10 +140,11 @@ def gen():
     else:
         return 'false'
 
-@app.route('/download', methods=['GET'])
-def download():
+@app.route('/download/<pid>', methods=['GET'])
+def download(pid):
     if 'user' in session:
-        project_id = request.form['pid']
+        user = session['user']
+        project_id = pid;
         userpath = config.CLOOCA_CGI+'/out/' + user['uname']
         projectpath = userpath + '/p' + project_id
         filepath = projectpath + '/p' + project_id + '.zip'
@@ -152,15 +160,30 @@ def download():
             f = open(filepath, 'rb')
             content = f.read()
             os.remove(filepath)
-            resp = make_response(content, '200')
+            resp = make_response(content)
             resp.headers['Content-type'] = 'application/octet-stream;'
             resp.headers['Content-Disposition'] = 'attachment; filename=p'+project_id+'.zip;'
             return resp
 
-@app.route('/tree', methods=['POST'])
-def tree():
+'''
+template
+'''
+@app.route('/template/tree', methods=['POST'])
+def temp_tree():
     if 'user' in session:
         result = FileService.GetFileTree(session['user'], request.form['id'])
+        return json.dumps(result)
+
+@app.route('/template/new', methods=['POST'])
+def temp_new():
+    if 'user' in session:
+        result = FileService.CreateNewFile(session['user'], request.form['id'], request.form['fname'])
+        return json.dumps(result)
+
+@app.route('/template/save', methods=['POST'])
+def temp_save():
+    if 'user' in session:
+        result = FileService.SaveFile(session['user'], request.form['id'], request.form['fname'], request.form['content'])
         return json.dumps(result)
 
 @app.route('/create_rep', methods=['POST'])

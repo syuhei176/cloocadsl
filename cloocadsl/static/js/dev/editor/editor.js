@@ -13,6 +13,7 @@ function init_clooca(pid) {
 		layout:'border',
 		items:[
 		       new Ext.Panel({
+		    	   id: 'centerpanel',
 		    	   html:'',
 		    	   width:'100px',
 		    	   region:'center',
@@ -36,10 +37,11 @@ function init_clooca(pid) {
 		       new Ext.Panel({
 		     	   id:'toolpanel',
 		    	   title:'Tool',
-		    	   html:'',
+		    	   html:'toolbuttons',
 		    	   margins:'0 3 0 3',
 		    	   region:'east',
 		    	   collapsible:true,
+		    	   split:true,
 		       layout: {
 		    	    type: 'vbox',
 		    	    align : 'stretch',
@@ -53,7 +55,7 @@ function init_clooca(pid) {
 		       new Ext.Panel({
 		    	   id:'modelexplorer',
 		    	   title:'Model Explorer',
-		    	   html:'',
+		    	   html:' ',
 		    	   margins:'0 0 0 3',
 		    	   region:'west',
 		    	   collapsible:true,
@@ -84,7 +86,6 @@ function create_tabs() {
 function create_menu() {
 	return {
         tbar: [{
-            xtype:'splitbutton',
             text: 'Edit',
             iconCls: 'add16',
             menu: [
@@ -107,18 +108,20 @@ function create_menu() {
                    }
                    ],
         	handler : onItemClick
-        },'-',{
-            xtype:'splitbutton',
-            text: 'Save',
-            iconCls: 'add16',
-            menu: [{text: 'Cut Menu Item'}],
-        	handler : onItemClick
         },{
             text: 'プロジェクト',
             iconCls: 'add16',
             menu: [
                    {
                 	   text: 'generate',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
+                   },{
+                	   text: 'download',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
+                   },{
+                	   text: 'genbin',
                 	   iconCls: 'add16',
                 	   handler : onProjItemClick
                    },{
@@ -132,31 +135,10 @@ function create_menu() {
                    }
 
                    ]
-        }/*,{
-            text: 'Workbench',
+        },'-',{
+            text: 'Save',
             iconCls: 'add16',
-            menu: [
-                   {
-                	   text: 'MetaSave',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   text: 'MetaObj',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   text: 'MetaRel',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   text: 'MetaJSON',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   }
-                   ]
-        }*/,'-',{
-            text: 'Format',
-            iconCls: 'add16'
+        	handler : onItemClick
         }]
     }
 }
@@ -194,6 +176,10 @@ function onItemClick(item){
 function onProjItemClick(item){
 	if(item.text == 'generate') {
 		Generate(g_project_id);
+	}else if(item.text == 'download') {
+		download(g_project_id);
+	}else if(item.text == 'genbin') {
+		
 	}else if(item.text == 'commit') {
 		commit(g_project_id);
 	}else if(item.text == 'update') {

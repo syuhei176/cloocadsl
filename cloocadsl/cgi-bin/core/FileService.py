@@ -1,6 +1,4 @@
 import os
-import MySQLdb
-import md5
 import re
 import sys
 import config
@@ -48,20 +46,38 @@ def GetFileTree(user, id):
             for line in fd:
                 content += line
             fd.close()
-            files.append({'name' : f, 'content' : content})
-#    if os.path.isdir(searchpath + '/' + f):
-#       files.append(PrivateGetFileTree(searchpath + '/' + f, f))
+            files.append({'name' : f, 'list' : [], 'type' : 'file', 'content' : content})
+        if os.path.isdir(filepath):
+            files.append(PrivateGetFileTree(filepath, f))
     return files
 
-def SaveFile(user, pname, path, content):
-    projectpath = GetProjectDirectory(user.username, pname)
+def PrivateGetFileTree(path, name):
+  dict = {}
+  dict['name'] = name
+  dict['list'] = []
+  dict['type'] = 'dir'
+  for f in os.listdir(path):
+    filepath = os.path.normpath(path + '/' + f)
+    if os.path.isfile(filepath):
+      fd = open(filepath, 'r')
+      content = ''
+      for line in fd:
+        content += line
+      fd.close()
+      dict['list'].append({'name' : f, 'list' : [], 'type' : 'file', 'content' : content})
+    if os.path.isdir(filepath):
+       dict['list'].append(PrivateGetFileTree(filepath, f))
+  return dict
+
+def SaveFile(user, id, path, content):
+    projectpath = GetTemplateDirectory(id)
     f = open(projectpath+'/'+path, 'w')
     f.write(content)
     f.close()
     return True
 
-def LoadFile(user, pname, path):
-    projectpath = GetProjectDirectory(user.username, pname)
+def LoadFile(user, pnaidme, path):
+    projectpath = GetTemplateDirectory(id)
     f = open(projectpath+'/'+path, 'r')
     content = ''
     for line in f:

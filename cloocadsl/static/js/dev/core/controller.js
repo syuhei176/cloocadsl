@@ -1,4 +1,12 @@
 /**
+ * download
+ * @param pid
+ */
+function download(pid) {
+	window.open('/download/'+pid);
+}
+
+/**
  * Save Model
  * グローバル変数g_modelの内容をサーバに保存する。
  */
@@ -135,7 +143,13 @@ function loadMetaModel(id) {
 				if(data) {
 					console.log('loaded json string = '+data.xml);
 //					g_metamodel = eval('(' + data.xml + ')');
-					g_metamodel = JSON.parse(data.xml);
+					console.log(data.xml);
+					if(data.xml == ' ' || data.xml == null || data.xml.length == 0) {
+						g_metamodel = new MetaModel();
+					}else{
+						g_metamodel = JSON.parse(data.xml);
+					}
+					g_config_of_template = data.template;
 					for(var i=0;i < g_metamodel.metaobjects.length;i++) {
 						if(g_metamodel.metaobjects[i] != null) {
 							metaobject_IdGenerator.setOffset(g_metamodel.metaobjects[i].id);

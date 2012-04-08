@@ -1,9 +1,13 @@
 function MetaModelEditor(metaobjects) {
+	var l_metaobjs = [];
+	for(var i=0;i < metaobjects.length;i++) {
+		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
+	}
 	Ext.create('Ext.data.Store', {
 	    storeId:'simpsonsStore',
 	    fields:['id', 'name'],
 	    data:{
-	    	'items':metaobjects
+	    	'items':l_metaobjs
 	    },
 	    proxy: {
 	        type: 'memory',
@@ -14,7 +18,6 @@ function MetaModelEditor(metaobjects) {
 	    }
 	});
 	
-//	var grid = Ext.grid.GridPanel({
 	var grid = Ext.create('Ext.grid.Panel', {
 	    title: 'Simpsons',
 	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
@@ -94,11 +97,15 @@ function MetaModelEditor(metaobjects) {
 }
 
 function MetaRelationEditor(metarelations) {
+	var l_metaobjs = [];
+	for(var i=0;i < metarelations.length;i++) {
+		if(metarelations[i] != null) l_metaobjs.push(metarelations[i]);
+	}
 	Ext.create('Ext.data.Store', {
 	    storeId:'simpsonsStore',
 	    fields:['id', 'name'],
 	    data:{
-	    	'items':metarelations
+	    	'items':l_metaobjs
 	    },
 	    proxy: {
 	        type: 'memory',
@@ -109,7 +116,6 @@ function MetaRelationEditor(metarelations) {
 	    }
 	});
 	
-//	var grid = Ext.grid.GridPanel({
 	var grid = Ext.create('Ext.grid.Panel', {
 	    title: 'Simpsons',
 	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
@@ -174,7 +180,9 @@ function MetaRelationEditor(metarelations) {
 }
 
 function MetaJSONEditor(metadiagram) {
-	var metamodeleditor = Ext.create('Ext.panel.Panel',
+	this.resource = g_metamodel;
+	var self = this;
+	var editor = Ext.create('Ext.panel.Panel',
 		{
 		  	   title: 'JSONEditor',
 		  	   layout: {
@@ -184,8 +192,8 @@ function MetaJSONEditor(metadiagram) {
 		  	   items: [
 		  	           {
 		  	        	   xtype: 'textarea',
-		  	        		   width: 240,
-		  	        		   height: 240,
+	  	        		   width: Ext.getCmp('centerpanel').getWidth(),
+	  	        		   height: Ext.getCmp('centerpanel').getHeight(),
 		  	        		   value: JSON.stringify(g_metamodel),
 		  	        		   listeners: {
 		  	        			   change: {
@@ -199,12 +207,99 @@ function MetaJSONEditor(metadiagram) {
 		  	           ],
 		  	 		closable: 'true'
 	});
-	/*
-	metamodeleditor.addListener('change', function(field, newValue, oldValue, opt){
-		metadiagram = eval('('+newValue+')');
-		console.log('change');
-	})
-	*/
-	var tab = editor_tabs.add(metamodeleditor);
+	var tab = editor_tabs.add(editor);
+	tab.on('activate', function(){
+		current_editor = self;
+	});
 	editor_tabs.setActiveTab(tab);
+}
+
+MetaJSONEditor.prototype.save = function() {
+	saveMetaModel(g_metamodel_id);
+}
+
+function TempConfigEditor() {
+	var self = this;
+	var editor = Ext.create('Ext.panel.Panel',
+		{
+		  	   title: 'TemplateConfig',
+		  	   layout: {
+		  		   type: 'hbox',
+		  		   align: 'center'
+		  	   },
+		  	   items: [
+		  	           {
+		  	        	   xtype: 'textarea',
+	  	        		   width: Ext.getCmp('centerpanel').getWidth(),
+	  	        		   height: Ext.getCmp('centerpanel').getHeight(),
+		  	        		   value: g_config_of_template,
+		  	        		   listeners: {
+		  	        			   change: {
+		  	        				   fn: function(field, newValue, oldValue, opt) {
+		  	        					   g_config_of_template = newValue;
+		  	        				   }
+		  	        			   }
+		  	        		   }
+		  	           }
+		  	           ],
+		  	 		closable: 'true'
+	});
+	var tab = editor_tabs.add(editor);
+	tab.on('activate', function(){
+		current_editor = self;
+	});
+	editor_tabs.setActiveTab(tab);
+}
+
+TempConfigEditor.prototype.save = function() {
+	$.post('/tcsave', { id : g_metamodel_id, tc : g_config_of_template },
+			function(data) {
+				if(data) {
+					
+				}
+			}, "json");
+}
+
+function TemplateEditor(template) {
+	this.template = template;
+	var self = this;
+	var editor = Ext.create('Ext.panel.Panel',
+		{
+		  	   title: template.name,
+		  	   layout: {
+		  		   type: 'hbox',
+		  		   align: 'center'
+		  	   },
+		  	   items: [
+		  	           {
+		  	        	   xtype: 'textarea',
+		  	        		   width: Ext.getCmp('centerpanel').getWidth(),
+		  	        		   height: Ext.getCmp('centerpanel').getHeight(),
+		  	        		   value: template.content,
+		  	        		   listeners: {
+		  	        			   change: {
+		  	        				   fn: function(field, newValue, oldValue, opt) {
+		  	        					 template.content = newValue;
+		  	        				   }
+		  	        			   }
+		  	        		   }
+		  	           }
+		  	           ],
+		  	 		closable: 'true'
+	});
+	var tab = editor_tabs.add(editor);
+	tab.on('activate', function(){
+		current_editor = self;
+		current_resource = template;
+	});
+	editor_tabs.setActiveTab(tab);
+}
+
+TemplateEditor.prototype.save = function() {
+	$.post('/template/save', { id : g_metamodel_id, fname : this.template.name , content : this.template.content},
+			function(data) {
+				if(data) {
+					
+				}
+			}, "json");
 }

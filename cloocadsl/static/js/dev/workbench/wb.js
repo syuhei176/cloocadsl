@@ -9,10 +9,12 @@ Ext.require([
 var g_metamodel_id = 0;
 function init_wb(id) {
 	g_metamodel_id = id;
+	load_templates();
 	new Ext.Viewport({
 		layout:'border',
 		items:[
 		       new Ext.Panel({
+		    	   id: 'centerpanel',
 		    	   html:'',
 		    	   width:'100px',
 		    	   region:'center',
@@ -101,26 +103,12 @@ function create_menu() {
             iconCls: 'add16',
             menu: [{text: 'Cut Menu Item'}],
         	handler : onItemClick
-        }/*,{
-            text: 'Project',
-            iconCls: 'add16',
-            menu: [
-                   {
-                	   text: 'Generate',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   }
-                   ]
-        }*/,{
+        },{
             text: 'Workbench',
             iconCls: 'add16',
             menu: [
                    {
                 	   text: 'Preview',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   text: 'MetaSave',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
@@ -135,6 +123,20 @@ function create_menu() {
                 	   text: 'MetaJSON',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
+                   },{
+                	   text: 'TempConfig',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   }
+                   ]
+        },{
+            text: 'Template',
+            iconCls: 'add16',
+            menu: [
+                   {
+                	   text: 'New',
+                	   iconCls: 'add16',
+                	   handler : onTempItemClick
                    }
                    ]
         },'-',{
@@ -145,30 +147,40 @@ function create_menu() {
 }
 
 function onItemClick(item){
-	window.alert('item'+ item.text);
 	if(item.text == 'Save') {
-//		saveModel(g_project_id);
-		saveMetaModel(g_metamodel_id);
+		current_editor.save();
+//		saveMetaModel(g_metamodel_id);
+//		save_template(current_resource.name, current_resource.content);
 	}else if(item.text == 'Preview') {
 		g_model = new Model();
 		g_model.root = 1;
 		g_model.diagrams[1] = new Diagram();
 		g_model.diagrams[1].meta_id = 1;
 		editor = new DiagramEditor('preview', 'preview'+new Date().getTime(), g_model.diagrams[1]);
-	}else if(item.text == 'MetaSave') {
-		saveMetaModel(g_metamodel_id);
 	}else if(item.text == 'MetaObj') {
-		MetaModelEditor(g_metamodel.metadiagram.metaobjects);
+		MetaModelEditor(g_metamodel.metaobjects);
 	}else if(item.text == 'MetaRel') {
-		MetaRelationEditor(g_metamodel.metadiagram.metarelations);
+		MetaRelationEditor(g_metamodel.metarelations);
 	}else if(item.text == 'MetaJSON') {
-		MetaJSONEditor(g_metamodel.metadiagram);
+		current_editor = new MetaJSONEditor(g_metamodel.metadiagrams);
+	}else if(item.text == 'TempConfig') {
+		current_editor = new TempConfigEditor();
 	}else if(item.text == 'delete') {
 		current_editor.deleteSelected();
 	}else{
 		
 	}
 //    Ext.example.msg('Menu Click', 'You clicked the "{0}" menu item.', item.text);
+}
+
+function onTempItemClick(item){
+	if(item.text == 'New') {
+		 Ext.Msg.prompt('','',function(btn,text){
+			 if(btn != 'cancel') {
+				 create_new_template(text);
+			 }
+		 },null,true);
+	}
 }
 /*
 var viewport = new Ext.Viewport({
@@ -198,34 +210,65 @@ html: '<h1>2つ目のタブパネル</h1>'
 });
 */
 
+/*
+ * wb/controller
+ */
+function load_templates() {
+	$.post('/template/tree', { id : g_metamodel_id},
+			function(data) {
+				if(data) {
+					g_templates = data;
+					createTemplateExplorer();
+				}
+			}, "json");
+}
 
-function createModelExplorer() {
+function create_new_template(fname) {
+	$.post('/template/new', { id : g_metamodel_id, fname : fname },
+			function(data) {
+				if(data) {
+					load_templates();
+				}
+			}, "json");
+}
+
+function save_template(fname, content) {
+	$.post('/template/save', { id : g_metamodel_id, fname : fname , content : content},
+			function(data) {
+				if(data) {
+					
+				}
+			}, "json");
+}
+
+
+function createTemplateExplorer() {
+	Ext.getCmp('modelexplorer').removeAll();
+	var nodes = [];
+	for(var i=0;i < g_templates.length;i++) {
+		var key = g_templates[i].name;
+		nodes.push({id: ''+i, text: key, leaf: true});
+	}
+
 	var store = Ext.create('Ext.data.TreeStore', {
 	    root: {
 	        expanded: true,
 	        children: [
-	            { text: "root", expanded: true, children: [
-	                { id: "1", text: "diagram", leaf: true },
-	                { id: "2", text: "alegrbra", leaf: true}
-	            ] }
+	            { text: "templates", expanded: true, children: nodes }
 	        ]
 	    }
 	});
 	var modelExplorer = Ext.create('Ext.tree.Panel', {
-	    title: 'Model Explorer',
+	    title: 'Template Explorer',
 	    width: 200,
 	    height: 150,
 	    store: store,
 	    rootVisible: false
 	});
 	modelExplorer.on('itemclick',function(view, record, item, index, event) {
-    	console.log('click '+record.data.id);
-    	if(record.data.id == 1) {
-    		editor = new DiagramEditor(record.data.text, 'test'+new Date().getTime(), g_model.root);
-    	}
+    	editor = new TemplateEditor(g_templates[record.data.id]);
     });
 	Ext.getCmp('modelexplorer').add(modelExplorer);
-	console.log('a');
 	return modelExplorer;
 }
 

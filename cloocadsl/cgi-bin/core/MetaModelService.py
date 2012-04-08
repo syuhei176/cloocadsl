@@ -28,6 +28,21 @@ def saveMetaModel(user, pid, xml):
     connect.close()
     return True
 
+def saveTempConfig(user, pid, tc):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
+    cur = connect.cursor()
+    affect_row_count = cur.execute('UPDATE MetaModelInfo SET template=%s WHERE id = %s;',(tc, pid, ))
+    connect.commit()
+    cur.close()
+    connect.close()
+    return True
+
 def loadMetaModel(user, pid):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
 #    cur = connect.cursor()

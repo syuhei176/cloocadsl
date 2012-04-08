@@ -14,25 +14,29 @@ function DiagramEditor(name, key, diagram) {
 	this.drag_end = new Point2D();
 	this.selected = null;
 	this.dragMode = 0;
+	this.select_button = null;
 	var self = this;
 	
 //	this.createButton();
-	
+	this.width = Ext.getCmp('centerpanel').getWidth();
+	this.height = Ext.getCmp('centerpanel').getHeight();
 	var tab = editor_tabs.add({
 		id: this.key,
 		title: name,
-		html : '<canvas id="canvas_'+this.key+'" width=500 height=400></canvas>',
+		html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
 		closable: 'true',
 	});
-	tab.on('activate', function(){self.createButton();});
-	current_editor = this;
+	tab.on('activate', function(){
+		self.createButton();
+		current_editor = self;
+		});
 	editor_tabs.setActiveTab(tab);
 	this.canvas = $('#canvas_'+this.key);
 //	window.alert("canvas = "+this.canvas);
 	var draw = function() {
 //		console.log('draw '+self.key)
 //		window.alert("draw" + editor_key);
-		self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: 500,height: 400, fromCenter: false});
+		self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: self.width,height: self.height, fromCenter: false});
 		for(var i=0;i < self.diagram.objects.length;i++) {
 			var obj_id = self.diagram.objects[i];
 			var obj = g_model.objects[obj_id];
@@ -64,9 +68,7 @@ function DiagramEditor(name, key, diagram) {
 						if(p.ve.ver_type == 'delete') continue;
 						self.canvas.drawText({
 							  fillStyle: "#000",
-//							  strokeStyle: "#000",
-//							  strokeWidth: 5,
-							  x: obj.bound.x+20, y: obj.bound.y + h * 20 + 16,
+							  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 16,
 							  text: p.value,
 							  align: "center",
 							  baseline: "middle",
@@ -82,6 +84,27 @@ function DiagramEditor(name, key, diagram) {
 			var rel = g_model.relationships[rel_id];
 			if(rel.ve.ver_type == 'delete') continue;
 			self.draw_relationship(rel);
+		}
+		if(self.tool != null) {
+			self.canvas.drawText({
+				  fillStyle: "#000",
+				  x: self.drag_move.x, y: self.drag_move.y,
+				  text: self.tool.name,
+				  align: "center",
+				  baseline: "middle",
+				  font: "16px 'ＭＳ ゴシック'"
+				});
+		}
+		if(self.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+			self.canvas.drawLine({
+				  strokeStyle: "#777",
+				  strokeWidth: 2,
+				  strokeCap: "round",
+				  strokeJoin: "miter",
+				  x1: self.drag_start.x, y1: self.drag_start.y,
+				  x2: self.drag_move.x, y2: self.drag_move.y
+				});
+
 		}
 	}
 //	var context = this.canvas.getContext('2d');
@@ -107,6 +130,7 @@ function DiagramEditor(name, key, diagram) {
 		draw();
 	});
 	draw();
+	this.draw = draw;
 }
 
 /**
@@ -123,7 +147,7 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
-			this.updateObject(this.selected,x-10,y-10);
+			this.updateObject(this.selected,Number(x-10),Number(y-10));
 		}
 	}
 }
@@ -136,7 +160,7 @@ DiagramEditor.prototype.updateObject = function(obj, x, y) {
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
 	if(this.tool == null) {
-		if(this.clicknode(x, y)) {
+		if(this.clicknode(Number(x), Number(y))) {
 			this.dragMode = DiagramEditor.DRAG_MOVE;
 		}else if(this.clickedge(x, y)) {
 			
@@ -146,6 +170,7 @@ DiagramEditor.prototype.ActionDown = function(x, y) {
 		}
 	}else if(this.tool.classname == 'MetaObject'){
 		this.addObject(x, y);
+		this.select_button.toggle(true, false);
 	}else if(this.tool.classname == 'MetaRelation'){
 		this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
 	}
@@ -158,6 +183,7 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.addRelationship(this.drag_start, this.drag_end);
+		this.select_button.toggle(true);
 	}
 	this.dragMode = DiagramEditor.DRAG_NONE;
 }
@@ -240,19 +266,28 @@ DiagramEditor.prototype.createButton = function() {
 		var b = Ext.create('Ext.Button', {
 		    text     : button_text,
 /*		    renderTo : Ext.get('toolpanel'),*/
+		    width: 100,
 		    enableToggle: true,
 		    toggleGroup: 'tools',
 		    listeners: {
 		        click: function() {
+		        	/*
 		    		var tool = tools[this.index];
-		            // this == the button, as we are in the local scope
 		            self.tool = tool;
+		            */
+		        },
+		        toggle: function(b, state) {
+		        	if(state) {
+			    		var tool = tools[this.index];
+			            self.tool = tool;
+		        	}
 		        },
 		        mouseover: function() {
 		            // this == the button, as we are in the local scope
 		        }
 		    }
 		});
+		if(b.text == 'select') this.select_button = b;
 		b.index = i;
 
 		toolpanel.add(b);
@@ -268,32 +303,47 @@ DiagramEditor.prototype.createButton = function() {
  */
 DiagramEditor.prototype.deleteSelected = function() {
 	if(this.selected != null) {
-		if(this.selected.ve.ver_type == 'add') {
-			var rm = -1;
-			for(var i=0;i < this.diagram.objects.length;i++) {
-				if(this.diagram.objects[i] == this.selected.id) {
-					rm = i;
-				}
+		for(var i=0;i < this.diagram.objects.length;i++) {
+			if(this.diagram.objects[i] == this.selected.id) {
+				this.deleteObject(this.selected.id);
 			}
-			if(rm != -1) {
-				this.diagram.objects.splice(rm, 1);
-//				g_model.objects.splice(this.selected.id, 1);
-				delete g_model.objects[this.selected.id]
-				return;
-			}
-			for(var i=0;i < this.diagram.relationships.length;i++) {
-				if(this.diagram.relationships[i] == this.selected.id) {
-					rm = i;
-				}
-			}
-			if(rm != -1) {
-				this.diagram.relationships.splice(rm, 1);
-//				g_model.relationships.splice(this.selected.id, 1);
-				delete g_model.relationships[this.selected.id]
-			}
-		}else{
-			this.selected.ve.ver_type = 'delete';
 		}
+		for(var i=0;i < this.diagram.relationships.length;i++) {
+			if(this.diagram.relationships[i] == this.selected.id) {
+				this.deleteRelationship(this.selected.id);
+			}
+		}
+		this.draw();
+	}
+}
+
+DiagramEditor.prototype.deleteObject = function(id) {
+	if(g_model.objects[id].ve.ver_type == 'add') {
+		for(var i=0;i < this.diagram.objects.length;i++) {
+			if(this.diagram.objects[i] == id) {
+				this.diagram.objects.splice(i, 1);
+			}
+		}
+		delete g_model.objects[id]
+	}else{
+		g_model.objects[id].ve.ver_type = 'delete';		
+	}
+	for(var i=0;i < this.diagram.relationships.length;i++) {
+		
+		if(g_model.relationships[this.diagram.relationships[i]].src == id || g_model.relationships[this.diagram.relationships[i]].dest == id) {
+			this.deleteRelationship(this.diagram.relationships[i]);
+		}
+	}
+}
+
+DiagramEditor.prototype.deleteRelationship = function(id) {
+	if(g_model.relationships[id].ve.ver_type == 'add') {
+		for(var i=0;i < this.diagram.relationships.length;i++) {
+			if(this.diagram.relationships[i] == id) this.diagram.relationships.splice(i, 1);
+		}
+		delete g_model.relationships[id]
+	}else{
+		g_model.relationships[id].ve.ver_type = 'delete';		
 	}
 }
 
@@ -607,11 +657,15 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 function calObjHeight(obj) {
 	if(obj.bound == undefined) return;
 	var h = 0;
+	var w = 0;
 	for(var j=0;j < obj.properties.length;j++) {
-		var prop = obj.properties[j];
-		for(var k=0;k < prop.children.length;k++) {
+		var plist = obj.properties[j];
+		for(var k=0;k < plist.children.length;k++) {
 			h++;
+			var prop = g_model.properties[plist.children[k]];
+			if(w < prop.value.length) w = prop.value.length;
 		}
 	}
 	obj.bound.height = h * 20 + 10;
+	obj.bound.width = w * 8 + 10;
 }
