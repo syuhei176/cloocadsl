@@ -657,7 +657,7 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 function calObjHeight(obj) {
 	if(obj.bound == undefined) return;
 	var h = 0;
-	var w = 0;
+	var w = 4;
 	for(var j=0;j < obj.properties.length;j++) {
 		var plist = obj.properties[j];
 		for(var k=0;k < plist.children.length;k++) {
