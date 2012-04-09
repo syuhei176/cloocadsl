@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- ホスト: localhost
--- 生成時間: 2012 年 4 月 05 日 18:30
+-- 生成時間: 2012 年 4 月 09 日 14:03
 -- サーバのバージョン: 5.5.16
 -- PHP のバージョン: 5.3.8
 
@@ -33,15 +33,16 @@ CREATE TABLE IF NOT EXISTS `MetaModelInfo` (
   `visibillity` int(1) NOT NULL DEFAULT '0',
   `template` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
 
 --
 -- テーブルのデータをダンプしています `MetaModelInfo`
 --
 
 INSERT INTO `MetaModelInfo` (`id`, `name`, `xml`, `visibillity`, `template`) VALUES
-(6, 'json', '{"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[2]},{"classname":"MetaObject","id":2,"name":"start","properties":[]}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[3],"bindings":[],"arrow_type":"none"}],"metaproperties":[null,{"id":1,"name":"name","data_type":"collection_String","widget":"input field","exfield":""},{"id":2,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":3,"name":"action","data_type":"String","widget":"input field","exfield":""}],"metadiagrams":[null,{"id":1,"name":"json","metaobjects":[1,2],"metarelations":[1]}]}', 1, '<?xml version="1.0" encoding="utf-8"?><DirTemp><Template src="controller.mako" dest="t1.js"></Template></DirTemp>'),
-(7, 'json2', ' {"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1,2]},{"classname":"MetaObject","id":2,"name":"start","properties":[]}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[3],"bindings":[],"arrow_type":"none"}],"metaproperties":[null,{"id":1,"name":"name","data_type":"collection_String","widget":"input field","exfield":""},{"id":2,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":3,"name":"action","data_type":"String","widget":"input field","exfield":""}],"metadiagrams":[null,{"id":1,"name":"json","metaobjects":[1,2],"metarelations":[1]}]}', 0, '');
+(6, 'json', '{"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1]},{"classname":"MetaObject","id":2,"name":"start","properties":[]},{"classname":"MetaObject","id":3,"name":"class","properties":[3],"decomposition":2}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[2],"bindings":[],"arrow_type":"v"}],"metaproperties":[null,{"id":1,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":2,"name":"event","data_type":"String","widget":"fixed list","exfield":"none&touch&white&black"},{"id":3,"name":"name","data_type":"String","widget":"fixed list","exfield":"Linetracer&Controller"}],"metadiagrams":[null,{"id":1,"name":"classdiagram","metaobjects":[3],"metarelations":[]},{"id":2,"name":"statediagram","metaobjects":[1,2],"metarelations":[1]}]}', 1, '<?xml version="1.0" encoding="utf-8"?><DirTemp><TemplateForDiagram src="controller.mako" dest="t1.js" diagram="2"></TemplateForDiagram></DirTemp>'),
+(7, 'json2', ' {"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1,2]},{"classname":"MetaObject","id":2,"name":"start","properties":[]}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[3],"bindings":[],"arrow_type":"none"}],"metaproperties":[null,{"id":1,"name":"name","data_type":"collection_String","widget":"input field","exfield":""},{"id":2,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":3,"name":"action","data_type":"String","widget":"input field","exfield":""}],"metadiagrams":[null,{"id":1,"name":"json","metaobjects":[1,2],"metarelations":[1]}]}', 0, ''),
+(8, 'statemachine for nxt', '{"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1]},{"classname":"MetaObject","id":2,"name":"start","properties":[]},{"classname":"MetaObject","id":3,"name":"class","properties":[3],"decomposition":2}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[2],"bindings":[],"arrow_type":"v"}],"metaproperties":[null,{"id":1,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":2,"name":"event","data_type":"String","widget":"fixed list","exfield":"none&touch&white&black"}],"metadiagrams":[null,{"id":1,"name":"statediagram","metaobjects":[1,2],"metarelations":[1]}]}', 1, '<?xml version="1.0" encoding="utf-8"?><DirTemp><TemplateForDiagram src="state.mako" dest="state.cpp" diagram="1"></TemplateForDiagram></DirTemp>');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
