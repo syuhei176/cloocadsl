@@ -6,6 +6,17 @@ function download(pid) {
 	window.open('/download/'+pid);
 }
 
+function genbin(pid) {
+	$.post('/compile_server/reserve', { pid : pid ,pname:g_projectname},
+			function(data) {
+				if(data) {
+					console.log('url='+data);
+				}else{
+					window.alert('error');
+				}
+			}, "json");
+}
+
 /**
  * Save Model
  * グローバル変数g_modelの内容をサーバに保存する。
@@ -78,6 +89,7 @@ function loadModel(pid) {
 			function(data) {
 				if(data) {
 					console.log('loaded json string = '+data.xml);
+					g_projectname = data.name;
 					if(data.xml == '') {
 						g_model = new Model();
 						g_model.root = 1;
@@ -103,7 +115,7 @@ function loadModel(pid) {
 						object_IdGenerator.setOffset(obj.id);
 					}
 					for(var key in g_model.relationships) {
-						obj = g_model.objects[key]
+						obj = g_model.relationships[key]
 						if(obj == null) continue;
 						object_IdGenerator.setOffset(obj.id);
 					}

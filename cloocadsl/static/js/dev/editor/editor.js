@@ -185,7 +185,7 @@ function onProjItemClick(item){
 	}else if(item.text == 'download') {
 		download(g_project_id);
 	}else if(item.text == 'genbin') {
-		
+		genbin(g_project_id);
 	}else if(item.text == 'commit') {
 		commit(g_project_id);
 	}else if(item.text == 'update') {

@@ -19,6 +19,7 @@ from core import ModelCompiler
 from core import FileService
 from mvcs import CommitService
 from mvcs import UpdateServiceJSON
+from shinshu import compile_server
 
 app = Flask(__name__)
 
@@ -165,6 +166,12 @@ def download(pid):
             resp.headers['Content-Disposition'] = 'attachment; filename=p'+project_id+'.zip;'
             return resp
 
+
+@app.route('/compile_server/reserve', methods=['POST'])
+def compile_server_reserve():
+    if 'user' in session:
+        return json.dumps(compile_server.reserve(session['user'], request.form['pid'], request.form['pname']))
+        
 '''
 template
 '''
@@ -212,7 +219,7 @@ app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 if not app.debug:
     import logging
     from logging import FileHandler
-    file_handler = FileHandler('log.txt')
+    file_handler = FileHandler(config.CLOOCA_ROOT + '/log.txt')
     file_handler.setLevel(logging.WARNING)
     app.logger.addHandler(file_handler)
     
