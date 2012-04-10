@@ -45,15 +45,30 @@ function DiagramEditor(name, key, diagram) {
 			if(obj == self.selected) {
 				col = '#00f';
 			}
-			self.canvas.drawRect({
-				  strokeStyle: col,
-				  strokeWidth: 2,
-				  x: obj.bound.x, y: obj.bound.y,
-				  width: obj.bound.width,
-				  height: obj.bound.height,
-				  fromCenter: false
-			});
-			var meta_ele = g_metamodel.metaobjects[obj.meta_id];//MetaModelController.getMetaObject(g_metamodel.metadiagram, obj.meta_id)
+			var meta_ele = g_metamodel.metaobjects[obj.meta_id];
+			if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
+				self.canvas.drawRect({
+					  strokeStyle: col, strokeWidth: 2,
+					  x: obj.bound.x, y: obj.bound.y,
+					  width: obj.bound.width, height: obj.bound.height,
+					  fromCenter: false
+				});
+			}else if(meta_ele.graphic == 'rounded') {
+				self.canvas.drawRect({
+					  strokeStyle: col, strokeWidth: 2,
+					  x: obj.bound.x, y: obj.bound.y,
+					  width: obj.bound.width, height: obj.bound.height,
+					  fromCenter: false,
+					  cornerRadius: 2
+				});
+			}else if(meta_ele.graphic == 'circle') {
+				$("canvas").drawArc({
+					  strokeStyle: col, strokeWidth: 2,
+					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+					  radius: obj.bound.width / 2,
+					  start: 0, end: 359
+					});
+			}
 			var h = 0;
 			for(var l=0;l < meta_ele.properties.length;l++) {
 				var prop = null;
