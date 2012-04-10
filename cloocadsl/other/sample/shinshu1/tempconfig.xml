@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><DirTemp>
+<TemplateForDiagram src="state_header.mako" dest="c_$id.h" diagram="1"></TemplateForDiagram>
+<TemplateForDiagram src="state.mako" dest="c_$id.cpp" diagram="1"></TemplateForDiagram>
+<Template src="main.h" dest="main.h" />
+<Template src="Makefile" dest="Makefile" />
+<Copy src="EventManager.h" dest="EventManager.h" />
+<Copy src="main.cpp" dest="main.cpp" />
+<Copy src="StateMachine.h" dest="StateMachine.h" />
+<Copy src="mdlnxtproj.h" dest="mdlnxtproj.h" />
+<Copy src="mdlnxtproj.cfg" dest="mdlnxtproj.cfg" />
+</DirTemp>
