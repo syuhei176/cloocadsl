@@ -9,16 +9,29 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	var dest = ModelController.getObject(this.diagram, rel.dest);
 	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
 	var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
-	var start = this.getConnectionPoint(new Line2D(s.x, s.y, e.x, e.y), src.bound);
-	var end = this.getConnectionPoint(new Line2D(e.x, e.y, s.x, s.y), dest.bound);
-	this.canvas.drawLine({
-		  strokeStyle: col,
-		  strokeWidth: 2,
-		  strokeCap: "round",
-		  strokeJoin: "miter",
-		  x1: start.x, y1: start.y,
-		  x2: end.x, y2: end.y
-		});
+	var start = 0;
+	var end = 0;
+	if(rel.points.length == 0) {
+		start = this.getConnectionPoint(new Line2D(s.x, s.y, e.x, e.y), src.bound);
+		end = this.getConnectionPoint(new Line2D(e.x, e.y, s.x, s.y), dest.bound);
+	}else if(rel.points.length > 0) {
+		start = this.getConnectionPoint(new Line2D(s.x, s.y, rel.points[0].x, rel.points[0].y), src.bound);
+		end = this.getConnectionPoint(new Line2D(e.x, e.y, rel.points[rel.points.length-1].x, rel.points[rel.points.length-1].y), dest.bound);
+	}
+	var points = [];
+	points.push(start);
+	points = points.concat(rel.points);
+	points.push(end);
+	for(var i=0;i < points.length-1;i++) {
+		this.canvas.drawLine({
+			  strokeStyle: col,
+			  strokeWidth: 2,
+			  strokeCap: "round",
+			  strokeJoin: "miter",
+			  x1: points[i].x, y1: points[i].y,
+			  x2: points[i+1].x, y2: points[i+1].y
+			});
+	}
 	var meta_ele = g_metamodel.metarelations[rel.meta_id];
 	var arrow_type = meta_ele.arrow_type;
 	if(arrow_type == 'v') {

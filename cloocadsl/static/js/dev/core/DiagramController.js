@@ -163,7 +163,7 @@ DiagramEditor.prototype.ActionDown = function(x, y) {
 		if(this.clicknode(Number(x), Number(y))) {
 			this.dragMode = DiagramEditor.DRAG_MOVE;
 		}else if(this.clickedge(x, y)) {
-			
+//			this.dragMode = DiagramEditor.DRAG_POINT;
 		}else{
 			this.dragMode = DiagramEditor.DRAG_NONE;
 			this.selected = null;
@@ -184,8 +184,35 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.addRelationship(this.drag_start, this.drag_end);
 		this.select_button.toggle(true);
+	} else if(this.dragMode == DiagramEditor.DRAG_POINT) {
+		this.movePoint(this.selected, this.drag_start, this.drag_end);
 	}
 	this.dragMode = DiagramEditor.DRAG_NONE;
+}
+
+DiagramEditor.prototype.deletePoint = function() {
+	var rel = this.selected;
+	if(rel == null) return;
+	rel.points.length = 0;
+}
+
+DiagramEditor.prototype.movePoint = function(rel, s, d) {
+	if(rel != null) {
+		var flg = true;
+		for(var i=0;i < rel.points.length;i++) {
+			if(Point2D.distanceSq(rel.points[i], s) < 14) {
+				rel.points[i].x = d.x;
+				rel.points[i].y = d.y;
+				flg = false;
+			}
+		}
+		if(flg) {
+			if(rel.points.length < 2) {
+				console.log('x'+d.x+',y'+d.y);
+				rel.points.push(new Point2D(d.x, d.y));
+			}
+		}
+	}
 }
 
 DiagramEditor.prototype.clicknode = function(x, y) {
@@ -228,13 +255,14 @@ DiagramEditor.prototype.click_a_edge = function(rel, x, y) {
 	points.push(e);
 	for(var i=0;i < points.length - 1;i++) {
 		if((new Line2D(points[i].x, points[i].y, points[i+1].x, points[i+1].y)).ptSegDist(x, y) < 16) {
-			console.log("click_a_edge true");
+//			console.log("click_a_edge true");
+			if(rel == this.selected) this.dragMode = DiagramEditor.DRAG_POINT;
 			this.selected = rel;
 			this.fireSelectRelationship(this.selected);
 			return true;
 		}
 	}
-	console.log("click_a_edge false");
+//	console.log("click_a_edge false");
 	return false;
 }
 
@@ -379,6 +407,14 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 		rel.dest = end.id;
 		rel.ve.ver_type = 'add';
 		VersionElement.update(this.diagram.ve);
+		/*
+		 * 自己遷移
+		 */
+		if(rel.src == rel.dest) {
+			rel.points.push(new Point2D(start.bound.x + 10, start.bound.y + 50));
+			rel.points.push(new Point2D(start.bound.x + 50, start.bound.y + 50));
+			rel.points.push(new Point2D(start.bound.x + 50, start.bound.y + 10));
+		}
 		/*
 		rel.ve.ver_type = "add";
 		for(MetaProperty metaprop : rel.meta.properties) {

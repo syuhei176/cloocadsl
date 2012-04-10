@@ -94,6 +94,10 @@ function create_menu() {
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
+                	   text: 'deletePoints',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
                 	   text: 'diagram',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
@@ -167,6 +171,8 @@ function onItemClick(item){
 		MetaJSONEditor(g_metamodel.metadiagram);
 	}else if(item.text == 'delete') {
 		current_editor.deleteSelected();
+	}else if(item.text == 'deletePoints') {
+		current_editor.deletePoint();
 	}else{
 		
 	}

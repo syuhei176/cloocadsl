@@ -236,6 +236,7 @@ function TempConfigEditor() {
 		  	        		   listeners: {
 		  	        			   change: {
 		  	        				   fn: function(field, newValue, oldValue, opt) {
+		  	        					   editor.setTitle('TemplateConfig*');
 		  	        					   g_config_of_template = newValue;
 		  	        				   }
 		  	        			   }
@@ -244,6 +245,7 @@ function TempConfigEditor() {
 		  	           ],
 		  	 		closable: 'true'
 	});
+	this.editor = editor;
 	var tab = editor_tabs.add(editor);
 	tab.on('activate', function(){
 		current_editor = self;
@@ -252,10 +254,11 @@ function TempConfigEditor() {
 }
 
 TempConfigEditor.prototype.save = function() {
+	var self = this;
 	$.post('/tcsave', { id : g_metamodel_id, tc : g_config_of_template },
 			function(data) {
 				if(data) {
-					
+					self.editor.setTitle('TemplateConfig');
 				}
 			}, "json");
 }

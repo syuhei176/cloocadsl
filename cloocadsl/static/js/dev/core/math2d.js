@@ -49,10 +49,10 @@ Point2D.prototype.distanceSq = function(px, py) {
 	return (px * px + py * py);
 }
 
-Point2D.prototype.distanceSq = function(px, py) {
-    px -= this.getX();
-    py -= this.getY();
-    return Math.sqrt(px * px + py * py);
+Point2D.distanceSq = function(p, q) {
+    var xx = p.x - q.getX();
+    var yy = p.y - q.getY();
+    return (xx * xx + yy * yy);
 }
 
 /*
@@ -218,7 +218,7 @@ Line2D.prototype.intersectsLine = function(x1, y1, x2, y2) {
 	*/
 	
 Line2D.ptSegDistSq = function(x1, y1, x2, y2, px, py) {
-	console.log('ptSegDistSq' + x1 +','+ y1 +','+ x2 +','+ y2 +','+ px +','+ py);
+//	console.log('ptSegDistSq' + x1 +','+ y1 +','+ x2 +','+ y2 +','+ px +','+ py);
 	x2 -= x1;
 	y2 -= y1;
 	px -= x1;

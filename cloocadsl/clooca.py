@@ -5,7 +5,7 @@ auto create table
 deploy
 """
 
-from flask import Flask, url_for, render_template, session, request, make_response
+from flask import Flask, url_for, render_template, session, request, make_response, redirect
 import sys
 import os
 import zipfile
@@ -208,6 +208,13 @@ with app.test_request_context():
 
 #sercret key
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
- 
+
+if not app.debug:
+    import logging
+    from logging import FileHandler
+    file_handler = FileHandler('log.txt')
+    file_handler.setLevel(logging.WARNING)
+    app.logger.addHandler(file_handler)
+    
 if __name__ == '__main__':
     app.run(debug=True)

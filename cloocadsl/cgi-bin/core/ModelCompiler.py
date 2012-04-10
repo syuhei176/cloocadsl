@@ -11,6 +11,7 @@ from StringIO import StringIO
 import config
 from ProjectService import *
 from MetaModelService import *
+from string import Template
 
 def CreateClass():
     class klass: pass
@@ -71,7 +72,9 @@ class BaseGenerator(object):
         dname = elem.get('diagram')
         for key in self.model.diagrams:
             if str(self.model.diagrams[key].meta_id) == str(dname):
-                self.FileGenByDiagram(src, dest+str(self.model.diagrams[key].id), self.model.diagrams[key])
+                template = Template(dest)
+                d = {'id': self.model.diagrams[key].id}
+                self.FileGenByDiagram(src, template.substitute(d), self.model.diagrams[key])
     
     def parseCopy(self, elem):
         src = elem.get('src')
