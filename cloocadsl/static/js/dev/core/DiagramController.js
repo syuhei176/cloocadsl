@@ -403,6 +403,7 @@ DiagramEditor.prototype.addObject = function(x,y) {
 	VersionElement.update(this.diagram.ve);
 	g_model.objects[obj.id] = obj;
 	this.diagram.objects.push(obj.id);
+	this.addElement(obj, g_metamodel.metaobjects[obj.id])
 }
 
 /**
@@ -448,10 +449,31 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 		*/
 		g_model.relationships[rel.id] = rel;
 		this.diagram.relationships.push(rel.id);
+		this.addElement(rel, g_metamodel.metarelations[rel.id])
 //		this.fireOnAddRelationship(rel);
 		return rel;
 	}
 	return null;
+}
+
+DiagramEditor.prototype.addElement = function(ele, meta_ele) {
+	for(var i=0;i < meta_ele.properties.length;i++) {
+		var meta_prop = g_metamodel.metaproperties[meta_ele.properties[i]];
+		var prop = null;
+		for(var j=0;j<ele.properties.length;j++) {
+			if(ele.properties[j].meta_id == meta_ele.properties[i]) {
+				prop = ele.properties[j];
+			}
+		}
+		if(prop == null) {
+			plist = new PropertyList();
+			plist.meta_id = meta_prop.id;
+			var new_p = new Property();
+			g_model.properties[new_p.id] = new_p;
+			plist.children[0] = new_p.id;
+			ele.properties.push(plist);
+		}
+	}
 }
 
 DiagramEditor.prototype.findNode = function(p) {
