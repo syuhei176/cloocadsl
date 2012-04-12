@@ -18,6 +18,7 @@ function init_wb(id) {
 		    	   html:'',
 		    	   width:'100px',
 		    	   region:'center',
+		           layout: 'fit',
 		    	   items : [create_tabs()]
 		       }),
 		       new Ext.Panel({
@@ -71,11 +72,15 @@ function init_wb(id) {
 
 function create_tabs() {
 	var tabs = Ext.create('Ext.tab.Panel', {
+		plain: true,
+        defaults :{
+            bodyPadding: 6,
+            closable: 'true',
+        },
 	    items: [
 	        {
 	            title: 'Welcome',
 	            html : 'Welcome to the clooca DSL.<br><br>test',
-	            closable: 'true'
 	        }
 	        ],
 	});

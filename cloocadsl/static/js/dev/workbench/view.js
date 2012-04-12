@@ -192,6 +192,7 @@ function MetaJSONEditor(metadiagram) {
 		  	   items: [
 		  	           {
 		  	        	   xtype: 'textarea',
+		  	        	   autoScroll: true,
 	  	        		   width: Ext.getCmp('centerpanel').getWidth(),
 	  	        		   height: Ext.getCmp('centerpanel').getHeight(),
 		  	        		   value: JSON.stringify(g_metamodel),
@@ -276,8 +277,9 @@ function TemplateEditor(template) {
 		  	   items: [
 		  	           {
 		  	        	   xtype: 'textarea',
-		  	        		   width: Ext.getCmp('centerpanel').getWidth(),
-		  	        		   height: Ext.getCmp('centerpanel').getHeight(),
+		  	        	   autoScroll: true,
+		  	        		   width: Ext.getCmp('centerpanel').getWidth() - 40,
+		  	        		   height: Ext.getCmp('centerpanel').getHeight() - 40,
 		  	        		   value: template.content,
 		  	        		   listeners: {
 		  	        			   change: {

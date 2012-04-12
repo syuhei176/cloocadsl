@@ -17,6 +17,7 @@ function init_clooca(pid) {
 		    	   html:'',
 		    	   width:'100px',
 		    	   region:'center',
+		    	   layout: 'fit',
 		    	   items : [create_tabs()]
 		       }),
 		       new Ext.Panel({
@@ -71,6 +72,10 @@ function init_clooca(pid) {
 
 function create_tabs() {
 	var tabs = Ext.create('Ext.tab.Panel', {
+        defaults :{
+            bodyPadding: 6,
+            closable: 'true',
+        },
 	    items: [
 	        {
 	            title: 'Welcome',
