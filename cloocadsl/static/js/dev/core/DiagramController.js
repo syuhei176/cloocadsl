@@ -18,8 +18,8 @@ function DiagramEditor(name, key, diagram) {
 	var self = this;
 	
 //	this.createButton();
-	this.width = Ext.getCmp('centerpanel').getWidth();
-	this.height = Ext.getCmp('centerpanel').getHeight();
+	this.width = Ext.getCmp('centerpanel').getWidth() - 30;
+	this.height = Ext.getCmp('centerpanel').getHeight() - 40;
 	var tab = editor_tabs.add({
 		id: this.key,
 		title: name,
@@ -122,7 +122,44 @@ function DiagramEditor(name, key, diagram) {
 
 		}
 	}
-//	var context = this.canvas.getContext('2d');
+	
+	/*
+	 * 
+	 */
+	var mnuContext = new Ext.menu.Menu({
+	    items: [{
+	        id: 'delete_element',
+	        text: '削除'
+	    },{
+	        id: 'delete_point',
+	        text: 'ポイントを削除'
+	    }],
+	    listeners: {
+	        itemclick: function(item) {
+            	console.log(item.id);
+	            switch (item.id) {
+	                case 'delete_element':
+	                	self.deleteSelected();
+	                    break;
+	                case 'delete_point':
+	                	self.deletePoint();
+	                    break;
+	            }
+	        },
+        click: function(menu, item) {
+        	console.log(item.id);
+            switch (item.id) {
+                case 'delete_element':
+                	self.deleteSelected();
+                    break;
+                case 'delete_point':
+                	self.deletePoint();
+                    break;
+            }
+        }
+	    }
+	});
+
 	this.canvas.mousemove(function(e){
 		var rect = e.target.getBoundingClientRect();
 		mouseX = e.clientX - rect.left;
@@ -134,8 +171,12 @@ function DiagramEditor(name, key, diagram) {
 		var rect = e.target.getBoundingClientRect();
 		mouseX = e.clientX - rect.left;
 		mouseY = e.clientY - rect.top;
-		self.ActionDown(mouseX, mouseY)
-		draw();
+		if(e.button == 2) {
+			mnuContext.showAt(e.clientX, e.clientY);
+		}else{
+			self.ActionDown(mouseX, mouseY)
+			draw();
+		}
 	});
 	this.canvas.mouseup(function(e){
 		var rect = e.target.getBoundingClientRect();
@@ -146,6 +187,7 @@ function DiagramEditor(name, key, diagram) {
 	});
 	draw();
 	this.draw = draw;
+	
 }
 
 /**
@@ -449,7 +491,7 @@ DiagramEditor.prototype.addRelationship = function(s,e) {
 		*/
 		g_model.relationships[rel.id] = rel;
 		this.diagram.relationships.push(rel.id);
-		this.addElement(rel, g_metamodel.metarelations[rel.id])
+		this.addElement(rel, g_metamodel.metarelations[rel.meta_id])
 //		this.fireOnAddRelationship(rel);
 		return rel;
 	}
