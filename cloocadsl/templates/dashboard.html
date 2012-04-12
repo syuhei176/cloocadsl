@@ -16,6 +16,12 @@
 
 
 function init() {
+    $('#create-newp-button').bind('click', function() {
+        $('#create-new-p').dialog()
+    });
+    $('#create-newm-button').bind('click', function() {
+        $('#create-new-m').dialog()
+    });
 	{% if loggedin %}
 	  $('#login').empty().append('<a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
 	  load_models();
@@ -274,10 +280,10 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <h1>clooca DSL</h1>
             <h2>プロジェクト</h2>
             <div id="project"></div>
-            <p><a class="btn btn-danger btn-small" href="javascript:$('#create-new-p').dialog()">　新規作成 &raquo;　　</a></p>
+            <p><a id="create-newp-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
             <h2>メタモデル</h2>
             <div id="metamodel"></div>
-            <p><a class="btn btn-danger btn-small" href="javascript:$('#create-new-m').dialog()">　新規作成 &raquo;　　</a></p>
+            <p><a id="create-newm-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
           </div>
       </div><!--/row-->
 
