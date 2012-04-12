@@ -26,8 +26,6 @@ _gaq.push(['_trackPageview']);
 })();
 
 function init() {
-	$( "#login_dialog" ).hide();
-	$( "#register_dialog" ).hide();
     if(location.hostname == "clooca.com") {
         location.href='http://education.clooca.com/';
     }
@@ -162,7 +160,7 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 <p id="message"></p>
 
 <!-- ログイン　ダイアログ -->
-<div id="login_dialog" title="login dialog">
+<div id="login_dialog" title="login dialog" style="display : none;">
 <form id="loginform" action="/login">
 <div>username:<input type="text" name="username"></div>
 <div>password:<input type="password" name="password"></div>
@@ -171,7 +169,7 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 </div>
 
 <!-- 登録　ダイアログ -->
-<div id="register_dialog" title="register dialog">
+<div id="register_dialog" title="register dialog" style="display : none;">
 <form id="register-form" action="/register">
 <div>username:<input type="text" name="username"></div>
 <div>password:<input type="password" name="password"></div>

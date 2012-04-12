@@ -16,9 +16,6 @@
 
 
 function init() {
-	$( "#login-dialog" ).hide();
-	$( "#create-new-p" ).hide();
-	$( "#create-new-m" ).hide();
 	{% if loggedin %}
 	  $('#login').empty().append('<a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
 	  load_models();
@@ -183,7 +180,7 @@ function delete_project(pid, pname) {
     </noscript>
 <p id="message"></p>
 
-<div id="login-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable ui-resizable">
+<div id="login-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable ui-resizable" style="display : none;">
    <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
       <span id="ui-dialog-title-dialog" class="ui-dialog-title">ログインダイアログ</span>
       <a class="ui-dialog-titlebar-close ui-corner-all" href="#"><span class="ui-icon ui-icon-closethick">close</span></a>
@@ -196,7 +193,7 @@ function delete_project(pid, pname) {
    </form>
    </div>
 </div>
-<div id="create-new-p" title="CreateNew">
+<div id="create-new-p" title="CreateNew" style="display : none;">
    <form id="create-project-form" method="POST" action="/createp">
    <div>プロジェクト名<input type="text" name="name"></div>
 	<div id="metamodel2"></div>
@@ -204,7 +201,7 @@ function delete_project(pid, pname) {
    <input type="submit" value="OK">
    </form>
 </div>
-<div id="create-new-m" title="CreateNew">
+<div id="create-new-m" title="CreateNew" style="display : none;">
    <form id="create-metamodel-form" method="POST" action="/createm">
    <div>メタモデル名<input type="text" name="name"></div>
 	<select name="visibillity">
@@ -244,7 +241,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="/index.html">Home</a></li>
+            <li class="active"><a href="/index">Home</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/service.html">Service</a></li>
             <li class="divider-vertical"></li>
