@@ -55,6 +55,7 @@ function PropertyList() {
 function Property() {
 	this.id = property_IdGenerator.getNewId();
 //	this.values = new Array();
+	this.meta_id = null;
 	this.value = '';
 	this.ve = new VersionElement();
 }
@@ -110,7 +111,6 @@ function IdGenerator() {
 IdGenerator.prototype.setOffset = function(offset) {
 	if(this.idcount < offset) {
 		this.idcount = offset;
-		console.log('offset='+this.idcount);
 	}
 }
 

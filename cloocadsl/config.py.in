@@ -12,5 +12,7 @@ DB_PORT = 3306
 DB_USER = 'cloocadsl'
 DB_PASSWD = 'un1verse'
 
+REP_DB_NAME = 'Repository'
+
 JAVA_FILE = '/src'
 STATIC_FILE = '/static'

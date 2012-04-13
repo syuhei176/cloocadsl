@@ -49,7 +49,7 @@ def loadProject(user, pid):
         connect.close()
         return None
     cur = connect.cursor()
-    cur.execute('SELECT id,name,xml,metamodel_id FROM ProjectInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT id,name,xml,metamodel_id,rep_id FROM ProjectInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
     cur.close()
     project = {}
@@ -57,6 +57,7 @@ def loadProject(user, pid):
     project['name'] = rows[0][1]
     project['xml'] = rows[0][2]
     project['metamodel_id'] = rows[0][3]
+    project['rep_id'] = rows[0][4]
     connect.close()
     return project
 

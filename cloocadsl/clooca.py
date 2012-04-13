@@ -19,6 +19,8 @@ from core import ModelCompiler
 from core import FileService
 from mvcs import CommitService
 from mvcs import UpdateServiceJSON
+from mvcs import RepositoryService
+from mvcs import mvcs
 from shinshu import compile_server
 
 app = Flask(__name__)
@@ -193,21 +195,86 @@ def temp_save():
         result = FileService.SaveFile(session['user'], request.form['id'], request.form['fname'], request.form['content'])
         return json.dumps(result)
 
-@app.route('/create_rep', methods=['POST'])
-def create_rep():
-    if 'user' in session:
-        pass
-
-@app.route('/commit', methods=['POST'])
+'''
+mvcs
+'''
+@app.route('/mvcs/commit', methods=['POST'])
 def commit():
     if 'user' in session:
-        CommitService.commit(request.form['pid'])
-        return ""
+        resp = mvcs.commit(session['user'], pid=request.form['pid'])
+        return json.dumps(resp)
 
-@app.route('/update', methods=['POST'])
+@app.route('/mvcs/update', methods=['POST'])
 def update():
-    jsontext = UpdateServiceJSON.LoadHeadRevision(request.form['pid'])
-    return json.dumps(jsontext)
+    if 'user' in session:
+        resp = mvcs.update(session['user'], pid=request.form['pid'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/update_to_version', methods=['POST'])
+def update_to_version():
+    if 'user' in session:
+        resp = mvcs.update_to_version(session['user'], pid=request.form['pid'], version=request.form['version'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/checkout', methods=['POST'])
+def checkout():
+    if 'user' in session:
+        resp = mvcs.checkout(session['user'], pid=request.form['pid'], rep_id=request.form['rep_id'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/import', methods=['POST'])
+def mvcs_import():
+    if 'user' in session:
+        resp = mvcs.import_to_rep(session['user'], pid=request.form['pid'], rep_id=request.form['rep_id'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/export', methods=['POST'])
+def mvcs_export():
+    if 'user' in session:
+        resp = mvcs.export_from_rep(session['user'], pid=request.form['pid'], rep_id=request.form['rep_id'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/create_rep', methods=['POST'])
+def create_rep():
+    if 'user' in session:
+        resp = mvcs.create_rep(session['user'], request.form['name'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/clear_rep', methods=['POST'])
+def clear_rep():
+    if 'user' in session:
+        resp = mvcs.clear_rep(session['user'], rep_id=request.form['rep_id'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/delete_rep', methods=['POST'])
+def delete_rep():
+    if 'user' in session:
+        resp = mvcs.delete_rep(session['user'], rep_id=request.form['rep_id'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/rep_list', methods=['POST'])
+def rep_list():
+    if 'user' in session:
+        resp = mvcs.rep_list(session['user'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/user_rep_list', methods=['POST'])
+def user_rep_list():
+    if 'user' in session:
+        resp = mvcs.user_rep_list(session['user'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/group_rep_list', methods=['POST'])
+def group_rep_list():
+    if 'user' in session:
+        resp = mvcs.group_rep_list(session['user'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/gethistory', methods=['POST'])
+def gethistory():
+    if 'user' in session:
+        RepositoryService.getHistory(request.form['pid'])
+
 
 with app.test_request_context():
     print url_for('index')

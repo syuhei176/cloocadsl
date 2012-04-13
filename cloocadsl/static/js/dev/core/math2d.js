@@ -218,7 +218,6 @@ Line2D.prototype.intersectsLine = function(x1, y1, x2, y2) {
 	*/
 	
 Line2D.ptSegDistSq = function(x1, y1, x2, y2, px, py) {
-//	console.log('ptSegDistSq' + x1 +','+ y1 +','+ x2 +','+ y2 +','+ px +','+ py);
 	x2 -= x1;
 	y2 -= y1;
 	px -= x1;
@@ -241,7 +240,6 @@ Line2D.ptSegDistSq = function(x1, y1, x2, y2, px, py) {
 	if (lenSq < 0) {
 		lenSq = 0;
 	}
-	console.log('ptSegDistSq' + lenSq);
 	return lenSq;
 }
 

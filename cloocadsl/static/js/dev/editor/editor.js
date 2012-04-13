@@ -91,6 +91,23 @@ function create_tabs() {
 function create_menu() {
 	return {
         tbar: [{
+            text: 'File',
+            iconCls: 'add16',
+            menu: [
+                   {
+                	   id: 'create_rep',
+                	   text: 'リポジトリ作成',
+                	   iconCls: 'add16',
+                	   handler : onFileItemClick
+                   },{
+                	   id: 'clear_rep',
+                	   text: 'リポジトリ削除',
+                	   iconCls: 'add16',
+                	   handler : onFileItemClick
+                   }
+                   ],
+        	handler : onItemClick
+        },{
             text: 'Edit',
             iconCls: 'add16',
             menu: [
@@ -141,8 +158,17 @@ function create_menu() {
                 	   text: 'update',
                 	   iconCls: 'add16',
                 	   handler : onProjItemClick
+                   },{
+                	   id: 'history',
+                	   text: 'History',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
+                   },{
+                	   id: 'pviewer',
+                	   text: 'プロジェクト情報',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
                    }
-
                    ]
         },'-',{
             text: 'Save',
@@ -184,6 +210,14 @@ function onItemClick(item){
 //    Ext.example.msg('Menu Click', 'You clicked the "{0}" menu item.', item.text);
 }
 
+function onFileItemClick(item){
+	if(item.id == 'create_rep') {
+		create_rep();
+	}else if(item.id == 'clear_rep') {
+		clear_rep();
+	}
+}
+
 function onProjItemClick(item){
 	if(item.text == 'generate') {
 		Generate(g_project_id);
@@ -195,6 +229,10 @@ function onProjItemClick(item){
 		commit(g_project_id);
 	}else if(item.text == 'update') {
 		update(g_project_id);
+	}else if(item.id == 'history') {
+		current_editor = new HistoryView();
+	}else if(item.id == 'pviewer') {
+		current_editor = new ProjectInfoViewer();
 	}
 }
 

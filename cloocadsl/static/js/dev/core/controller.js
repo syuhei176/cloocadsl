@@ -33,51 +33,6 @@ function saveModel(pid) {
 			}, "json");
 }
 
-/**
- * commit
- * @param pid
- */
-function commit(pid) {
-	$.post('/commit', { pid : pid },
-			function(data) {
-				if(data) {
-					console.log('loaded json string = '+data.xml);
-				}
-			}, "json");
-}
-
-/**
- * update
- * @param pid
- */
-function update(pid) {
-	$.post('/update', { pid : pid },
-			function(data) {
-				if(data) {
-					console.log('loaded json string = '+data);
-					g_model = JSON.parse(data);
-//					g_model = eval('(' + data + ')');
-					/*
-					g_metamodel_id = data.metamodel_id;
-					loadMetaModel(data.metamodel_id);
-//					g_model = parseModelXML(data.xml);
-					for(var i=0;i < g_model.root.objects.length;i++) {
-						object_IdGenerator.setOffset(g_model.root.objects[i].id);
-					}
-					*/
-					createModelExplorer();
-				}
-			}, "json");
-}
-
-/**
- * marge
- * @param model1
- * @param model2
- */
-function marge(model1, model2) {
-	
-}
 
 /**
  * Load Model
@@ -89,7 +44,8 @@ function loadModel(pid) {
 			function(data) {
 				if(data) {
 					console.log('loaded json string = '+data.xml);
-					g_projectname = data.name;
+//					g_projectname = data.name;
+					g_projectinfo = data;
 					if(data.xml == '') {
 						g_model = new Model();
 						g_model.root = 1;
@@ -155,7 +111,7 @@ function loadMetaModel(id) {
 				if(data) {
 					console.log('loaded json string = '+data.xml);
 //					g_metamodel = eval('(' + data.xml + ')');
-					console.log(data.xml);
+//					console.log(data.xml);
 					if(data.xml == ' ' || data.xml == null || data.xml.length == 0) {
 						g_metamodel = new MetaModel();
 					}else{
