@@ -85,7 +85,7 @@ function DiagramEditor(name, key, diagram) {
 						if(p.ve.ver_type == 'delete') continue;
 						self.canvas.drawText({
 							  fillStyle: "#000",
-							  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 16,
+							  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
 							  text: p.value,
 							  align: "center",
 							  baseline: "middle",
@@ -93,6 +93,14 @@ function DiagramEditor(name, key, diagram) {
 							});
 						h++;
 					}
+					self.canvas.drawLine({
+						  strokeStyle: "#000",
+						  strokeWidth: 2,
+/*						  strokeCap: "round",
+						  strokeJoin: "miter",*/
+						  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
+						  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
+						});
 				}
 			}
 		}
@@ -272,7 +280,7 @@ DiagramEditor.prototype.movePoint = function(rel, s, d) {
 }
 
 DiagramEditor.prototype.clicknode = function(x, y) {
-	var obj = this.findNode(new Point2D(x, y));
+	var obj = this.diagramController.findNode(new Point2D(x, y));
 	if(obj != null) {
 		if(obj.ve.ver_type == "delete") return false;
 		this.selected = obj;
@@ -398,16 +406,6 @@ DiagramEditor.prototype.deleteSelected = function() {
 	}
 }
 
-DiagramEditor.prototype.findNode = function(p) {
-	for(var i=0;i < this.diagram.objects.length;i++) {
-		var obj_id = this.diagram.objects[i];
-		var obj = g_model.objects[obj_id];
-		if(Rectangle2D.contains(obj.bound, p)) {
-			return obj;
-		}
-	}
-	return null;
-}
 
 /*
 function addRelationship(src, dest) {
@@ -550,7 +548,8 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 	                grid4.down('#removeButton').setDisabled(selections.length == 0);
 	                for(var i=0;i < selections.length;i++) {
 	                	PropertyPanel.selected = new Array();
-	                	PropertyPanel.selected.push(selections[i].index);
+	                	PropertyPanel.selected.push(selections[i].get('index'));
+	                	console.log(i + '=' + selections[i].get('index'));
 	                	/*
 	                	for(var j=0;j < prop.children.length;j++) {
 	                		prop.children[j]
@@ -562,33 +561,31 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 	    });
 	    Ext.define('Collection', {
 	        extend: 'Ext.data.Model',
-	        fields: [{name: 'string'}]
+	        fields: ['value'/*{name: 'value'}*/]
 	    });
 	 var dummy = new Array();
 	 for(var i=0;i < prop.children.length;i++) {
 		var p = g_model.properties[prop.children[i]];
-		if(p.ve.ver_type != 'delete') dummy.push(p.value);
+		if(p.ve.ver_type != 'delete') dummy.push({id: p.id, index: i, value : p.value});
 	 }
-	 var store = Ext.create('Ext.data.ArrayStore', {
+	 var store = Ext.create('Ext.data.Store', {
          model: 'Collection',
          data: dummy
      });
+//	 console.log(dummy[0].value);
 	 var additem = function() {
 		 dc.diagramController.addProperty(prop, meta_prop);
-/*		 var new_p = new Property();
-		 new_p.meta_id = meta_prop.id;
-		 g_model.properties[new_p.id] = new_p;
-		 prop.children.push(new_p.id);*/
 //		 dc.createPropertyPanel()
 	 }
 	 var optionitem = function() {
-		 Ext.Msg.prompt('','',function(btn,text){
+		 var p = g_model.properties[prop.children[PropertyPanel.selected[0]]];
+		 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
 			 if(btn != 'cancel') {
 				 var p = g_model.properties[prop.children[PropertyPanel.selected[0]]];
 				 p.value = text;
 				 VersionElement.update(p.ve);
 			 }
-		 },null,true);
+		 },null,false,p.value);
 	 }
 	 var deleteitem = function() {
 		 for(var i=0;i<PropertyPanel.selected.length;i++) {
@@ -601,10 +598,10 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 		 }
 	 }
 	    var grid4 = Ext.create('Ext.grid.Panel', {
-	        id:'button-grid',
+	        id:'property_collection_'+meta_prop.name,
 	        store: store,
 	        columns: [
-	            {text: "string", flex: 1, sortable: true, dataIndex: 'string'}
+	            {text: "string", flex: 1, sortable: true, dataIndex: 'value'},
 	        ],
 	        columnLines: true,
 	        selModel: selModel,

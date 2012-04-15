@@ -117,3 +117,16 @@ def loadMetaModelList():
         metamodel['name'] = rows[i][1]
         metamodels.append(metamodel)
     return metamodels
+
+def loadGroupMetaModelList(group_id, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT id,name,xml FROM MetaModelInfo WHERE visibillity=%s;',(1, ))
+    rows = cur.fetchall()
+    cur.close()
+    metamodels = []
+    for i in range(len(rows)):
+        metamodel = {}
+        metamodel['id'] = rows[i][0]
+        metamodel['name'] = rows[i][1]
+        metamodels.append(metamodel)
+    return metamodels

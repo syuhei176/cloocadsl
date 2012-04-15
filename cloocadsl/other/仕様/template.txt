@@ -1,0 +1,20 @@
+テンプレート仕様：４月６日版
+
+
+構文はhttp://docs.makotemplates.org/en/latest/index.htmlを参照
+
+
+root.ダイアグラム名.オブジェクト名.プロパティ名[0].valueのようなアクセスが可能
+
+
+
+例：ステートマシンぽいやつ
+{"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1]},{"classname":"MetaObject","id":2,"name":"start","properties":[]},{"classname":"MetaObject","id":3,"name":"class","properties":[3],"decomposition":2}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[2],"bindings":[],"arrow_type":"v"}],"metaproperties":[null,{"id":1,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":2,"name":"event","data_type":"String","widget":"fixed list","exfield":"none&touch&white&black"}],"metadiagrams":[null,{"id":1,"name":"stm","metaobjects":[1,2],"metarelations":[1]}]}
+
+上のようなメタモデルが定義されている場合
+
+%for s in root.stm.state:
+  ${s.name[0].value}
+%endfor
+
+でステートの名前の一覧を生成できる。

@@ -138,3 +138,15 @@ DiagramController.prototype.addProperty = function(plist, meta_prop) {
 DiagramController.prototype.deleteProperty = function() {
 	console.log('add property id='+new_p.id+','+new_p.ve.ver_type);
 }
+
+DiagramController.prototype.findNode = function(p) {
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj_id = this.diagram.objects[i];
+		var obj = g_model.objects[obj_id];
+		if(Rectangle2D.contains(obj.bound, p)) {
+			return obj;
+		}
+	}
+	return null;
+}
+

@@ -19,6 +19,8 @@ model_id = None
 #次のバージョン
 next_version = None
 
+
+
 '''
  ワークスペースからモデルリポジトリにコミットする。
 '''
@@ -27,7 +29,6 @@ def commit(rep_id, model_json):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    #最新バージョンじゃないとだめ
     cur.execute('SELECT id,model_id,head_version FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
     if len(rows) == 0:
@@ -37,6 +38,7 @@ def commit(rep_id, model_json):
     model_id = rows[0][1]
     head_version = int(rows[0][2])
     model = json.loads(model_json)
+    #最新バージョンじゃないとだめ
     if int(model['current_version']) == head_version:
         if InsertJSON2REP(model, model_id):
             cur = connect.cursor()
@@ -104,7 +106,7 @@ def parseDiagramJSON(diagram):
     insert_datas = []
     for rel_id in diagram['relationships']:
 #        cur.execute('INSERT INTO has_relationship (diagram_id,relationship_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,rel_id,model_id,next_version))
-        insert_datas.append((id,obj_id,model_id,next_version))
+        insert_datas.append((id,rel_id,model_id,next_version))
     cur.executemany('INSERT INTO has_relationship (diagram_id,relationship_id,model_id,version) VALUES(%s,%s,%s,%s);', insert_datas)
     connect.commit()
     if edited_type == 'update':
@@ -135,6 +137,7 @@ def parseObjectJSON(obj):
     meta_id = obj['meta_id']
     x = obj['bound']['x']
     y = obj['bound']['y']
+    decomposition_diagram = obj['diagram']
     edited_type = obj['ve']['ver_type']
     version = int(obj['ve']['version'])
     if not edited_type == 'delete':
@@ -149,7 +152,7 @@ def parseObjectJSON(obj):
         cur = connect.cursor()
         cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO object (id,meta_id,x,y,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,model_id,next_version,0))
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,0))
         connect.commit()
         cur.close()
         return True
@@ -157,7 +160,7 @@ def parseObjectJSON(obj):
         cur = connect.cursor()
         cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO object (id,meta_id,x,y,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,model_id,next_version,1))
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,1))
         connect.commit()
         cur.close()
         return True

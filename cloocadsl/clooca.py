@@ -1,8 +1,5 @@
 # coding: utf-8
 """
-run
-auto create table
-deploy
 """
 
 from flask import Flask, url_for, render_template, session, request, make_response, redirect
@@ -45,6 +42,22 @@ def dashboard(type='js'):
                                type = type
                                )
     return render_template('dashboard.html', loggedin = False, username = '')
+
+@app.route('/group')
+@app.route('/group/<id>')
+def group(id=None):
+    if 'user' in session:
+        return render_template('dashboard.html',
+                               loggedin = True,
+                               username = session['user']['uname'],
+                               mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'])),
+                               myproject = json.dumps(ProjectService.loadMyProjectList(session['user'])),
+                               metamodel = json.dumps(MetaModelService.loadMetaModelList()),
+                               type = type
+                               )
+    return render_template('dashboard.html', loggedin = False, username = '')
+
+
 
 @app.route('/editor')
 def editor():

@@ -82,10 +82,11 @@ def LoadModel(id, ver):
     model['current_version'] = str(ver)
     model['root'] = rows[0][2]
     model['properties'] = LoadPropertyEntities()
-    model['diagrams'] = LoadDiagramEntities()
     model['objects'] = LoadObjectEntities()
     model['relationships'] = LoadRelationshipEntities()
+    model['diagrams'] = LoadDiagramEntities()
     cur.close()
+    checkmodel(model)
     return model
 
 def LoadDiagramEntities():
@@ -103,25 +104,27 @@ def LoadDiagramEntities():
         idmap[id].sort()
         idmap[id].reverse()
         latest_ver = idmap[id][0]
-        cur.execute('SELECT id,meta_id,version,model_id FROM diagram WHERE id=%s AND model_id=%s AND version=%s;', (id, g_model_id, latest_ver, ))
+        cur.execute('SELECT id,meta_id,version,model_id,ver_type FROM diagram WHERE id=%s AND model_id=%s AND version=%s;', (id, g_model_id, latest_ver, ))
         rows = cur.fetchall()
-        diagram = {}
-        diagram['id'] = int(rows[0][0])
-        diagram['meta_id'] = int(rows[0][1])
-        diagram['ve'] = {}
-        diagram['ve']['ver_type'] = 'none'
-        diagram['ve']['version'] = int(rows[0][2])
-        diagram['objects'] = []
-        diagram['relationships'] = []
-        cur.execute('SELECT object_id FROM has_object WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,g_model_id,latest_ver))
-        rows = cur.fetchall()
-        for i in range(len(rows)):
-            diagram['objects'].append(rows[i][0])
-        cur.execute('SELECT relationship_id FROM has_relationship WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,g_model_id,latest_ver))
-        rows = cur.fetchall()
-        for i in range(len(rows)):
-            diagram['relationships'].append(rows[i][0])
-        diagrams[str(diagram['id'])] = diagram
+        ver_type = int(rows[0][4])
+        if not ver_type == 2:
+            diagram = {}
+            diagram['id'] = int(rows[0][0])
+            diagram['meta_id'] = int(rows[0][1])
+            diagram['ve'] = {}
+            diagram['ve']['ver_type'] = 'none'
+            diagram['ve']['version'] = int(rows[0][2])
+            diagram['objects'] = []
+            diagram['relationships'] = []
+            cur.execute('SELECT object_id FROM has_object WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,g_model_id,latest_ver))
+            obj_rows = cur.fetchall()
+            for i in range(len(obj_rows)):
+                diagram['objects'].append(obj_rows[i][0])
+            cur.execute('SELECT relationship_id FROM has_relationship WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,g_model_id,latest_ver))
+            rel_rows = cur.fetchall()
+            for i in range(len(rel_rows)):
+                diagram['relationships'].append(rel_rows[i][0])
+            diagrams[str(diagram['id'])] = diagram
     cur.close()
     return diagrams
 
@@ -148,9 +151,10 @@ def LoadObjectEntities():
         idmap[id].sort()
         idmap[id].reverse()
         latest_version = idmap[id][0]
-        cur.execute('SELECT id,meta_id,x,y,version,ver_type FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
+        cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
         obj_rows = cur.fetchall()
-        if not obj_rows[0][5] == 2:
+        ver_type = int(obj_rows[0][6])
+        if not ver_type == 2:
             object = {}
             meta_id = int(obj_rows[0][1])
             object['id'] = int(obj_rows[0][0])
@@ -160,6 +164,10 @@ def LoadObjectEntities():
             object['bound']['y'] = int(obj_rows[0][3])
             object['bound']['width'] = 50
             object['bound']['height'] = 50
+            if obj_rows[0][4] == None:
+                object['diagram'] = None
+            else:
+                object['diagram'] = int(obj_rows[0][4])
             object['ve'] = {}
             object['ve']['ver_type'] = 'none'
             object['ve']['version'] = int(obj_rows[0][5])
@@ -225,25 +233,6 @@ def LoadRelationshipEntities():
     cur.close()
     return objects
 
-def LoadDiagram(id, project_id, ver):
-    diagram = {}
-    cur = connect.cursor()
-    cur.execute('SELECT id,meta_id,version,model_id FROM diagram WHERE id=%s AND model_id=%s AND version<=%s;', (id, project_id, ver))
-    rows = cur.fetchall()
-    xml=''
-    if len(rows) == 0:
-        return None
-    meta_id = int(rows[0][1])
-    diagram['id'] = int(rows[0][0])
-    diagram['meta_id'] = int(rows[0][1])
-    diagram['ve'] = {}
-    diagram['ve']['ver_type'] = 'none'
-    diagram['ve']['version'] = int(rows[0][2])
-    diagram['objects'] = LoadObjects(id, project_id, ver)
-    diagram['relationships'] = LoadRelationships(id, project_id, ver)
-    cur.close()
-    return diagram
-
 def LoadPropertyEntities():
     properties = {}
     cur = connect.cursor()
@@ -270,3 +259,32 @@ def LoadPropertyEntities():
         properties[str(property['id'])] = property
     cur.close()
     return properties
+
+def checkmodel(model):
+    for key in model['diagrams']:
+        d = model['diagrams'][key]
+        for i in d['objects']:
+            if not model['objects'].has_key(str(i)):
+                d['objects'].remove(i)
+        for i in d['relationships']:
+            if not model['relationships'].has_key(str(i)):
+                d['relationships'].remove(i)
+
+def LoadDiagram(id, project_id, ver):
+    diagram = {}
+    cur = connect.cursor()
+    cur.execute('SELECT id,meta_id,version,model_id FROM diagram WHERE id=%s AND model_id=%s AND version<=%s;', (id, project_id, ver))
+    rows = cur.fetchall()
+    xml=''
+    if len(rows) == 0:
+        return None
+    meta_id = int(rows[0][1])
+    diagram['id'] = int(rows[0][0])
+    diagram['meta_id'] = int(rows[0][1])
+    diagram['ve'] = {}
+    diagram['ve']['ver_type'] = 'none'
+    diagram['ve']['version'] = int(rows[0][2])
+    diagram['objects'] = LoadObjects(id, project_id, ver)
+    diagram['relationships'] = LoadRelationships(id, project_id, ver)
+    cur.close()
+    return diagram

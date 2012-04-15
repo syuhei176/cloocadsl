@@ -13,7 +13,7 @@ reg_username = re.compile('\w+')
 def GetUserFromDB(username):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,uname,passwd FROM UserInfo WHERE uname = %s;', username)
+    cur.execute('SELECT id,uname,passwd,role FROM UserInfo WHERE uname = %s;', username)
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
@@ -23,6 +23,7 @@ def GetUserFromDB(username):
     user['id'] = rows[0][0]
     user['uname'] = rows[0][1]
     user['passwd'] = rows[0][2]
+    user['role'] = rows[0][3]
     cur.close()
     connect.close()
     return user
@@ -37,7 +38,7 @@ def GetUser():
 #    user = session.getAttribute("user")
 #    return user
 
-def CreateUser(username, password):
+def CreateUser(username, password, role = 0):
     if not reg_username.match(username):
         return False
     if len(password) < 5:
@@ -51,7 +52,7 @@ def CreateUser(username, password):
         connect.close()
         return False
     d = datetime.datetime.today()
-    cur.execute('INSERT INTO UserInfo (uname,passwd, register_date) VALUES(%s,%s,%s);',(username, md5.new(password).hexdigest(), d.strftime("%Y-%m-%d")))
+    cur.execute('INSERT INTO UserInfo (uname,passwd,register_date,role) VALUES(%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), role, ))
     connect.commit()
     cur.close()
     connect.close()
