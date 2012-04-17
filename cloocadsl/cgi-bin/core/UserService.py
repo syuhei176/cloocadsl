@@ -73,6 +73,8 @@ def Login(username, password):
         return None
 #    session = MySession.GetSession()
     user = GetUserFromDB(username)
+    if user == None:
+        return None
     if md5.new(password).hexdigest() == user['passwd']:
 #        session.setAttribute('user', user)
         session['user'] = user

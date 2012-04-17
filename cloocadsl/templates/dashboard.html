@@ -47,7 +47,9 @@ function init() {
 	    	if(data != null) {
 	    		$('#login').empty().append('<a href="/logout">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
 	    		$( "#login-dialog" ).dialog('close');
-	    		load_models();
+	    		location.reload();
+	    	}else{
+	    		$('#login-message').empty().append('ユーザ名が違います。');
 	    	}
 	      }, "json");
 	  });
@@ -192,6 +194,7 @@ function delete_project(pid, pname) {
       <a class="ui-dialog-titlebar-close ui-corner-all" href="#"><span class="ui-icon ui-icon-closethick">close</span></a>
    </div>
    <div style="height: 200px; min-height: 109px; width: auto;" class="ui-dialog-content ui-widget-content" id="dialog">
+   <div id="login-message"></div>
    <form id="loginform" method="POST" action="/login">
    <div>username:<input type="text" name="username"></div>
    <div>password:<input type="password" name="password"></div>
