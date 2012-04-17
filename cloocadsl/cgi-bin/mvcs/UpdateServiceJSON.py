@@ -32,7 +32,7 @@ def LoadHeadRevision(rep_id):
     if len(rows) == 0:
         connect.close()
         return False
-    model_json = json.dumps(LoadModel(rep_id, rows[0][0]))
+    model_json = LoadModel(rep_id, rows[0][0])
     connect.close()
     return model_json
 
@@ -116,6 +116,7 @@ def LoadDiagramEntities():
             diagram['ve']['version'] = int(rows[0][2])
             diagram['objects'] = []
             diagram['relationships'] = []
+#            print latest_ver
             cur.execute('SELECT object_id FROM has_object WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,g_model_id,latest_ver))
             obj_rows = cur.fetchall()
             for i in range(len(obj_rows)):
@@ -177,11 +178,16 @@ def LoadObjectEntities():
             proplist = {}
             for i in range(len(property_rows)):
                 property_id = int(property_rows[i][0])
-                meta_id = g_model['properties'][str(property_id)]['meta_id']
-                if proplist.has_key(meta_id):
-                    proplist[meta_id].append(property_id)
+                if g_model['properties'].has_key(str(property_id)):
+                    #update or add
+                    meta_id = g_model['properties'][str(property_id)]['meta_id']
+                    if proplist.has_key(meta_id):
+                        proplist[meta_id].append(property_id)
+                    else:
+                        proplist[meta_id] = [property_id]
                 else:
-                    proplist[meta_id] = [property_id]
+                    #delete
+                    pass
             for key in proplist.keys():
                 object['properties'].append({'meta_id':key,'children':proplist[key]})
             objects[str(object['id'])] = object
@@ -222,11 +228,16 @@ def LoadRelationshipEntities():
             proplist = {}
             for i in range(len(property_rows)):
                 property_id = int(property_rows[i][0])
-                meta_id = g_model['properties'][str(property_id)]['meta_id']
-                if proplist.has_key(meta_id):
-                    proplist[meta_id].append(property_id)
+                if g_model['properties'].has_key(str(property_id)):
+                    #add or update
+                    meta_id = g_model['properties'][str(property_id)]['meta_id']
+                    if proplist.has_key(meta_id):
+                        proplist[meta_id].append(property_id)
+                    else:
+                        proplist[meta_id] = [property_id]
                 else:
-                    proplist[meta_id] = [property_id]
+                    #delete
+                    pass
             for key in proplist.keys():
                 object['properties'].append({'meta_id':key,'children':proplist[key]})
             objects[str(object['id'])] = object
@@ -248,15 +259,17 @@ def LoadPropertyEntities():
         idmap[id].reverse()
         cur.execute('SELECT id,meta_id,content,version,ver_type FROM property WHERE id=%s AND model_id=%s AND version=%s;', (str(id), g_model_id, idmap[id][0]))
         prop_rows = cur.fetchall()
-        meta_id = int(prop_rows[0][1])
-        property = {}
-        property['id'] = int(prop_rows[0][0])
-        property['meta_id'] = meta_id
-        property['value'] = prop_rows[0][2]
-        property['ve'] = {}
-        property['ve']['ver_type'] = 'none'
-        property['ve']['version'] = int(prop_rows[0][3])
-        properties[str(property['id'])] = property
+        ver_type = prop_rows[0][4]
+        if not ver_type == 2:
+            meta_id = int(prop_rows[0][1])
+            property = {}
+            property['id'] = int(prop_rows[0][0])
+            property['meta_id'] = meta_id
+            property['value'] = prop_rows[0][2]
+            property['ve'] = {}
+            property['ve']['ver_type'] = 'none'
+            property['ve']['version'] = int(prop_rows[0][3])
+            properties[str(property['id'])] = property
     cur.close()
     return properties
 

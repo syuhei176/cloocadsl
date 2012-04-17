@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- ホスト: localhost
--- 生成時間: 2012 年 4 月 14 日 00:33
+-- 生成時間: 2012 年 4 月 17 日 12:00
 -- サーバのバージョン: 5.5.16
 -- PHP のバージョン: 5.3.8
 
@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `object` (
   `model_id` int(11) NOT NULL,
   `version` int(11) NOT NULL,
   `ver_type` int(1) NOT NULL,
+  `diagram` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`,`model_id`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -155,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `Repository` (
   `model_id` int(11) NOT NULL,
   `owner_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

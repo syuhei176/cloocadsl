@@ -46,7 +46,7 @@ function loadModel(pid) {
 					console.log('loaded json string = '+data.xml);
 //					g_projectname = data.name;
 					g_projectinfo = data;
-					if(data.xml == '') {
+					if(data.xml == 'null' || data.xml == '') {
 						g_model = new Model();
 						g_model.root = 1;
 						g_model.diagrams[1] = new Diagram(1);
@@ -60,6 +60,9 @@ function loadModel(pid) {
 					/*
 					 * IDジェネレータの初期値を設定する。
 					 */
+					diagram_IdGenerator.setOffset(g_projectinfo.id * 10000);
+					object_IdGenerator.setOffset(g_projectinfo.id * 10000);
+					property_IdGenerator.setOffset(g_projectinfo.id * 10000);
 					for(var key in g_model.diagrams) {
 						obj = g_model.diagrams[key]
 						if(obj == null) continue;
@@ -69,6 +72,7 @@ function loadModel(pid) {
 						obj = g_model.objects[key]
 						if(obj == null) continue;
 						object_IdGenerator.setOffset(obj.id);
+						calObjHeight(obj);
 					}
 					for(var key in g_model.relationships) {
 						obj = g_model.relationships[key]

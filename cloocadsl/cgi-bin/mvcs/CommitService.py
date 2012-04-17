@@ -242,7 +242,7 @@ def parsePropertyJSON(prop):
         cur = connect.cursor()
         cur.execute('DELETE FROM property where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content,model_id,next_version,0))
+        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content.encode('utf_8'),model_id,next_version,0))
         connect.commit()
         cur.close()
         return True
@@ -250,13 +250,13 @@ def parsePropertyJSON(prop):
         cur = connect.cursor()
         cur.execute('DELETE FROM property where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content,model_id,next_version,1))
+        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content.encode('utf_8'),model_id,next_version,1))
         connect.commit()
         cur.close()
         return True
     elif edited_type == 'delete':
         cur = connect.cursor()
-        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content,model_id,next_version,2))
+        cur.execute('INSERT INTO property (id,meta_id,content,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s);', (id,meta_id,content.encode('utf_8'),model_id,next_version,2))
         connect.commit()
         cur.close()
         return True

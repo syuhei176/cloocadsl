@@ -30,7 +30,7 @@ def saveProject(user, pid, xml):
         connect.close()
         return None
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id = %s;',(xml, pid, ))
+    affect_row_count = cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id = %s;',(xml.encode('utf_8'), pid, ))
     connect.commit()
     cur.close()
     connect.close()

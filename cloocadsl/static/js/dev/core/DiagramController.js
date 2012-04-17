@@ -1,5 +1,6 @@
 function DiagramController(diagram) {
 	this.diagram = diagram;
+	this.listeners = new Array();
 }
 
 DiagramController.prototype.deleteObject = function(id) {
@@ -12,7 +13,8 @@ DiagramController.prototype.deleteObject = function(id) {
 		}
 		delete g_model.objects[id]
 	}else{
-		g_model.objects[id].ve.ver_type = 'delete';		
+		g_model.objects[id].ve.ver_type = 'delete';
+		VersionElement.update(this.diagram.ve);
 	}
 	for(var i=0;i < this.diagram.relationships.length;i++) {
 		if(g_model.relationships[this.diagram.relationships[i]].src == id || g_model.relationships[this.diagram.relationships[i]].dest == id) {
@@ -30,6 +32,7 @@ DiagramController.prototype.deleteRelationship = function(id) {
 		delete g_model.relationships[id]
 	}else{
 		g_model.relationships[id].ve.ver_type = 'delete';		
+		VersionElement.update(this.diagram.ve);
 	}
 }
 
@@ -139,6 +142,12 @@ DiagramController.prototype.deleteProperty = function() {
 	console.log('add property id='+new_p.id+','+new_p.ve.ver_type);
 }
 
+DiagramController.prototype.updateProperty = function(p, newValue, ele) {
+	p.value = newValue;
+	VersionElement.update(p.ve);
+	this.fireUpdateProperty(p, newValue, ele);
+}
+
 DiagramController.prototype.findNode = function(p) {
 	for(var i=0;i < this.diagram.objects.length;i++) {
 		var obj_id = this.diagram.objects[i];
@@ -149,4 +158,17 @@ DiagramController.prototype.findNode = function(p) {
 	}
 	return null;
 }
+
+DiagramController.prototype.on = function(event, fn) {
+	this.listeners.push({event: event, fn: fn});
+}
+
+DiagramController.prototype.fireUpdateProperty = function(p, newValue, parent) {
+	for(var i=0;i<this.listeners.length;i++) {
+		if(this.listeners[0].event == 'updateProperty') {
+			this.listeners[0].fn(p, newValue, parent);
+		}
+	}
+}
+
 

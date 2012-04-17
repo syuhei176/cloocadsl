@@ -65,7 +65,28 @@ function update_to_ver(ver) {
  * @param model2
  */
 function marge(model1, model2) {
-	
+	for(var key in model1.diagrams) {
+		dgm = g_model.diagrams[key]
+		if(dgm == null) continue;
+		diagram_IdGenerator.setOffset(dgm.id);
+	}
+	for(var key in model1.objects) {
+		obj = g_model.objects[key]
+		if(obj == null) continue;
+		object_IdGenerator.setOffset(obj.id);
+		calObjHeight(obj);
+	}
+	for(var key in model1.relationships) {
+		rel = g_model.relationships[key]
+		if(rel == null) continue;
+		object_IdGenerator.setOffset(rel.id);
+	}
+	for(var key in model1.properties) {
+		var prop = g_model.properties[key];
+		if(prop == null) continue;
+		property_IdGenerator.setOffset(prop.id);
+	}
+
 }
 
 

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- ホスト: localhost
--- 生成時間: 2012 年 4 月 14 日 00:32
+-- 生成時間: 2012 年 4 月 17 日 13:14
 -- サーバのバージョン: 5.5.16
 -- PHP のバージョン: 5.3.8
 
@@ -26,6 +26,7 @@ SET time_zone = "+00:00";
 -- テーブルの構造 `GraphicInfo`
 --
 
+DROP TABLE IF EXISTS `GraphicInfo`;
 CREATE TABLE IF NOT EXISTS `GraphicInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `visibillity` int(1) NOT NULL,
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `GraphicInfo` (
 -- テーブルの構造 `GroupInfo`
 --
 
+DROP TABLE IF EXISTS `GroupInfo`;
 CREATE TABLE IF NOT EXISTS `GroupInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
@@ -53,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `GroupInfo` (
 -- テーブルの構造 `hasMetaModel`
 --
 
+DROP TABLE IF EXISTS `hasMetaModel`;
 CREATE TABLE IF NOT EXISTS `hasMetaModel` (
   `user_id` int(11) NOT NULL,
   `metamodel_id` int(11) NOT NULL
@@ -64,6 +67,7 @@ CREATE TABLE IF NOT EXISTS `hasMetaModel` (
 -- テーブルの構造 `hasProject`
 --
 
+DROP TABLE IF EXISTS `hasProject`;
 CREATE TABLE IF NOT EXISTS `hasProject` (
   `user_id` int(11) NOT NULL,
   `project_id` int(11) NOT NULL
@@ -75,9 +79,11 @@ CREATE TABLE IF NOT EXISTS `hasProject` (
 -- テーブルの構造 `Join`
 --
 
+DROP TABLE IF EXISTS `Join`;
 CREATE TABLE IF NOT EXISTS `Join` (
   `user_id` int(11) NOT NULL,
   `group_id` int(11) NOT NULL,
+  `role` int(1) NOT NULL,
   KEY `user_id` (`user_id`,`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -87,14 +93,16 @@ CREATE TABLE IF NOT EXISTS `Join` (
 -- テーブルの構造 `MetaModelInfo`
 --
 
+DROP TABLE IF EXISTS `MetaModelInfo`;
 CREATE TABLE IF NOT EXISTS `MetaModelInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
   `xml` mediumtext NOT NULL,
   `visibillity` int(1) NOT NULL DEFAULT '0',
   `template` mediumtext NOT NULL,
+  `group_id` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
 
 -- --------------------------------------------------------
 
@@ -102,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `MetaModelInfo` (
 -- テーブルの構造 `ProjectInfo`
 --
 
+DROP TABLE IF EXISTS `ProjectInfo`;
 CREATE TABLE IF NOT EXISTS `ProjectInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
@@ -109,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `ProjectInfo` (
   `metamodel_id` int(11) NOT NULL,
   `rep_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=19 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
 
 -- --------------------------------------------------------
 
@@ -117,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `ProjectInfo` (
 -- テーブルの構造 `UserInfo`
 --
 
+DROP TABLE IF EXISTS `UserInfo`;
 CREATE TABLE IF NOT EXISTS `UserInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uname` varchar(32) NOT NULL,

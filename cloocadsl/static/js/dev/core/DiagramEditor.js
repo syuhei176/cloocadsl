@@ -16,6 +16,10 @@ function DiagramEditor(name, key, diagram) {
 	this.dragMode = 0;
 	this.select_button = null;
 	var self = this;
+	this.diagramController.on('updateProperty', function(p, newValue, parent){
+		if(parent.bound != undefined) calObjHeight(parent);
+		self.draw();
+	});
 	
 //	this.createButton();
 //	this.width = Ext.getCmp('centerpanel').getWidth() - 30;
@@ -96,8 +100,6 @@ function DiagramEditor(name, key, diagram) {
 					self.canvas.drawLine({
 						  strokeStyle: "#000",
 						  strokeWidth: 2,
-/*						  strokeCap: "round",
-						  strokeJoin: "miter",*/
 						  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
 						  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
 						});
@@ -173,7 +175,6 @@ function DiagramEditor(name, key, diagram) {
 		mouseX = e.clientX - rect.left;
 		mouseY = e.clientY - rect.top;
 		self.ActionMove(mouseX, mouseY)
-		draw();
 	});
 	this.canvas.mousedown(function(e){
 		var rect = e.target.getBoundingClientRect();
@@ -213,7 +214,10 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
 			this.updateObject(this.selected,Number(x-10),Number(y-10));
+			this.draw()
 		}
+	}else if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+		this.draw()
 	}
 }
 
@@ -459,9 +463,9 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 			prop_tab = PropertyPanel.CollectionString(this, meta_prop, prop, ele)
 		}else{
 			if(meta_prop.widget == MetaProperty.INPUT_FIELD) {
-				prop_tab = PropertyPanel.InputField(meta_prop, prop, ele)
+				prop_tab = PropertyPanel.InputField(this, meta_prop, prop, ele)
 			}else if(meta_prop.widget == MetaProperty.FIXED_LIST) {
-				prop_tab = PropertyPanel.FixedList(meta_prop, prop, ele)
+				prop_tab = PropertyPanel.FixedList(this, meta_prop, prop, ele)
 			}
 		}
 		prop_tab.index = i;
@@ -480,7 +484,7 @@ DiagramEditor.prototype.getImage = function(type) {
 
 function PropertyPanel(){}
 
-PropertyPanel.InputField = function(meta_prop, prop, ele) {
+PropertyPanel.InputField = function(dc, meta_prop, prop, ele) {
 	var p = g_model.properties[prop.children[0]];
 	var prop_tab = {
             title: meta_prop.name,
@@ -492,10 +496,11 @@ PropertyPanel.InputField = function(meta_prop, prop, ele) {
   	        		   listeners: {
   	        			   change: {
   	        				   fn: function(field, newValue, oldValue, opt) {
- 	        						p.value = newValue;
- 	        						VersionElement.update(p.ve);
+	        						dc.diagramController.updateProperty(p, newValue, ele);
+// 	        						p.value = newValue;
+// 	        						VersionElement.update(p.ve);
 //  	        					 ele.properties[this.index].children[0].value = newValue;
-  	        					 calObjHeight(ele);
+//  	        					 calObjHeight(ele);
   	        				   }
   	        			   }
   	        		   }
@@ -503,7 +508,7 @@ PropertyPanel.InputField = function(meta_prop, prop, ele) {
 		};
 	return prop_tab;
 }
-PropertyPanel.FixedList = function(meta_prop, prop, ele) {
+PropertyPanel.FixedList = function(dc, meta_prop, prop, ele) {
 	var p = g_model.properties[prop.children[0]];
 	var strs = meta_prop.exfield.split('&');
 	var datas = new Array();
@@ -527,11 +532,12 @@ PropertyPanel.FixedList = function(meta_prop, prop, ele) {
   	        		   listeners: {
   	        			   change: {
   	        				   fn: function(field, newValue, oldValue, opt) {
- 	        						p.value = newValue;
+// 	        						p.value = newValue;
  	        						g_model.properties[prop.children[0]].value = newValue;
- 	        						VersionElement.update(p.ve);
+ 	        						dc.diagramController.updateProperty(p, newValue, ele);
+// 	        						VersionElement.update(p.ve);
 //  	        					 ele.properties[this.index].children[0].value = newValue;
-  	        					 calObjHeight(ele);
+//  	        					 calObjHeight(ele);
   	        				   }
   	        			   }
   	        		   }
@@ -549,12 +555,7 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 	                for(var i=0;i < selections.length;i++) {
 	                	PropertyPanel.selected = new Array();
 	                	PropertyPanel.selected.push(selections[i].get('index'));
-	                	console.log(i + '=' + selections[i].get('index'));
-	                	/*
-	                	for(var j=0;j < prop.children.length;j++) {
-	                		prop.children[j]
-	                	}
-	                	*/
+//	                	console.log(i + '=' + selections[i].get('index'));
 	                }
 	            }
 	        }
@@ -582,8 +583,7 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 		 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
 			 if(btn != 'cancel') {
 				 var p = g_model.properties[prop.children[PropertyPanel.selected[0]]];
-				 p.value = text;
-				 VersionElement.update(p.ve);
+				 dc.diagramController.updateProperty(p, text, ele);
 			 }
 		 },null,false,p.value);
 	 }
@@ -646,7 +646,6 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 	    return grid4;
 }
 
-
 function calObjHeight(obj) {
 	if(obj.bound == undefined) return;
 	var h = 0;
@@ -662,8 +661,6 @@ function calObjHeight(obj) {
 	obj.bound.height = h * 20 + 10;
 	obj.bound.width = w * 8 + 10;
 }
-
-
 
 DiagramEditor.prototype.draw_relationship = function(rel) {
 	var col = '#000';

@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 import sys
+import codecs
 import config
 
 
@@ -71,7 +73,8 @@ def PrivateGetFileTree(path, name):
 
 def SaveFile(user, id, path, content):
     projectpath = GetTemplateDirectory(id)
-    f = open(projectpath+'/'+path, 'w')
+#    f = open(projectpath+'/'+path, 'w')
+    f = codecs.open(projectpath+'/'+path, 'w', encoding='utf-8')
     f.write(content)
     f.close()
     return True
