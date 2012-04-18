@@ -123,7 +123,7 @@ function create_projects_table(projects) {
 		{% else %}
 		var link = '<a href="/editor#'+projects[i].id+'">'+projects[i].name+'</a>';
 		{% endif %}
-		var del = '<a href="javascript:delete_project('+projects[i].id+',\''+projects[i].name+'\')">削除</a>';
+		var del = '<a onclick="delete_project('+projects[i].id+',\''+projects[i].name+'\')">削除</a>';
 		html += '<tr><td>'+link+'</td><td>'+del+'</td></tr>';
 	}
 	html += '</table>';

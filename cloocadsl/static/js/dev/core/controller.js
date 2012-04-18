@@ -22,6 +22,7 @@ function genbin(pid) {
  * グローバル変数g_modelの内容をサーバに保存する。
  */
 function saveModel(pid) {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	g_model.id = pid;
 	var xml = JSON.stringify(g_model);
 //	console.log(xml);
@@ -29,6 +30,7 @@ function saveModel(pid) {
 			function(data) {
 				if(data) {
 					console.log('saved json string = '+xml);
+					Ext.MessageBox.hide();
 				}
 			}, "json");
 }
@@ -40,6 +42,7 @@ function saveModel(pid) {
  * @param pid
  */
 function loadModel(pid) {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/pload', { pid : pid },
 			function(data) {
 				if(data) {
@@ -85,6 +88,7 @@ function loadModel(pid) {
 						property_IdGenerator.setOffset(prop.id);
 					}
 					createModelExplorer();
+					Ext.MessageBox.updateProgress(0.5, '50% completed');
 				}
 			}, "json");
 }
@@ -128,15 +132,17 @@ function loadMetaModel(id) {
 						}
 					}
 //					g_model = parseModelXML(data.xml);
-//					createModelExplorer();
+					Ext.MessageBox.hide();
 				}
 			}, "json");
 }
 
 function Generate(pid) {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Generating...',progressText: 'Generating...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/gen', { pid : pid },
 			function(data) {
 				if(data) {
+					Ext.MessageBox.hide();
 				}
 			}, "json");
 }
