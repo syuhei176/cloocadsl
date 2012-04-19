@@ -86,15 +86,19 @@ class BaseGenerator(object):
         shutil.copy(self.input + '/' + src, self.projectpath + '/' + dest)
     
     def FileGen(self, src, dest):
-        mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
-        tmpl = mylookup.get_template(src)
-        buf = StringIO()
-        model = self.model
-        ctx = Context(buf, root = model)
-        tmpl.render_context(ctx)
-        hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
-        hf.write(buf.getvalue())
-        hf.close()
+        try:
+            mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
+            tmpl = mylookup.get_template(src)
+            buf = StringIO()
+            model = self.model
+            ctx = Context(buf, root = model)
+            tmpl.render_context(ctx)
+            hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
+            hf.write(buf.getvalue())
+            hf.close()
+        except Exception as e:
+            global message
+            message += e.message
     
     def FileGenByDiagram(self, src, dest, diagram):
         try:
