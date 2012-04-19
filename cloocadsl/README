@@ -37,16 +37,10 @@ DB_PORT = 3306
 DB_USER = 'root'
 DB_PASSWD = ''
 
-2) python application.pyで実行
+2) python clooca.pyで実行
 
-3) http://127.0.0.1:5000/index にアクセス
+3) http://127.0.0.1:5000/ にアクセス
 
 ===========
 =  その他  =
 ===========
-GWT関係
-EclipseでメニューのProject-Property-Web ApplicationのWAR DIRECTORYを"static"に変更すること。
-
-プロジェクトのXMLの仕様はXMLPresenter.java
-メタモデルのXMLの仕様はXMLMetaPresenter.java
-を参照
