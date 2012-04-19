@@ -29,33 +29,49 @@ def index():
         return render_template('index.html', loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
-@app.route('/dashboard')
-@app.route('/dashboard/<type>')
-def dashboard(type='js'):
+@app.route('/login', methods=['GET'])
+def login_view():
     if 'user' in session:
-        return render_template('dashboard.html',
-                               loggedin = True,
-                               username = session['user']['uname'],
-                               mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'])),
-                               myproject = json.dumps(ProjectService.loadMyProjectList(session['user'])),
-                               metamodel = json.dumps(MetaModelService.loadMetaModelList()),
-                               type = type
-                               )
-    return render_template('dashboard.html', loggedin = False, username = '')
+        return redirect('/groups')
+    else:
+        return render_template('login.html')
 
-@app.route('/group')
-@app.route('/group/<id>')
-def group(id=None):
+@app.route('/member_reg/<gid>', methods=['GET'])
+def member_reg_view(gid):
     if 'user' in session:
-        return render_template('dashboard.html',
+        return redirect('/groups')
+    else:
+        return render_template('member_reg.html', group_id=gid)
+
+@app.route('/reg', methods=['GET'])
+def reg_view():
+    return render_template('register.html')
+
+@app.route('/groups')
+def groups(type='js'):
+    if 'user' in session and 'joinInfos' in session['user']:
+        return render_template('groups.html',
+                               username = session['user']['uname'],
+                               joinInfos = session['user']['joinInfos']
+                               )
+    return redirect(url_for('login_view'))
+
+@app.route('/dashboard/<id>')
+def dashboard(id=None):
+    if 'user' in session and 'joinInfos' in session['user']:
+        for joinInfo in session['user']['joinInfos']:
+            if int(joinInfo['id']) == int(id):
+                return render_template('dashboard.html',
                                loggedin = True,
                                username = session['user']['uname'],
-                               mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'])),
-                               myproject = json.dumps(ProjectService.loadMyProjectList(session['user'])),
-                               metamodel = json.dumps(MetaModelService.loadMetaModelList()),
-                               type = type
+                               mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'], joinInfo)),
+                               myproject = json.dumps(ProjectService.loadMyProjectList(session['user'], joinInfo)),
+                               metamodel = json.dumps(MetaModelService.loadMetaModelList(session['user'], joinInfo)),
+                               group_name = joinInfo['name'],
+                               group_id = joinInfo['id'],
+                               type = 'js'
                                )
-    return render_template('dashboard.html', loggedin = False, username = '')
+    return render_template('request_deny.html', loggedin = False, username = '')
 
 
 
@@ -69,8 +85,14 @@ def editor():
 @app.route('/editorjs/<pid>')
 def editorjs(pid=None):
     if 'user' in session:
-        return render_template('editorjs.html', pid = pid, loggedin = True, username = session['user']['uname'])
-    return render_template('index.html', loggedin = False, username = '')
+        result = ProjectService.loadProject(session['user'], pid)
+        if not result == None:
+            for joinInfo in session['user']['joinInfos']:
+                if joinInfo['id'] == result['group_id']:
+                    result['group'] = joinInfo
+                    #return json.dumps(result)
+                    return render_template('editorjs.html', pid = pid, project = json.dumps(result))
+    return render_template('request_deny.html')
 
 @app.route('/workbench')
 def workbench():
@@ -85,17 +107,24 @@ def workbenchjs(id=None):
         return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
-@app.route('/register', methods=['POST'])
+@app.route('/free-register', methods=['POST'])
 def register():
-    return json.dumps(UserService.CreateUser(request.form['username'], request.form['password']))
+    if 'group_id' in request.form:
+        return json.dumps(UserService.CreateUser(request.form['username'], request.form['password'], group_id=request.form['group_id']))
+    else:
+        return json.dumps(UserService.CreateUser(request.form['username'], request.form['password']))
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
+def register_admin():
+    return json.dumps(UserService.CreateUser(request.form['username'],
+                                             request.form['password'],
+                                             role=1,
+                                             email=request.form['email']))
+
+@app.route('/login-to', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        user = UserService.Login(request.form['username'], request.form['password'])
-#        resp = make_response(json.dumps(user), '200')
-#        resp.headers['Content-type'] = 'text/javascript'
-        return json.dumps(user)
+    user = UserService.Login(request.form['username'], request.form['password'])
+    return json.dumps(user)
 
 @app.route('/logout')
 def logout():
@@ -105,13 +134,23 @@ def logout():
 
 @app.route('/createm', methods=['POST'])
 def createm():
-    project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'])
-    return json.dumps(project)
+    if 'user' in session and 'joinInfos' in session['user']:
+        gid = request.form['group_id']
+        for joinInfo in session['user']['joinInfos']:
+            if joinInfo['id'] == gid and joinInfo['role'] == 1:
+                project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], joinInfo)
+                return json.dumps(project)
+    return 'false'
 
 @app.route('/createp', methods=['POST'])
 def createp():
-    project = ProjectService.createProject(session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'])
-    return json.dumps(project)
+    if 'user' in session and 'joinInfos' in session['user']:
+        gid = int(request.form['group_id'])
+        for joinInfo in session['user']['joinInfos']:
+            if int(joinInfo['id']) == gid:
+                project = ProjectService.createProject(session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'], joinInfo)
+                return json.dumps(project)
+    return 'false'
 
 @app.route('/deletep', methods=['POST'])
 def deletep():
@@ -125,9 +164,11 @@ def deletep():
 def pload():
     if 'user' in session:
         result = ProjectService.loadProject(session['user'], request.form['pid'])
-        return json.dumps(result)
-    else:
-        return 'false'
+        for joinInfo in session['user']['joinInfos']:
+            if joinInfo['id'] == result['group_id']:
+                result['group'] = joinInfo
+                return json.dumps(result)
+    return 'false'
 
 @app.route('/psave', methods=['POST'])
 def psave():
@@ -151,8 +192,8 @@ def tcsave():
 def gen():
     if 'user' in session:
         generator = ModelCompiler.BaseGenerator()
-        generator.GenerateCode(session['user'], int(request.form['pid']));
-        return 'true'
+        mes = generator.GenerateCode(session['user'], int(request.form['pid']));
+        return json.dumps(mes)
     else:
         return 'false'
 

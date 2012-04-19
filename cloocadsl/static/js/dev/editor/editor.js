@@ -7,8 +7,9 @@ Ext.require([
 ]);
 
 var g_project_id = 0;
-function init_clooca(pid) {
+function init_clooca(pid, project) {
 	g_project_id = pid;
+	g_projectinfo = project;
 	new Ext.Viewport({
 		layout:'border',
 		items:[
@@ -65,72 +66,49 @@ function init_clooca(pid) {
 		       }),
 		       ]
 	});
-
-	loadModel(pid);
-//	loadMetaModel(6);
+	readModel(project);
 }
 
 function create_tabs() {
-	var tabs = Ext.create('Ext.tab.Panel', {
-        defaults :{
-            bodyPadding: 6,
-            closable: 'true',
-        },
-	    items: [
-	        {
-	            title: 'Welcome',
-	            html : 'Welcome to the clooca DSL.<br><br>test',
-	            closable: 'true'
-	        }
-	        ],
-	});
-	editor_tabs = tabs;
-	return tabs;
+	editortabpanel = new EditorTabPanel();
+	return editortabpanel.getPanel();
 }
 
 function create_menu() {
-	return {
+	var common_menu = {
         tbar: [{
-            text: 'File',
-            iconCls: 'add16',
-            menu: [
-                   {
-                	   id: 'create_rep',
-                	   text: 'リポジトリ作成',
-                	   iconCls: 'add16',
-                	   handler : onFileItemClick
-                   },{
-                	   id: 'clear_rep',
-                	   text: 'リポジトリ削除',
-                	   iconCls: 'add16',
-                	   handler : onFileItemClick
-                   }
-                   ],
-        	handler : onItemClick
-        },{
             text: 'Edit',
             iconCls: 'add16',
             menu: [
                    {
-                	   text: 'delete',
+                	   id: 'delete',
+                	   text: '削除',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   text: 'deletePoints',
+                	   id: 'deletePoints',
+                	   text: 'ポイントを削除',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   text: 'diagram',
+                	   id: 'diagram',
+                	   text: 'ダイアグラム',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   text: 'png',
+                	   text: 'エクスポート',
                 	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   text: 'jpg',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
+                	   menu: [{
+                    	   id: 'png',
+                    	   text: 'png',
+                    	   iconCls: 'add16',
+                    	   handler : onItemClick
+                       },{
+                    	   id: 'jpg',
+                    	   text: 'jpg',
+                    	   iconCls: 'add16',
+                    	   handler : onItemClick
+                       }]
                    }
                    ],
         	handler : onItemClick
@@ -139,28 +117,13 @@ function create_menu() {
             iconCls: 'add16',
             menu: [
                    {
+                	   id: 'generate',
                 	   text: 'generate',
                 	   iconCls: 'add16',
                 	   handler : onProjItemClick
                    },{
+                	   id: 'download',
                 	   text: 'download',
-                	   iconCls: 'add16',
-                	   handler : onProjItemClick
-                   },{
-                	   text: 'genbin',
-                	   iconCls: 'add16',
-                	   handler : onProjItemClick
-                   },{
-                	   text: 'commit',
-                	   iconCls: 'add16',
-                	   handler : onProjItemClick
-                   },{
-                	   text: 'update',
-                	   iconCls: 'add16',
-                	   handler : onProjItemClick
-                   },{
-                	   id: 'history',
-                	   text: 'History',
                 	   iconCls: 'add16',
                 	   handler : onProjItemClick
                    },{
@@ -171,38 +134,87 @@ function create_menu() {
                    }
                    ]
         },'-',{
+            id: 'save',
             text: 'Save',
             iconCls: 'add16',
         	handler : onItemClick
         }]
     }
+	if(g_projectinfo.group.service == 'free') {
+		
+	}
+	if(g_projectinfo.group.service == 'rep' || g_projectinfo.group.service == 'all') {
+		common_menu.tbar.push({
+            text: 'リポジトリ',
+            iconCls: 'add16',
+            menu: [
+                   {
+                	   id: 'create_rep',
+                	   text: 'リポジトリ作成',
+                	   iconCls: 'add16',
+                	   handler : onRepItemClick
+                   },{
+                	   id: 'clear_rep',
+                	   text: 'リポジトリ削除',
+                	   iconCls: 'add16',
+                	   handler : onRepItemClick
+                   },{
+                	   text: 'checkout',
+                	   iconCls: 'add16',
+                	   handler : onRepItemClick
+                   },{
+                	   text: 'commit',
+                	   iconCls: 'add16',
+                	   handler : onRepItemClick
+                   },{
+                	   text: 'update',
+                	   iconCls: 'add16',
+                	   handler : onRepItemClick
+                   },{
+                	   id: 'history',
+                	   text: 'History',
+                	   iconCls: 'add16',
+                	   handler : onRepItemClick
+                   }
+                   ],
+        	handler : onItemClick
+        });
+	}
+	if(g_projectinfo.group.service == 'shinshu' || g_projectinfo.group.service == 'all') {
+		common_menu.tbar.push({
+            text: '信州大学',
+            iconCls: 'add16',
+            menu: [
+                   {
+                	   id: 'genbin',
+                	   text: 'バイナリ生成',
+                	   iconCls: 'add16',
+                	   handler : onShinshuItemClick
+                   }
+                   ],
+        	handler : onItemClick
+        });
+	}
+	return common_menu;
 }
 
 function onItemClick(item){
 //	window.alert('item'+ item.text);
-	if(item.text == 'Save') {
+	if(item.id == 'save') {
 		saveModel(g_project_id);
-	}else if(item.text == 'diagram') {
+	}else if(item.id == 'diagram') {
 		var d = new Diagram();
 		d.meta_id = g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition;
 		current_editor.selected.diagram = d.id;
 		g_model.diagrams[d.id] = d;
 		createModelExplorer();
-	}else if(item.text == 'png') {
+	}else if(item.id == 'png') {
 		current_editor.getImage('png');
-	}else if(item.text == 'jpg') {
+	}else if(item.id == 'jpg') {
 		current_editor.getImage('jpg');
-	}else if(item.text == 'MetaSave') {
-		saveMetaModel(g_metamodel_id);
-	}else if(item.text == 'MetaObj') {
-		MetaModelEditor(g_metamodel.metadiagram.metaobjects);
-	}else if(item.text == 'MetaRel') {
-		MetaRelationEditor(g_metamodel.metadiagram.metarelations);
-	}else if(item.text == 'MetaJSON') {
-		MetaJSONEditor(g_metamodel.metadiagram);
-	}else if(item.text == 'delete') {
+	}else if(item.id == 'delete') {
 		current_editor.deleteSelected();
-	}else if(item.text == 'deletePoints') {
+	}else if(item.id == 'deletePoints') {
 		current_editor.deletePoint();
 	}else{
 		
@@ -219,51 +231,37 @@ function onFileItemClick(item){
 }
 
 function onProjItemClick(item){
-	if(item.text == 'generate') {
+	if(item.id == 'generate') {
 		Generate(g_project_id);
-	}else if(item.text == 'download') {
+	}else if(item.id == 'download') {
 		download(g_project_id);
 	}else if(item.text == 'genbin') {
 		genbin(g_project_id);
-	}else if(item.text == 'commit') {
-		commit(g_project_id);
-	}else if(item.text == 'update') {
-		update(g_project_id);
-	}else if(item.id == 'history') {
-		current_editor = new HistoryView();
 	}else if(item.id == 'pviewer') {
 		current_editor = new ProjectInfoViewer();
 	}
 }
 
-/*
-var viewport = new Ext.Viewport({
-id:'viewport',
-layout:'fit',
-items:
-{
-id:'tabs',
-xtype:'tabpanel',
-closable : 'true',
-activeTab: 'firstTab',
-defaults:{
-bodyStyle:'padding:50px;text-align:center;'
-},
-items: [
-{
-id:'firstTab',
-title: 'タブパネル1',
-html: '<h1>１つ目のタブパネル</h1>'
-},{
-id:'secondTab',
-title: 'タブパネル2',
-html: '<h1>2つ目のタブパネル</h1>'
+function onRepItemClick(item){
+	if(item.id == 'create_rep') {
+		create_rep();
+	}else if(item.id == 'clear_rep') {
+		clear_rep();
+	}else if(item.id == 'checkout') {
+	}else if(item.id == 'commit') {
+		commit();
+	}else if(item.id == 'update') {
+		update();
+	}else if(item.id == 'history') {
+		current_editor = new HistoryView();
+	}
 }
-]
-}
-});
-*/
 
+function onShinshuItemClick(item){
+	if(item.id == 'genbin') {
+		genbin(g_project_id);
+	}
+}
 
 function createModelExplorer() {
 	var diagrams = [];
@@ -287,100 +285,12 @@ function createModelExplorer() {
 	    rootVisible: false
 	});
 	modelExplorer.on('itemclick',function(view, record, item, index, event) {
-    	console.log('click '+record.data.id);
-		editor = new DiagramEditor(record.data.text, record.data.text, g_model.diagrams[record.data.id]);
+		if(record.data.text != 'root') {
+	    	var editor = new DiagramEditor(record.data.text, record.data.text, g_model.diagrams[record.data.id]);
+	    	editortabpanel.add(editor, record.data.text);
+		}
     });
 	Ext.getCmp('modelexplorer').removeAll();
 	Ext.getCmp('modelexplorer').add(modelExplorer);
 	return modelExplorer;
 }
-
-/*
-Ext.Loader.setConfig({enabled: true});
-
-Ext.Loader.setPath('Ext.ux', '../ux/');
-
-Ext.require([
-    'Ext.tab.*',
-    'Ext.ux.TabCloseMenu'
-]);
-
-Ext.onReady(function() {
-    var currentItem;
-    var tabs = Ext.createWidget('tabpanel', {
-        renderTo: 'tabs',
-        resizeTabs: true,
-        enableTabScroll: true,
-        width: 600,
-        height: 250,
-        defaults: {
-            autoScroll:true,
-            bodyPadding: 10
-        },
-        items: [{
-            title: 'Tab 1',
-            iconCls: 'tabs',
-            html: 'Tab Body<br/><br/>' + Ext.example.bogusMarkup,
-            closable: true
-        }],
-        plugins: Ext.create('Ext.ux.TabCloseMenu', {
-            extraItemsTail: [
-                '-',
-                {
-                    text: 'Closable',
-                    checked: true,
-                    hideOnClick: true,
-                    handler: function (item) {
-                        currentItem.tab.setClosable(item.checked);
-                    }
-                }
-            ],
-            listeners: {
-                aftermenu: function () {
-                    currentItem = null;
-                },
-                beforemenu: function (menu, item) {
-                    var menuitem = menu.child('*[text="Closable"]');
-                    currentItem = item;
-                    menuitem.setChecked(item.closable);
-                }
-            }
-        })
-    });
-
-    // tab generation code
-    var index = 0;
-    while(index < 3){
-        addTab(index % 2);
-    }
-
-    function addTab (closable) {
-        ++index;
-        tabs.add({
-            title: 'New Tab ' + index,
-            iconCls: 'tabs',
-            html: 'Tab Body ' + index + '<br/><br/>' + Ext.example.bogusMarkup,
-            closable: !!closable
-        }).show();
-    }
-
-    Ext.createWidget('button', {
-        renderTo: 'addButtonCt',
-        text: 'Add Closable Tab',
-        handler: function () {
-            addTab(true);
-        },
-        iconCls:'new-tab'
-    });
-
-    Ext.createWidget('button', {
-        renderTo: 'addButtonCt',
-        text: 'Add Unclosable Tab',
-        handler: function () {
-            addTab(false);
-        },
-        iconCls:'new-tab',
-        style: 'margin-left: 8px;'
-    });
-});
-*/

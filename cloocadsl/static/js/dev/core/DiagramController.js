@@ -127,9 +127,10 @@ DiagramController.prototype.addElement = function(ele, meta_ele) {
 /**
  * addProperty
  */
-DiagramController.prototype.addProperty = function(plist, meta_prop) {
+DiagramController.prototype.addProperty = function(plist, meta_prop, content) {
 	var new_p = new Property();
 	new_p.meta_id = meta_prop.id;
+	if(content != undefined) new_p.value = content;
 	g_model.properties[new_p.id] = new_p;
 	plist.children.push(new_p.id);
 	console.log('add property id='+new_p.id+','+new_p.ve.ver_type);

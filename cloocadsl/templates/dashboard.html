@@ -4,8 +4,6 @@
 <meta name="gwt:property" content="locale=ja">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>clooca</title>
-<link rel="stylesheet" href="home.css" type="text/css" />
-<!-- <link rel="stylesheet" href="common.css" type="text/css" /> -->
 <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 <script src="/static/js/jquery-1.7.1.min.js"></script>
@@ -71,7 +69,7 @@ function init() {
 	    	return;
 	    }
 	    /* Send the data using post and put the results in a div */
-	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml },
+	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml, group_id: {{group_id}} },
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-p" ).dialog('close');
@@ -92,7 +90,7 @@ function init() {
 	    
 	    if(name.length == 0) return;
 	    /* Send the data using post and put the results in a div */
-	    $.post( url, { name: name, visibillity: visibillity, xml: xml },
+	    $.post( url, { name: name, visibillity: visibillity, xml: xml, group_id: {{group_id}} },
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-m" ).dialog('close');
@@ -250,9 +248,9 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="/index">Home</a></li>
+            <li class="active"><a href="/index">ホーム</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/service.html">Service</a></li>
+            <li><a href="/groups">グループ</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/document.html">Document</a></li>
             <li class="divider-vertical"></li>
@@ -280,7 +278,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         </div><!--/span-->
         <div class="span9">
           <div class="hero-unit">
-            <h1>clooca DSL</h1>
+            <h1>{{ group_name }}</h1>
             <h2>プロジェクト</h2>
             <div id="project"></div>
             <p><a id="create-newp-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>

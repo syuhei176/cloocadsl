@@ -27,6 +27,7 @@
     <script src="/static/js/dev/core/DiagramEditor.js"></script>
     <script src="/static/js/dev/core/metamodel.js"></script>
     <script src="/static/js/dev/core/model.js"></script>
+    <script src="/static/js/dev/core/EditorTabPanel.js"></script>
     <script src="/static/js/dev/editor/controller.js"></script>
     <script src="/static/js/dev/editor/editor.js"></script>
     <script src="/static/js/dev/editor/view.js"></script>
@@ -52,7 +53,7 @@
     var editor_tabs = null;
     var g_model = null;
     function init() {
-    	init_clooca({{pid}});
+    	init_clooca({{pid}}, {{project|safe}});
     }
     -->
     </script>

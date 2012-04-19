@@ -49,6 +49,7 @@ function loadModel(pid) {
 					console.log('loaded json string = '+data.xml);
 //					g_projectname = data.name;
 					g_projectinfo = data;
+					console.log('service='+g_projectinfo.group.service);
 					if(data.xml == 'null' || data.xml == '') {
 						g_model = new Model();
 						g_model.root = 1;
@@ -93,19 +94,52 @@ function loadModel(pid) {
 			}, "json");
 }
 
-/**
- * Save MetaModel
- * グローバル変数g_metamodelの内容をサーバに保存する。
- */
-function saveMetaModel(id) {
-	var xml = JSON.stringify(g_metamodel);
-//	console.log(xml);
-	$.post('/msave', { id : id, xml : xml },
-			function(data) {
-				if(data) {
-					console.log('saved json string = '+xml);
-				}
-			}, "json");
+function readModel(project) {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
+	if(project) {
+		console.log('loaded json string = '+project.xml);
+		g_projectinfo = project;
+		console.log('service='+g_projectinfo.group.service);
+		if(g_projectinfo.xml == 'null' || g_projectinfo.xml == '') {
+						g_model = new Model();
+						g_model.root = 1;
+						g_model.diagrams[1] = new Diagram(1);
+						diagram_IdGenerator.setOffset(1);
+		}else{
+						g_model = JSON.parse(g_projectinfo.xml);
+		}
+		g_metamodel_id = g_projectinfo.metamodel_id;
+		loadMetaModel(g_projectinfo.metamodel_id);
+					/*
+					 * IDジェネレータの初期値を設定する。
+					 */
+		diagram_IdGenerator.setOffset(g_projectinfo.id * 10000);
+		object_IdGenerator.setOffset(g_projectinfo.id * 10000);
+		property_IdGenerator.setOffset(g_projectinfo.id * 10000);
+		for(var key in g_model.diagrams) {
+						obj = g_model.diagrams[key]
+						if(obj == null) continue;
+						diagram_IdGenerator.setOffset(obj.id);
+					}
+					for(var key in g_model.objects) {
+						obj = g_model.objects[key]
+						if(obj == null) continue;
+						object_IdGenerator.setOffset(obj.id);
+						calObjHeight(obj);
+					}
+					for(var key in g_model.relationships) {
+						obj = g_model.relationships[key]
+						if(obj == null) continue;
+						object_IdGenerator.setOffset(obj.id);
+					}
+					for(var key in g_model.properties) {
+						var prop = g_model.properties[key];
+						if(prop == null) continue;
+						property_IdGenerator.setOffset(prop.id);
+					}
+					createModelExplorer();
+					Ext.MessageBox.hide();
+	}
 }
 
 /**
@@ -114,6 +148,7 @@ function saveMetaModel(id) {
  * @param pid
  */
 function loadMetaModel(id) {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/mload', { id : id },
 			function(data) {
 				if(data) {
@@ -141,9 +176,8 @@ function Generate(pid) {
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Generating...',progressText: 'Generating...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/gen', { pid : pid },
 			function(data) {
-				if(data) {
-					Ext.MessageBox.hide();
-				}
+				Ext.MessageBox.hide();
+				Ext.MessageBox.alert('結果', data);
 			}, "json");
 }
 

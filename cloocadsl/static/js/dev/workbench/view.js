@@ -200,6 +200,7 @@ function MetaJSONEditor(metadiagram) {
 		  	        			   change: {
 		  	        				   fn: function(field, newValue, oldValue, opt) {
 		  	        						g_metamodel = eval('('+newValue+')');
+		  	        						editor.setTitle('JSONEditor*')
 		  	        						console.log('change');
 		  	        				   }
 		  	        			   }
@@ -208,15 +209,37 @@ function MetaJSONEditor(metadiagram) {
 		  	           ],
 		  	 		closable: 'true'
 	});
-	var tab = editor_tabs.add(editor);
-	tab.on('activate', function(){
-		current_editor = self;
-	});
-	editor_tabs.setActiveTab(tab);
+	this.editor = editor;
 }
 
 MetaJSONEditor.prototype.save = function() {
-	saveMetaModel(g_metamodel_id);
+	var self = this;
+	saveMetaModel(g_metamodel_id, function(data){
+		if(data) {
+			self.editor.setTitle('JSONEditor');
+		}
+	});
+}
+
+/**
+ * Save MetaModel
+ * グローバル変数g_metamodelの内容をサーバに保存する。
+ */
+function saveMetaModel(id, fn) {
+	var xml = JSON.stringify(g_metamodel);
+	$.post('/msave', { id : id, xml : xml }, fn, "json");
+}
+
+
+MetaJSONEditor.prototype.getPanel = function() {
+	return this.editor;
+}
+
+MetaJSONEditor.prototype.Initialize = function() {
+}
+
+MetaJSONEditor.prototype.onActivate = function() {
+	current_editor = this;
 }
 
 function TempConfigEditor() {
@@ -247,11 +270,6 @@ function TempConfigEditor() {
 		  	 		closable: 'true'
 	});
 	this.editor = editor;
-	var tab = editor_tabs.add(editor);
-	tab.on('activate', function(){
-		current_editor = self;
-	});
-	editor_tabs.setActiveTab(tab);
 }
 
 TempConfigEditor.prototype.save = function() {
@@ -264,10 +282,22 @@ TempConfigEditor.prototype.save = function() {
 			}, "json");
 }
 
+TempConfigEditor.prototype.getPanel = function() {
+	return this.editor;
+}
+
+TempConfigEditor.prototype.Initialize = function() {
+}
+
+TempConfigEditor.prototype.onActivate = function() {
+	current_editor = this;
+}
+
 function TemplateEditor(template) {
 	this.template = template;
+	this.resource = template;
 	var self = this;
-	var editor = Ext.create('Ext.panel.Panel',
+	this.panel = Ext.create('Ext.panel.Panel',
 		{
 		  	   title: template.name,
 		  	   layout: {
@@ -285,6 +315,7 @@ function TemplateEditor(template) {
 		  	        			   change: {
 		  	        				   fn: function(field, newValue, oldValue, opt) {
 		  	        					 template.content = newValue;
+		  	        					 self.panel.setTitle(template.name + '*');
 		  	        				   }
 		  	        			   }
 		  	        		   }
@@ -292,19 +323,28 @@ function TemplateEditor(template) {
 		  	           ],
 		  	 		closable: 'true'
 	});
-	var tab = editor_tabs.add(editor);
-	tab.on('activate', function(){
-		current_editor = self;
-		current_resource = template;
-	});
-	editor_tabs.setActiveTab(tab);
 }
 
 TemplateEditor.prototype.save = function() {
+	var self = this;
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/template/save', { id : g_metamodel_id, fname : this.template.name , content : this.template.content},
 			function(data) {
 				if(data) {
-					
+					self.panel.setTitle(self.template.name);
+					Ext.MessageBox.hide();
 				}
 			}, "json");
+}
+
+TemplateEditor.prototype.getPanel = function() {
+	return this.panel;
+}
+
+TemplateEditor.prototype.Initialize = function() {
+}
+
+TemplateEditor.prototype.onActivate = function() {
+	current_editor = this;
+	current_resource = this.resource;
 }

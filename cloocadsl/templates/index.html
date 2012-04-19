@@ -4,8 +4,6 @@
 <meta name="gwt:property" content="locale=ja">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>clooca</title>
-<link rel="stylesheet" href="home.css" type="text/css" />
-<!-- <link rel="stylesheet" href="common.css" type="text/css" /> -->
 <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 <script src="/static/js/jquery-1.7.1.min.js"></script>
@@ -42,7 +40,7 @@ function init() {
 	{% if loggedin %}
 	  $('#login').empty().append('<a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
 	{% else %}
-	  $('#login').empty().append('<a href="javascript:login()">login</a>&nbsp;&nbsp;&nbsp;');
+	  $('#login').empty().append('<a href="/login">login</a>&nbsp;&nbsp;&nbsp;');
 	{% endif %}
 	/*
 	$.post('/cgi-bin/core/checkloggedin.cgi',
@@ -170,7 +168,7 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 
 <!-- 登録　ダイアログ -->
 <div id="register_dialog" title="register dialog" style="display : none;">
-<form id="register-form" action="/register">
+<form id="register-form" action="/free-register">
 <div>username:<input type="text" name="username"></div>
 <div>password:<input type="password" name="password"></div>
 <div>confirm:<input type="password" name="password-confirm"></div>
@@ -205,9 +203,9 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="/index">Home</a></li>
+            <li class="active"><a href="/index">ホーム</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/service.html">Service</a></li>
+            <li><a href="/groups">グループ</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/document.html">Document</a></li>
             <li class="divider-vertical"></li>
@@ -238,7 +236,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <h1>clooca DSL</h1>
             <p>cloooca DSLはソーシャルDSMLプラットフォームです。</p>
             <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　　</a></p>
-            <p><a class="btn btn-primary btn-large" href="/dashboard">ダッシュボード &raquo;</a></p>
+            <p><a class="btn btn-primary btn-large" href="/groups">ダッシュボード &raquo;</a></p>
             <h3>最新情報</h3>
             <ul id="twitter_data"></ul>
           </div>

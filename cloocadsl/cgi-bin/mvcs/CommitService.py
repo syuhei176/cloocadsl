@@ -29,9 +29,11 @@ def commit(rep_id, model_json):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
+    cur.execute('LOCK TABLES Repository WRITE,object WRITE,model WRITE,diagram WRITE;')
     cur.execute('SELECT id,model_id,head_version FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
     if len(rows) == 0:
+        cur.execute('UNLOCK TABLES;')
         cur.close()
         connect.close()
         return 0
@@ -44,12 +46,18 @@ def commit(rep_id, model_json):
             cur = connect.cursor()
             cur.execute('UPDATE Repository SET head_version=%s WHERE id=%s;', (next_version,rep_id,))
             connect.commit()
+            cur.execute('UNLOCK TABLES;')
             cur.close()
             connect.close()
             return 1
         else:
+            cur = connect.cursor()
+            cur.execute('UNLOCK TABLES;')
+            cur.close()
+            connect.close()
             return 3
     else:
+        cur.execute('UNLOCK TABLES;')
         cur.close()
         connect.close()
         return 2

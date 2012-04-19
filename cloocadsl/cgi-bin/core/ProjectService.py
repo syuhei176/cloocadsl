@@ -36,6 +36,18 @@ def saveProject(user, pid, xml):
     connect.close()
     return True
 
+def check(user, pid):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        connect.close()
+        return False
+    connect.close()
+    return True
+
 '''
 プロジェクトをロードする
 '''
@@ -49,7 +61,7 @@ def loadProject(user, pid):
         connect.close()
         return None
     cur = connect.cursor()
-    cur.execute('SELECT id,name,xml,metamodel_id,rep_id FROM ProjectInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT id,name,xml,metamodel_id,rep_id,group_id FROM ProjectInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
     cur.close()
     project = {}
@@ -58,6 +70,7 @@ def loadProject(user, pid):
     project['xml'] = rows[0][2]
     project['metamodel_id'] = rows[0][3]
     project['rep_id'] = rows[0][4]
+    project['group_id'] = rows[0][5]
     connect.close()
     return project
 
@@ -84,10 +97,10 @@ clean_xml = '''
 '''
 clean_json = ''
 
-def createProject(user, name, xml, metamodel_id):
+def createProject(user, name, xml, metamodel_id, joinInfo=None):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id) VALUES(%s,%s,%s);',(name, clean_json, metamodel_id, ))
+    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,group_id) VALUES(%s,%s,%s),%s;',(name, clean_json, metamodel_id, joinInfo['id'], ))
     connect.commit()
     id = cur.lastrowid
     cur.close()
@@ -103,23 +116,19 @@ def createProject(user, name, xml, metamodel_id):
     project['metamodel_id'] = metamodel_id
     return True
 
-def loadMyProjectList(user):
+def loadMyProjectList(user, joinInfo):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT project_id FROM hasProject WHERE user_id=%s;',(user['id'], ))
+    cur.execute('SELECT ProjectInfo.id AS id,hasProject.project_id AS id2,name,xml,metamodel_id,rep_id,group_id FROM ProjectInfo INNER JOIN hasProject ON ProjectInfo.id = hasProject.project_id AND hasProject.user_id=%s AND ProjectInfo.group_id=%s;',(user['id'], joinInfo['id'], ))
     rows = cur.fetchall()
     projects = []
     cur.close()
     for i in range(len(rows)):
-        cur = connect.cursor()
-        cur.execute('SELECT id,name,xml FROM ProjectInfo WHERE id=%s;',(rows[i][0], ))
-        metamodel_rows = cur.fetchall()
         project = {}
-        project['id'] = metamodel_rows[0][0]
-        project['name'] = metamodel_rows[0][1]
+        project['id'] = rows[i][0]
+        project['name'] = rows[i][2]
 #        metamodel['xml'] = metamodel_rows[0][2]
         projects.append(project)
-        cur.close()
     connect.close()
     return projects
 

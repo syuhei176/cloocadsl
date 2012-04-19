@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import MySQLdb
 import md5
@@ -6,7 +7,8 @@ import sys
 import datetime
 import config
 from flask import session
-#from util import MySession
+import GroupService
+from util import Gmail
 
 reg_username = re.compile('\w+')
 
@@ -32,13 +34,8 @@ def GetUser():
     if 'user' in session:
         return session['user']
     return None
-#    session = MySession.GetSession()
-#    if session._is_new():
-#        return None
-#    user = session.getAttribute("user")
-#    return user
 
-def CreateUser(username, password, role = 0):
+def CreateUser(username, password, role = 0, group_id=None):
     if not reg_username.match(username):
         return False
     if len(password) < 5:
@@ -53,10 +50,26 @@ def CreateUser(username, password, role = 0):
         return False
     d = datetime.datetime.today()
     cur.execute('INSERT INTO UserInfo (uname,passwd,register_date,role) VALUES(%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), role, ))
+    user_id = cur.lastrowid
     connect.commit()
+    if not group_id == None:
+        GroupService.joinGroup(user_id, group_id, connect)
     cur.close()
     connect.close()
     return True
+
+'''
+'''
+def CreateAdminUser(email):
+    from_addr = 'hiya@gmail.com'
+    to_addr = email
+    msg = Gmail.create_message(from_addr, to_addr, 'test subject', 'test body')
+    Gmail.send_via_gmail(from_addr, to_addr, msg)
+
+'''
+'''
+def ConfirmEmail():
+    pass
 
 def EnableEmail(user, email):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -76,9 +89,13 @@ def Login(username, password):
     if user == None:
         return None
     if md5.new(password).hexdigest() == user['passwd']:
-#        session.setAttribute('user', user)
-        session['user'] = user
+        #session.setAttribute('user', user)
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        joinInfos = GroupService.checkUserJoinGroup(user, connect)
+        connect.close()
         user['passwd'] = '*****'
+        user['joinInfos'] = joinInfos
+        session['user'] = user
         return user
     else:
         return None

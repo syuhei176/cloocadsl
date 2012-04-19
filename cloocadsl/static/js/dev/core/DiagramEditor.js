@@ -26,6 +26,7 @@ function DiagramEditor(name, key, diagram) {
 //	this.height = Ext.getCmp('centerpanel').getHeight() - 40;
 	this.width = 1000;
 	this.height = 1000;
+	/*
 	var tab = editor_tabs.add({
 		id: this.key,
 		title: name,
@@ -33,15 +34,33 @@ function DiagramEditor(name, key, diagram) {
 		html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
 		closable: 'true',
 	});
+	*/
+	this.panel = {
+			id: this.key,
+			title: name,
+			autoScroll: true,
+			html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
+			closable: 'true',
+		};
+	/*
+	editortabpanel.on('activate', function(){
+		self.createButton();
+		current_editor = self;
+		})
+		*/
+		/*
 	tab.on('activate', function(){
 		self.createButton();
 		current_editor = self;
 		});
-	editor_tabs.setActiveTab(tab);
+		*/
+//	editor_tabs.setActiveTab(tab);
 	this.canvas = $('#canvas_'+this.key);
 //	window.alert("canvas = "+this.canvas);
 	var draw = function() {
-//		window.alert("draw" + editor_key);
+		if(self.canvas == null) {
+			self.canvas = $('#canvas_'+self.key);
+		}
 		self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: self.width,height: self.height, fromCenter: false});
 		for(var i=0;i < self.diagram.objects.length;i++) {
 			var obj_id = self.diagram.objects[i];
@@ -72,7 +91,8 @@ function DiagramEditor(name, key, diagram) {
 					  strokeStyle: col, strokeWidth: 2,
 					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
 					  radius: obj.bound.width / 2,
-					  start: 0, end: 359
+					  start: 0, end: 359,
+					  fromCenter: true
 					});
 			}
 			var h = 0;
@@ -134,10 +154,17 @@ function DiagramEditor(name, key, diagram) {
 
 		}
 	}
-	
-	/*
-	 * 
-	 */
+
+	this.draw = draw;
+}
+
+DiagramEditor.prototype.getPanel = function() {
+	return this.panel;
+}
+
+DiagramEditor.prototype.Initialize = function() {
+	var self = this;
+	this.canvas = $('#canvas_'+this.key);
 	var mnuContext = new Ext.menu.Menu({
 	    items: [{
 	        id: 'delete_element',
@@ -169,7 +196,6 @@ function DiagramEditor(name, key, diagram) {
         }
 	    }
 	});
-
 	this.canvas.mousemove(function(e){
 		var rect = e.target.getBoundingClientRect();
 		mouseX = e.clientX - rect.left;
@@ -184,7 +210,7 @@ function DiagramEditor(name, key, diagram) {
 			mnuContext.showAt(e.clientX, e.clientY);
 		}else{
 			self.ActionDown(mouseX, mouseY)
-			draw();
+			self.draw();
 		}
 	});
 	this.canvas.mouseup(function(e){
@@ -192,11 +218,14 @@ function DiagramEditor(name, key, diagram) {
 		mouseX = e.clientX - rect.left;
 		mouseY = e.clientY - rect.top;
 		self.ActionUp(mouseX, mouseY)
-		draw();
+		self.draw();
 	});
-	draw();
-	this.draw = draw;
-	
+	this.draw();
+}
+
+DiagramEditor.prototype.onActivate = function() {
+	this.createButton();
+	current_editor = this;
 }
 
 /**
@@ -436,6 +465,10 @@ DiagramEditor.prototype.fireSelectRelationship = function(selected) {
  * @param ele
  */
 DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
+	var meta_prop_id = null;
+	if(arguments.length == 3) {
+		meta_prop_id = arguments[2];
+	}
 	var self = this;
 	Ext.getCmp('propertypanel').removeAll();
 	var property_tabs = Ext.create('Ext.tab.Panel', {
@@ -460,7 +493,7 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 		}
 		var prop_tab = null;
 		if(meta_prop.data_type == MetaProperty.COLLECTION_STRING) {
-			prop_tab = PropertyPanel.CollectionString(this, meta_prop, prop, ele)
+			prop_tab = PropertyPanel.CollectionString(this, meta_prop, prop, ele, meta_ele)
 		}else{
 			if(meta_prop.widget == MetaProperty.INPUT_FIELD) {
 				prop_tab = PropertyPanel.InputField(this, meta_prop, prop, ele)
@@ -470,6 +503,9 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 		}
 		prop_tab.index = i;
 		property_tabs.add(prop_tab);
+		if(meta_prop.id == meta_prop_id) {
+			property_tabs.setActiveTab(prop_tab);
+		}
 	}
 	Ext.getCmp('propertypanel').add(property_tabs);
 
@@ -546,8 +582,12 @@ PropertyPanel.FixedList = function(dc, meta_prop, prop, ele) {
 		};
 	return prop_tab;
 }
+
 PropertyPanel.selected = new Array();
-PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
+/**
+ * コレクション<String>用のプロパティエリア
+ */
+PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele, meta_ele) {
 	 var selModel = Ext.create('Ext.selection.CheckboxModel', {
 	        listeners: {
 	            selectionchange: function(sm, selections) {
@@ -562,7 +602,7 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 	    });
 	    Ext.define('Collection', {
 	        extend: 'Ext.data.Model',
-	        fields: ['value'/*{name: 'value'}*/]
+	        fields: ['value']
 	    });
 	 var dummy = new Array();
 	 for(var i=0;i < prop.children.length;i++) {
@@ -573,11 +613,18 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
          model: 'Collection',
          data: dummy
      });
-//	 console.log(dummy[0].value);
+	 //追加ボタンが押されたときの処理
 	 var additem = function() {
-		 dc.diagramController.addProperty(prop, meta_prop);
-//		 dc.createPropertyPanel()
+		 Ext.Msg.prompt('追加','プロパティ',function(btn,text){
+			 if(btn != 'cancel') {
+				 dc.diagramController.addProperty(prop, meta_prop, text);
+				 //アクティブにするタブを指定して、プロパティエリアを再構築
+				 if(ele.bound != undefined) calObjHeight(ele);
+				 current_editor.createPropertyPanel(meta_ele, ele, meta_prop.id);
+			 }
+		 },null,false,'');
 	 }
+	 //編集ボタンが押されたときの処理
 	 var optionitem = function() {
 		 var p = g_model.properties[prop.children[PropertyPanel.selected[0]]];
 		 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
@@ -587,14 +634,19 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele) {
 			 }
 		 },null,false,p.value);
 	 }
+	 //削除ボタンが押されたときの処理
 	 var deleteitem = function() {
 		 for(var i=0;i<PropertyPanel.selected.length;i++) {
+			 //プロパティの削除
 			 if(p.ve.ver_type == 'add') {
 				 delete g_model.properties[prop.children[PropertyPanel.selected[i]]];
 				 prop.children.splice(PropertyPanel.selected[i], 1);
 			 }else{
 				 g_model.properties[prop.children[PropertyPanel.selected[i]]].ve.ver_type = 'delete';
 			 }
+			 //アクティブにするタブを指定して、プロパティエリアを再構築
+			 if(ele.bound != undefined) calObjHeight(ele);
+			 current_editor.createPropertyPanel(meta_ele, ele, meta_prop.id);
 		 }
 	 }
 	    var grid4 = Ext.create('Ext.grid.Panel', {
@@ -660,6 +712,7 @@ function calObjHeight(obj) {
 	}
 	obj.bound.height = h * 20 + 10;
 	obj.bound.width = w * 8 + 10;
+	if(obj.bound.height < 12) obj.bound.height = 42;
 }
 
 DiagramEditor.prototype.draw_relationship = function(rel) {

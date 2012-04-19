@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta name="gwt:property" content="locale=ja">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>clooca 登録</title>
+<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+<script src="/static/js/jquery-1.7.1.min.js"></script>
+<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+function init() {
+	$("#register-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+        username = $form.find( 'input[name="username"]' ).val(),
+        password = $form.find( 'input[name="password"]' ).val(),
+        password_confirm = $form.find( 'input[name="password-confirm"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    if(password != password_confirm) {
+	    	window.alert('passwordが一致しません！');
+	    	return;
+	    }
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { username: username, password: password },
+	      function( data ) {
+//	    	window.alert(data);
+    		$( "#register_dialog" ).dialog('close');
+	      }, "json");
+	  });
+	register();
+}
+
+function register() {
+	$( "#register_dialog" ).dialog({ modal: true });
+}
+
+
+</script>
+</head>
+<body onload="init()">
+      <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+
+<!-- 登録　ダイアログ -->
+<div id="register_dialog" title="register dialog" style="display : none;">
+<form id="register-form" action="/register">
+<div>ユーザ名：　　　<input type="text" name="username"></div>
+<div>パスワード：　　<input type="password" name="password"></div>
+<div>確認：　　　　　<input type="password" name="password-confirm"></div>
+<div>氏名：　　　　　<input type="text" name="fullname"></div>
+<div>団体名：　　　　<input type="text" name="company"></div>
+<div>メールアドレス：<input type="text" name="email"></div>
+<input type="submit" value="登録">
+</form>
+</div>
+
+
+<div id="wrapper">
+<div id="temp">
+<div id="header">
+<div id="header-main">
+<p id="overview">
+</p>
+<!-- clooca is a web-based model-driven development tool.
+Currently, clooca is being introduced at the lesson of the Kyushu University Graduate School of Information Systems, please try it. -->
+</div>
+<div id="language">
+<div Align="right"><a href="/english/index.html">English</a></div>
+<div Align="right"><a href="/index.html">日本語</a></div>
+</div>
+</div>
+<!-- ナビゲーションバー -->
+ <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container" style="width: auto;">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <!-- <a class="brand" href="/"><img src="images/logo2.png" width="80" height="30"></img></a> -->
+        <a class="brand" href="/">clooca DSL</a>
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="active"><a href="/index">Home</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/service.html">Service</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/document.html">Document</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/contact.html">Contact</a></li>
+          </ul>
+          <p id="login" class="navbar-text pull-right"></p>
+        </div><!-- /.nav-collapse -->
+      </div>
+    </div><!-- /navbar-inner -->
+  </div><!-- /navbar -->
+ 
+      <hr>
+
+      <footer>
+      
+        <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
+お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
+Copyright &copy 2011 部谷修平　All Rights Reserved.
+</p>
+
+
+<div id="footer">
+</div>
+</div>
+</div>
+</body>
+</html>

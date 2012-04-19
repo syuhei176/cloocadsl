@@ -9,6 +9,7 @@ from mako.lookup import TemplateLookup
 from mako.runtime import Context
 from StringIO import StringIO
 import config
+import codecs
 from ProjectService import *
 from MetaModelService import *
 from string import Template
@@ -43,7 +44,10 @@ class BaseGenerator(object):
         if not os.path.exists(self.projectpath):
             os.mkdir(self.projectpath)
         self.model = parseJSON(project['xml'], metamodel['xml'])
+        global message
+        message = ''
         self.parseXML(metamodel['template'])
+        return message
 #        print Template(metamodel['template']).render(root = model)
 #        self.FileGen(model, config.CLOOCA_CGI + '/template/t1.mako', self.outpath)
 #        self.FileGen(model, 'template/t1.mako', self.outpath)
@@ -82,27 +86,31 @@ class BaseGenerator(object):
         shutil.copy(self.input + '/' + src, self.projectpath + '/' + dest)
     
     def FileGen(self, src, dest):
-        mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", encoding_errors='replace')
+        mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
         tmpl = mylookup.get_template(src)
         buf = StringIO()
         model = self.model
         ctx = Context(buf, root = model)
         tmpl.render_context(ctx)
-        hf = open(self.projectpath + '/' + dest, 'w')
+        hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
         hf.write(buf.getvalue())
         hf.close()
     
     def FileGenByDiagram(self, src, dest, diagram):
-        mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", encoding_errors='replace')
-        tmpl = mylookup.get_template(src)
-        buf = StringIO()
-        model = diagram
-        ctx = Context(buf, root = model)
-        tmpl.render_context(ctx)
-        hf = open(self.projectpath + '/' + dest, 'w')
-        hf.write(buf.getvalue())
-        hf.close()
-
+        try:
+            mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
+            tmpl = mylookup.get_template(src)
+            buf = StringIO()
+            model = diagram
+            ctx = Context(buf, root = model)
+            tmpl.render_context(ctx)
+            hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
+            hf.write(buf.getvalue())
+            hf.close()
+        except Exception as e:
+            global message
+            message += e.message
+        
 def parseJSON(xml, meta_text):
     global g_metamodel_dict
     global g_model_dict

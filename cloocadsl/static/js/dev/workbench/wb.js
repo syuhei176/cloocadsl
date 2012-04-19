@@ -71,6 +71,7 @@ function init_wb(id) {
 }
 
 function create_tabs() {
+	/*
 	var tabs = Ext.create('Ext.tab.Panel', {
 		plain: true,
         defaults :{
@@ -86,6 +87,9 @@ function create_tabs() {
 	});
 	editor_tabs = tabs;
 	return tabs;
+	*/
+	editortabpanel = new EditorTabPanel();
+	return editortabpanel.getPanel();
 }
 
 function create_menu() {
@@ -103,58 +107,60 @@ function create_menu() {
                    ],
         	handler : onItemClick
         },'-',{
-            xtype:'splitbutton',
-            text: 'Save',
+            id: 'save',
+            text: '保存',
             iconCls: 'add16',
-            menu: [{text: 'Cut Menu Item'}],
         	handler : onItemClick
         },{
-            text: 'Workbench',
+            text: 'ワークベンチ',
             iconCls: 'add16',
             menu: [
                    {
-                	   text: 'Preview',
+                	   id: 'preview',
+                	   text: 'プレビュー',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
+                	   id: 'MetaObj',
                 	   text: 'MetaObj',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
+                	   id: 'MetaRel',
                 	   text: 'MetaRel',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   text: 'MetaJSON',
+                	   id: 'metajson',
+                	   text: 'メタモデル',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   text: 'TempConfig',
+                	   id: 'tempconfig',
+                	   text: 'テンプレートコンフィグ',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    }
                    ]
         },{
-            text: 'Template',
+            text: 'テンプレート',
             iconCls: 'add16',
             menu: [
                    {
-                	   text: 'New',
+                	   text: 'new',
+                	   text: '新規作成',
                 	   iconCls: 'add16',
                 	   handler : onTempItemClick
                    }
                    ]
-        },'-',{
-            text: 'Format',
-            iconCls: 'add16'
         }]
     }
 }
 
 function onItemClick(item){
-	if(item.text == 'Save') {
+	if(item.id == 'save') {
 		current_editor.save();
-	}else if(item.text == 'Preview') {
+	}else if(item.id == 'preview') {
 		g_model = new Model();
 		g_model.root = 1;
 		g_model.diagrams[1] = new Diagram();
@@ -164,19 +170,19 @@ function onItemClick(item){
 		MetaModelEditor(g_metamodel.metaobjects);
 	}else if(item.text == 'MetaRel') {
 		MetaRelationEditor(g_metamodel.metarelations);
-	}else if(item.text == 'MetaJSON') {
-		current_editor = new MetaJSONEditor(g_metamodel.metadiagrams);
-	}else if(item.text == 'TempConfig') {
-		current_editor = new TempConfigEditor();
-	}else if(item.text == 'delete') {
-		current_editor.deleteSelected();
+	}else if(item.id == 'metajson') {
+		var editor = new MetaJSONEditor(g_metamodel.metadiagrams);
+		editortabpanel.add(editor, 'metajson');
+	}else if(item.id == 'tempconfig') {
+		var editor = new TempConfigEditor();
+		editortabpanel.add(editor, 'tempconfig');
 	}else{
 		
 	}
 }
 
 function onTempItemClick(item){
-	if(item.text == 'New') {
+	if(item.id == 'new') {
 		 Ext.Msg.prompt('','',function(btn,text){
 			 if(btn != 'cancel') {
 				 create_new_template(text);
@@ -243,6 +249,7 @@ function createTemplateExplorer() {
 	});
 	modelExplorer.on('itemclick',function(view, record, item, index, event) {
     	editor = new TemplateEditor(g_templates[record.data.id]);
+    	editortabpanel.add(editor, record.data.text);
     });
 	Ext.getCmp('modelexplorer').add(modelExplorer);
 	return modelExplorer;
