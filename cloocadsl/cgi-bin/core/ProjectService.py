@@ -100,7 +100,7 @@ clean_json = ''
 def createProject(user, name, xml, metamodel_id, joinInfo=None):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,group_id) VALUES(%s,%s,%s),%s;',(name, clean_json, metamodel_id, joinInfo['id'], ))
+    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,group_id) VALUES(%s,%s,%s,%s);',(name, clean_json, metamodel_id, joinInfo['id'], ))
     connect.commit()
     id = cur.lastrowid
     cur.close()

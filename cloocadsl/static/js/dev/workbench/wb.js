@@ -147,7 +147,7 @@ function create_menu() {
             iconCls: 'add16',
             menu: [
                    {
-                	   text: 'new',
+                	   id: 'new',
                 	   text: '新規作成',
                 	   iconCls: 'add16',
                 	   handler : onTempItemClick

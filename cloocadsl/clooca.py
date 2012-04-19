@@ -137,7 +137,8 @@ def createm():
     if 'user' in session and 'joinInfos' in session['user']:
         gid = request.form['group_id']
         for joinInfo in session['user']['joinInfos']:
-            if joinInfo['id'] == gid and joinInfo['role'] == 1:
+#            print joinInfo['role']
+            if int(joinInfo['id']) == int(gid) and joinInfo['role'] == 1:
                 project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], joinInfo)
                 return json.dumps(project)
     return 'false'

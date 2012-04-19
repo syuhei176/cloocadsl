@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- ホスト: localhost
--- 生成時間: 2012 年 4 月 19 日 13:00
+-- 生成時間: 2012 年 4 月 19 日 13:25
 -- サーバのバージョン: 5.5.16
 -- PHP のバージョン: 5.3.8
 
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `GroupInfo` (
   `visibillity` int(1) NOT NULL,
   `service` varchar(8) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
 
 --
 -- テーブルのデータをダンプしています `GroupInfo`
@@ -55,7 +55,8 @@ CREATE TABLE IF NOT EXISTS `GroupInfo` (
 
 INSERT INTO `GroupInfo` (`id`, `name`, `detail`, `visibillity`, `service`) VALUES
 (1, 'Shinshu University', '', 0, 'shinshu'),
-(3, 'global', '', 1, 'all');
+(3, 'global', '', 1, 'all'),
+(4, 'core_seminar', '', 0, 'shinshu');
 
 -- --------------------------------------------------------
 
@@ -130,7 +131,8 @@ CREATE TABLE IF NOT EXISTS `JoinInfo` (
 INSERT INTO `JoinInfo` (`user_id`, `group_id`, `role`) VALUES
 (1, 1, 1),
 (7, 1, 0),
-(1, 3, 1);
+(1, 3, 1),
+(1, 4, 1);
 
 -- --------------------------------------------------------
 

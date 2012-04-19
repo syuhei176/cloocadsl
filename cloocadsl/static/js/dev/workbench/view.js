@@ -328,6 +328,7 @@ function TemplateEditor(template) {
 TemplateEditor.prototype.save = function() {
 	var self = this;
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
+	this.template.content = this.template.content.replace(/\t/g, "  ");
 	$.post('/template/save', { id : g_metamodel_id, fname : this.template.name , content : this.template.content},
 			function(data) {
 				if(data) {
