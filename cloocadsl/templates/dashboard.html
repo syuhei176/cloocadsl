@@ -73,6 +73,7 @@ function init() {
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-p" ).dialog('close');
+				location.reload();
 	    	}
 	      }, "json");
 	  });
@@ -94,6 +95,7 @@ function init() {
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-m" ).dialog('close');
+				location.reload();
 	    	}
 	      }, "json");
 	  });
@@ -165,6 +167,7 @@ function delete_project(pid, pname) {
 						/*
 						TODO:行の削除処理
 						*/
+						location.reload();
 					}
 				}, "json");
 	}
