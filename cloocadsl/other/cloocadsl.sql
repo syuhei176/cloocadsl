@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- ホスト: localhost
--- 生成時間: 2012 年 4 月 19 日 13:25
+-- 生成時間: 2012 年 4 月 20 日 14:01
 -- サーバのバージョン: 5.5.16
 -- PHP のバージョン: 5.3.8
 
@@ -26,6 +26,7 @@ SET time_zone = "+00:00";
 -- テーブルの構造 `GraphicInfo`
 --
 
+DROP TABLE IF EXISTS `GraphicInfo`;
 CREATE TABLE IF NOT EXISTS `GraphicInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `visibillity` int(1) NOT NULL,
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `GraphicInfo` (
 -- テーブルの構造 `GroupInfo`
 --
 
+DROP TABLE IF EXISTS `GroupInfo`;
 CREATE TABLE IF NOT EXISTS `GroupInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
@@ -64,6 +66,7 @@ INSERT INTO `GroupInfo` (`id`, `name`, `detail`, `visibillity`, `service`) VALUE
 -- テーブルの構造 `hasMetaModel`
 --
 
+DROP TABLE IF EXISTS `hasMetaModel`;
 CREATE TABLE IF NOT EXISTS `hasMetaModel` (
   `user_id` int(11) NOT NULL,
   `metamodel_id` int(11) NOT NULL
@@ -78,7 +81,9 @@ INSERT INTO `hasMetaModel` (`user_id`, `metamodel_id`) VALUES
 (1, 7),
 (1, 8),
 (1, 9),
-(1, 10);
+(1, 10),
+(1, 11),
+(1, 12);
 
 -- --------------------------------------------------------
 
@@ -86,6 +91,7 @@ INSERT INTO `hasMetaModel` (`user_id`, `metamodel_id`) VALUES
 -- テーブルの構造 `hasProject`
 --
 
+DROP TABLE IF EXISTS `hasProject`;
 CREATE TABLE IF NOT EXISTS `hasProject` (
   `user_id` int(11) NOT NULL,
   `project_id` int(11) NOT NULL
@@ -109,7 +115,8 @@ INSERT INTO `hasProject` (`user_id`, `project_id`) VALUES
 (1, 21),
 (1, 22),
 (1, 23),
-(1, 24);
+(1, 24),
+(1, 25);
 
 -- --------------------------------------------------------
 
@@ -117,6 +124,7 @@ INSERT INTO `hasProject` (`user_id`, `project_id`) VALUES
 -- テーブルの構造 `JoinInfo`
 --
 
+DROP TABLE IF EXISTS `JoinInfo`;
 CREATE TABLE IF NOT EXISTS `JoinInfo` (
   `user_id` int(11) NOT NULL,
   `group_id` int(11) NOT NULL,
@@ -132,7 +140,8 @@ INSERT INTO `JoinInfo` (`user_id`, `group_id`, `role`) VALUES
 (1, 1, 1),
 (7, 1, 0),
 (1, 3, 1),
-(1, 4, 1);
+(1, 4, 1),
+(9, 4, 0);
 
 -- --------------------------------------------------------
 
@@ -140,6 +149,7 @@ INSERT INTO `JoinInfo` (`user_id`, `group_id`, `role`) VALUES
 -- テーブルの構造 `MetaModelInfo`
 --
 
+DROP TABLE IF EXISTS `MetaModelInfo`;
 CREATE TABLE IF NOT EXISTS `MetaModelInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
@@ -149,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `MetaModelInfo` (
   `group_id` int(11) NOT NULL DEFAULT '1',
   `welcome_message` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
 
 --
 -- テーブルのデータをダンプしています `MetaModelInfo`
@@ -160,7 +170,9 @@ INSERT INTO `MetaModelInfo` (`id`, `name`, `xml`, `visibillity`, `template`, `gr
 (7, 'json2', ' {"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1,2]},{"classname":"MetaObject","id":2,"name":"start","properties":[]}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[3],"bindings":[],"arrow_type":"none"}],"metaproperties":[null,{"id":1,"name":"name","data_type":"collection_String","widget":"input field","exfield":""},{"id":2,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":3,"name":"action","data_type":"String","widget":"input field","exfield":""}],"metadiagrams":[null,{"id":1,"name":"json","metaobjects":[1,2],"metarelations":[1]}]}', 1, '', 3, 'welcome'),
 (8, 'statemachine for nxt', '{"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1],"graphic":"rounded"},{"classname":"MetaObject","id":2,"name":"start","properties":[],"graphic":"circle"},{"classname":"MetaObject","id":3,"name":"class","properties":[3],"graphic":"rect","decomposition":2}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[2],"bindings":[],"arrow_type":"v"}],"metaproperties":[null,{"id":1,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go"},{"id":2,"name":"event","data_type":"String","widget":"fixed list","exfield":"none&touch&white&black"}],"metadiagrams":[null,{"id":1,"name":"statediagram","metaobjects":[1,2],"metarelations":[1]}]}', 1, '<?xml version="1.0" encoding="utf-8"?><DirTemp>\n<TemplateForDiagram src="state_header.mako" dest="c_$id.h" diagram="1"></TemplateForDiagram>\n<TemplateForDiagram src="state.mako" dest="c_$id.cpp" diagram="1"></TemplateForDiagram>\n<Template src="main.h" dest="main.h" />\n<Template src="Makefile" dest="Makefile" />\n<Copy src="EventManager.h" dest="EventManager.h" />\n<Copy src="main.cpp" dest="main.cpp" />\n<Copy src="StateMachine.h" dest="StateMachine.h" />\n<Copy src="mdlnxtproj.h" dest="mdlnxtproj.h" />\n<Copy src="mdlnxtproj.cfg" dest="mdlnxtproj.cfg" />\n</DirTemp>', 1, 'welcome'),
 (9, 'classdiagram', '{"id":9,"name":"uml","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"class","properties":[1,2,3],"graphic":"rect"}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"association","properties":[1],"bindings":[],"arrow_type":"v"}],"metaproperties":[null,{"id":1,"name":"name","data_type":"String","widget":"input field","exfield":""},{"id":2,"name":"attribute","data_type":"collection_String","widget":"input field","exfield":""},{"id":3,"name":"operation","data_type":"collection_String","widget":"input field","exfield":""}],"metadiagrams":[null,{"id":1,"name":"classdiagram","metaobjects":[1],"metarelations":[1]}]}', 1, '', 3, 'welcome'),
-(10, 'core', '{"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1],"graphic":"rounded"},{"classname":"MetaObject","id":2,"name":"start","properties":[],"graphic":"circle"},{"classname":"MetaObject","id":3,"name":"klass","properties":[3],"graphic":"rect","decomposition":2},{"classname":"MetaObject","id":4,"name":"send_event_state","properties":[4],"graphic":"rounded"}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[2],"bindings":[],"arrow_type":"v"}],"metaproperties":[null,{"id":1,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go&userdefine1&userdefine2"},{"id":2,"name":"event","data_type":"String","widget":"fixed list","exfield":"none&touch&white&black&userdefine1&userdefine2"},{"id":3,"name":"classname","data_type":"String","widget":"fixed list","exfield":"Controller&Linetracer"},{"id":4,"name":"send","data_type":"String","widget":"fixed list","exfield":"userdefine1&userdefine2"}],"metadiagrams":[null,{"id":1,"name":"classdiagram","metaobjects":[3],"metarelations":[]},{"id":2,"name":"statediagram","metaobjects":[1,2,4],"metarelations":[1]}]}', 1, '<?xml version="1.0" encoding="utf-8"?><DirTemp>\n<TemplateForDiagram src="state_header.mako" dest="c_$id.h" diagram="2"></TemplateForDiagram>\n<TemplateForDiagram src="state.mako" dest="c_$id.cpp" diagram="2"></TemplateForDiagram>\n<Template src="main.h" dest="main.h" />\n<Template src="Makefile" dest="Makefile" />\n<Copy src="EventManager.h" dest="EventManager.h" />\n<Copy src="main.cpp" dest="main.cpp" />\n<Copy src="StateMachine.h" dest="StateMachine.h" />\n<Copy src="mdlnxtproj.h" dest="mdlnxtproj.h" />\n<Copy src="mdlnxtproj.cfg" dest="mdlnxtproj.cfg" />\n</DirTemp>', 3, 'welcome');
+(10, 'core', '{"id":6,"name":"json","metaobjects":[null,{"classname":"MetaObject","id":1,"name":"state","properties":[1],"graphic":"rounded"},{"classname":"MetaObject","id":2,"name":"start","properties":[],"graphic":"circle"},{"classname":"MetaObject","id":3,"name":"klass","properties":[3],"graphic":"rect","decomposition":2},{"classname":"MetaObject","id":4,"name":"send_event_state","properties":[4],"graphic":"rounded"}],"metarelations":[null,{"classname":"MetaRelation","id":1,"name":"transition","properties":[2],"bindings":[],"arrow_type":"v"}],"metaproperties":[null,{"id":1,"name":"action","data_type":"String","widget":"fixed list","exfield":"stop&go&userdefine1&userdefine2"},{"id":2,"name":"event","data_type":"String","widget":"fixed list","exfield":"none&touch&white&black&userdefine1&userdefine2"},{"id":3,"name":"classname","data_type":"String","widget":"fixed list","exfield":"Controller&Linetracer"},{"id":4,"name":"send","data_type":"String","widget":"fixed list","exfield":"userdefine1&userdefine2"}],"metadiagrams":[null,{"id":1,"name":"classdiagram","metaobjects":[3],"metarelations":[]},{"id":2,"name":"statediagram","metaobjects":[1,2,4],"metarelations":[1]}]}', 1, '<?xml version="1.0" encoding="utf-8"?><DirTemp>\n<TemplateForDiagram src="state_header.mako" dest="c_$id.h" diagram="2"></TemplateForDiagram>\n<TemplateForDiagram src="state.mako" dest="c_$id.cpp" diagram="2"></TemplateForDiagram>\n<Template src="main.h" dest="main.h" />\n<Template src="Makefile" dest="Makefile" />\n<Copy src="EventManager.h" dest="EventManager.h" />\n<Copy src="main.cpp" dest="main.cpp" />\n<Copy src="StateMachine.h" dest="StateMachine.h" />\n<Copy src="mdlnxtproj.h" dest="mdlnxtproj.h" />\n<Copy src="mdlnxtproj.cfg" dest="mdlnxtproj.cfg" />\n</DirTemp>', 3, 'welcome'),
+(11, 'sd', '{"metadiagrams":[],"metaobjects":[],"metarelations":[],"metaproperties":[]}', 1, '', 4, ''),
+(12, 'u', ' ', 1, '', 4, '');
 
 -- --------------------------------------------------------
 
@@ -168,6 +180,7 @@ INSERT INTO `MetaModelInfo` (`id`, `name`, `xml`, `visibillity`, `template`, `gr
 -- テーブルの構造 `ProjectInfo`
 --
 
+DROP TABLE IF EXISTS `ProjectInfo`;
 CREATE TABLE IF NOT EXISTS `ProjectInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
@@ -176,7 +189,7 @@ CREATE TABLE IF NOT EXISTS `ProjectInfo` (
   `rep_id` int(11) NOT NULL,
   `group_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=25 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
 --
 -- テーブルのデータをダンプしています `ProjectInfo`
@@ -195,7 +208,8 @@ INSERT INTO `ProjectInfo` (`id`, `name`, `xml`, `metamodel_id`, `rep_id`, `group
 (21, 'core_test1', '{"id":21,"root":1,"current_version":1,"diagrams":{"1":{"id":1,"meta_id":1,"objects":[210001,210002],"relationships":[],"ve":{"version":1,"ver_type":"add"}},"210001":{"id":210001,"meta_id":2,"objects":[210003,210004,210014],"relationships":[210005,210016],"ve":{"version":1,"ver_type":"add"}},"210002":{"id":210002,"meta_id":2,"objects":[210006,210007,210012],"relationships":[210008,210013],"ve":{"version":1,"ver_type":"add"}}},"objects":{"210001":{"meta_id":3,"id":210001,"bound":{"x":69.72727966308594,"y":96.18181991577148,"width":90,"height":30},"properties":[{"meta_id":3,"children":[210001]}],"ve":{"version":1,"ver_type":"add"},"diagram":210001},"210002":{"meta_id":3,"id":210002,"bound":{"x":296.72727966308594,"y":142.18181991577148,"width":90,"height":30},"properties":[{"meta_id":3,"children":[210002]}],"ve":{"version":1,"ver_type":"add"},"diagram":210002},"210003":{"meta_id":1,"id":210003,"bound":{"x":324.72727966308594,"y":77.18181991577148,"width":42,"height":30},"properties":[{"meta_id":1,"children":[210003]}],"ve":{"version":1,"ver_type":"add"},"diagram":null},"210004":{"meta_id":2,"id":210004,"bound":{"x":25.727279663085938,"y":91.18181991577148,"width":42,"height":10},"properties":[],"ve":{"version":1,"ver_type":"add"},"diagram":null},"210006":{"meta_id":2,"id":210006,"bound":{"x":84.72727966308594,"y":176.18181991577148,"width":42,"height":10},"properties":[],"ve":{"version":1,"ver_type":"add"},"diagram":null},"210007":{"meta_id":1,"id":210007,"bound":{"x":247.72727966308594,"y":70.18181991577148,"width":42,"height":30},"properties":[{"meta_id":1,"children":[210005]}],"ve":{"version":1,"ver_type":"add"},"diagram":null},"210012":{"meta_id":1,"id":210012,"bound":{"x":404.72727966308594,"y":105.18181991577148,"width":42,"height":30},"properties":[{"meta_id":1,"children":[210010]}],"ve":{"version":1,"ver_type":"add"},"diagram":null},"210014":{"meta_id":1,"id":210014,"bound":{"x":450.72727966308594,"y":186.18181991577148,"width":98,"height":30},"properties":[{"meta_id":1,"children":[210012]}],"ve":{"version":1,"ver_type":"add"},"diagram":null}},"properties":{"210001":{"id":210001,"meta_id":3,"value":"Controller","ve":{"version":1,"ver_type":"add"}},"210002":{"id":210002,"meta_id":3,"value":"Linetracer","ve":{"version":1,"ver_type":"add"}},"210003":{"id":210003,"meta_id":1,"value":"stop","ve":{"version":1,"ver_type":"add"}},"210004":{"id":210004,"meta_id":2,"value":"none","ve":{"version":1,"ver_type":"add"}},"210005":{"id":210005,"meta_id":1,"value":"stop","ve":{"version":1,"ver_type":"add"}},"210006":{"id":210006,"meta_id":2,"value":"none","ve":{"version":1,"ver_type":"add"}},"210007":{"id":210007,"meta_id":4,"value":"","ve":{"version":1,"ver_type":"add"}},"210008":{"id":210008,"meta_id":4,"value":"userdefine1","ve":{"version":1,"ver_type":"add"}},"210009":{"id":210009,"meta_id":2,"value":"touch","ve":{"version":1,"ver_type":"add"}},"210010":{"id":210010,"meta_id":1,"value":"go","ve":{"version":1,"ver_type":"add"}},"210011":{"id":210011,"meta_id":2,"value":"userdefine1","ve":{"version":1,"ver_type":"add"}},"210012":{"id":210012,"meta_id":1,"value":"userdefine1","ve":{"version":1,"ver_type":"add"}},"210013":{"id":210013,"meta_id":2,"value":"","ve":{"version":1,"ver_type":"add"}},"210014":{"id":210014,"meta_id":2,"value":"touch","ve":{"version":1,"ver_type":"add"}}},"relationships":{"210005":{"meta_id":1,"id":210005,"src":210004,"dest":210003,"points":[],"properties":[{"meta_id":2,"children":[210004]}],"ve":{"version":1,"ver_type":"add"}},"210008":{"meta_id":1,"id":210008,"src":210006,"dest":210007,"points":[],"properties":[{"meta_id":2,"children":[210006]}],"ve":{"version":1,"ver_type":"add"}},"210013":{"meta_id":1,"id":210013,"src":210007,"dest":210012,"points":[],"properties":[{"meta_id":2,"children":[210011]}],"ve":{"version":1,"ver_type":"add"}},"210016":{"meta_id":1,"id":210016,"src":210003,"dest":210014,"points":[],"properties":[{"meta_id":2,"children":[210014]}],"ve":{"version":1,"ver_type":"add"}}}}', 10, 0, 3),
 (22, 'uml_test3', '{"relationships": {"230002": {"src": 220004, "ve": {"ver_type": "none", "version": 1}, "dest": 230001, "properties": [{"children": [230002], "meta_id": 1}], "points": [], "meta_id": 1, "id": 230002}, "230004": {"src": 220002, "ve": {"ver_type": "none", "version": 1}, "dest": 230003, "properties": [{"children": [230004], "meta_id": 1}], "points": [], "meta_id": 1, "id": 230004}, "230006": {"src": 220002, "ve": {"ver_type": "none", "version": 1}, "dest": 230005, "properties": [{"children": [230006], "meta_id": 1}], "points": [], "meta_id": 1, "id": 230006}, "220007": {"src": 220004, "ve": {"ver_type": "none", "version": 1}, "dest": 220006, "properties": [{"children": [220007], "meta_id": 1}], "points": [], "meta_id": 1, "id": 220007}, "220005": {"src": 220002, "ve": {"ver_type": "none", "version": 1}, "dest": 220004, "properties": [{"children": [220005], "meta_id": 1}], "points": [], "meta_id": 1, "id": 220005}}, "properties": {"220002": {"value": "\\u7720\\u3044", "id": 220002, "meta_id": 1, "ve": {"ver_type": "none", "version": 2}}, "220003": {"value": "", "id": 220003, "meta_id": 1, "ve": {"ver_type": "none", "version": 2}}, "220001": {"value": "\\u3059\\u3054\\u3044", "id": 220001, "meta_id": 1, "ve": {"ver_type": "none", "version": 2}}, "220006": {"value": "\\u6771\\u4eac", "id": 220006, "meta_id": 1, "ve": {"ver_type": "none", "version": 4}}, "220007": {"value": "", "id": 220007, "meta_id": 1, "ve": {"ver_type": "none", "version": 4}}, "220004": {"value": "\\u3067\\u3054\\u308f\\u3059\\u3002", "id": 220004, "meta_id": 1, "ve": {"ver_type": "none", "version": 3}}, "220005": {"value": "", "id": 220005, "meta_id": 1, "ve": {"ver_type": "none", "version": 3}}, "230012": {"value": "ererefefdv", "id": 230012, "meta_id": 2, "ve": {"ver_type": "none", "version": 9}}, "230013": {"value": "sugoi", "id": 230013, "meta_id": 2, "ve": {"ver_type": "none", "version": 9}}, "230003": {"value": "\\u4e2d\\u9593", "id": 230003, "meta_id": 1, "ve": {"ver_type": "none", "version": 6}}, "230002": {"value": "", "id": 230002, "meta_id": 1, "ve": {"ver_type": "none", "version": 5}}, "230001": {"value": "\\uff12\\uff13", "id": 230001, "meta_id": 1, "ve": {"ver_type": "none", "version": 5}}, "230014": {"value": "gdssgf", "id": 230014, "meta_id": 2, "ve": {"ver_type": "none", "version": 9}}, "230006": {"value": "", "id": 230006, "meta_id": 1, "ve": {"ver_type": "none", "version": 7}}, "230005": {"value": "\\u306a\\u3093\\u3060\\u3053\\u308c\\u306f", "id": 230005, "meta_id": 1, "ve": {"ver_type": "none", "version": 7}}, "230004": {"value": "", "id": 230004, "meta_id": 1, "ve": {"ver_type": "none", "version": 6}}, "230010": {"value": "pppppppp", "id": 230010, "meta_id": 2, "ve": {"ver_type": "none", "version": 9}}, "230009": {"value": "ggg", "id": 230009, "meta_id": 2, "ve": {"ver_type": "none", "version": 9}}, "230008": {"value": "bbbbb", "id": 230008, "meta_id": 2, "ve": {"ver_type": "none", "version": 8}}, "230015": {"value": "koredesaigo", "id": 230015, "meta_id": 2, "ve": {"ver_type": "none", "version": 9}}, "230011": {"value": "sss", "id": 230011, "meta_id": 2, "ve": {"ver_type": "none", "version": 9}}}, "objects": {"220002": {"ve": {"ver_type": "update", "version": 12}, "bound": {"y": 135, "x": 201, "height": 50, "width": 50}, "id": 220002, "diagram": null, "meta_id": 1, "properties": [{"children": [220002], "meta_id": 1}, {"children": [230008, 230015], "meta_id": 2}, {"children": [], "meta_id": 3}]}, "220006": {"ve": {"ver_type": "none", "version": 4}, "bound": {"y": 129, "x": 533, "height": 50, "width": 50}, "id": 220006, "diagram": null, "meta_id": 1, "properties": [{"children": [220006], "meta_id": 1}]}, "220004": {"ve": {"ver_type": "none", "version": 3}, "bound": {"y": 177, "x": 410, "height": 50, "width": 50}, "id": 220004, "diagram": null, "meta_id": 1, "properties": [{"children": [220004], "meta_id": 1}]}, "230003": {"ve": {"ver_type": "none", "version": 6}, "bound": {"y": 57, "x": 290, "height": 50, "width": 50}, "id": 230003, "diagram": null, "meta_id": 1, "properties": [{"children": [230003], "meta_id": 1}]}, "230001": {"ve": {"ver_type": "none", "version": 5}, "bound": {"y": 210, "x": 541, "height": 50, "width": 50}, "id": 230001, "diagram": null, "meta_id": 1, "properties": [{"children": [230001], "meta_id": 1}]}, "230005": {"ve": {"ver_type": "update", "version": 12}, "bound": {"y": 115, "x": 70, "height": 50, "width": 50}, "id": 230005, "diagram": null, "meta_id": 1, "properties": [{"children": [230005], "meta_id": 1}, {"children": [], "meta_id": 2}, {"children": [], "meta_id": 3}]}}, "current_version": "12", "root": 0, "id": 3, "diagrams": {"1": {"relationships": [220005, 220007, 230002, 230004, 230006], "objects": [220002, 220004, 220006, 230001, 230003, 230005], "id": 1, "meta_id": 1, "ve": {"ver_type": "none", "version": 11}}}}', 9, 3, 3),
 (23, 'uml_test4', '{"relationships":{"220005":{"src":220002,"ve":{"ver_type":"none","version":1},"dest":220004,"properties":[{"children":[220005],"meta_id":1}],"points":[],"meta_id":1,"id":220005},"220007":{"src":220004,"ve":{"ver_type":"none","version":1},"dest":220006,"properties":[{"children":[220007],"meta_id":1}],"points":[],"meta_id":1,"id":220007},"230002":{"src":220004,"ve":{"ver_type":"none","version":1},"dest":230001,"properties":[{"children":[230002],"meta_id":1}],"points":[],"meta_id":1,"id":230002},"230004":{"src":220002,"ve":{"ver_type":"none","version":1},"dest":230003,"properties":[{"children":[230004],"meta_id":1}],"points":[],"meta_id":1,"id":230004},"230006":{"src":220002,"ve":{"ver_type":"none","version":1},"dest":230005,"properties":[{"children":[230006],"meta_id":1}],"points":[],"meta_id":1,"id":230006}},"properties":{"220001":{"value":"ã™ã”ã„","id":220001,"meta_id":1,"ve":{"ver_type":"none","version":2}},"220002":{"value":"çœ ã„","id":220002,"meta_id":1,"ve":{"ver_type":"none","version":2}},"220003":{"value":"","id":220003,"meta_id":1,"ve":{"ver_type":"none","version":2}},"220004":{"value":"ã§ã”ã‚ã™ã€‚","id":220004,"meta_id":1,"ve":{"ver_type":"none","version":3}},"220005":{"value":"","id":220005,"meta_id":1,"ve":{"ver_type":"none","version":3}},"220006":{"value":"æ±äº¬","id":220006,"meta_id":1,"ve":{"ver_type":"none","version":4}},"220007":{"value":"","id":220007,"meta_id":1,"ve":{"ver_type":"none","version":4}},"230001":{"value":"ï¼’ï¼“","id":230001,"meta_id":1,"ve":{"ver_type":"none","version":5}},"230002":{"value":"","id":230002,"meta_id":1,"ve":{"ver_type":"none","version":5}},"230003":{"value":"ä¸­é–“","id":230003,"meta_id":1,"ve":{"ver_type":"none","version":6}},"230004":{"value":"","id":230004,"meta_id":1,"ve":{"ver_type":"none","version":6}},"230005":{"value":"ãªã‚“ã ã“ã‚Œã¯","id":230005,"meta_id":1,"ve":{"ver_type":"none","version":7}},"230006":{"value":"","id":230006,"meta_id":1,"ve":{"ver_type":"none","version":7}},"230008":{"value":"bbbbb","id":230008,"meta_id":2,"ve":{"ver_type":"none","version":8}},"230009":{"value":"ggg","id":230009,"meta_id":2,"ve":{"ver_type":"none","version":9}},"230010":{"value":"pppppppp","id":230010,"meta_id":2,"ve":{"ver_type":"none","version":9}},"230011":{"value":"sss","id":230011,"meta_id":2,"ve":{"ver_type":"none","version":9}},"230012":{"value":"ererefefdv","id":230012,"meta_id":2,"ve":{"ver_type":"none","version":9}},"230013":{"value":"sugoi","id":230013,"meta_id":2,"ve":{"ver_type":"none","version":9}},"230014":{"value":"gdssgf","id":230014,"meta_id":2,"ve":{"ver_type":"none","version":9}},"230015":{"value":"koredesaigo","id":230015,"meta_id":2,"ve":{"ver_type":"none","version":9}}},"objects":{"220002":{"ve":{"ver_type":"none","version":12},"bound":{"y":135,"x":201,"height":70,"width":98},"id":220002,"diagram":null,"meta_id":1,"properties":[{"children":[220002],"meta_id":1},{"children":[230008,230015],"meta_id":2}]},"220004":{"ve":{"ver_type":"none","version":3},"bound":{"y":177,"x":410,"height":30,"width":50},"id":220004,"diagram":null,"meta_id":1,"properties":[{"children":[220004],"meta_id":1}]},"220006":{"ve":{"ver_type":"none","version":4},"bound":{"y":129,"x":533,"height":30,"width":42},"id":220006,"diagram":null,"meta_id":1,"properties":[{"children":[220006],"meta_id":1}]},"230001":{"ve":{"ver_type":"none","version":5},"bound":{"y":210,"x":541,"height":30,"width":42},"id":230001,"diagram":null,"meta_id":1,"properties":[{"children":[230001],"meta_id":1}]},"230003":{"ve":{"ver_type":"none","version":6},"bound":{"y":57,"x":290,"height":30,"width":42},"id":230003,"diagram":null,"meta_id":1,"properties":[{"children":[230003],"meta_id":1}]},"230005":{"ve":{"ver_type":"update","version":12},"bound":{"y":115,"x":70,"height":30,"width":58},"id":230005,"diagram":null,"meta_id":1,"properties":[{"children":[230005],"meta_id":1},{"children":[],"meta_id":2},{"children":[],"meta_id":3}]}},"current_version":"12","root":0,"id":23,"diagrams":{"1":{"relationships":[220005,220007,230002,230004,230006],"objects":[220002,220004,220006,230001,230003,230005],"id":1,"meta_id":1,"ve":{"ver_type":"none","version":11}}}}', 9, 3, 3),
-(24, 'test', '', 8, 0, 1);
+(24, 'test', '', 8, 0, 1),
+(25, 'j', '', 12, 0, 4);
 
 -- --------------------------------------------------------
 
@@ -203,6 +217,7 @@ INSERT INTO `ProjectInfo` (`id`, `name`, `xml`, `metamodel_id`, `rep_id`, `group
 -- テーブルの構造 `UserInfo`
 --
 
+DROP TABLE IF EXISTS `UserInfo`;
 CREATE TABLE IF NOT EXISTS `UserInfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uname` varchar(32) NOT NULL,
@@ -212,7 +227,7 @@ CREATE TABLE IF NOT EXISTS `UserInfo` (
   `role` int(1) NOT NULL DEFAULT '0',
   `belonging` tinytext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10 ;
 
 --
 -- テーブルのデータをダンプしています `UserInfo`
@@ -223,7 +238,8 @@ INSERT INTO `UserInfo` (`id`, `uname`, `passwd`, `register_date`, `email`, `role
 (2, 'user', '7d9a0d11cb36e12a68817aff945390de', '2012-03-14', '', 0, ''),
 (3, 'user2', '7d9a0d11cb36e12a68817aff945390de', '2012-03-17', '', 0, ''),
 (7, 'test', '7d9a0d11cb36e12a68817aff945390de', '2012-04-18', '', 0, ''),
-(8, 'clooca', 'a8ed147206bd6df12f9bdee5e5f2d4f1', '2012-04-19', '', 0, '');
+(8, 'clooca', 'a8ed147206bd6df12f9bdee5e5f2d4f1', '2012-04-19', '', 0, ''),
+(9, 'syuhei', '7d9a0d11cb36e12a68817aff945390de', '2012-04-19', '', 0, '');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
