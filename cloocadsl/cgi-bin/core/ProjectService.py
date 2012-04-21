@@ -71,6 +71,18 @@ def loadProject(user, pid):
     project['metamodel_id'] = rows[0][3]
     project['rep_id'] = rows[0][4]
     project['group_id'] = rows[0][5]
+    cur = connect.cursor()
+    cur.execute('SELECT id,name,xml,template,visibillity,welcome_message FROM MetaModelInfo WHERE id=%s;',(project['metamodel_id'], ))
+    rows = cur.fetchall()
+    cur.close()
+    metamodel = {}
+    metamodel['id'] = rows[0][0]
+    metamodel['name'] = rows[0][1]
+    metamodel['xml'] = rows[0][2]
+    metamodel['template'] = rows[0][3]
+    metamodel['visibillity'] = rows[0][4]
+    metamodel['welcome_message'] = rows[0][5]
+    project['metamodel'] = metamodel
     connect.close()
     return project
 
@@ -98,9 +110,11 @@ clean_xml = '''
 clean_json = ''
 
 def createProject(user, name, xml, metamodel_id, joinInfo=None):
+    if len(name.encode('utf_8')) >= 255:
+        return False
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,group_id) VALUES(%s,%s,%s,%s);',(name, clean_json, metamodel_id, joinInfo['id'], ))
+    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,group_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), clean_json, metamodel_id, joinInfo['id'], ))
     connect.commit()
     id = cur.lastrowid
     cur.close()
@@ -119,7 +133,7 @@ def createProject(user, name, xml, metamodel_id, joinInfo=None):
 def loadMyProjectList(user, joinInfo):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT ProjectInfo.id AS id,hasProject.project_id AS id2,name,xml,metamodel_id,rep_id,group_id FROM ProjectInfo INNER JOIN hasProject ON ProjectInfo.id = hasProject.project_id AND hasProject.user_id=%s AND ProjectInfo.group_id=%s;',(user['id'], joinInfo['id'], ))
+    cur.execute('SELECT ProjectInfo.id AS id,hasProject.project_id AS id2,name,metamodel_id,rep_id,group_id FROM ProjectInfo INNER JOIN hasProject ON ProjectInfo.id = hasProject.project_id AND hasProject.user_id=%s AND ProjectInfo.group_id=%s;',(user['id'], joinInfo['id'], ))
     rows = cur.fetchall()
     projects = []
     cur.close()
@@ -127,6 +141,7 @@ def loadMyProjectList(user, joinInfo):
         project = {}
         project['id'] = rows[i][0]
         project['name'] = rows[i][2]
+        project['meta_id'] = rows[i][3]
 #        metamodel['xml'] = metamodel_rows[0][2]
         projects.append(project)
     connect.close()

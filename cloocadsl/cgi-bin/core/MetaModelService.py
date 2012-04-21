@@ -13,6 +13,23 @@ reg_username = re.compile('\w+')
 connect = None
 g_model_id = None
 
+def saveAll(user, pid, name, xml, visibillity):
+    if len(name.encode('utf_8')) >= 255:
+        return False
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
+    cur = connect.cursor()
+    affect_row_count = cur.execute('UPDATE MetaModelInfo SET name=%s,xml=%s,visibillity=%s WHERE id = %s;',(name.encode('utf_8'), xml, visibillity, pid, ))
+    connect.commit()
+    cur.close()
+    connect.close()
+    return True
+
 def saveMetaModel(user, pid, xml):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
@@ -45,14 +62,14 @@ def saveTempConfig(user, pid, tc):
 
 def loadMetaModel(user, pid):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-#    cur = connect.cursor()
-#    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
-#    has_rows = cur.fetchall()
-#    cur.close()
-#    if len(has_rows) == 0:
-#        return None
     cur = connect.cursor()
-    cur.execute('SELECT id,name,xml,template,welcome_message FROM MetaModelInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
+    cur = connect.cursor()
+    cur.execute('SELECT id,name,xml,template,visibillity,welcome_message FROM MetaModelInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
     cur.close()
     project = {}
@@ -60,14 +77,32 @@ def loadMetaModel(user, pid):
     project['name'] = rows[0][1]
     project['xml'] = rows[0][2]
     project['template'] = rows[0][3]
-    project['welcome_message'] = rows[0][4]
+    project['visibillity'] = rows[0][4]
+    project['welcome_message'] = rows[0][5]
     connect.close()
     return project
+
+def deleteMetaModel(user, id):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], id, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        connect.close()
+        return False
+    cur = connect.cursor()
+    cur.execute('DELETE FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], id, ))
+    cur.execute('DELETE FROM MetaModelInfo WHERE id=%s;',(id, ))
+    connect.commit()
+    cur.close()
+    connect.close()
+    return True
 
 def createMetaModel(user, name, xml, visibillity, joinInfo=None):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,group_id) VALUES(%s,%s,%s,%s);',(name, xml, visibillity, joinInfo['id'], ))
+    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,group_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), xml, visibillity, joinInfo['id'], ))
     connect.commit()
     id = cur.lastrowid
     cur.close()

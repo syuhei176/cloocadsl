@@ -66,28 +66,10 @@ function init_wb(id) {
 		       ]
 	});
 
-//	loadModel(pid);
-	loadMetaModel(id);
+	wb_loadMetaModel(id);
 }
 
 function create_tabs() {
-	/*
-	var tabs = Ext.create('Ext.tab.Panel', {
-		plain: true,
-        defaults :{
-            bodyPadding: 6,
-            closable: 'true',
-        },
-	    items: [
-	        {
-	            title: 'Welcome',
-	            html : 'Welcome to the clooca DSL.<br><br>test',
-	        }
-	        ],
-	});
-	editor_tabs = tabs;
-	return tabs;
-	*/
 	editortabpanel = new EditorTabPanel();
 	return editortabpanel.getPanel();
 }
@@ -153,6 +135,35 @@ function create_menu() {
                 	   handler : onTempItemClick
                    }
                    ]
+        },{
+        	id: 'vsibillity_setting',
+        	xtype: 'combo',
+            fieldLabel: '公開設定',
+            store: Ext.create('Ext.data.Store', {
+                fields: ['name', 'value'],
+                data : [{"name":"非公開", "value":0},
+                    {"name":"公開", "value":1}]}),
+            queryMode: 'local',
+            displayField: 'name',
+            valueField: 'value',
+            listeners:{
+            	scope: this,
+                'select': function(){
+                	g_metaproject.visibillity = Ext.getCmp('vsibillity_setting').getValue();
+                	saveAll(function(){});
+                }
+           }
+        },{
+        	id: 'name_setting',
+        	xtype: 'textfield',
+            fieldLabel: '名前',
+            queryMode: 'local',
+            listeners:{
+            	scope: this,
+                'change': function(){
+                	g_metaproject.name = Ext.getCmp('name_setting').getValue();
+                }
+           }
         }]
     }
 }

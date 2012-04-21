@@ -199,7 +199,7 @@ function MetaJSONEditor(metadiagram) {
 		  	        		   listeners: {
 		  	        			   change: {
 		  	        				   fn: function(field, newValue, oldValue, opt) {
-		  	        						g_metamodel = eval('('+newValue+')');
+		  	        						g_metamodel = JSON.parse(newValue);
 		  	        						editor.setTitle('JSONEditor*')
 		  	        						console.log('change');
 		  	        				   }
@@ -220,16 +220,6 @@ MetaJSONEditor.prototype.save = function() {
 		}
 	});
 }
-
-/**
- * Save MetaModel
- * グローバル変数g_metamodelの内容をサーバに保存する。
- */
-function saveMetaModel(id, fn) {
-	var xml = JSON.stringify(g_metamodel);
-	$.post('/msave', { id : id, xml : xml }, fn, "json");
-}
-
 
 MetaJSONEditor.prototype.getPanel = function() {
 	return this.editor;

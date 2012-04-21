@@ -21,7 +21,7 @@ def listingfile(m):
             content += '\n'
     out =  minify(content, mangle=True)
     f = open(config.CLOOCA_ROOT+'/static/js/'+m+'.js', 'w')
-    f.write(out)
+    f.write('/* Copyright (C) 2012 clooca All Rights Reserved. */'+out)
     f.close()
     return out
 

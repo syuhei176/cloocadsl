@@ -85,7 +85,7 @@ def checkout(user, rep_id, pid):
     connect.commit()
     cur.close()
     connect.close()
-    update(user, pid)
+    return update(user, pid)
     
 
 def improt_to_rep(user, pid, rep_id):

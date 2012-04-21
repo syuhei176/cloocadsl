@@ -32,29 +32,46 @@ def index():
 @app.route('/login', methods=['GET'])
 def login_view():
     if 'user' in session:
-        return redirect('/groups')
+        return redirect('/mygroups')
     else:
         return render_template('login.html')
 
 @app.route('/member_reg/<gid>', methods=['GET'])
 def member_reg_view(gid):
-    if 'user' in session:
-        return redirect('/groups')
-    else:
-        return render_template('member_reg.html', group_id=gid)
+    return render_template('member_reg.html', group_id=gid)
 
 @app.route('/reg', methods=['GET'])
 def reg_view():
     return render_template('register.html')
 
+@app.route('/mygroups')
+def mygroups(type='js'):
+    if 'user' in session and 'joinInfos' in session['user']:
+        return render_template('mygroups.html',
+                               username = session['user']['uname'],
+                               joinInfos = session['user']['joinInfos']
+                               )
+    return redirect(url_for('login_view'))
+
+
 @app.route('/groups')
-def groups(type='js'):
+def groups():
     if 'user' in session and 'joinInfos' in session['user']:
         return render_template('groups.html',
                                username = session['user']['uname'],
                                joinInfos = session['user']['joinInfos']
                                )
     return redirect(url_for('login_view'))
+
+@app.route('/account')
+def account():
+    if 'user' in session and 'joinInfos' in session['user']:
+        return render_template('account.html',
+                               username = session['user']['uname'],
+                               joinInfos = session['user']['joinInfos']
+                               )
+    return redirect(url_for('login_view'))
+
 
 @app.route('/dashboard/<id>')
 def dashboard(id=None):
@@ -71,17 +88,10 @@ def dashboard(id=None):
                                group_id = joinInfo['id'],
                                type = 'js'
                                )
-    return render_template('request_deny.html', loggedin = False, username = '')
+    else:
+        return redirect(url_for('login_view'))
+    return render_template('request_deny.html')
 
-
-
-@app.route('/editor')
-def editor():
-    if 'user' in session:
-        return render_template('editor.html', loggedin = True, username = session['user']['uname'])
-    return render_template('index.html', loggedin = False, username = '')
-
-@app.route('/editorjs')
 @app.route('/editorjs/<pid>')
 def editorjs(pid=None):
     if 'user' in session:
@@ -92,15 +102,10 @@ def editorjs(pid=None):
                     result['group'] = joinInfo
                     #return json.dumps(result)
                     return render_template('editorjs.html', pid = pid, project = json.dumps(result))
+    else:
+        return redirect(url_for('login_view'))
     return render_template('request_deny.html')
 
-@app.route('/workbench')
-def workbench():
-    if 'user' in session:
-        return render_template('workbench.html', loggedin = True, username = session['user']['uname'])
-    return render_template('index.html', loggedin = False, username = '')
-
-@app.route('/workbenchjs')
 @app.route('/workbenchjs/<id>')
 def workbenchjs(id=None):
     if 'user' in session:
@@ -161,6 +166,14 @@ def deletep():
     else:
         return 'false'
 
+@app.route('/deletem', methods=['POST'])
+def deletem():
+    if 'user' in session:
+        result = MetaModelService.deleteMetaModel(session['user'], request.form['id'])
+        return json.dumps(result)
+    else:
+        return 'false'
+
 @app.route('/pload', methods=['POST'])
 def pload():
     if 'user' in session:
@@ -179,6 +192,29 @@ def psave():
 def mload():
     project = MetaModelService.loadMetaModel(session['user'], request.form['id'])
     return json.dumps(project)
+
+
+@app.route('/metamodel-save', methods=['POST'])
+def metamodel_save():
+    if not 'user' in session:
+        return 'false'
+    if not 'id' in request.form:
+        return 'false'
+    id = request.form['id']
+    if 'name' in request.form and 'xml' in request.form and 'visibillity' in request.form:
+        return json.dumps(MetaModelService.saveAll(session['user'],
+                                                   request.form['id'],
+                                                   request.form['name'],
+                                                   request.form['xml'],
+                                                   request.form['visibillity']))
+    if 'name' in request.form:
+        pass
+    if 'xml' in request.form:
+        pass
+    if 'visibillity' in request.form:
+        pass
+    return 'false'
+    
 
 @app.route('/msave', methods=['POST'])
 def msave():

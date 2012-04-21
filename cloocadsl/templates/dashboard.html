@@ -9,9 +9,11 @@
 <script src="/static/js/jquery-1.7.1.min.js"></script>
 <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAQr-OoUDUD8B6md7h-mq_iBRB2_XkvWJzLyCU3pCnbWbszTP00xQZ7sOVnkT-oSJ1YdcNe6Gkeyz7zA"></script>
 <script type="text/javascript">
 
+$(function() {
+	$( "#dashboard_tabs" ).tabs();
+});
 
 function init() {
     $('#create-newp-button').bind('click', function() {
@@ -73,6 +75,7 @@ function init() {
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-p" ).dialog('close');
+				location.reload();
 	    	}
 	      }, "json");
 	  });
@@ -100,29 +103,25 @@ function init() {
 }
 
 function load_models() {
+	var mymetamodels = {{ mymetamodel|safe }};
+	var myprojects = {{ myproject|safe }};
 	create_mymetamodels_table({{ mymetamodel|safe }});
-	create_metamodels_table({{ metamodel|safe }});
-	create_projects_table({{ myproject|safe }});
-	/*
-	$.post('/cgi-bin/core/dashboard.cgi',
-			function(data) {
-				create_mymetamodels_table(data.mymetamodels);
-				create_metamodels_table(data.metamodels);
-				create_projects_table(data.projects);
-			}, "json");
-	*/
+	create_metamodels_table(mymetamodels);
+	create_projects_table(myprojects, mymetamodels);
 }
 
-function create_projects_table(projects) {
-	var html = '<table><tr><td>プロジェクト名</td><td></td></tr>';
+function create_projects_table(projects, metamodels) {
+	var html = '<table padding="100"><tr><td>プロジェクト名</td><td>種類</td></tr>';
 	for(var i = 0;i < projects.length;i++) {
-		{% if type == 'js' %}
-		var link = '<a href="/editorjs/'+projects[i].id+'">'+projects[i].name+'</a>';
-		{% else %}
-		var link = '<a href="/editor#'+projects[i].id+'">'+projects[i].name+'</a>';
-		{% endif %}
+		var link = '<a href="/editorjs/'+projects[i].id+' target="_blank"">'+projects[i].name+'</a>';
+		var metamodel_name = '';
+		for(var j = 0;j < metamodels.length;j++) {
+			if(projects[i].meta_id == metamodels[j].id) {
+				metamodel_name = metamodels[j].name;
+			}
+		}
 		var del = '<a onclick="delete_project('+projects[i].id+',\''+projects[i].name+'\')">削除</a>';
-		html += '<tr><td>'+link+'</td><td>'+del+'</td></tr>';
+		html += '<tr><td>'+link+'</td><td>'+metamodel_name+'</td><td>'+del+'</td></tr>';
 	}
 	html += '</table>';
 	  $('#project').empty().append(html);
@@ -131,18 +130,15 @@ function create_projects_table(projects) {
 function create_mymetamodels_table(metamodels) {
 	var html = '<table><tr><td>メタモデル名</td><td>公開範囲</td></tr>';
 	for(var i = 0;i < metamodels.length;i++) {
-		{% if type == 'js' %}
-		var link = '<a href="/workbenchjs/'+metamodels[i].id+'">'+metamodels[i].name+'</a>'
-		{% else %}
-		var link = '<a href="/workbench#'+metamodels[i].id+'">'+metamodels[i].name+'</a>'
-		{% endif %}
+		var link = '<a href="/workbenchjs/'+metamodels[i].id+'" target="_blank">'+metamodels[i].name+'</a>'
 		var vis = 'エラー';
 		if(metamodels[i].visibillity == 0) {
 			vis = '非公開';
 		}else if(metamodels[i].visibillity == 1) {
 			vis = '公開';
 		}
-		html += '<tr><td>'+link+'</td><td>'+vis+'</td></tr>';
+		var del = '<a onclick="delete_metamodel('+metamodels[i].id+',\''+metamodels[i].name+'\')">削除</a>';
+		html += '<tr><td>'+link+'</td><td>'+vis+'</td><td>'+del+'</td></tr>';
 	}
 	html += '</table>';
 	$('#metamodel').empty().append(html);
@@ -162,14 +158,22 @@ function delete_project(pid, pname) {
 		$.post('/deletep', { pid : pid },
 				function(data) {
 					if(data) {
-						/*
-						TODO:行の削除処理
-						*/
+						location.reload();
 					}
 				}, "json");
 	}
 }
 
+function delete_metamodel(id, mname) {
+	if(window.confirm("メタモデル"+mname+"を削除しますか。")) {
+		$.post('/deletem', { id : id },
+				function(data) {
+					if(data) {
+						location.reload();
+					}
+				}, "json");
+	}
+}
 
 </script>
 </head>
@@ -220,7 +224,6 @@ function delete_project(pid, pname) {
    </form>
 </div>
 
-
 <div id="wrapper">
 <div id="temp">
 <div id="header">
@@ -248,13 +251,17 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="/index">ホーム</a></li>
+            <li><a href="/index">ホーム</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/groups">グループ</a></li>
+            <li class="active"><a href="/mygroups">マイグループ</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/document.html">Document</a></li>
+            <li><a href="/groups">公開コミュニティ</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/contact.html">Contact</a></li>
+            <li><a href="/account">アカウント</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/document">Document</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/contact">Contact</a></li>
           </ul>
           <p id="login" class="navbar-text pull-right"></p>
         </div><!-- /.nav-collapse -->
@@ -279,13 +286,45 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <div class="span9">
           <div class="hero-unit">
             <h1>{{ group_name }}</h1>
+            
+            
+            <div id="dashboard_tabs">
+	<ul>
+		<li><a href="#dashboard-tabs-1">プロジェクト</a></li>
+		<li><a href="#dashboard-tabs-2">ワークベンチ</a></li>
+		<li><a href="#dashboard-tabs-3">設定</a></li>
+	</ul>
+	<div id="dashboard-tabs-1">
             <h2>プロジェクト</h2>
             <div id="project"></div>
             <p><a id="create-newp-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
+	</div>
+	<div id="dashboard-tabs-2">
             <h2>メタモデル</h2>
             <div id="metamodel"></div>
             <p><a id="create-newm-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
+	</div>
+	<div id="dashboard-tabs-3">
+		<form id="create-metamodel-form" method="POST" action="/update-group">
+		<div>名前：<input type="text" name="name"></div>
+		<div>説明：<input type="textarea" name="detail"></div>
+		<div>種類：<select name="visibillity">
+		<option value="0">プライベートプロジェクト</option>
+		<option value="1">公開コミュニティ</option>
+		<option value="2">教育グループ</option>
+		</select></div>
+		<input type="submit" value="変更">
+   </form>
+	</div>
+</div>
           </div>
+          <div class="row-fluid">
+            <div class="span4">
+              <h2>グループメンバの参加について</h2>
+              <p>下記のURLから参加してもらってください。</p>
+              <p><a href="http://dsl.clooca.com/member_reg/{{ group_id }}">メンバ登録URL</a><br>http://dsl.clooca.com/member_reg/{{ group_id }}</p>
+            </div><!--/span-->
+          </div><!--/row-->
       </div><!--/row-->
 
       <hr>

@@ -11,43 +11,18 @@
 <script src="/static/js/jquery-1.7.1.min.js"></script>
 <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
-<style>
-		#login-form-wrapper { width: 380px; height: 200px; padding: 0.4em; position: relative; }
-		#login-form-wrapper h3 { margin: 0; padding: 0.4em; text-align: center; }
-	</style>
-	<script type="text/javascript">
+<script type="text/javascript">
+
 
 function init() {
- 	$("#loginform").submit(function(event) {
-
-	    /* stop form from submitting normally */
-	    event.preventDefault(); 
-	        
-	    /* get some values from elements on the page: */
-	    var $form = $( this ),
-	        username = $form.find( 'input[name="username"]' ).val(),
-	        password = $form.find( 'input[name="password"]' ).val(),
-	        url = $form.attr( 'action' );
-	    
-	    /* Send the data using post and put the results in a div */
-	    $.post( url, { username: username, password: password },
-	      function( data ) {
-	    	if(data != null) {
-	    		$('#login').empty().append('<a href="/logout">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
-	    		$( "#login_dialog" ).dialog('close');
-	    		window.location.reload();
-	    	}else{
-	    		$('#login-messaeg').empty().append('ユーザ名かパスワードが違います。');
-	    	}
-	      }, "json");
-	  });
-// 	login();
-// 	$('#login-form-wrapper').corner();
+    $('#create-newp-button').bind('click', function() {
+        $('#create-new-p').dialog()
+    });
+    $('#create-newm-button').bind('click', function() {
+        $('#create-new-m').dialog()
+    });
 }
 
-function login() {
-	$( "#login_dialog" ).dialog({ modal: true });
-}
 
 </script>
 </head>
@@ -63,8 +38,11 @@ function login() {
       </div>
     </noscript>
 
+
 <div id="wrapper">
+<div id="temp">
 <div id="header">
+<div id="header-main">
 <p id="overview">
 </p>
 <!-- clooca is a web-based model-driven development tool.
@@ -73,6 +51,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
 <div id="language">
 <div Align="right"><a href="/english/index.html">English</a></div>
 <div Align="right"><a href="/index.html">日本語</a></div>
+</div>
 </div>
 <!-- ナビゲーションバー -->
  <div class="navbar navbar-fixed-top">
@@ -89,7 +68,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <ul class="nav">
             <li><a href="/index">ホーム</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/mygroups">マイグループ</a></li>
+            <li class="active"><a href="/mygroups">マイグループ</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/groups">公開コミュニティ</a></li>
             <li class="divider-vertical"></li>
@@ -99,13 +78,13 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <li class="divider-vertical"></li>
             <li><a href="/contact.html">Contact</a></li>
           </ul>
-          <p id="login" class="navbar-text pull-right"></p>
+          <p id="login" class="navbar-text pull-right"><a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;</p>
         </div><!-- /.nav-collapse -->
       </div>
     </div><!-- /navbar-inner -->
   </div><!-- /navbar -->
- 
-       <div class="container-fluid">
+  
+      <div class="container-fluid">
       <div class="row-fluid">
         <div class="span3">
           <div class="well sidebar-nav">
@@ -121,25 +100,36 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         </div><!--/span-->
         <div class="span9">
           <div class="hero-unit">
-            <h2>ログイン</h2>
-            <div id="login-form-wrapper" class="ui-widget-content ui-corner-all">
-            <h3 class="ui-widget-header ui-corner-all">ログイン</h3>
-             <div id="login-messaeg"> </div><br>
-             <form id="loginform" action="/login-to">
-             <div>ユーザ名　：<input type="text" name="username"></div>
-             <div>パスワード：<input type="password" name="password"></div>
-             <input type="submit" value="ログイン">
-             </form>
-             </div>
+            <h1>{{ group_name }}</h1>
+            <h2>グループ</h2>
+	{% for joinInfo in joinInfos %}
+	<a href="/dashboard/{{joinInfo['id']}}">{{joinInfo['name']}}</a><br>
+	{% endfor %}
           </div>
       </div><!--/row-->
- 
+
+      <hr>
+
       <footer>
         <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
 お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
 Copyright &copy 2011 部谷修平　All Rights Reserved.
 </p>
-<div id="footer"></div>
+      </footer>
+
+    </div><!--/.fluid-container-->
+<!--
+<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="DFBZ4Z5JC38YY">
+<input type="image" src="https://www.sandbox.paypal.com/ja_JP/JP/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal- オンラインで安全・簡単にお支払い">
+<img alt="" border="0" src="https://www.sandbox.paypal.com/ja_JP/i/scr/pixel.gif" width="1" height="1">
+</form>
+-->
+
+</div>
+<div id="footer">
+</div>
 </div>
 </div>
 </body>

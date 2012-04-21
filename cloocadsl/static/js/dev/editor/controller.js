@@ -1,4 +1,75 @@
 /**
+ * readProject
+ * @param project
+ */
+function readProject(project) {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
+	if(project) {
+		console.log('loaded json string = '+project.xml);
+		g_projectinfo = project;
+		readModel(project.xml);
+		g_metamodel_id = g_projectinfo.metamodel_id;
+		if(g_projectinfo.metamodel.xml == ' ' || g_projectinfo.metamodel.xml == null || g_projectinfo.metamodel.xml.length == 0) {
+			g_metamodel = new MetaModel();
+		}else{
+			g_metamodel = JSON.parse(g_projectinfo.metamodel.xml);
+		}
+					createModelExplorer();
+					Ext.MessageBox.hide();
+	}
+}
+
+/**
+ * readModel
+ */
+function readModel(xml) {
+	console.log('loaded json string = '+xml);
+	console.log('service='+g_projectinfo.group.service);
+	if(xml == 'null' || xml == '') {
+						g_model = new Model();
+						g_model.root = 1;
+						g_model.diagrams[1] = new Diagram(1);
+						diagram_IdGenerator.setOffset(1);
+	}else{
+						g_model = JSON.parse(xml);
+	}
+		g_metamodel_id = g_projectinfo.metamodel_id;
+		if(g_projectinfo.metamodel.xml == ' ' || g_projectinfo.metamodel.xml == null || g_projectinfo.metamodel.xml.length == 0) {
+			g_metamodel = new MetaModel();
+		}else{
+			g_metamodel = JSON.parse(g_projectinfo.metamodel.xml);
+		}
+//		loadMetaModel(g_projectinfo.metamodel_id);
+					/*
+					 * IDジェネレータの初期値を設定する。
+					 */
+		diagram_IdGenerator.setOffset(g_projectinfo.id * 10000);
+		object_IdGenerator.setOffset(g_projectinfo.id * 10000);
+		property_IdGenerator.setOffset(g_projectinfo.id * 10000);
+		for(var key in g_model.diagrams) {
+						obj = g_model.diagrams[key]
+						if(obj == null) continue;
+						diagram_IdGenerator.setOffset(obj.id);
+					}
+					for(var key in g_model.objects) {
+						obj = g_model.objects[key]
+						if(obj == null) continue;
+						object_IdGenerator.setOffset(obj.id);
+						calObjHeight(obj);
+					}
+					for(var key in g_model.relationships) {
+						obj = g_model.relationships[key]
+						if(obj == null) continue;
+						object_IdGenerator.setOffset(obj.id);
+					}
+					for(var key in g_model.properties) {
+						var prop = g_model.properties[key];
+						if(prop == null) continue;
+						property_IdGenerator.setOffset(prop.id);
+					}
+}
+
+/**
  * commit
  * @param pid
  */
@@ -153,8 +224,7 @@ function rep_list() {
 function checkout(rep_id) {
 	$.post('/mvcs/checkout', {pid:g_projectinfo.id, rep_id:rep_id},
 			function(data) {
-				if(data) {
-				}
+				readModel(data);
 			}, "json");
 }
 
