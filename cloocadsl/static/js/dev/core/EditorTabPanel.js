@@ -47,6 +47,12 @@ EditorTabPanel.prototype.add = function(editor, key) {
 		self.current_editor = editor;
 		editor.onActivate();
 	});
+	tab.on('close', function(){
+//		self.current_editor = null;
+		for(var i=0;i < self.editors.length;i++) {
+			if(self.editors[i].tab == tab) self.editors.splice(i, 1);
+		}
+	});
 	this.tabpanel.setActiveTab(tab);
 	editor.Initialize();
 }

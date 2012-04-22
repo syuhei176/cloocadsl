@@ -94,6 +94,24 @@ function DiagramEditor(name, key, diagram) {
 					  start: 0, end: 359,
 					  fromCenter: true
 					});
+			}else{
+				var graphic = g_metamodel['graphics'][meta_ele.graphic];
+				if(graphic.type == 'polygon') {
+					self.canvas.translateCanvas({
+						  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
+						})
+					self.canvas.scaleCanvas({
+						x:0, y:0,
+						scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
+						})
+					self.canvas.drawPolygon(graphic.option);
+					self.canvas.restoreCanvas();
+					self.canvas.restoreCanvas();
+				}else if(graphic.type == 'lines') {
+					self.canvas.translateCanvas({
+						  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+					}).drawLine(graphic.option).restoreCanvas();
+				}
 			}
 			var h = 0;
 			for(var l=0;l < meta_ele.properties.length;l++) {

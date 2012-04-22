@@ -25,11 +25,10 @@ next_version = None
  ワークスペースからモデルリポジトリにコミットする。
 '''
 def commit(rep_id, model_json):
-    #select project xml
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('LOCK TABLES Repository WRITE,object WRITE,model WRITE,diagram WRITE;')
+    cur.execute('LOCK TABLES Repository WRITE,object WRITE,model WRITE,diagram WRITE,relationship WRITE,property WRITE,has_object WRITE,has_relationship WRITE,has_property WRITE;')
     cur.execute('SELECT id,model_id,head_version FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
     if len(rows) == 0:
@@ -106,31 +105,40 @@ def parseDiagramJSON(diagram):
     cur.execute('DELETE FROM has_object WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
     cur.execute('DELETE FROM has_relationship WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
     connect.commit()
+    '''
+    # use has_object and has_relationship
     insert_datas = []
     for obj_id in diagram['objects']:
-#        cur.execute('INSERT INTO has_object (diagram_id,object_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,obj_id,model_id,next_version))
         insert_datas.append((id,obj_id,model_id,next_version))
     cur.executemany('INSERT INTO has_object (diagram_id,object_id,model_id,version) VALUES(%s,%s,%s,%s);', insert_datas)
     insert_datas = []
     for rel_id in diagram['relationships']:
-#        cur.execute('INSERT INTO has_relationship (diagram_id,relationship_id,model_id,version) VALUES(%s,%s,%s,%s);', (id,rel_id,model_id,next_version))
         insert_datas.append((id,rel_id,model_id,next_version))
     cur.executemany('INSERT INTO has_relationship (diagram_id,relationship_id,model_id,version) VALUES(%s,%s,%s,%s);', insert_datas)
     connect.commit()
+    '''
+    obj_refs = []
+    rel_refs = []
+    for obj_id in diagram['objects']:
+        obj_refs.append(obj_id)
+    for rel_id in diagram['relationships']:
+        rel_refs.append(rel_id)
+    obj_refs_json = json.dumps(obj_refs)
+    rel_refs_json = json.dumps(rel_refs)
     if edited_type == 'update':
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,0))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,0,obj_refs_json,rel_refs_json))
         connect.commit()
     elif edited_type == 'add':
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,1))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,1,obj_refs_json,rel_refs_json))
         connect.commit()
     elif edited_type == 'delete':
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,2))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,2,obj_refs_json,rel_refs_json))
         connect.commit()
     else:
         pass
@@ -148,19 +156,24 @@ def parseObjectJSON(obj):
     decomposition_diagram = obj['diagram']
     edited_type = obj['ve']['ver_type']
     version = int(obj['ve']['version'])
+    '''
     if not edited_type == 'delete':
         cur = connect.cursor()
         cur.execute('DELETE FROM has_property WHERE parent_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
         cur.close()
         for e in obj['properties']:
-            if parsePropertyListJSON(e, id):
-                children_edited = True
+            parsePropertyListJSON(e, id)
+    '''
+    prop_refs = []
+    for e in obj['properties']:
+        prop_refs = prop_refs + parsePropertyListJSON(e, id)
+    prop_refs_json = json.dumps(prop_refs)
     if edited_type == 'update':
         cur = connect.cursor()
         cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,0))
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,0,prop_refs_json))
         connect.commit()
         cur.close()
         return True
@@ -168,7 +181,7 @@ def parseObjectJSON(obj):
         cur = connect.cursor()
         cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,1))
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,1,prop_refs_json))
         connect.commit()
         cur.close()
         return True
@@ -192,19 +205,24 @@ def parseRelationshipJSON(rel):
     dest = rel['dest']
     edited_type = rel['ve']['ver_type']
     version = int(rel['ve']['version'])
+    '''
     if not edited_type == 'delete':
         cur = connect.cursor()
         cur.execute('DELETE FROM has_property WHERE parent_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
         cur.close()
         for e in rel['properties']:
-            if parsePropertyListJSON(e, id):
-                children_edited = True
+            parsePropertyListJSON(e, id)
+    '''
+    prop_refs = []
+    for e in rel['properties']:
+        prop_refs = prop_refs + parsePropertyListJSON(e, id)
+    prop_refs_json = json.dumps(prop_refs)
     if edited_type == 'update':
         cur = connect.cursor()
         cur.execute('DELETE FROM relationship where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,0))
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,0,prop_refs_json))
         connect.commit()
         cur.close()
         return True
@@ -212,13 +230,13 @@ def parseRelationshipJSON(rel):
         cur = connect.cursor()
         cur.execute('DELETE FROM relationship where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,1))
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,1,prop_refs_json))
         connect.commit()
         cur.close()
         return True
     elif edited_type == 'delete':
         cur = connect.cursor()
-        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,2))
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,2,prop_refs_json))
         connect.commit()
         cur.close()
         return True
@@ -233,11 +251,13 @@ def parsePropertyListJSON(plist, parent_id):
     cur = connect.cursor()
     children_edited = False
     meta_id = plist['meta_id']
+    ret = []
     for prop_id in plist['children']:
         cur.execute('INSERT INTO has_property (parent_id,property_id,model_id,version) VALUES(%s,%s,%s,%s);', (parent_id,prop_id,model_id,next_version))
         connect.commit()
+        ret.append(prop_id)
     cur.close()
-    return children_edited
+    return ret
 
 def parsePropertyJSON(prop):
     edited = False

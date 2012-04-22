@@ -3,9 +3,7 @@
 <head>
 <meta name="gwt:property" content="locale=ja">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>clooca account</title>
-<link rel="stylesheet" href="home.css" type="text/css" />
-<!-- <link rel="stylesheet" href="common.css" type="text/css" /> -->
+<title>clooca document</title>
 <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 <script src="/static/js/jquery-1.7.1.min.js"></script>
@@ -13,10 +11,13 @@
 <script src="/static/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 
-
 function init() {
+	{% if 'user' in session %}
+	  $('#login').empty().append('<a href="/logout">logout {{session['user']['uname']}}</a>&nbsp;&nbsp;&nbsp;');
+	{% else %}
+	  $('#login').empty().append('<a href="/login">login</a>&nbsp;&nbsp;&nbsp;');
+	{% endif %}
 }
-
 
 </script>
 </head>
@@ -31,7 +32,7 @@ function init() {
         in order for this application to display correctly.
       </div>
     </noscript>
-
+<p id="message"></p>
 
 <div id="wrapper">
 <div id="temp">
@@ -66,11 +67,11 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <li class="divider-vertical"></li>
             <li><a href="/groups">公開コミュニティ</a></li>
             <li class="divider-vertical"></li>
-            <li class="active"><a href="/account">アカウント</a></li>
+            <li><a href="/account">アカウント</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/document">ドキュメント</a></li>
+            <li class="active"><a href="/document">ドキュメント</a></li>
           </ul>
-          <p id="login" class="navbar-text pull-right"><a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;</p>
+          <p id="login" class="navbar-text pull-right"></p>
         </div><!-- /.nav-collapse -->
       </div>
     </div><!-- /navbar-inner -->
@@ -92,32 +93,57 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         </div><!--/span-->
         <div class="span9">
           <div class="hero-unit">
-            <h2>アカウント</h2>
-            <div id="login-form-wrapper" class="ui-widget-content ui-corner-all">
-            <h3 class="ui-widget-header ui-corner-all">アカウント情報</h3>
-             <div id="login-messaeg"> </div><br>
-             <div>ユーザ名<p>{{ user['uname'] }}</p></div>
-             <div>パスワード<p>{{ user['passwd'] }}</p></div>
-             <div>メールアドレス<p>{{ user['email'] }}</p></div>
-             <div>登録日<p>{{ user['register_date'] }}</p></div>
-             <form id="loginform" action="/login-to">
-             <div>所属：<input type="text" name="username" value="{{ user['belonging'] }}"></div>
-             <input type="submit" value="変更">
-             </form>
-             </div>
+            <h1>ドキュメント</h1>
+            <p>cloooca DSLはソーシャルDSMLプラットフォームです。</p>
+            <h2 id="about-cloocadsl">clooca DSLとは</h2>
+            <h3>cloocaDSLでできること</h3>
+            <p>
+            cloocaDSLはwebベースのソフトウェア開発ツールです。「直感的な図」を用いてソフトウェアを開発することができます。
+            cloocaDSL上にはアプリケーションドメインごとに、多数の「コミュニティ」や「グループ」が存在します。
+            その中にはアプリケーションドメイン用に洗練されたDSMLが蓄積されています。開発者はそれを用いることで直感的なソフトウェア開発を実現することができます。
+            </p>
+            <h3>cloocaDSL</h3>
+            <p></p>
+            <h2 id="about-editor">エディタ</h2>
+            <h3>プロジェクトの作り方</h3>
+            <p></p>
+            <h3>エディタの使い方</h3>
+            <p></p>
+            <h2 id="about-wb">ワークベンチ</h2>
+            <h3>メタモデルの作り方</h3>
+            <p></p>
+            <h3>メタモデルの書き方</h3>
+            <p></p>
+            <h3>テンプレートの書き方</h3>
+            <p></p>
+            <h2 id="about-group">グループ機能について</h2>
+            <h3>グループへの参加</h3>
+            <p>グループへの参加は、グループごとに割り当てられたURLにアクセスすることで可能です。URLはグループの管理者がダッシュボード画面で確認することができます。</p>
           </div>
+        </div><!--/span-->
       </div><!--/row-->
 
       <hr>
 
       <footer>
+      <div id="metamodel">
+      
         <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
 お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
-Copyright &copy 2011 部谷修平　All Rights Reserved.
+Copyright &copy 2011 clooca　All Rights Reserved.
 </p>
       </footer>
 
     </div><!--/.fluid-container-->
+<!--
+<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="DFBZ4Z5JC38YY">
+<input type="image" src="https://www.sandbox.paypal.com/ja_JP/JP/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal- オンラインで安全・簡単にお支払い">
+<img alt="" border="0" src="https://www.sandbox.paypal.com/ja_JP/i/scr/pixel.gif" width="1" height="1">
+</form>
+-->
+
 </div>
 <div id="footer">
 </div>

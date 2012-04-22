@@ -14,8 +14,8 @@ function readProject(project) {
 		}else{
 			g_metamodel = JSON.parse(g_projectinfo.metamodel.xml);
 		}
-					createModelExplorer();
-					Ext.MessageBox.hide();
+		createModelExplorer();
+		Ext.MessageBox.hide();
 	}
 }
 
@@ -91,16 +91,9 @@ function update() {
 			function(data) {
 				if(data) {
 					console.log('loaded json string = '+data);
-					g_model = JSON.parse(data);
-//					g_model = eval('(' + data + ')');
-					/*
-					g_metamodel_id = data.metamodel_id;
-					loadMetaModel(data.metamodel_id);
-//					g_model = parseModelXML(data.xml);
-					for(var i=0;i < g_model.root.objects.length;i++) {
-						object_IdGenerator.setOffset(g_model.root.objects[i].id);
-					}
-					*/
+					g_projectinfo.xml = data;
+					readModel(data);
+//					g_model = JSON.parse(data);
 					createModelExplorer();
 				}
 			}, "json");

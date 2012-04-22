@@ -38,38 +38,6 @@ function init() {
 	{% else %}
 	  $('#login').empty().append('<a href="/login">login</a>&nbsp;&nbsp;&nbsp;');
 	{% endif %}
-	/*
-	$.post('/cgi-bin/core/checkloggedin.cgi',
-		function(data) {
-		  if(data != null) {
-			  load_models();
-			  $('#login').empty().append('<a href="/cgi-bin/core/logout.cgi">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
-		  }else{
-			  $('#login').empty().append('<a href="javascript:login()">login</a>&nbsp;&nbsp;&nbsp;');
-		  }
-		}, "json");
-	*/
-	$("#loginform").submit(function(event) {
-
-	    /* stop form from submitting normally */
-	    event.preventDefault(); 
-	        
-	    /* get some values from elements on the page: */
-	    var $form = $( this ),
-	        username = $form.find( 'input[name="username"]' ).val(),
-	        password = $form.find( 'input[name="password"]' ).val(),
-	        url = $form.attr( 'action' );
-	    
-	    /* Send the data using post and put the results in a div */
-	    $.post( url, { username: username, password: password },
-	      function( data ) {
-//	    	window.alert(data);
-	    	if(data != null) {
-	    		$('#login').empty().append('<a href="/logout">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
-	    		$( "#login_dialog" ).dialog('close');
-	    	}
-	      }, "json");
-	  });
 	
 	$("#register-form").submit(function(event) {
 
@@ -153,21 +121,12 @@ document.getElementById(twitter_elem_id).innerHTML = html;
     </noscript>
 <p id="message"></p>
 
-<!-- ログイン　ダイアログ -->
-<div id="login_dialog" title="login dialog" style="display : none;">
-<form id="loginform" action="/login">
-<div>username:<input type="text" name="username"></div>
-<div>password:<input type="password" name="password"></div>
-<input type="submit" value="ログイン">
-</form>
-</div>
-
 <!-- 登録　ダイアログ -->
 <div id="register_dialog" title="register dialog" style="display : none;">
 <form id="register-form" action="/free-register">
-<div>username:<input type="text" name="username"></div>
-<div>password:<input type="password" name="password"></div>
-<div>confirm:<input type="password" name="password-confirm"></div>
+<div>ユーザ名：　<input type="text" name="username"></div>
+<div>パスワード：<input type="password" name="password"></div>
+<div>確認：　　　<input type="password" name="password-confirm"></div>
 <input type="submit" value="登録">
 </form>
 </div>
@@ -207,9 +166,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <li class="divider-vertical"></li>
             <li><a href="/account">アカウント</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/document.html">Document</a></li>
-            <li class="divider-vertical"></li>
-            <li><a href="/contact.html">Contact</a></li>
+            <li><a href="/document">ドキュメント</a></li>
           </ul>
           <p id="login" class="navbar-text pull-right"></p>
         </div><!-- /.nav-collapse -->
@@ -235,8 +192,8 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <div class="hero-unit">
             <h1>clooca DSL</h1>
             <p>cloooca DSLはソーシャルDSMLプラットフォームです。</p>
-            <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　　</a></p>
-            <p><a class="btn btn-primary btn-large" href="/groups">ダッシュボード &raquo;</a></p>
+            <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　</a></p>
+            <p><a class="btn btn-primary btn-large" href="/mygroups">マイグループ &raquo;</a></p>
             <h3>最新情報</h3>
             <ul id="twitter_data"></ul>
           </div>
@@ -244,17 +201,24 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <div class="span4">
               <h2>ブラウザで使用可能</h2>
               <p>cloocaのモデルエディタはブラウザさえあれば、いつでも、どこでも使うことができる。</p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
+              <p><a class="btn" href="/document#about-cloocadsl">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="span4">
               <h2>Editor</h2>
               <p>cloocaでは直感的なモデル図（DSML）を用いて開発することができる。</p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
+              <p><a class="btn" href="/document#about-editor">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="span4">
               <h2>Workbench</h2>
               <p>DSMLをブラウザで構築することができる。</p>
-              <p><a class="btn" href="#">View details &raquo;</a></p>
+              <p><a class="btn" href="/document#about-wb">View details &raquo;</a></p>
+            </div><!--/span-->
+          </div><!--/row-->
+          <div class="row-fluid">
+            <div class="span4">
+              <h2>グループ機能</h2>
+              <p>DSMLをブラウザで構築することができる。</p>
+              <p><a class="btn" href="/document#about-group">View details &raquo;</a></p>
             </div><!--/span-->
           </div><!--/row-->
         </div><!--/span-->

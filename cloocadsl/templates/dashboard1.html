@@ -128,7 +128,7 @@ function load_models() {
 	var mymetamodels = {{ mymetamodel|safe }};
 	var myprojects = {{ myproject|safe }};
 	create_mymetamodels_table({{ mymetamodel|safe }});
-	create_metamodels_table( {{ metamodels|safe }} );
+	create_metamodels_table({{ metamodels|safe }});
 	create_projects_table(myprojects, mymetamodels);
 }
 
@@ -310,11 +310,70 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <div id="dashboard_tabs">
 	<ul>
 		<li><a href="#dashboard-tabs-1">プロジェクト</a></li>
+		<li><a href="#dashboard-tabs-2">ワークベンチ</a></li>
+		<li><a href="#dashboard-tabs-3">設定</a></li>
+		<li><a href="#dashboard-tabs-4">メンバー</a></li>
 	</ul>
 	<div id="dashboard-tabs-1">
             <h2>プロジェクト</h2>
             <div id="project"></div>
             <p><a id="create-newp-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
+	</div>
+	<div id="dashboard-tabs-2">
+            <h2>メタモデル</h2>
+            <div id="metamodel"></div>
+            <p><a id="create-newm-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
+	</div>
+	<div id="dashboard-tabs-3">
+		<form id="group-update-form" method="POST" action="/update-group">
+		<input type="hidden" name="group_id" value="{{ group['id'] }}">
+		<div>名前：<input type="text" name="name" value="{{group['name']}}"></div>
+		<div>説明：<input type="textarea" name="detail" value="{{group['detail']}}"></div>
+		<div>種類：<select name="visibillity">
+		{% if group['visibillity'] == 0 %}
+		<option value="0" selected=true>プライベートプロジェクト</option>
+		<option value="1">公開コミュニティ</option>
+		<option value="2">教育グループ</option>
+		{% elif group['visibillity'] == 1 %}
+		<option value="0">プライベートプロジェクト</option>
+		<option value="1" selected=true>公開コミュニティ</option>
+		<option value="2">教育グループ</option>
+		{% elif group['visibillity'] == 2 %}
+		<option value="0">プライベートプロジェクト</option>
+		<option value="1">公開コミュニティ</option>
+		<option value="2" selected=true>教育グループ</option>
+		{% endif %}
+		</select></div>
+		<div>プラン：<select name="service">
+		{% if group['service'] == 'free' %}
+		<option value="free" selected=true>フリー</option>
+		<option value="shinshu">信州大学用</option>
+		<option value="rep">モデルリポジトリ</option>
+		{% elif group['service'] == 'shinshu' %}
+		<option value="free">フリー</option>
+		<option value="shinshu" selected=true>信州大学用</option>
+		<option value="rep">モデルリポジトリ</option>
+		{% elif group['service'] == 'rep' %}
+		<option value="free">フリー</option><option value="shinshu">信州大学用</option><option value="rep" selected=true>モデルリポジトリ</option>
+		{% elif group['service'] == 'all' %}
+		<option value="0">フリー</option><option value="1">信州大学用</option><option value="2">モデルリポジトリ</option><option value="all" selected=true>ALL</option>
+		{% else %}
+		<option value="0" selected=true>フリー</option><option value="1">信州大学用</option><option value="2">モデルリポジトリ</option>
+		{% endif %}
+		</select></div>
+		<input type="submit" value="変更">
+   </form>
+	</div>
+	<div id="dashboard-tabs-4">
+	<form id="member-add-form" method="POST" action="/member-add">
+	<div><input type="text" name="name" value=""></div>
+	<input type="submit" value="追加">
+	</form>
+	<div id="userlist">
+	{% for member in members %}
+	<p>{{ member['uname'] }}</p>
+	{% endfor %}
+	</div>
 	</div>
 </div>
           </div>

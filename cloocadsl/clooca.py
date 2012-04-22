@@ -7,6 +7,7 @@ import sys
 import os
 import zipfile
 import json
+import MySQLdb
 import config
 sys.path.append(config.CLOOCA_CGI)
 from core import UserService
@@ -14,6 +15,7 @@ from core import MetaModelService
 from core import ProjectService
 from core import ModelCompiler
 from core import FileService
+from core import GroupService
 from mvcs import CommitService
 from mvcs import UpdateServiceJSON
 from mvcs import RepositoryService
@@ -29,6 +31,10 @@ def index():
         return render_template('index.html', loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
+@app.route('/document')
+def document():
+    return render_template('document.html')
+
 @app.route('/login', methods=['GET'])
 def login_view():
     if 'user' in session:
@@ -38,7 +44,10 @@ def login_view():
 
 @app.route('/member_reg/<gid>', methods=['GET'])
 def member_reg_view(gid):
-    return render_template('member_reg.html', group_id=gid)
+    if 'user' in session:
+        return render_template('member_join.html', group_id=gid)
+    else:
+        return render_template('member_reg.html', group_id=gid)
 
 @app.route('/reg', methods=['GET'])
 def reg_view():
@@ -47,10 +56,12 @@ def reg_view():
 @app.route('/mygroups')
 def mygroups(type='js'):
     if 'user' in session and 'joinInfos' in session['user']:
-        return render_template('mygroups.html',
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        resp = render_template('mygroups.html',
                                username = session['user']['uname'],
-                               joinInfos = session['user']['joinInfos']
-                               )
+                               groups = GroupService.getMyGroups(session['user'], connect))
+        connect.close()
+        return resp
     return redirect(url_for('login_view'))
 
 
@@ -65,29 +76,43 @@ def groups():
 
 @app.route('/account')
 def account():
-    if 'user' in session and 'joinInfos' in session['user']:
-        return render_template('account.html',
-                               username = session['user']['uname'],
-                               joinInfos = session['user']['joinInfos']
-                               )
+    if 'user' in session:
+        return render_template('account.html', user = UserService.getUserInfo(session['user']))
     return redirect(url_for('login_view'))
 
 
 @app.route('/dashboard/<id>')
 def dashboard(id=None):
-    if 'user' in session and 'joinInfos' in session['user']:
-        for joinInfo in session['user']['joinInfos']:
-            if int(joinInfo['id']) == int(id):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        cur = connect.cursor()
+        cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], id, ))
+        rows = cur.fetchall()
+        cur.close()
+        joinInfo = {}
+        joinInfo['id'] = int(id)
+        joinInfo['role'] = int(rows[0][1])
+        if not len(rows) == 0:
+            if joinInfo['role'] == 0:
                 return render_template('dashboard.html',
-                               loggedin = True,
-                               username = session['user']['uname'],
-                               mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'], joinInfo)),
-                               myproject = json.dumps(ProjectService.loadMyProjectList(session['user'], joinInfo)),
-                               metamodel = json.dumps(MetaModelService.loadMetaModelList(session['user'], joinInfo)),
-                               group_name = joinInfo['name'],
-                               group_id = joinInfo['id'],
-                               type = 'js'
-                               )
+                                       loggedin = True,
+                                       username = session['user']['uname'],
+                                       mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'], id, connect)),
+                                       myproject = json.dumps(ProjectService.loadMyProjectList(session['user'], id, connect)),
+                                       metamodels = json.dumps(MetaModelService.loadMetaModelList(session['user'], id, connect)),
+                                       group = GroupService.getGroup(session['user'], joinInfo['id'], connect),
+#                                       members = GroupService.getGroupMember(session['user'], joinInfo['id'], connect),
+                                       group_id = joinInfo['id'])
+            elif joinInfo['role'] == 1:
+                return render_template('dashboard1.html',
+                                       loggedin = True,
+                                       username = session['user']['uname'],
+                                       mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'], id, connect)),
+                                       myproject = json.dumps(ProjectService.loadMyProjectList(session['user'], id, connect)),
+                                       metamodels = json.dumps(MetaModelService.loadMetaModelList(session['user'], id, connect)),
+                                       group = GroupService.getGroup(session['user'], joinInfo['id'], connect),
+                                       members = GroupService.getGroupMember(session['user'], joinInfo['id'], connect),
+                                       group_id = joinInfo['id'])
     else:
         return redirect(url_for('login_view'))
     return render_template('request_deny.html')
@@ -112,8 +137,17 @@ def workbenchjs(id=None):
         return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
+
+@app.route('/join-group', methods=['POST'])
+def join_group():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.joinGroup(session['user'], request.form['group_id'], connect)
+        connect.close()
+        return json.dumps(result)
+
 @app.route('/free-register', methods=['POST'])
-def register():
+def register_free():
     if 'group_id' in request.form:
         return json.dumps(UserService.CreateUser(request.form['username'], request.form['password'], group_id=request.form['group_id']))
     else:
@@ -129,6 +163,8 @@ def register_admin():
 @app.route('/login-to', methods=['POST'])
 def login():
     user = UserService.Login(request.form['username'], request.form['password'])
+    if not user == None and 'permanent' in request.form:
+        session.permanent = True
     return json.dumps(user)
 
 @app.route('/logout')
@@ -259,6 +295,14 @@ def download(pid):
             resp.headers['Content-Disposition'] = 'attachment; filename=p'+project_id+'.zip;'
             return resp
 
+
+@app.route('/update-group', methods=['POST'])
+def update_group():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'], request.form['detail'], request.form['visibillity'], connect)
+        connect.close()
+        return json.dumps(result)
 
 @app.route('/compile_server/reserve', methods=['POST'])
 def compile_server_reserve():

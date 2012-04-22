@@ -130,10 +130,10 @@ def createProject(user, name, xml, metamodel_id, joinInfo=None):
     project['metamodel_id'] = metamodel_id
     return True
 
-def loadMyProjectList(user, joinInfo):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+def loadMyProjectList(user, group_id, connect):
+#    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT ProjectInfo.id AS id,hasProject.project_id AS id2,name,metamodel_id,rep_id,group_id FROM ProjectInfo INNER JOIN hasProject ON ProjectInfo.id = hasProject.project_id AND hasProject.user_id=%s AND ProjectInfo.group_id=%s;',(user['id'], joinInfo['id'], ))
+    cur.execute('SELECT ProjectInfo.id AS id,hasProject.project_id AS id2,name,metamodel_id,rep_id,group_id FROM ProjectInfo INNER JOIN hasProject ON ProjectInfo.id = hasProject.project_id AND hasProject.user_id=%s AND ProjectInfo.group_id=%s;',(user['id'], group_id, ))
     rows = cur.fetchall()
     projects = []
     cur.close()
@@ -144,7 +144,7 @@ def loadMyProjectList(user, joinInfo):
         project['meta_id'] = rows[i][3]
 #        metamodel['xml'] = metamodel_rows[0][2]
         projects.append(project)
-    connect.close()
+#    connect.close()
     return projects
 
 def loadLessonProjectList(user, metamodel_id):

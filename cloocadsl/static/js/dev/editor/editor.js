@@ -164,10 +164,12 @@ function create_menu() {
                 	   iconCls: 'add16',
                 	   handler : onRepItemClick
                    },{
+                	   id: 'commit',
                 	   text: 'commit',
                 	   iconCls: 'add16',
                 	   handler : onRepItemClick
                    },{
+                	   id: 'update',
                 	   text: 'update',
                 	   iconCls: 'add16',
                 	   handler : onRepItemClick

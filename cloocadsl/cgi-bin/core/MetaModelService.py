@@ -119,10 +119,10 @@ def createMetaModel(user, name, xml, visibillity, joinInfo=None):
     project['group_id'] = joinInfo['id']
     return True
 
-def loadMyMetaModelList(user, joinInfo):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+def loadMyMetaModelList(user, group_id, connect):
+#    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,group_id FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s AND MetaModelInfo.group_id=%s;',(user['id'], joinInfo['id'], ))
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,group_id FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s AND MetaModelInfo.group_id=%s;',(user['id'], group_id, ))
     rows = cur.fetchall()
     cur.close()
     metamodels = []
@@ -133,19 +133,19 @@ def loadMyMetaModelList(user, joinInfo):
 #        metamodel['xml'] = metamodel_rows[0][2]
         metamodel['visibillity'] = rows[i][3]
         metamodels.append(metamodel)
-    connect.close()
+#    connect.close()
     return metamodels
 
-def loadMetaModelList(user=None, group=None):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+def loadMetaModelList(user=None, group_id=None, connect=None):
+#    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    if group == None:
+    if group_id == None:
         cur.execute('SELECT id,name,xml FROM MetaModelInfo WHERE visibillity=%s;',(1, ))
     else:
-        cur.execute('SELECT id,name,xml FROM MetaModelInfo WHERE group_id=%s AND visibillity=%s;',(group['id'], 1, ))
+        cur.execute('SELECT id,name,xml FROM MetaModelInfo WHERE group_id=%s AND visibillity=%s;',(group_id, 1, ))
     rows = cur.fetchall()
     cur.close()
-    connect.close()
+#    connect.close()
     metamodels = []
     for i in range(len(rows)):
         metamodel = {}

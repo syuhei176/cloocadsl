@@ -186,3 +186,24 @@ def UpdateUserDetail(username, detail):
     if affect_row_count == 0:
         return False
     return True
+
+def getUserInfo(user):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT id,uname,passwd,register_date,email,role,belonging FROM UserInfo WHERE id = %s;', user['id'])
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        connect.close()
+        return None
+    user = {}
+    user['id'] = rows[0][0]
+    user['uname'] = rows[0][1]
+    user['passwd'] = '*' * 5
+    user['register_date'] = rows[0][3]
+    user['email'] = rows[0][4]
+    user['role'] = rows[0][5]
+    user['belonging'] = rows[0][6]
+    cur.close()
+    connect.close()
+    return user    
