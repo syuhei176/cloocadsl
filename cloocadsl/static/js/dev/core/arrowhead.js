@@ -7,17 +7,56 @@ ArrowHead.NONE = 0;
 ArrowHead.V = 1;
 
 ArrowHead.prototype.draw = function(canvas, p, q) {
-    var dx = q.getX() - p.getX();
-    var dy = q.getY() - p.getY();
+    var dx = q.x - p.x;
+    var dy = q.y - p.y;
     var angle = (Math.atan2(dy, dx)-Math.PI / 6) * 180 / Math.PI;
     if(this.type == ArrowHead.NONE) {
     	
     }else if(this.type == ArrowHead.V) {
+		canvas.translateCanvas({x:q.x, y:q.y});
+		canvas.rotateCanvas({
+			  angle: angle+5,
+			  x: 0, y: 0
+			})
+    	canvas.drawLine({
+    		  strokeStyle: "#000",
+    		  strokeWidth: 2,
+    		  x1: -10, y1: -10,
+    		  x2: 0, y2: 0,
+    		  x3: -14, y3: 0
+    		});
+		canvas.restoreCanvas();
+		canvas.restoreCanvas();
+    }else if (this.type == ArrowHead.TRIANGLE){
+    	canvas.drawPolygon({
+    		strokeStyle: "#000",
+  		  x: q.x, y: q.y,
+  		  radius: 10,
+  		  sides: 3,
+  		  angle: angle
+  		});
+    }else if (this.type == ArrowHead.BLACK_TRIANGLE){
+    	canvas.drawPolygon({
+    		  fillStyle: "#000",
+    		  x: q.x, y: q.y,
+    		  radius: 10,
+    		  sides: 3,
+    		  angle: angle
+    		});
+    }else if (this.type == ArrowHead.DIAMOND){
+    	canvas.drawPolygon({
+    		strokeStyle: "#000",
+  		  x: q.x, y: q.y,
+  		  radius: 10,
+  		  sides: 4,
+  		  angle: angle
+  		});
+    }else if (this.type == ArrowHead.BLACK_DIAMOND){
     	canvas.drawPolygon({
   		  fillStyle: "#000",
   		  x: q.x, y: q.y,
   		  radius: 10,
-  		  sides: 3,
+  		  sides: 4,
   		  angle: angle
   		});
     }

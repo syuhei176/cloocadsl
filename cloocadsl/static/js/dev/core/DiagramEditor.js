@@ -21,20 +21,8 @@ function DiagramEditor(name, key, diagram) {
 		self.draw();
 	});
 	
-//	this.createButton();
-//	this.width = Ext.getCmp('centerpanel').getWidth() - 30;
-//	this.height = Ext.getCmp('centerpanel').getHeight() - 40;
 	this.width = 1000;
 	this.height = 1000;
-	/*
-	var tab = editor_tabs.add({
-		id: this.key,
-		title: name,
-		autoScroll: true,
-		html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
-		closable: 'true',
-	});
-	*/
 	this.panel = {
 			id: this.key,
 			title: name,
@@ -42,138 +30,128 @@ function DiagramEditor(name, key, diagram) {
 			html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
 			closable: 'true',
 		};
-	/*
-	editortabpanel.on('activate', function(){
-		self.createButton();
-		current_editor = self;
-		})
-		*/
-		/*
-	tab.on('activate', function(){
-		self.createButton();
-		current_editor = self;
-		});
-		*/
-//	editor_tabs.setActiveTab(tab);
 	this.canvas = $('#canvas_'+this.key);
-//	window.alert("canvas = "+this.canvas);
-	var draw = function() {
-		if(self.canvas == null) {
-			self.canvas = $('#canvas_'+self.key);
-		}
-		self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: self.width,height: self.height, fromCenter: false});
-		for(var i=0;i < self.diagram.objects.length;i++) {
-			var obj_id = self.diagram.objects[i];
-			var obj = g_model.objects[obj_id];
-			if(obj.ve.ver_type == 'delete') continue;
-			var col = '#000';
-			if(obj == self.selected) {
-				col = '#00f';
-			}
-			var meta_ele = g_metamodel.metaobjects[obj.meta_id];
-			if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
-				self.canvas.drawRect({
-					  strokeStyle: col, strokeWidth: 2,
-					  x: obj.bound.x, y: obj.bound.y,
-					  width: obj.bound.width, height: obj.bound.height,
-					  fromCenter: false
-				});
-			}else if(meta_ele.graphic == 'rounded') {
-				self.canvas.drawRect({
-					  strokeStyle: col, strokeWidth: 2,
-					  x: obj.bound.x, y: obj.bound.y,
-					  width: obj.bound.width, height: obj.bound.height,
-					  fromCenter: false,
-					  cornerRadius: 2
-				});
-			}else if(meta_ele.graphic == 'circle') {
-				$("canvas").drawArc({
-					  strokeStyle: col, strokeWidth: 2,
-					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-					  radius: obj.bound.width / 2,
-					  start: 0, end: 359,
-					  fromCenter: true
-					});
-			}else{
-				var graphic = g_metamodel['graphics'][meta_ele.graphic];
-				if(graphic.type == 'polygon') {
-					self.canvas.translateCanvas({
-						  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
-						})
-					self.canvas.scaleCanvas({
-						x:0, y:0,
-						scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
-						})
-					self.canvas.drawPolygon(graphic.option);
-					self.canvas.restoreCanvas();
-					self.canvas.restoreCanvas();
-				}else if(graphic.type == 'lines') {
-					self.canvas.translateCanvas({
-						  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-					}).drawLine(graphic.option).restoreCanvas();
-				}
-			}
-			var h = 0;
-			for(var l=0;l < meta_ele.properties.length;l++) {
-				var prop = null;
-				for(var j=0;j<obj.properties.length;j++) {
-					if(obj.properties[j].meta_id == meta_ele.properties[l]) {
-						prop = obj.properties[j];
-					}
-				}
-				if(prop != null) {
-					for(var k=0;k < prop.children.length;k++) {
-						var p = g_model.properties[prop.children[k]]
-						if(p.ve.ver_type == 'delete') continue;
-						self.canvas.drawText({
-							  fillStyle: "#000",
-							  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
-							  text: p.value,
-							  align: "center",
-							  baseline: "middle",
-							  font: "16px 'ＭＳ ゴシック'"
-							});
-						h++;
-					}
-					self.canvas.drawLine({
-						  strokeStyle: "#000",
-						  strokeWidth: 2,
-						  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
-						  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
-						});
-				}
-			}
-		}
-		for(var i=0;i < self.diagram.relationships.length;i++) {
-			var rel_id = self.diagram.relationships[i];
-			var rel = g_model.relationships[rel_id];
-			if(rel.ve.ver_type == 'delete') continue;
-			self.draw_relationship(rel);
-		}
-		if(self.tool != null) {
-			self.canvas.drawText({
-				  fillStyle: "#000",
-				  x: self.drag_move.x, y: self.drag_move.y,
-				  text: self.tool.name,
-				  align: "center",
-				  baseline: "middle",
-				  font: "16px 'ＭＳ ゴシック'"
-				});
-		}
-		if(self.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
-			self.canvas.drawLine({
-				  strokeStyle: "#777",
-				  strokeWidth: 2,
-				  strokeCap: "round",
-				  strokeJoin: "miter",
-				  x1: self.drag_start.x, y1: self.drag_start.y,
-				  x2: self.drag_move.x, y2: self.drag_move.y
-				});
 
+//	this.draw = draw;
+}
+
+
+
+DiagramEditor.prototype.draw = function() {
+	var self = this;
+	if(self.canvas == null) {
+		self.canvas = $('#canvas_'+self.key);
+	}
+	self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: self.width,height: self.height, fromCenter: false});
+	for(var i=0;i < self.diagram.objects.length;i++) {
+		var obj_id = self.diagram.objects[i];
+		var obj = g_model.objects[obj_id];
+		if(obj.ve.ver_type == 'delete') continue;
+		var col = '#000';
+		if(obj == self.selected) {
+			col = '#00f';
+		}
+		var meta_ele = g_metamodel.metaobjects[obj.meta_id];
+		if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
+			self.canvas.drawRect({
+				  strokeStyle: col, strokeWidth: 2,
+				  x: obj.bound.x, y: obj.bound.y,
+				  width: obj.bound.width, height: obj.bound.height,
+				  fromCenter: false
+			});
+		}else if(meta_ele.graphic == 'rounded') {
+			self.canvas.drawRect({
+				  strokeStyle: col, strokeWidth: 2,
+				  x: obj.bound.x, y: obj.bound.y,
+				  width: obj.bound.width, height: obj.bound.height,
+				  fromCenter: false,
+				  cornerRadius: 2
+			});
+		}else if(meta_ele.graphic == 'circle') {
+			$("canvas").drawArc({
+				  strokeStyle: col, strokeWidth: 2,
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				  radius: obj.bound.width / 2,
+				  start: 0, end: 359,
+				  fromCenter: true
+				});
+		}else{
+			var graphic = g_metamodel['graphics'][meta_ele.graphic];
+			if(graphic.type == 'polygon') {
+				self.canvas.translateCanvas({
+					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
+					})
+				self.canvas.scaleCanvas({
+					x:0, y:0,
+					scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
+					})
+				self.canvas.drawPolygon(graphic.option);
+				self.canvas.restoreCanvas();
+				self.canvas.restoreCanvas();
+			}else if(graphic.type == 'lines') {
+				self.canvas.translateCanvas({
+					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				}).drawLine(graphic.option).restoreCanvas();
+			}
+		}
+		var h = 0;
+		for(var l=0;l < meta_ele.properties.length;l++) {
+			var prop = null;
+			for(var j=0;j<obj.properties.length;j++) {
+				if(obj.properties[j].meta_id == meta_ele.properties[l]) {
+					prop = obj.properties[j];
+				}
+			}
+			if(prop != null) {
+				for(var k=0;k < prop.children.length;k++) {
+					var p = g_model.properties[prop.children[k]]
+					if(p.ve.ver_type == 'delete') continue;
+					self.canvas.drawText({
+						  fillStyle: "#000",
+						  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
+						  text: p.value,
+						  align: "center",
+						  baseline: "middle",
+						  font: "16px 'ＭＳ ゴシック'"
+						});
+					h++;
+				}
+				self.canvas.drawLine({
+					  strokeStyle: "#000",
+					  strokeWidth: 2,
+					  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
+					  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
+					});
+			}
 		}
 	}
+	for(var i=0;i < self.diagram.relationships.length;i++) {
+		var rel_id = self.diagram.relationships[i];
+		var rel = g_model.relationships[rel_id];
+		if(rel.ve.ver_type == 'delete') continue;
+		self.draw_relationship(rel);
+	}
+	if(self.tool != null) {
+		self.canvas.drawText({
+			  fillStyle: "#000",
+			  x: self.drag_move.x, y: self.drag_move.y,
+			  text: self.tool.name,
+			  align: "center",
+			  baseline: "middle",
+			  font: "16px 'ＭＳ ゴシック'"
+			});
+	}
+	if(self.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+		self.canvas.drawLine({
+			  strokeStyle: "#777",
+			  strokeWidth: 2,
+			  strokeCap: "round",
+			  strokeJoin: "miter",
+			  x1: self.drag_start.x, y1: self.drag_start.y,
+			  x2: self.drag_move.x, y2: self.drag_move.y
+			});
 
-	this.draw = draw;
+	}
 }
 
 DiagramEditor.prototype.getPanel = function() {
@@ -769,7 +747,13 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	var arrow_type = meta_ele.arrow_type;
 	if(arrow_type == 'v') {
 		var ah = new ArrowHead(ArrowHead.V);
-		ah.draw(this.canvas, start, end);
+		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
+	}else if(arrow_type == 'TRIANGLE'){
+		var ah = new ArrowHead(ArrowHead.TRIANGLE);
+		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
+	}else if(arrow_type == 'BLACK_TRIANGLE'){
+		var ah = new ArrowHead(ArrowHead.BLACK_TRIANGLE);
+		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
 	}else{
 		
 	}
