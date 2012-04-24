@@ -7,6 +7,7 @@ import sys
 import os
 import zipfile
 import json
+import md5
 import MySQLdb
 import config
 sys.path.append(config.CLOOCA_CGI)
@@ -42,12 +43,20 @@ def login_view():
     else:
         return render_template('login.html')
 
-@app.route('/member_reg/<gid>', methods=['GET'])
-def member_reg_view(gid):
+def hash(k):
+    return md5.new(str((k * 5 + 100001) % 34567)).hexdigest()
+
+@app.route('/member_reg/<gid>/<key>', methods=['GET'])
+def member_reg_view(gid,key):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    group = GroupService.getGroup(None, gid, connect)
+    connect.close()
+    if group == None or not key == hash(int(gid)):
+        return render_template('request_deny.html')
     if 'user' in session:
-        return render_template('member_join.html', group_id=gid)
+        return render_template('member_join.html', group_id=gid, group=group)
     else:
-        return render_template('member_reg.html', group_id=gid)
+        return render_template('member_reg.html', group_id=gid, group=group)
 
 @app.route('/reg', methods=['GET'])
 def reg_view():
@@ -112,7 +121,7 @@ def dashboard(id=None):
                                        metamodels = json.dumps(MetaModelService.loadMetaModelList(session['user'], id, connect)),
                                        group = GroupService.getGroup(session['user'], joinInfo['id'], connect),
                                        members = GroupService.getGroupMember(session['user'], joinInfo['id'], connect),
-                                       group_id = joinInfo['id'])
+                                       group_id = joinInfo['id'],hash_key = hash(joinInfo['id']))
     else:
         return redirect(url_for('login_view'))
     return render_template('request_deny.html')
@@ -122,11 +131,19 @@ def editorjs(pid=None):
     if 'user' in session:
         result = ProjectService.loadProject(session['user'], pid)
         if not result == None:
-            for joinInfo in session['user']['joinInfos']:
-                if joinInfo['id'] == result['group_id']:
-                    result['group'] = joinInfo
-                    #return json.dumps(result)
-                    return render_template('editorjs.html', pid = pid, project = json.dumps(result))
+            gid = int(result['group_id'])
+            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+            cur = connect.cursor()
+            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+            rows = cur.fetchall()
+            cur.close()
+            connect.close()
+            if not len(rows) == 0:
+                joinInfo = {}
+                joinInfo['id'] = int(rows[0][0])
+                joinInfo['role'] = int(rows[0][1])
+                result['group'] = joinInfo
+                return render_template('editorjs.html', pid = pid, project = json.dumps(result))
     else:
         return redirect(url_for('login_view'))
     return render_template('request_deny.html')
@@ -143,6 +160,14 @@ def join_group():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         result = GroupService.joinGroup(session['user'], request.form['group_id'], connect)
+        connect.close()
+        return json.dumps(result)
+
+@app.route('/update-role', methods=['POST'])
+def update_role():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.updateRole(session['user'], request.form['group_id'], request.form['user_id'], request.form['role'], connect)
         connect.close()
         return json.dumps(result)
 
@@ -186,12 +211,20 @@ def createm():
 
 @app.route('/createp', methods=['POST'])
 def createp():
-    if 'user' in session and 'joinInfos' in session['user']:
+    if 'user' in session:
         gid = int(request.form['group_id'])
-        for joinInfo in session['user']['joinInfos']:
-            if int(joinInfo['id']) == gid:
-                project = ProjectService.createProject(session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'], joinInfo)
-                return json.dumps(project)
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        cur = connect.cursor()
+        cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+        rows = cur.fetchall()
+        cur.close()
+        connect.close()
+        if not len(rows) == 0:
+            joinInfo = {}
+            joinInfo['id'] = int(id)
+            joinInfo['role'] = int(rows[0][1])
+            project = ProjectService.createProject(session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'], joinInfo)
+            return json.dumps(project)
     return 'false'
 
 @app.route('/deletep', methods=['POST'])
@@ -300,7 +333,7 @@ def download(pid):
 def update_group():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'], request.form['detail'], request.form['visibillity'], connect)
+        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
         connect.close()
         return json.dumps(result)
 

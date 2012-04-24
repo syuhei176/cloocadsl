@@ -34,7 +34,8 @@ function init() {
 	    $.post( url, { username: username, password: password, group_id: {{group_id}}},
 	      function( data ) {
 //	    	window.alert(data);
-    		$( "#register_dialog" ).dialog('close');
+//    		$( "#register_dialog" ).dialog('close');
+    		$('#message').empty().append('<a href="/mygroups">マイグループへ</a>');
 	      }, "json");
 	  });
 	register();
@@ -61,6 +62,8 @@ function register() {
 
 <!-- 登録　ダイアログ -->
 <div id="register_dialog" title="register dialog" style="display : none;">
+<p>{{group['name']}}に登録</p>
+<div id="message"> </div>
 <form id="register-form" action="/free-register">
 <div>ユーザ名：　<input type="text" name="username"></div>
 <div>パスワード：<input type="password" name="password"></div>
@@ -97,13 +100,15 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="/index">Home</a></li>
+            <li><a href="/index">ホーム</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/service.html">Service</a></li>
+            <li><a href="/mygroups">マイグループ</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/document.html">Document</a></li>
+            <li><a href="/groups">公開コミュニティ</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/contact.html">Contact</a></li>
+            <li><a href="/account">アカウント</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/document">ドキュメント</a></li>
           </ul>
           <p id="login" class="navbar-text pull-right"></p>
         </div><!-- /.nav-collapse -->

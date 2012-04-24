@@ -127,9 +127,10 @@ function init() {
 function load_models() {
 	var mymetamodels = {{ mymetamodel|safe }};
 	var myprojects = {{ myproject|safe }};
-	create_mymetamodels_table({{ mymetamodel|safe }});
-	create_metamodels_table( {{ metamodels|safe }} );
-	create_projects_table(myprojects, mymetamodels);
+	var metamodels = {{ metamodels|safe }};
+	create_mymetamodels_table(mymetamodels);
+	create_metamodels_table(metamodels);
+	create_projects_table(myprojects, metamodels);
 }
 
 function create_projects_table(projects, metamodels) {

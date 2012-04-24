@@ -122,6 +122,26 @@ function init() {
 	    	}
 	      }, "json");
 	  });
+	$("#update-role-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	    	group_id = $form.find( 'input[name="group_id"]' ).val(),
+	    	user_id = $form.find( 'input[name="user_id"]' ).val(),
+	        role = $form.find( 'input[name="role"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, {  group_id: {{group_id}}, user_id: user_id, role: role},
+	      function( data ) {
+	    	if(data != null) {
+	    		
+	    	}
+	      }, "json");
+	  });
 }
 
 function load_models() {
@@ -372,6 +392,23 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
 	<div id="userlist">
 	{% for member in members %}
 	<p>{{ member['uname'] }}</p>
+		<form id="update-role-form{{ member['id'] }}" method="POST" action="/update-role">
+		<input type="hidden" name="user_id" value="{{ member['id'] }}">
+		<input type="hidden" name="group_id" value="{{ group['id'] }}">
+		<div>権限：<select name="role">
+		{% if member['group_role'] == 0 %}
+		<option value="0" selected=true>通常</option>
+		<option value="1">管理者</option>
+		{% elif member['group_role'] == 1 %}
+		<option value="0">通常</option>
+		<option value="1" selected=true>管理者</option>
+		{% else %}
+		<option value="0">通常</option>
+		<option value="1" selected=true>管理者</option>
+		{% endif %}
+		</select></div>
+		<input type="submit" value="変更">
+		</form>
 	{% endfor %}
 	</div>
 	</div>
@@ -381,7 +418,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <div class="span4">
               <h2>グループメンバの参加について</h2>
               <p>下記のURLから参加してもらってください。</p>
-              <p><a href="http://dsl.clooca.com/member_reg/{{ group_id }}">メンバ登録URL</a><br>http://dsl.clooca.com/member_reg/{{ group_id }}</p>
+              <p><a href="http://dsl.clooca.com/member_reg/{{ group_id }}/{{hash_key}}">メンバ登録URL</a><br>http://dsl.clooca.com/member_reg/{{ group_id }}/{{hash_key}}</p>
             </div><!--/span-->
           </div><!--/row-->
       </div><!--/row-->

@@ -26,7 +26,12 @@ function init() {
 	    /* Send the data using post and put the results in a div */
 	    $.post( url, { group_id: {{group_id}} },
 	      function( data ) {
-    		$( "#register_dialog" ).dialog('close');
+	    	if(data){
+//	    		$( "#register_dialog" ).dialog('close');
+	    		$('#message').empty().append('参加しました。<a href="/mygroups">マイグループへ</a>');
+	    	}else{
+	    		$('#message').empty().append('既に参加しています。');
+	    	}
 	      }, "json");
 	  });
 	register();
@@ -52,9 +57,12 @@ function register() {
     </noscript>
 
 <!-- 登録　ダイアログ -->
-<div id="register_dialog" title="register dialog" style="display : none;">
+<div id="register_dialog" title="グループへの参加" style="display : none;">
+<p>{{group['name']}}に参加しますか？</p>
+<p>{{group['name']}}の詳細：{{group['detail']}}</p>
+<div id="message"> </div>
 <form id="register-form" action="/join-group">
-<input type="submit" value="登録">
+<input type="submit" value="参加">
 </form>
 </div>
 
@@ -86,13 +94,15 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <a class="brand" href="/">clooca DSL</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="active"><a href="/index">Home</a></li>
+            <li><a href="/index">ホーム</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/service.html">Service</a></li>
+            <li><a href="/mygroups">マイグループ</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/document.html">Document</a></li>
+            <li><a href="/groups">公開コミュニティ</a></li>
             <li class="divider-vertical"></li>
-            <li><a href="/contact.html">Contact</a></li>
+            <li><a href="/account">アカウント</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/document">ドキュメント</a></li>
           </ul>
           <p id="login" class="navbar-text pull-right"></p>
         </div><!-- /.nav-collapse -->

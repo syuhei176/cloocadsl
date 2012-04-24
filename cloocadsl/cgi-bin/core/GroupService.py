@@ -42,7 +42,7 @@ def getMyGroups(user, connect):
         service = has_rows[i][5]
         joinInfo = {}
         joinInfo['id'] = group_id
-        joinInfo['name'] = name
+        joinInfo['name'] = name.decode('utf-8')
         joinInfo['role'] = role
         joinInfo['service'] = service
         joinInfos.append(joinInfo)
@@ -50,9 +50,24 @@ def getMyGroups(user, connect):
 
 def joinGroup(user, group_id, connect):
     cur = connect.cursor()
+    cur.execute('SELECT * FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (user['id'], group_id, ))
+    rows = cur.fetchall()
+    if not len(rows) == 0:
+        cur.close()
+        return False
     cur.execute('INSERT INTO JoinInfo (user_id,group_id,role) VALUES(%s,%s,%s);',(user['id'], group_id, 0, ))
     connect.commit()
     cur.close()
+    return True
+
+def updateRole(user, group_id, user_id, role, connect):
+    cur = connect.cursor()
+    affect_row_count = cur.execute('UPDATE JoinInfo SET role=%s WHERE user_id=%s AND group_id=%s;', (role, user_id, group_id, ))
+    connect.commit()
+    cur.close()
+    if affect_row_count == 0:
+        return False
+    return True
     
 def createGroup(user, group_name, connect):
     if len(group_name.encode('utf_8')) >= 255:
@@ -69,26 +84,25 @@ def getGroup(user, group_id, connect):
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
-        connect.close()
         return None
-    user = {}
-    user['id'] = int(rows[0][0])
-    user['name'] = rows[0][1]
-    user['detail'] = rows[0][2]
-    user['visibillity'] = int(rows[0][3])
-    user['service'] = rows[0][4]
+    group = {}
+    group['id'] = int(rows[0][0])
+    group['name'] = rows[0][1].decode('utf-8')
+    group['detail'] = rows[0][2].decode('utf-8')
+    group['visibillity'] = int(rows[0][3])
+    group['service'] = rows[0][4]
     cur.close()
-    return user    
+    return group    
 
 def updateGroup(user, group_id, name, detail, visibillity, connect):
-    if len(name.encode('utf_8')) >= 255:
+    if len(name) >= 255:
         return False
     cur = connect.cursor()
     cur.execute('SELECT * FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (user['id'], group_id, ))
     rows = cur.fetchall()
     if not len(rows) == 0:
         cur = connect.cursor()
-        affect_row_count = cur.execute('UPDATE GroupInfo SET name=%s, detail=%s, visibillity=%s WHERE id = %s;',(name.encode('utf_8'), detail.encode('utf_8'), visibillity, group_id, ))
+        affect_row_count = cur.execute('UPDATE GroupInfo SET name=%s, detail=%s, visibillity=%s WHERE id = %s;',(name, detail, visibillity, group_id, ))
         connect.commit()
         cur.close()
         return True

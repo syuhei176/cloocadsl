@@ -248,15 +248,14 @@ def parseRelationshipJSON(rel):
 
 
 def parsePropertyListJSON(plist, parent_id):
-    cur = connect.cursor()
-    children_edited = False
+#    cur = connect.cursor()
     meta_id = plist['meta_id']
     ret = []
     for prop_id in plist['children']:
-        cur.execute('INSERT INTO has_property (parent_id,property_id,model_id,version) VALUES(%s,%s,%s,%s);', (parent_id,prop_id,model_id,next_version))
-        connect.commit()
+#        cur.execute('INSERT INTO has_property (parent_id,property_id,model_id,version) VALUES(%s,%s,%s,%s);', (parent_id,prop_id,model_id,next_version))
+#        connect.commit()
         ret.append(prop_id)
-    cur.close()
+#    cur.close()
     return ret
 
 def parsePropertyJSON(prop):

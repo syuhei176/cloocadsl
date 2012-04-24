@@ -64,7 +64,7 @@ def update_to_version(user, pid, version):
     cur.close()
 #    connect.close()
     newModel = UpdateServiceJSON.LoadRevision(rep_id, version)
-    model_json = json.dumps(merge(oldModel, newModel))
+    model_json = json.dumps(merge(newModel, oldModel))
 #    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id=%s;', (model_json, pid))
@@ -176,7 +176,7 @@ def merge_object(object1, object2):
             merge_plist(plist, plist2, object1)
         else:
             object1['properties'].append(plist2)
-            object1['ve']['ver_type'] = 'update'
+#            object1['ve']['ver_type'] = 'update'
 
 def merge_relationship(object1, object2):
     for plist2 in object2['properties']:

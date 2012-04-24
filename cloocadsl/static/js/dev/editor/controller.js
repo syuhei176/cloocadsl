@@ -74,10 +74,20 @@ function readModel(xml) {
  * @param pid
  */
 function commit() {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Commit',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/mvcs/commit', { pid : g_projectinfo.id },
 			function(data) {
 				if(data) {
 					console.log('commit state = '+data);
+					Ext.MessageBox.hide();
+					if(data == 1) {
+						Ext.MessageBox.alert("コミットステート","成功");
+						update();
+					}else if(data == 2) {
+						Ext.MessageBox.alert("コミットステート","変更がありません。");
+					}else if(data == 3) {
+						Ext.MessageBox.alert("コミットステート","最新バージョンに更新してください。");
+					}
 				}
 			}, "json");
 }
@@ -87,14 +97,15 @@ function commit() {
  * @param pid
  */
 function update() {
+	Ext.MessageBox.show({title: 'Please wait',msg: 'Update',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/mvcs/update', { pid : g_projectinfo.id },
 			function(data) {
 				if(data) {
 					console.log('loaded json string = '+data);
 					g_projectinfo.xml = data;
 					readModel(data);
-//					g_model = JSON.parse(data);
 					createModelExplorer();
+					Ext.MessageBox.hide();
 				}
 			}, "json");
 }

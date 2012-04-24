@@ -60,7 +60,7 @@ function MetaModelEditor(metaobjects) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'update',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!')
+	  	  	  	     	    	alert('You clicked the button!');
 	  	  	  	     	    }
 
   	  	  	           },
