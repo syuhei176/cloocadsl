@@ -104,13 +104,13 @@ function loadModel(pid) {
  * @param pid
  */
 function loadMetaModel(id) {
+	alert('aaaaaaaaaaaaaaaa');
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/mload', { id : id },
 			function(data) {
 				if(data) {
+					g_metamodelinfo = data;
 					console.log('loaded json string = '+data.xml);
-//					g_metamodel = eval('(' + data.xml + ')');
-//					console.log(data.xml);
 					if(data.xml == ' ' || data.xml == null || data.xml.length == 0) {
 						g_metamodel = new MetaModel();
 					}else{

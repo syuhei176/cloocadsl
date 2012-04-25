@@ -93,6 +93,9 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <div class="span9">
           <div class="hero-unit">
             <h1>準備中</h1>
+            {% for g in groups %}
+            <a href="{{ g['url'] }}">{{ g['name'] }}</a>
+            {% endfor %}
           </div>
       </div><!--/row-->
 

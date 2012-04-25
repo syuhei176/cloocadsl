@@ -8,13 +8,7 @@ function EditorTabPanel() {
             bodyPadding: 6,
             closable: 'true',
         },
-	    items: [
-	        {
-	            title: 'Welcome',
-	            html : 'Welcome to the clooca DSL.<br><br>test',
-	            closable: 'true'
-	        }
-	        ],
+	    items: [],
 	});
 }
 

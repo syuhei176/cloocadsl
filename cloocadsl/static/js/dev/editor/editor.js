@@ -71,6 +71,7 @@ function init_clooca(pid, project) {
 
 function create_tabs() {
 	editortabpanel = new EditorTabPanel();
+	editortabpanel.add(new WelcomeMessageView(), 'welcome');
 	return editortabpanel.getPanel();
 }
 

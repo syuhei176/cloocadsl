@@ -78,10 +78,14 @@ def mygroups(type='js'):
 @app.route('/groups')
 def groups():
     if 'user' in session and 'joinInfos' in session['user']:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.getComunity(session['user'], connect)
+        connect.close()
+        for g in result:
+            g['url'] = 'http://dsl.clooca.com/member_reg/'+str(g['id'])+'/'+str(hash(g['id']))
         return render_template('groups.html',
                                username = session['user']['uname'],
-                               joinInfos = session['user']['joinInfos']
-                               )
+                               groups = result)
     return redirect(url_for('login_view'))
 
 @app.route('/account')
@@ -287,7 +291,8 @@ def metamodel_save():
                                                    request.form['id'],
                                                    request.form['name'],
                                                    request.form['xml'],
-                                                   request.form['visibillity']))
+                                                   request.form['visibillity'],
+                                                   request.form['welcome_message']))
     if 'name' in request.form:
         pass
     if 'xml' in request.form:
@@ -381,6 +386,23 @@ def temp_save():
         result = TemplateService.save(request.form['id'], request.form['fname'], request.form['content'], connect)
         connect.close()
         return json.dumps(result)
+
+
+@app.route('/wb/import', methods=['POST'])
+def wb_import():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.Import(request.form['id'], request.form['text'], connect)
+        connect.close()
+        return json.dumps(result)
+
+@app.route('/wb/export/<id>', methods=['GET'])
+def wb_export(id):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.Export(id, connect)
+        connect.close()
+        return result
 
 @app.route('/template/import', methods=['POST'])
 def temp_import():

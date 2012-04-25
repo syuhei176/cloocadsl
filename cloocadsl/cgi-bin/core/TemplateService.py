@@ -8,15 +8,21 @@ import config
 
 def create(metamodel_id, name, connect):
     cur = connect.cursor()
+    cur.execute('SELECT name,content FROM Template WHERE metamodel_id=%s AND path=%s',(metamodel_id, name, ))
+    rows = cur.fetchall()
+    if not len(rows) == 0:
+        return False
     cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(name, name, '', metamodel_id, ))
     connect.commit()
     cur.close()
+    return True
 
 def delete(metamodel_id, name, connect):
     cur = connect.cursor()
     cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(name, name, content, metamodel_id, ))
     connect.commit()
     cur.close()
+    return True
 
 def save(metamodel_id, name, content, connect):
     cur = connect.cursor()

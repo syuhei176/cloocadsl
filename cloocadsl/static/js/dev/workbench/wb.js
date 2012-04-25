@@ -128,6 +128,11 @@ function create_menu() {
                 	   text: 'メタモデル',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
+                   },{
+                	   id: 'welcome_editor',
+                	   text: 'ウェルカムメッセージ',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
                    }
                    ]
         },{
@@ -220,6 +225,9 @@ function onItemClick(item){
 	}else if(item.id == 'metajson') {
 		var editor = new MetaJSONEditor(g_metamodel.metadiagrams);
 		editortabpanel.add(editor, 'metajson');
+	}else if(item.id == 'welcome_editor') {
+		var editor = new WellcomeMessageEditor();
+		editortabpanel.add(editor, 'welcome_editor');
 	}else{
 		
 	}
@@ -259,7 +267,7 @@ function import_template(text) {
 	$.post('/template/import', { id : g_metamodel_id, text: text},
 			function(data) {
 				if(data) {
-					
+					load_templates();
 				}
 			}, "json");
 }

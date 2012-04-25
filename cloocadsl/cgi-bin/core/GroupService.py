@@ -148,3 +148,22 @@ def getGroupMember(user, group_id, connect):
         member['group_role'] = group_role
         members.append(member)
     return members
+
+def getComunity(user, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT id,name,detail,visibillity,service FROM GroupInfo WHERE visibillity = 1;')
+    rows = cur.fetchall()
+    cur.close()
+    groups = []
+    for i in range(len(rows)):
+        group_id = int(rows[i][0])
+        name = rows[i][1]
+        detail = rows[i][2]
+        visibillity = int(rows[i][3])
+        group = {}
+        group['id'] = group_id
+        group['name'] = name.decode('utf-8')
+        group['detail'] = detail.decode('utf-8')
+        group['visibillity'] = visibillity
+        groups.append(group)
+    return groups

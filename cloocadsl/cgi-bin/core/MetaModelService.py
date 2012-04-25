@@ -14,7 +14,7 @@ reg_username = re.compile('\w+')
 connect = None
 g_model_id = None
 
-def saveAll(user, pid, name, xml, visibillity):
+def saveAll(user, pid, name, xml, visibillity, welcome_message):
     if len(name.encode('utf_8')) >= 255:
         return False
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -25,7 +25,7 @@ def saveAll(user, pid, name, xml, visibillity):
     if len(has_rows) == 0:
         return None
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE MetaModelInfo SET name=%s,xml=%s,visibillity=%s WHERE id = %s;',(name.encode('utf_8'), xml.encode('utf_8'), visibillity, pid, ))
+    affect_row_count = cur.execute('UPDATE MetaModelInfo SET name=%s,xml=%s,visibillity=%s,welcome_message=%s WHERE id = %s;',(name.encode('utf_8'), xml.encode('utf_8'), visibillity, welcome_message.encode('utf_8'), pid, ))
     connect.commit()
     cur.close()
     connect.close()
@@ -63,6 +63,13 @@ def saveTempConfig(user, pid, tc):
 
 def loadMetaModel(user, pid, check=True):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    if check:
+        cur = connect.cursor()
+        cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
+        has_rows = cur.fetchall()
+        cur.close()
+        if len(has_rows) == 0:
+            return None
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml,template,visibillity,welcome_message,group_id FROM MetaModelInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
@@ -75,17 +82,6 @@ def loadMetaModel(user, pid, check=True):
     project['visibillity'] = int(rows[0][4])
     project['welcome_message'] = rows[0][5]
     project['group_id'] = int(rows[0][6])
-    if check:
-        if project['visibillity'] < 2:
-            cur = connect.cursor()
-            cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
-            has_rows = cur.fetchall()
-            cur.close()
-            if len(has_rows) == 0:
-                return None
-        else:
-            if not GroupService.checkJoin(user, project['group_id'], connect):
-                return None
     connect.close()
     return project
 

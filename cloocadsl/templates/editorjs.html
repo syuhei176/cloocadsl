@@ -20,22 +20,8 @@
     <script src="/static/js/jcanvas.min.js"></script>
     <script src="/static/js/ext-all.js"></script>
     <script src="/static/js/json2.js"></script>
-    <script src="/static/js/dev/core/math2d.js"></script>
-    <script src="/static/js/dev/core/controller.js"></script>
-    <script src="/static/js/dev/core/arrowhead.js"></script>
-    <script src="/static/js/dev/core/DiagramController.js"></script>
-    <script src="/static/js/dev/core/DiagramEditor.js"></script>
-    <script src="/static/js/dev/core/metamodel.js"></script>
-    <script src="/static/js/dev/core/model.js"></script>
-    <script src="/static/js/dev/core/EditorTabPanel.js"></script>
-    <script src="/static/js/dev/editor/controller.js"></script>
-    <script src="/static/js/dev/editor/editor.js"></script>
-    <script src="/static/js/dev/editor/view.js"></script>
+    <script src="/static/js/editor.clooca.js"></script>
     <div id="script-div"></div>
-    <!-- 
-    <script src="/static/js/core.js"></script>
-    <script src="/static/js/editor.js"></script>
-     -->
 
     <!--                                           -->
     <!-- Any title is fine                         -->
@@ -48,21 +34,13 @@
     <!-- be added before this line.                -->
     <!--                                           -->
     
-    <!-- <script type="text/javascript" language="javascript" src="/static/testeditor/testeditor.nocache.js"></script> -->
     <script>
     <!--
     var editor_tabs = null;
     var g_model = null;
+    
     function init() {
-    	/*
-    	var fs = ['core.js','editor.js'];
-    	for(var i=0;i < fs.length;i++) {
-        	var script = document.createElement( 'script' );
-        	script.type = 'text/javascript';
-        	script.src = "/static/js/"+fs[i];
-        	$("#script-div").append( script );
-    	}
-    	*/
+    	initall();
     	init_clooca({{pid}}, {{project|safe}});
     }
     -->

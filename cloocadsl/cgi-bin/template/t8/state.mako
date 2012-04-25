@@ -1,6 +1,4 @@
-//Root Diagram
-//${root.id}
-
+#include"${root.id}"
 
 c_${root.id}::c_${root.id}() {
   current_state = 0;
@@ -14,14 +12,15 @@ c_${root.id}::~c_${root.id}() {
 <%
 
 state_no = {}
-cnt = 0
+cnt = 1
+state_no[str(root.start[0].id)] = 0
 for i in root.state:
 	state_no[str(i.id)] = cnt
 	cnt = cnt + 1
 endfor
 
 
-matrix = ['STATE_IGNORE'] * len(root.state) * 4
+matrix = ['STATE_IGNORE'] * (len(root.state) + 1) * 4
 for i in root.transition:
 	if i.event[0].value == 'none':
 		event_no = 0
@@ -48,8 +47,7 @@ c${root.id}_${matrix[i]},
 
 int c_${root.id}::execute(int event) {
 	int next_state = matrix_${root.id}[current_state * 4 + event];
-	print("ns="+next_state);
-    if(next_state == -1) return;
+    if(next_state == -1) return 0;
     current_state = next_state;
 	switch(current_state) {
 % for i in root.state:
@@ -58,4 +56,5 @@ int c_${root.id}::execute(int event) {
 	break;
 % endfor
 	}
+	return 0;
 }

@@ -64,7 +64,13 @@ def deploy():
     scp.readline()
     print scp.readline()
     
-    cd(scp, 'static/js')
+    cd(scp, 'templates')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.html')
+    scp.readline()
+    print scp.readline()
+    
+    cd(scp, '../static/js')
     
     send(scp, 'core.js')
     send(scp, 'editor.js')

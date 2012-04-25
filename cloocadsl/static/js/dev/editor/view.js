@@ -119,3 +119,27 @@ ProjectInfoViewer.prototype.Initialize = function() {
 ProjectInfoViewer.prototype.onActivate = function() {
 	
 }
+
+function WelcomeMessageView() {
+	var html = g_projectinfo.metamodel.welcome_message;
+	this.panel = Ext.create('Ext.panel.Panel',
+			{
+			  	   title: 'ウェルカム',
+			  	   html: html,
+			  	   closable: 'true'
+			}
+	);
+
+}
+
+WelcomeMessageView.prototype.getPanel = function() {
+	return this.panel;
+}
+
+WelcomeMessageView.prototype.Initialize = function() {
+	
+}
+
+WelcomeMessageView.prototype.onActivate = function() {
+	
+}

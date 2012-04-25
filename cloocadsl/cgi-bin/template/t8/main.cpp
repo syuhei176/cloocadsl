@@ -146,7 +146,7 @@ int sonacnt;
 void TaskMain(VP_INT exinf)
 {
   lcd.clear();
-	StateMachine *stm = new t1_2();
+	StateMachine *stm = new STATE_CLASS();
 	eventManager.addSTM(stm);
 
 	sonacnt = 0;

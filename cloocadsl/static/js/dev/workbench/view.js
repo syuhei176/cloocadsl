@@ -546,3 +546,55 @@ TemplateEditor.prototype.onActivate = function() {
 	current_editor = this;
 	current_resource = this.resource;
 }
+
+function WellcomeMessageEditor() {
+	this.resource = g_metaproject.welcome_message;
+	var self = this;
+	var editor = Ext.create('Ext.panel.Panel',
+		{
+		  	   title: 'JSONEditor',
+		  	   layout: {
+		  		   type: 'hbox',
+		  		   align: 'center'
+		  	   },
+		  	   items: [
+		  	           {
+		  	        	   xtype: 'textarea',
+		  	        	   autoScroll: true,
+	  	        		   width: Ext.getCmp('centerpanel').getWidth(),
+	  	        		   height: Ext.getCmp('centerpanel').getHeight(),
+		  	        		   value: g_metaproject.welcome_message,
+		  	        		   listeners: {
+		  	        			   change: {
+		  	        				   fn: function(field, newValue, oldValue, opt) {
+		  	        					 g_metaproject.welcome_message = newValue;
+		  	        						editor.setTitle('JSONEditor*')
+		  	        				   }
+		  	        			   }
+		  	        		   }
+		  	           }
+		  	           ],
+		  	 		closable: 'true'
+	});
+	this.editor = editor;
+}
+
+WellcomeMessageEditor.prototype.save = function() {
+	var self = this;
+	saveAll(g_metamodel_id, function(data){
+		if(data) {
+			self.editor.setTitle('JSONEditor');
+		}
+	});
+}
+
+WellcomeMessageEditor.prototype.getPanel = function() {
+	return this.editor;
+}
+
+WellcomeMessageEditor.prototype.Initialize = function() {
+}
+
+WellcomeMessageEditor.prototype.onActivate = function() {
+	current_editor = this;
+}
