@@ -7,7 +7,7 @@ function download(pid) {
 }
 
 function genbin(pid) {
-	$.post('/compile_server/reserve', { pid : pid ,pname:g_projectname},
+	$.post('/compile_server/reserve', { pid : pid ,pname:g_projectinfo.name},
 			function(data) {
 				if(data) {
 					console.log('url='+data);

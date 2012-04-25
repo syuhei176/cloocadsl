@@ -31,6 +31,7 @@
     <script src="/static/js/dev/editor/controller.js"></script>
     <script src="/static/js/dev/editor/editor.js"></script>
     <script src="/static/js/dev/editor/view.js"></script>
+    <div id="script-div"></div>
     <!-- 
     <script src="/static/js/core.js"></script>
     <script src="/static/js/editor.js"></script>
@@ -53,6 +54,15 @@
     var editor_tabs = null;
     var g_model = null;
     function init() {
+    	/*
+    	var fs = ['core.js','editor.js'];
+    	for(var i=0;i < fs.length;i++) {
+        	var script = document.createElement( 'script' );
+        	script.type = 'text/javascript';
+        	script.src = "/static/js/"+fs[i];
+        	$("#script-div").append( script );
+    	}
+    	*/
     	init_clooca({{pid}}, {{project|safe}});
     }
     -->

@@ -12,7 +12,8 @@ import config
 import codecs
 from ProjectService import *
 from MetaModelService import *
-from string import Template
+import TemplateService
+from string import Template as stringTemplate
 
 def CreateClass():
     class klass: pass
@@ -32,10 +33,16 @@ class BaseGenerator(object):
         self.userpath = None
         self.projectpath = None
         self.model = None
+        self.templates = {}
     
     def GenerateCode(self, user, pid):
         project = loadProject(user, pid)
-        metamodel = loadMetaModel(user, project['metamodel_id'])
+        metamodel = loadMetaModel(user, project['metamodel_id'], check=False)
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        files = TemplateService.tree(project['metamodel_id'], connect)
+        connect.close()
+        for f in files:
+            self.templates[f['name']] = f['content']
         self.input = self.input + '/t' + str(metamodel['id'])
         self.userpath = self.outpath + '/' + user['uname']
         self.projectpath = self.userpath + '/p' + str(project['id'])
@@ -76,7 +83,7 @@ class BaseGenerator(object):
         dname = elem.get('diagram')
         for key in self.model.diagrams:
             if str(self.model.diagrams[key].meta_id) == str(dname):
-                template = Template(dest)
+                template = stringTemplate(dest)
                 d = {'id': self.model.diagrams[key].id}
                 self.FileGenByDiagram(src, template.substitute(d), self.model.diagrams[key])
     
@@ -86,24 +93,26 @@ class BaseGenerator(object):
         shutil.copy(self.input + '/' + src, self.projectpath + '/' + dest)
     
     def FileGen(self, src, dest):
-        try:
-            mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
-            tmpl = mylookup.get_template(src)
-            buf = StringIO()
-            model = self.model
-            ctx = Context(buf, root = model)
-            tmpl.render_context(ctx)
-            hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
-            hf.write(buf.getvalue())
-            hf.close()
-        except Exception as e:
-            global message
-            message += e.message
+#        try:
+#            mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
+#            tmpl = mylookup.get_template(src)
+        tmpl = Template(u''+self.templates[src])
+        buf = StringIO()
+        model = self.model
+        ctx = Context(buf, root = model)
+        tmpl.render_context(ctx)
+        hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
+        hf.write(buf.getvalue())
+        hf.close()
+#        except Exception as e:
+#            global message
+#            message += e.message
     
     def FileGenByDiagram(self, src, dest, diagram):
         try:
-            mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
-            tmpl = mylookup.get_template(src)
+#            mylookup = TemplateLookup(directories=[self.input], output_encoding="utf-8", input_encoding="utf-8", encoding_errors='replace')
+#           tmpl = mylookup.get_template(src)
+            tmpl = Template(self.templates[src])
             buf = StringIO()
             model = diagram
             ctx = Context(buf, root = model)

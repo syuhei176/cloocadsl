@@ -10,6 +10,15 @@ sys.path.append('../')
 import config
 
 
+def checkJoin(user, group_id, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM JoinInfo WHERE user_id=%s AND group_id=%s',(user['id'], group_id, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return False
+    return True
+
 def checkUserJoinGroup(user, connect):
     cur = connect.cursor()
     cur.execute('SELECT GroupInfo.id AS id1, JoinInfo.group_id AS id2,name,user_id,role,service FROM GroupInfo INNER JOIN JoinInfo ON GroupInfo.id = JoinInfo.group_id AND JoinInfo.user_id=%s;',(user['id'], ))

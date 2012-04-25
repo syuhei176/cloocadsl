@@ -16,10 +16,18 @@ DiagramController.prototype.deleteObject = function(id) {
 		g_model.objects[id].ve.ver_type = 'delete';
 		VersionElement.update(this.diagram.ve);
 	}
+	/**
+	 * delete relationships
+	 */
+	var remove_rels = [];
 	for(var i=0;i < this.diagram.relationships.length;i++) {
-		if(g_model.relationships[this.diagram.relationships[i]].src == id || g_model.relationships[this.diagram.relationships[i]].dest == id) {
-			this.deleteRelationship(this.diagram.relationships[i]);
+		var rel_id = this.diagram.relationships[i];
+		if(g_model.relationships[rel_id].src == id || g_model.relationships[rel_id].dest == id) {
+			remove_rels.push(rel_id);
 		}
+	}
+	for(var i=0;i < remove_rels.length;i++) {
+		this.deleteRelationship(remove_rels[i]);
 	}
 }
 

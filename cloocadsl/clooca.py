@@ -17,6 +17,7 @@ from core import ProjectService
 from core import ModelCompiler
 from core import FileService
 from core import GroupService
+from core import TemplateService
 from mvcs import CommitService
 from mvcs import UpdateServiceJSON
 from mvcs import RepositoryService
@@ -117,6 +118,7 @@ def dashboard(id=None):
                                        loggedin = True,
                                        username = session['user']['uname'],
                                        mymetamodel = json.dumps(MetaModelService.loadMyMetaModelList(session['user'], id, connect)),
+                                       groupmetamodel = json.dumps(MetaModelService.loadGroupMetaModelList(session['user'], id, connect)),
                                        myproject = json.dumps(ProjectService.loadMyProjectList(session['user'], id, connect)),
                                        metamodels = json.dumps(MetaModelService.loadMetaModelList(session['user'], id, connect)),
                                        group = GroupService.getGroup(session['user'], joinInfo['id'], connect),
@@ -269,7 +271,7 @@ def psave():
 
 @app.route('/mload', methods=['POST'])
 def mload():
-    project = MetaModelService.loadMetaModel(session['user'], request.form['id'])
+    project = MetaModelService.loadMetaModel(session['user'], request.form['id'],check=True)
     return json.dumps(project)
 
 
@@ -358,20 +360,43 @@ template
 @app.route('/template/tree', methods=['POST'])
 def temp_tree():
     if 'user' in session:
-        result = FileService.GetFileTree(session['user'], request.form['id'])
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.tree(request.form['id'], connect)
+        connect.close()
+#        result = FileService.GetFileTree(session['user'], request.form['id'])
         return json.dumps(result)
 
 @app.route('/template/new', methods=['POST'])
 def temp_new():
     if 'user' in session:
-        result = FileService.CreateNewFile(session['user'], request.form['id'], request.form['fname'])
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.create(request.form['id'], request.form['fname'], connect)
+        connect.close()
         return json.dumps(result)
 
 @app.route('/template/save', methods=['POST'])
 def temp_save():
     if 'user' in session:
-        result = FileService.SaveFile(session['user'], request.form['id'], request.form['fname'], request.form['content'])
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.save(request.form['id'], request.form['fname'], request.form['content'], connect)
+        connect.close()
         return json.dumps(result)
+
+@app.route('/template/import', methods=['POST'])
+def temp_import():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.Import(request.form['id'], request.form['text'], connect)
+        connect.close()
+        return json.dumps(result)
+
+@app.route('/template/export/<id>', methods=['GET'])
+def temp_export(id):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.Export(id, connect)
+        connect.close()
+        return result
 
 '''
 mvcs

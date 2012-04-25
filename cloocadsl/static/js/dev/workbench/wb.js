@@ -104,6 +104,11 @@ function create_menu() {
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
+                	   id: 'MetaDiagram',
+                	   text: 'メタダイアグラム',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
                 	   id: 'MetaObj',
                 	   text: 'メタオブジェクト',
                 	   iconCls: 'add16',
@@ -123,11 +128,6 @@ function create_menu() {
                 	   text: 'メタモデル',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
-                   },{
-                	   id: 'tempconfig',
-                	   text: 'テンプレートコンフィグ',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
                    }
                    ]
         },{
@@ -137,6 +137,23 @@ function create_menu() {
                    {
                 	   id: 'new',
                 	   text: '新規作成',
+                	   iconCls: 'add16',
+                	   handler : onTempItemClick
+                   },
+                   {
+                	   id: 'import',
+                	   text: 'インポート',
+                	   iconCls: 'add16',
+                	   handler : onTempItemClick
+                   },
+                   {
+                	   id: 'export',
+                	   text: 'エクスポート',
+                	   iconCls: 'add16',
+                	   handler : onTempItemClick
+                   },{
+                	   id: 'tempconfig',
+                	   text: 'テンプレートコンフィグ',
                 	   iconCls: 'add16',
                 	   handler : onTempItemClick
                    }
@@ -149,6 +166,8 @@ function create_menu() {
                 fields: ['name', 'value'],
                 data : [{"name":"非公開", "value":0},
                     {"name":"公開", "value":1}]}),
+//                    {"name":"共有＆非公開", "value":2},
+//                    {"name":"共有＆公開", "value":3}]}),
             queryMode: 'local',
             displayField: 'name',
             valueField: 'value',
@@ -186,6 +205,9 @@ function onItemClick(item){
 		//if not exist
 		// create_project
 		//editorjs
+	}else if(item.id == 'MetaDiagram') {
+		var editor = new MetaDiagramsEditor(g_metamodel.metadiagrams);
+		editortabpanel.add(editor, 'metadiagrams');
 	}else if(item.id == 'MetaObj') {
 		var editor = new MetaObjectsEditor(g_metamodel.metaobjects);
 		editortabpanel.add(editor, 'metaobjects');
@@ -194,13 +216,10 @@ function onItemClick(item){
 		editortabpanel.add(editor, 'metarelations');
 	}else if(item.id == 'MetaProp') {
 		var editor = new MetaPropertyEditor(g_metamodel.metaproperties);
-		editortabpanel.add(editor, 'metarelations');
+		editortabpanel.add(editor, 'metaproperties');
 	}else if(item.id == 'metajson') {
 		var editor = new MetaJSONEditor(g_metamodel.metadiagrams);
 		editortabpanel.add(editor, 'metajson');
-	}else if(item.id == 'tempconfig') {
-		var editor = new TempConfigEditor();
-		editortabpanel.add(editor, 'tempconfig');
 	}else{
 		
 	}
@@ -212,10 +231,38 @@ function onTempItemClick(item){
 			 if(btn != 'cancel') {
 				 create_new_template(text);
 			 }
+		 },null,false);
+	}else if(item.id == 'import') {
+		 Ext.Msg.prompt('','',function(btn,text){
+			 if(btn != 'cancel') {
+					import_template(text);
+			 }
 		 },null,true);
+	}else if(item.id == 'export') {
+		window.open('/template/export/'+g_metamodel_id);
+	}else if(item.id == 'tempconfig') {
+		var editor = new TempConfigEditor();
+		editortabpanel.add(editor, 'tempconfig');
 	}
 }
 
+function export_template() {
+	$.post('/template/tree', { id : g_metamodel_id},
+			function(data) {
+				if(data) {
+					
+				}
+			}, "json");
+}
+
+function import_template(text) {
+	$.post('/template/import', { id : g_metamodel_id, text: text},
+			function(data) {
+				if(data) {
+					
+				}
+			}, "json");
+}
 
 /*
  * wb/controller

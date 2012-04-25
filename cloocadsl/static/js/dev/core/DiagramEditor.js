@@ -794,6 +794,7 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	if(rel == this.selected) {
 		col = '#00f';
 	}
+	if(rel.ve.ver_type == 'delete') return;
 	var src = ModelController.getObject(this.diagram, rel.src);
 	var dest = ModelController.getObject(this.diagram, rel.dest);
 	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
@@ -847,10 +848,19 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 			for(var k=0;k < prop.children.length;k++) {
 				var p = g_model.properties[prop.children[k]]
 				if(p.ve.ver_type == 'delete') continue;
+				var disp_text = p.value;
+				var meta_prop = g_metamodel.metaproperties[prop.meta_id];
+				if(meta_prop.widget == MetaProperty.FIXED_LIST) {
+					for(var index=0;index < meta_prop.exfield.length;index++) {
+						if(p.value == meta_prop.exfield[index].value) {
+							disp_text = meta_prop.exfield[index].disp;
+						}
+					}
+				}
 				this.canvas.drawText({
 					  fillStyle: "#000",
-					  x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 + h * 20,
-					  text: p.value,
+					  x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 + h * 20 + 10,
+					  text: disp_text,
 					  align: "center",baseline: "middle",font: "16px 'ＭＳ ゴシック'"
 					});
 				h++;

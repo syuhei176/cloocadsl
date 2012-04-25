@@ -1,3 +1,100 @@
+function MetaDiagramsEditor(metaobjects) {
+	var l_metaobjs = [];
+	for(var i=0;i < metaobjects.length;i++) {
+		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
+	}
+	Ext.create('Ext.data.Store', {
+	    storeId:'simpsonsStore',
+	    fields:['id', 'name', 'graphic'],
+	    data:{
+	    	'items':l_metaobjs
+	    },
+	    proxy: {
+	        type: 'memory',
+	        reader: {
+	            type: 'json',
+	            root: 'items'
+	        }
+	    }
+	});
+	
+	var grid = Ext.create('Ext.grid.Panel', {
+	    title: 'MetaDiagrams',
+	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
+	    columns: [
+	        { header: 'Id',  dataIndex: 'id' },
+	        { header: 'Name', dataIndex: 'name', flex: 1 },
+	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
+	    ],
+	    height: 200,
+	    width: 400,
+	    selModel : new Ext.selection.RowModel({
+        	singleSelect : true,
+        	listeners : {
+        		select : {
+        			fn : function(rmodel,record,index,options){
+        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+        					 if(btn != 'cancel') {
+        						 metaobjects[record.data.id] = JSON.parse(text);
+        					 }
+        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
+        			}
+        		}
+        	}
+        })
+	});
+	
+	this.panel = Ext.create('Ext.panel.Panel',
+		{
+			xtype: 'panel',
+		  	   title: 'MetaDiagrams',
+		  	   layout: {
+		  		   type: 'hbox',
+		  		   align: 'center'
+		  	   },
+		  	   items: [
+		  	           grid,
+  	  	  	           {
+  	  	  	        	   xtype: 'button',
+  	  	  	        	   text: 'add',
+	  	  	  	     	    handler: function() {
+	  	  	  	     	    	alert('You clicked the button!');
+	  	  	  	     	    	metaobjects.push(new MetaDiagram(metaobject_IdGenerator.getNewId(), ''));
+	  	  	  	     	    }
+  	  	  	           },
+  	  	  	           {
+  	  	  	        	   xtype: 'button',
+  	  	  	        	   text: 'delete',
+	  	  	  	     	    handler: function() {
+	  	  	  	     	    	alert('You clicked the button!');
+	  	  	  	     	    }
+  	  	  	           }
+		  	           ],
+		  	 		closable: 'true'
+	});
+	
+}
+
+MetaDiagramsEditor.prototype.save = function() {
+	var self = this;
+	saveMetaModel(g_metamodel_id, function(data){
+		if(data) {
+			self.panel.setTitle('JSONEditor');
+		}
+	});
+}
+
+MetaDiagramsEditor.prototype.getPanel = function() {
+	return this.panel;
+}
+
+MetaDiagramsEditor.prototype.Initialize = function() {
+}
+
+MetaDiagramsEditor.prototype.onActivate = function() {
+	current_editor = this;
+}
+
 function MetaObjectsEditor(metaobjects) {
 	var l_metaobjs = [];
 	for(var i=0;i < metaobjects.length;i++) {
@@ -79,7 +176,7 @@ MetaObjectsEditor.prototype.save = function() {
 	var self = this;
 	saveMetaModel(g_metamodel_id, function(data){
 		if(data) {
-			self.editor.setTitle('JSONEditor');
+			self.panel.setTitle('JSONEditor');
 		}
 	});
 }
@@ -176,7 +273,7 @@ MetaRelationsEditor.prototype.save = function() {
 	var self = this;
 	saveMetaModel(g_metamodel_id, function(data){
 		if(data) {
-			self.editor.setTitle('JSONEditor');
+			self.panel.setTitle('JSONEditor');
 		}
 	});
 }
@@ -273,7 +370,7 @@ MetaPropertyEditor.prototype.save = function() {
 	var self = this;
 	saveMetaModel(g_metamodel_id, function(data){
 		if(data) {
-			self.editor.setTitle('JSONEditor');
+			self.panel.setTitle('JSONEditor');
 		}
 	});
 }
