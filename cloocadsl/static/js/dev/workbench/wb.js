@@ -3,7 +3,8 @@ Ext.require([
     'Ext.toolbar.*',
     'Ext.button.*',
     'Ext.container.ButtonGroup',
-    'Ext.layout.container.Table'
+    'Ext.layout.container.Table',
+    'Ext.tab.Panel'
 ]);
 
 var g_metamodel_id = 0;
@@ -78,11 +79,11 @@ function create_menu() {
 	return {
         tbar: [{
             xtype:'splitbutton',
-            text: 'Edit',
+            text: 'ファイル',
             iconCls: 'add16',
             menu: [
                    {
-                	   text: 'delete',
+                	   text: '未実装',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    }
@@ -99,17 +100,22 @@ function create_menu() {
             menu: [
                    {
                 	   id: 'preview',
-                	   text: 'プレビュー',
+                	   text: 'プレビュー（未実装）',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
                 	   id: 'MetaObj',
-                	   text: 'MetaObj',
+                	   text: 'メタオブジェクト',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
                 	   id: 'MetaRel',
-                	   text: 'MetaRel',
+                	   text: 'メタリレーションシップ',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
+                	   id: 'MetaProp',
+                	   text: 'メタプロパティ',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
@@ -177,10 +183,18 @@ function onItemClick(item){
 		g_model.diagrams[1] = new Diagram();
 		g_model.diagrams[1].meta_id = 1;
 		editor = new DiagramEditor('preview', 'preview'+new Date().getTime(), g_model.diagrams[1]);
-	}else if(item.text == 'MetaObj') {
-		MetaModelEditor(g_metamodel.metaobjects);
-	}else if(item.text == 'MetaRel') {
-		MetaRelationEditor(g_metamodel.metarelations);
+		//if not exist
+		// create_project
+		//editorjs
+	}else if(item.id == 'MetaObj') {
+		var editor = new MetaObjectsEditor(g_metamodel.metaobjects);
+		editortabpanel.add(editor, 'metaobjects');
+	}else if(item.id == 'MetaRel') {
+		var editor = new MetaRelationsEditor(g_metamodel.metarelations);
+		editortabpanel.add(editor, 'metarelations');
+	}else if(item.id == 'MetaProp') {
+		var editor = new MetaPropertyEditor(g_metamodel.metaproperties);
+		editortabpanel.add(editor, 'metarelations');
 	}else if(item.id == 'metajson') {
 		var editor = new MetaJSONEditor(g_metamodel.metadiagrams);
 		editortabpanel.add(editor, 'metajson');
@@ -254,7 +268,7 @@ function createTemplateExplorer() {
 	var modelExplorer = Ext.create('Ext.tree.Panel', {
 	    title: 'Template Explorer',
 	    width: 200,
-	    height: 150,
+	    height: 200,
 	    store: store,
 	    rootVisible: false
 	});

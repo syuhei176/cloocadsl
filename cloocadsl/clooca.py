@@ -134,7 +134,7 @@ def editorjs(pid=None):
             gid = int(result['group_id'])
             connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
             cur = connect.cursor()
-            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+            cur.execute('SELECT GroupInfo.id AS id1,role,name,service FROM GroupInfo INNER JOIN JoinInfo ON GroupInfo.id = JoinInfo.group_id AND JoinInfo.user_id=%s AND group_id=%s;',(session['user']['id'], gid))
             rows = cur.fetchall()
             cur.close()
             connect.close()
@@ -142,6 +142,8 @@ def editorjs(pid=None):
                 joinInfo = {}
                 joinInfo['id'] = int(rows[0][0])
                 joinInfo['role'] = int(rows[0][1])
+                joinInfo['name'] = rows[0][2]
+                joinInfo['service'] = rows[0][3]
                 result['group'] = joinInfo
                 return render_template('editorjs.html', pid = pid, project = json.dumps(result))
     else:
@@ -202,9 +204,17 @@ def logout():
 def createm():
     if 'user' in session and 'joinInfos' in session['user']:
         gid = request.form['group_id']
-        for joinInfo in session['user']['joinInfos']:
-#            print joinInfo['role']
-            if int(joinInfo['id']) == int(gid) and joinInfo['role'] == 1:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        cur = connect.cursor()
+        cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+        rows = cur.fetchall()
+        cur.close()
+        connect.close()
+        if not len(rows) == 0:
+            joinInfo = {}
+            joinInfo['id'] = int(rows[0][0])
+            joinInfo['role'] = int(rows[0][1])
+            if joinInfo['id'] == int(gid) and joinInfo['role'] == 1:
                 project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], joinInfo)
                 return json.dumps(project)
     return 'false'
@@ -221,7 +231,7 @@ def createp():
         connect.close()
         if not len(rows) == 0:
             joinInfo = {}
-            joinInfo['id'] = int(id)
+            joinInfo['id'] = int(rows[0][0])
             joinInfo['role'] = int(rows[0][1])
             project = ProjectService.createProject(session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'], joinInfo)
             return json.dumps(project)

@@ -1,11 +1,11 @@
-function MetaModelEditor(metaobjects) {
+function MetaObjectsEditor(metaobjects) {
 	var l_metaobjs = [];
 	for(var i=0;i < metaobjects.length;i++) {
 		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
 	}
 	Ext.create('Ext.data.Store', {
 	    storeId:'simpsonsStore',
-	    fields:['id', 'name'],
+	    fields:['id', 'name', 'graphic'],
 	    data:{
 	    	'items':l_metaobjs
 	    },
@@ -19,11 +19,12 @@ function MetaModelEditor(metaobjects) {
 	});
 	
 	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'Simpsons',
+	    title: 'MetaObjects',
 	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
 	    columns: [
 	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 }
+	        { header: 'Name', dataIndex: 'name', flex: 1 },
+	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
 	    ],
 	    height: 200,
 	    width: 400,
@@ -32,15 +33,20 @@ function MetaModelEditor(metaobjects) {
         	listeners : {
         		select : {
         			fn : function(rmodel,record,index,options){
-        				Ext.Msg.alert('MetaObject', record.data.id+","+record.data);
+        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+        					 if(btn != 'cancel') {
+        						 metaobjects[record.data.id] = JSON.parse(text);
+        					 }
+        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
         			}
         		}
         	}
         })
 	});
 	
-	var metamodeleditor = Ext.create('Ext.panel.Panel',
+	this.panel = Ext.create('Ext.panel.Panel',
 		{
+			xtype: 'panel',
 		  	   title: 'MetaObjects',
 		  	   layout: {
 		  		   type: 'hbox',
@@ -58,52 +64,45 @@ function MetaModelEditor(metaobjects) {
   	  	  	           },
   	  	  	           {
   	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'update',
+  	  	  	        	   text: 'delete',
 	  	  	  	     	    handler: function() {
 	  	  	  	     	    	alert('You clicked the button!');
 	  	  	  	     	    }
-
-  	  	  	           },
-		  	 		{
-		  	  	  	   title: 'Tool',
-		  	  	  	   layout: {
-		  	  	  		   type: 'vbox',
-		  	  	  		   align: 'center'
-		  	  	  	   },
-		  	  	  	   items: [
-		  	  	  	           {
-		  	  	  	        	   xtype: 'button',
-		  	  	  	        	   text: 'add',
-			  	  	  	     	    handler: function() {
-			  	  	  	     	    	alert('You clicked the button!')
-			  	  	  	     	    }
-		  	  	  	           },
-		  	  	  	           {
-		  	  	  	        	   xtype: 'button',
-		  	  	  	        	   text: 'update',
-			  	  	  	     	    handler: function() {
-			  	  	  	     	    	alert('You clicked the button!')
-			  	  	  	     	    }
-
-		  	  	  	           }
-		  	  	  	           ]
-		  	  		}
+  	  	  	           }
 		  	           ],
 		  	 		closable: 'true'
 	});
 	
-	var tab = editor_tabs.add(metamodeleditor);
-	editor_tabs.setActiveTab(tab);
 }
 
-function MetaRelationEditor(metarelations) {
+MetaObjectsEditor.prototype.save = function() {
+	var self = this;
+	saveMetaModel(g_metamodel_id, function(data){
+		if(data) {
+			self.editor.setTitle('JSONEditor');
+		}
+	});
+}
+
+MetaObjectsEditor.prototype.getPanel = function() {
+	return this.panel;
+}
+
+MetaObjectsEditor.prototype.Initialize = function() {
+}
+
+MetaObjectsEditor.prototype.onActivate = function() {
+	current_editor = this;
+}
+
+function MetaRelationsEditor(metarelations) {
 	var l_metaobjs = [];
 	for(var i=0;i < metarelations.length;i++) {
 		if(metarelations[i] != null) l_metaobjs.push(metarelations[i]);
 	}
 	Ext.create('Ext.data.Store', {
 	    storeId:'simpsonsStore',
-	    fields:['id', 'name'],
+	    fields:['id', 'name', 'arrow_type'],
 	    data:{
 	    	'items':l_metaobjs
 	    },
@@ -117,11 +116,12 @@ function MetaRelationEditor(metarelations) {
 	});
 	
 	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'Simpsons',
+	    title: 'MetaRelations',
 	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
 	    columns: [
 	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 }
+	        { header: 'Name', dataIndex: 'name', flex: 1 },
+	        { header: 'Arrow type', dataIndex: 'arrow_type', flex: 1 }
 	    ],
 	    height: 200,
 	    width: 400,
@@ -130,16 +130,21 @@ function MetaRelationEditor(metarelations) {
         	listeners : {
         		select : {
         			fn : function(rmodel,record,index,options){
-        				Ext.Msg.alert('MetaObject', record.data.id+","+record.data);
+        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+        					 if(btn != 'cancel') {
+        						 metarelations[record.data.id] = JSON.parse(text);
+        					 }
+        				 },null,true,JSON.stringify(metarelations[record.data.id]));
         			}
         		}
         	}
         })
 	});
 	
-	var metamodeleditor = Ext.create('Ext.panel.Panel',
+	this.panel = Ext.create('Ext.panel.Panel',
 		{
-		  	   title: 'MetaRelation',
+			xtype: 'panel',
+		  	   title: 'MetaRelations',
 		  	   layout: {
 		  		   type: 'hbox',
 		  		   align: 'center'
@@ -151,32 +156,137 @@ function MetaRelationEditor(metarelations) {
   	  	  	        	   text: 'add',
 	  	  	  	     	    handler: function() {
 	  	  	  	     	    	alert('You clicked the button!');
-	  	  	  	     	    	metarelations.push(new MetaRelation(metarelation_IdGenerator.getNewId(), ''));
+	  	  	  	     	 metarelations.push(new MetaRelation(metaobject_IdGenerator.getNewId(), ''));
 	  	  	  	     	    }
   	  	  	           },
   	  	  	           {
   	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'update',
+  	  	  	        	   text: 'delete',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!')
+	  	  	  	     	    	alert('You clicked the button!');
 	  	  	  	     	    }
-
-  	  	  	           },
-		  	 		{
-		  	  	  	   title: 'Tool',
-		  	  	  	   layout: {
-		  	  	  		   type: 'vbox',
-		  	  	  		   align: 'center'
-		  	  	  	   },
-		  	  	  	   items: [
-		  	  	  	           ]
-		  	  		}
+  	  	  	           }
 		  	           ],
 		  	 		closable: 'true'
 	});
 	
-	var tab = editor_tabs.add(metamodeleditor);
-	editor_tabs.setActiveTab(tab);
+}
+
+MetaRelationsEditor.prototype.save = function() {
+	var self = this;
+	saveMetaModel(g_metamodel_id, function(data){
+		if(data) {
+			self.editor.setTitle('JSONEditor');
+		}
+	});
+}
+
+MetaRelationsEditor.prototype.getPanel = function() {
+	return this.panel;
+}
+
+MetaRelationsEditor.prototype.Initialize = function() {
+}
+
+MetaRelationsEditor.prototype.onActivate = function() {
+	current_editor = this;
+}
+
+function MetaPropertyEditor(metaobjects) {
+	var l_metaobjs = [];
+	for(var i=0;i < metaobjects.length;i++) {
+		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
+	}
+	Ext.create('Ext.data.Store', {
+	    storeId:'simpsonsStore',
+	    fields:['id', 'name', 'graphic'],
+	    data:{
+	    	'items':l_metaobjs
+	    },
+	    proxy: {
+	        type: 'memory',
+	        reader: {
+	            type: 'json',
+	            root: 'items'
+	        }
+	    }
+	});
+	
+	var grid = Ext.create('Ext.grid.Panel', {
+	    title: 'MetaProperties',
+	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
+	    columns: [
+	        { header: 'Id',  dataIndex: 'id' },
+	        { header: 'Name', dataIndex: 'name', flex: 1 },
+	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
+	    ],
+	    height: 200,
+	    width: 400,
+	    selModel : new Ext.selection.RowModel({
+        	singleSelect : true,
+        	listeners : {
+        		select : {
+        			fn : function(rmodel,record,index,options){
+        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+        					 if(btn != 'cancel') {
+        						 metaobjects[record.data.id] = JSON.parse(text);
+        					 }
+        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
+        			}
+        		}
+        	}
+        })
+	});
+	
+	this.panel = Ext.create('Ext.panel.Panel',
+		{
+			xtype: 'panel',
+		  	   title: 'MetaProperties',
+		  	   layout: {
+		  		   type: 'hbox',
+		  		   align: 'center'
+		  	   },
+		  	   items: [
+		  	           grid,
+  	  	  	           {
+  	  	  	        	   xtype: 'button',
+  	  	  	        	   text: 'add',
+	  	  	  	     	    handler: function() {
+	  	  	  	     	    	alert('You clicked the button!');
+	  	  	  	     	    	metaobjects.push(new MetaProperty(metaobjects.length, ''));
+	  	  	  	     	    }
+  	  	  	           },
+  	  	  	           {
+  	  	  	        	   xtype: 'button',
+  	  	  	        	   text: 'delete',
+	  	  	  	     	    handler: function() {
+	  	  	  	     	    	alert('You clicked the button!');
+	  	  	  	     	    }
+  	  	  	           }
+		  	           ],
+		  	 		closable: 'true'
+	});
+	
+}
+
+MetaPropertyEditor.prototype.save = function() {
+	var self = this;
+	saveMetaModel(g_metamodel_id, function(data){
+		if(data) {
+			self.editor.setTitle('JSONEditor');
+		}
+	});
+}
+
+MetaPropertyEditor.prototype.getPanel = function() {
+	return this.panel;
+}
+
+MetaPropertyEditor.prototype.Initialize = function() {
+}
+
+MetaPropertyEditor.prototype.onActivate = function() {
+	current_editor = this;
 }
 
 function MetaJSONEditor(metadiagram) {

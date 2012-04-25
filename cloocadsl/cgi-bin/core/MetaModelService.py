@@ -24,7 +24,7 @@ def saveAll(user, pid, name, xml, visibillity):
     if len(has_rows) == 0:
         return None
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE MetaModelInfo SET name=%s,xml=%s,visibillity=%s WHERE id = %s;',(name.encode('utf_8'), xml, visibillity, pid, ))
+    affect_row_count = cur.execute('UPDATE MetaModelInfo SET name=%s,xml=%s,visibillity=%s WHERE id = %s;',(name.encode('utf_8'), xml.encode('utf_8'), visibillity, pid, ))
     connect.commit()
     cur.close()
     connect.close()
@@ -39,7 +39,7 @@ def saveMetaModel(user, pid, xml):
     if len(has_rows) == 0:
         return None
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE MetaModelInfo SET xml=%s WHERE id = %s;',(xml, pid, ))
+    affect_row_count = cur.execute('UPDATE MetaModelInfo SET xml=%s WHERE id = %s;',(xml.encode('utf_8'), pid, ))
     connect.commit()
     cur.close()
     connect.close()
@@ -75,7 +75,7 @@ def loadMetaModel(user, pid):
     project = {}
     project['id'] = rows[0][0]
     project['name'] = rows[0][1]
-    project['xml'] = rows[0][2]
+    project['xml'] = rows[0][2].decode('utf_8')
     project['template'] = rows[0][3]
     project['visibillity'] = rows[0][4]
     project['welcome_message'] = rows[0][5]

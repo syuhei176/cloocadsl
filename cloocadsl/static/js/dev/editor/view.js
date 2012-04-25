@@ -92,13 +92,13 @@ function HistoryView(history_data) {
 		  	 		closable: 'true'
 	});
 	
-	var tab = editor_tabs.add(metamodeleditor);
-	editor_tabs.setActiveTab(tab);
+//	var tab = editor_tabs.add(metamodeleditor);
+//	editor_tabs.setActiveTab(tab);
 }
 
 function ProjectInfoViewer() {
 	var html = 'ID:' + g_project_id + '<br>NAME:' + g_projectinfo.name + '<br>REPOSITORY:' + g_projectinfo.rep_id
-	var pview = Ext.create('Ext.panel.Panel',
+	this.panel = Ext.create('Ext.panel.Panel',
 			{
 			  	   title: 'プロジェクト情報',
 			  	   html: html,
@@ -106,6 +106,16 @@ function ProjectInfoViewer() {
 			}
 	);
 
-	var tab = editor_tabs.add(pview);
-	editor_tabs.setActiveTab(tab);
+}
+
+ProjectInfoViewer.prototype.getPanel = function() {
+	return this.panel;
+}
+
+ProjectInfoViewer.prototype.Initialize = function() {
+	
+}
+
+ProjectInfoViewer.prototype.onActivate = function() {
+	
 }

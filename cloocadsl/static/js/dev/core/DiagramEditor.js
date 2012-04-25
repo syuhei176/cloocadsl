@@ -31,11 +31,7 @@ function DiagramEditor(name, key, diagram) {
 			closable: 'true',
 		};
 	this.canvas = $('#canvas_'+this.key);
-
-//	this.draw = draw;
 }
-
-
 
 DiagramEditor.prototype.draw = function() {
 	var self = this;
@@ -94,6 +90,18 @@ DiagramEditor.prototype.draw = function() {
 				}).drawLine(graphic.option).restoreCanvas();
 			}
 		}
+		/*
+		 * for resizable object
+		 */
+		if(meta_ele.resizable == true) {
+			self.canvas.drawRect({
+				  fillStyle: "#00f", strokeWidth: 2,
+				  x: obj.bound.x+obj.bound.width-8, y: obj.bound.y+obj.bound.height-8,
+				  width: 8, height: 8,
+				  fromCenter: false
+			});
+		}
+
 		var h = 0;
 		for(var l=0;l < meta_ele.properties.length;l++) {
 			var prop = null;
@@ -106,22 +114,33 @@ DiagramEditor.prototype.draw = function() {
 				for(var k=0;k < prop.children.length;k++) {
 					var p = g_model.properties[prop.children[k]]
 					if(p.ve.ver_type == 'delete') continue;
+					var disp_text = p.value;
+					var meta_prop = g_metamodel.metaproperties[prop.meta_id];
+					if(meta_prop.widget == MetaProperty.FIXED_LIST) {
+						for(var index=0;index < meta_prop.exfield.length;index++) {
+							if(p.value == meta_prop.exfield[index].value) {
+								disp_text = meta_prop.exfield[index].disp;
+							}
+						}
+					}
 					self.canvas.drawText({
 						  fillStyle: "#000",
 						  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
-						  text: p.value,
+						  text: disp_text,
 						  align: "center",
 						  baseline: "middle",
 						  font: "16px 'ＭＳ ゴシック'"
 						});
 					h++;
 				}
-				self.canvas.drawLine({
-					  strokeStyle: "#000",
-					  strokeWidth: 2,
-					  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
-					  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
-					});
+				if(meta_ele.properties.length-1 != l) {
+					self.canvas.drawLine({
+						  strokeStyle: "#000",
+						  strokeWidth: 2,
+						  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
+						  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
+						});
+				}
 			}
 		}
 	}
@@ -168,6 +187,9 @@ DiagramEditor.prototype.Initialize = function() {
 	    },{
 	        id: 'delete_point',
 	        text: 'ポイントを削除'
+	    },{
+	        id: 'info',
+	        text: '情報'
 	    }],
 	    listeners: {
 	        itemclick: function(item) {
@@ -188,34 +210,65 @@ DiagramEditor.prototype.Initialize = function() {
                 case 'delete_point':
                 	self.deletePoint();
                     break;
+                case 'info':
+                	self.info();
+                    break;
             }
         }
 	    }
 	});
-	this.canvas.mousemove(function(e){
-		var rect = e.target.getBoundingClientRect();
-		mouseX = e.clientX - rect.left;
-		mouseY = e.clientY - rect.top;
-		self.ActionMove(mouseX, mouseY)
-	});
-	this.canvas.mousedown(function(e){
-		var rect = e.target.getBoundingClientRect();
-		mouseX = e.clientX - rect.left;
-		mouseY = e.clientY - rect.top;
-		if(e.button == 2) {
-			mnuContext.showAt(e.clientX, e.clientY);
-		}else{
-			self.ActionDown(mouseX, mouseY)
+	
+	if(navigator.userAgent.indexOf('iPad') > 0) {
+		this.canvas.touchmove(function(e){
+			var rect = e.target.getBoundingClientRect();
+			mouseX = e.clientX - rect.left;
+			mouseY = e.clientY - rect.top;
+			self.ActionMove(mouseX, mouseY)
+		});
+		this.canvas.touchstart(function(e){
+			var rect = e.target.getBoundingClientRect();
+			mouseX = e.clientX - rect.left;
+			mouseY = e.clientY - rect.top;
+			if(e.button == 2) {
+				mnuContext.showAt(e.clientX, e.clientY);
+			}else{
+				self.ActionDown(mouseX, mouseY)
+				self.draw();
+			}
+		});
+		this.canvas.touchend(function(e){
+			var rect = e.target.getBoundingClientRect();
+			mouseX = e.clientX - rect.left;
+			mouseY = e.clientY - rect.top;
+			self.ActionUp(mouseX, mouseY)
 			self.draw();
-		}
-	});
-	this.canvas.mouseup(function(e){
-		var rect = e.target.getBoundingClientRect();
-		mouseX = e.clientX - rect.left;
-		mouseY = e.clientY - rect.top;
-		self.ActionUp(mouseX, mouseY)
-		self.draw();
-	});
+		});
+	}else{
+		this.canvas.mousemove(function(e){
+			var rect = e.target.getBoundingClientRect();
+			mouseX = e.clientX - rect.left;
+			mouseY = e.clientY - rect.top;
+			self.ActionMove(mouseX, mouseY)
+		});
+		this.canvas.mousedown(function(e){
+			var rect = e.target.getBoundingClientRect();
+			mouseX = e.clientX - rect.left;
+			mouseY = e.clientY - rect.top;
+			if(e.button == 2) {
+				mnuContext.showAt(e.clientX, e.clientY);
+			}else{
+				self.ActionDown(mouseX, mouseY)
+				self.draw();
+			}
+		});
+		this.canvas.mouseup(function(e){
+			var rect = e.target.getBoundingClientRect();
+			mouseX = e.clientX - rect.left;
+			mouseY = e.clientY - rect.top;
+			self.ActionUp(mouseX, mouseY)
+			self.draw();
+		});
+	}
 	this.draw();
 }
 
@@ -232,6 +285,7 @@ DiagramEditor.DRAG_RUBBERBAND = 1;
 DiagramEditor.DRAG_MOVE = 2;
 DiagramEditor.DRAG_POINT = 3;
 DiagramEditor.DRAG_RANGE = 4;
+DiagramEditor.DRAG_RESIZE = 5;
 
 DiagramEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.x = x;
@@ -243,6 +297,12 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 		}
 	}else if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.draw()
+	}else if(this.dragMode == DiagramEditor.DRAG_RESIZE) {
+		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
+		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
+		this.draw()
+	}else{
+		
 	}
 }
 
@@ -255,7 +315,7 @@ DiagramEditor.prototype.updateObject = function(obj, x, y) {
 DiagramEditor.prototype.ActionDown = function(x, y) {
 	if(this.tool == null) {
 		if(this.clicknode(Number(x), Number(y))) {
-			this.dragMode = DiagramEditor.DRAG_MOVE;
+			if(this.dragMode != DiagramEditor.DRAG_RESIZE) this.dragMode = DiagramEditor.DRAG_MOVE;
 		}else if(this.clickedge(x, y)) {
 //			this.dragMode = DiagramEditor.DRAG_POINT;
 		}else{
@@ -311,9 +371,14 @@ DiagramEditor.prototype.movePoint = function(rel, s, d) {
 DiagramEditor.prototype.clicknode = function(x, y) {
 	var obj = this.diagramController.findNode(new Point2D(x, y));
 	if(obj != null) {
+		if(obj == this.selected) {
+			if(Rectangle2D.contains(new Rectangle2D(obj.bound.x+obj.bound.width-8, obj.bound.y+obj.bound.height-8, 8, 8), new Point2D(x, y))) {
+				this.dragMode = DiagramEditor.DRAG_RESIZE;
+			}
+		}
 		if(obj.ve.ver_type == "delete") return false;
 		this.selected = obj;
-		this.fireSelectObject(this.selected)
+		this.fireSelectObject(this.selected);
 		return true;
 	}
 	/*
@@ -386,6 +451,7 @@ DiagramEditor.prototype.createButton = function() {
 		    text     : button_text,
 /*		    renderTo : Ext.get('toolpanel'),*/
 		    width: 100,
+		    height: 32,
 		    enableToggle: true,
 		    toggleGroup: 'tools',
 		    listeners: {
@@ -435,6 +501,20 @@ DiagramEditor.prototype.deleteSelected = function() {
 	}
 }
 
+DiagramEditor.prototype.info = function() {
+	if(this.selected != null) {
+		var str = 'ver_type='+this.selected.ve.ver_type;
+		str += '<br>version='+this.selected.ve.version;
+		str += '<br>id='+this.selected.id;
+		str += '<br>pid='+Math.floor(this.selected.id / 10000);
+		console.log(str);
+//		Ext.MessageBox.alert(str);
+		Ext.getCmp('element-infomation').removeAll();
+		Ext.getCmp('element-infomation').add({
+			html: str
+		});
+	}
+}
 
 /*
 function addRelationship(src, dest) {
@@ -447,11 +527,13 @@ function addRelationship(src, dest) {
 DiagramEditor.prototype.fireSelectObject = function(selected) {
 	var meta_obj = MetaModelController.getMetaObject(g_metamodel.metadiagram, selected.meta_id)
 	this.createPropertyPanel(meta_obj, selected);
+	this.info()
 }
 
 DiagramEditor.prototype.fireSelectRelationship = function(selected) {
 	var meta_rel = MetaModelController.getMetaRelation(g_metamodel.metadiagram, selected.meta_id)
 	this.createPropertyPanel(meta_rel, selected);
+	this.info()
 }
 
 /**
@@ -542,12 +624,12 @@ PropertyPanel.InputField = function(dc, meta_prop, prop, ele) {
 }
 PropertyPanel.FixedList = function(dc, meta_prop, prop, ele) {
 	var p = g_model.properties[prop.children[0]];
-	var strs = meta_prop.exfield.split('&');
-	var datas = new Array();
-	for(var j=0;j < strs.length;j++) datas.push({"name":strs[j]});
+//	var strs = meta_prop.exfield.split('&');
+//	var datas = new Array();
+//	for(var j=0;j < strs.length;j++) datas.push({"name":strs[j]});
 	var states = Ext.create('Ext.data.Store', {
-	    fields: ['name'],
-	    data : datas
+	    fields: ['disp','value'],
+	    data : meta_prop.exfield
 	});
 	var prop_tab = {
             title: meta_prop.name,
@@ -557,19 +639,14 @@ PropertyPanel.FixedList = function(dc, meta_prop, prop, ele) {
 	  	        	   xtype: 'combobox',
 	  	        	   store: states,
 	  	        	    queryMode: 'local',
-	  	        	    displayField: 'name',
-	  	        	    valueField: 'name',
+	  	        	    displayField: 'disp',
+	  	        	    valueField: 'value',
   	        		   value: p.value,
-//  	        		   index: i,
   	        		   listeners: {
   	        			   change: {
   	        				   fn: function(field, newValue, oldValue, opt) {
-// 	        						p.value = newValue;
  	        						g_model.properties[prop.children[0]].value = newValue;
  	        						dc.diagramController.updateProperty(p, newValue, ele);
-// 	        						VersionElement.update(p.ve);
-//  	        					 ele.properties[this.index].children[0].value = newValue;
-//  	        					 calObjHeight(ele);
   	        				   }
   	        			   }
   	        		   }
@@ -696,6 +773,7 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele, meta_ele) {
 
 function calObjHeight(obj) {
 	if(obj.bound == undefined) return;
+	if(g_metamodel.metaobjects[obj.meta_id].resizable == true) return;
 	var h = 0;
 	var w = 4;
 	for(var j=0;j < obj.properties.length;j++) {

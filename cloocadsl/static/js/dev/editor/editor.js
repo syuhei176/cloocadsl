@@ -246,7 +246,8 @@ function onProjItemClick(item){
 	}else if(item.text == 'genbin') {
 		genbin(g_project_id);
 	}else if(item.id == 'pviewer') {
-		current_editor = new ProjectInfoViewer();
+		var editor = new ProjectInfoViewer();
+		editortabpanel.add(editor, 'pviewer');
 	}
 }
 
@@ -289,7 +290,7 @@ function createModelExplorer() {
 	var modelExplorer = Ext.create('Ext.tree.Panel', {
 //	    title: 'Model Explorer',
 	    width: 200,
-	    height: 150,
+	    height: 200,
 	    store: store,
 	    rootVisible: false
 	});
@@ -301,6 +302,12 @@ function createModelExplorer() {
     });
 	Ext.getCmp('modelexplorer').removeAll();
 	Ext.getCmp('modelexplorer').add(modelExplorer);
+	Ext.getCmp('modelexplorer').add({
+		id: 'element-infomation',
+		xtype: 'panel',
+		    width: 200,
+		    height: 200
+	});
 	return modelExplorer;
 }
 
