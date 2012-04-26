@@ -39,8 +39,8 @@ function init_wb(id) {
 		    	   }),
 		       new Ext.Panel({
 		     	   id:'toolpanel',
-		    	   title:'EAST',
-		    	   html:'EAST PANEL',
+		    	   title:'未使用タイトル',
+		    	   html:'未使用パネル',
 		    	   margins:'0 3 0 3',
 		    	   region:'east',
 		    	   collapsible:true,
@@ -50,8 +50,7 @@ function init_wb(id) {
 		    	    pack  : 'start'
 		    	},
 		    	items: [
-		    	    {html:'panel 1', flex:1},
-		    	    {html:'panel 3', flex:2}
+		    	    {html:'未使用スペース', flex:1},
 		    	]
 		       }),
 		       new Ext.Panel({

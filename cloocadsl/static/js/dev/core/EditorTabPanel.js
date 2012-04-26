@@ -29,6 +29,7 @@ EditorTabPanel.prototype.fireSelectTab = function() {
 
 EditorTabPanel.prototype.add = function(editor, key) {
 	var self = this;
+	editor.key = key;
 	for(var i=0;i < this.editors.length;i++) {
 		if(this.editors[i].editor.key == key) {
 			this.tabpanel.setActiveTab(this.editors[i].tab);

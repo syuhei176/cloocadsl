@@ -494,7 +494,7 @@ function TemplateEditor(template) {
 	this.template = template;
 	this.resource = template;
 	var self = this;
-	var style = '"width:'+(Ext.getCmp('centerpanel').getWidth() - 40)+'px;height:'+(Ext.getCmp('centerpanel').getHeight() - 40)+'px;"'
+	var style = '"width:'+(Ext.getCmp('centerpanel').getWidth() - 40)+'px;height:'+(Ext.getCmp('centerpanel').getHeight())+'px;"'
 	this.panel = Ext.create('Ext.panel.Panel',
 		{
 		  	   title: template.name,
