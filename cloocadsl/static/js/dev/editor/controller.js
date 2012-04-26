@@ -84,9 +84,9 @@ function commit() {
 						Ext.MessageBox.alert("コミットステート","成功");
 						update();
 					}else if(data == 2) {
-						Ext.MessageBox.alert("コミットステート","変更がありません。");
-					}else if(data == 3) {
 						Ext.MessageBox.alert("コミットステート","最新バージョンに更新してください。");
+					}else if(data == 3) {
+						Ext.MessageBox.alert("コミットステート","変更がありません。");
 					}
 				}
 			}, "json");
