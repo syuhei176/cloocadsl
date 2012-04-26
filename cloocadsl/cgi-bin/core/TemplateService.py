@@ -25,6 +25,7 @@ def delete(metamodel_id, name, connect):
     return True
 
 def save(metamodel_id, name, content, connect):
+    print content
     cur = connect.cursor()
     affect_row_count = cur.execute('UPDATE Template SET content=%s WHERE name=%s AND metamodel_id=%s;', (content.encode('utf_8'), name, metamodel_id, ))
     connect.commit()

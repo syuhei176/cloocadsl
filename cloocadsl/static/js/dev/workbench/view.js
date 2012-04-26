@@ -545,8 +545,7 @@ TemplateEditor.prototype.Initialize = function() {
 	var self = this;
 	var textarea = document.getElementById('templatetextarea_'+this.template.name);
 	var myCodeMirror = CodeMirror.fromTextArea(textarea, {lineNumbers:true, onChange:function(editor, arg) {
-//		console.log(arg.text[0]);
-			 self.template.content = textarea.value;
+			 self.template.content = editor.getValue();
 				 self.panel.setTitle(self.template.name + '*');
 			   }});
 }
