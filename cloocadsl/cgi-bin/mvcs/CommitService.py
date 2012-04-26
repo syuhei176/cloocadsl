@@ -9,9 +9,9 @@ sys.path.append('../')
 from xml.etree.ElementTree import *
 import config
 
-'''
+"""
 グローバル変数
-'''
+"""
 #データベースとの接続
 connect = None
 #モデルリポジトリのID
@@ -20,10 +20,9 @@ model_id = None
 next_version = None
 
 
-
-'''
+"""
  ワークスペースからモデルリポジトリにコミットする。
-'''
+"""
 def commit(rep_id, model_json):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -105,7 +104,7 @@ def parseDiagramJSON(diagram):
     cur.execute('DELETE FROM has_object WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
     cur.execute('DELETE FROM has_relationship WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
     connect.commit()
-    '''
+    """
     # use has_object and has_relationship
     insert_datas = []
     for obj_id in diagram['objects']:
@@ -116,7 +115,7 @@ def parseDiagramJSON(diagram):
         insert_datas.append((id,rel_id,model_id,next_version))
     cur.executemany('INSERT INTO has_relationship (diagram_id,relationship_id,model_id,version) VALUES(%s,%s,%s,%s);', insert_datas)
     connect.commit()
-    '''
+    """
     obj_refs = []
     rel_refs = []
     for obj_id in diagram['objects']:
@@ -156,7 +155,7 @@ def parseObjectJSON(obj):
     decomposition_diagram = obj['diagram']
     edited_type = obj['ve']['ver_type']
     version = int(obj['ve']['version'])
-    '''
+    """
     if not edited_type == 'delete':
         cur = connect.cursor()
         cur.execute('DELETE FROM has_property WHERE parent_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
@@ -164,7 +163,7 @@ def parseObjectJSON(obj):
         cur.close()
         for e in obj['properties']:
             parsePropertyListJSON(e, id)
-    '''
+    """
     prop_refs = []
     for e in obj['properties']:
         prop_refs = prop_refs + parsePropertyListJSON(e, id)
@@ -205,7 +204,7 @@ def parseRelationshipJSON(rel):
     dest = rel['dest']
     edited_type = rel['ve']['ver_type']
     version = int(rel['ve']['version'])
-    '''
+    """
     if not edited_type == 'delete':
         cur = connect.cursor()
         cur.execute('DELETE FROM has_property WHERE parent_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
@@ -213,7 +212,7 @@ def parseRelationshipJSON(rel):
         cur.close()
         for e in rel['properties']:
             parsePropertyListJSON(e, id)
-    '''
+    """
     prop_refs = []
     for e in rel['properties']:
         prop_refs = prop_refs + parsePropertyListJSON(e, id)
