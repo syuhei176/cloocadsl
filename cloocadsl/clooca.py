@@ -103,10 +103,10 @@ def dashboard(id=None):
         cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], id, ))
         rows = cur.fetchall()
         cur.close()
-        joinInfo = {}
-        joinInfo['id'] = int(id)
-        joinInfo['role'] = int(rows[0][1])
         if not len(rows) == 0:
+            joinInfo = {}
+            joinInfo['id'] = int(id)
+            joinInfo['role'] = int(rows[0][1])
             if joinInfo['role'] == 0:
                 return render_template('dashboard.html',
                                        loggedin = True,
@@ -383,7 +383,7 @@ def temp_new():
 def temp_save():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.save(request.form['id'], request.form['fname'], request.form['content'], connect)
+        result = TemplateService.save(int(request.form['id']), request.form['fname'], request.form['content'], connect)
         connect.close()
         return json.dumps(result)
 

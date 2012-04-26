@@ -200,7 +200,7 @@ function create_menu() {
 
 function onItemClick(item){
 	if(item.id == 'save') {
-		current_editor.save();
+		editortabpanel.current_editor.save();
 	}else if(item.id == 'preview') {
 		g_model = new Model();
 		g_model.root = 1;

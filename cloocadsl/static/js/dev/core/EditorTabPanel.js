@@ -49,4 +49,6 @@ EditorTabPanel.prototype.add = function(editor, key) {
 	});
 	this.tabpanel.setActiveTab(tab);
 	editor.Initialize();
+	this.current_editor = editor;
+	editor.onActivate();
 }

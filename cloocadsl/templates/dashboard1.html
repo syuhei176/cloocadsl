@@ -145,13 +145,16 @@ function init() {
 }
 
 function load_models() {
-	var metamodels = {{ metamodels|safe }};
+	var available_metamodels = {{ metamodels|safe }};
 	var mymetamodels = {{ mymetamodel|safe }};
 	var groupmetamodels = {{ groupmetamodel|safe }};
 	var myprojects = {{ myproject|safe }};
 	create_mymetamodels_table(mymetamodels);
-	create_metamodels_table(metamodels);
-	create_projects_table(myprojects, metamodels);
+	for(var i=0;i < mymetamodels.length;i++) {
+		if(mymetamodels[i].visibillity == 0) available_metamodels.push(mymetamodels[i])
+	}
+	create_metamodels_table(available_metamodels);
+	create_projects_table(myprojects, available_metamodels);
 }
 
 function create_projects_table(projects, metamodels) {
