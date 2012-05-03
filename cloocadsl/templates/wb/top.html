@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Workbench</title>
+<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+<link href="/static/css/clooca.css" rel="stylesheet">
+<script src="/static/js/jquery-1.7.1.min.js"></script>
+<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+<style type="text/css">
+
+.clear {clear:both;}
+
+	#feedback { font-size: 1.4em; }
+	#selectable .ui-selecting { background: #FECA40; }
+	#selectable .ui-selected { background: #F39814; color: white; }
+	#selectable {
+	list-style-type: none; margin: 0; padding: 0; width: 60%;}
+	#selectable li { margin: 3px; padding: 0.4em; font-size: 1.2em; height: 18px; }
+</style>
+<script>
+	$(function() {
+		{% if loggedin %}
+		  $('#login').empty().append('<a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
+		{% else %}
+		  $('#login').empty().append('<a href="/login">login</a>&nbsp;&nbsp;&nbsp;');
+		{% endif %}
+		$( "#selectable" ).selectable({
+			stop: function() {
+				var result = $( "#select-result" ).empty();
+				$( ".ui-selected", this ).each(function() {
+					var index = $( "#selectable li" ).index( this );
+					result.append( " #" + ( index + 1 ) );
+				});
+			}
+		});
+	});
+</script>
+</head>
+<body>
+<div class="clooca_wrapper">
+<div class="clooca_header">
+<div class="clooca_logo"><img alt="" src="/static/images/site/clooca_wb_logo.png" width="140px"></img></div>
+<div class="clooca_login"><div id="login"></div></div>
+</div>
+<div class="clooca_second_header">
+<div class="clooca_menu">
+<ul class="clooca_nav">
+<li>Top</li>
+<li>Tools</li>
+</ul>
+</div>
+</div>
+
+<div class="clooca_main">
+<div class="clooca_left_content">
+<div id="clooca_left_nav">
+<ul>
+<li class="child-category"><a href="">Education</a></li>
+<li class="child-category"><a href="">Education</a></li>
+<li class="child-category"><a href="">Education</a></li>
+<li class="child-category"><a href="">Education</a></li>
+<li class="child-category"><a href="">Education</a></li>
+</ul>
+</div>
+</div>
+<div class="clooca_center_content">
+<img alt="" src="/static/images/site/clooca_wb_main.png" width="90%"></img>
+<div>clooca market learn more</div>
+<div><a href="/wb/dashboard">ダッシュボード</a></div>
+<div></div>
+<div></div>
+<div></div>
+</div>
+<div class="clooca_right_content">説明</div>
+</div>
+<div class="clooca_footer">Copyright &copy 2011 clooca　All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -22,6 +22,7 @@ function initall() {
 	                 'dev/core/arrowhead.js',
 	                 'dev/core/DiagramController.js',
 	                 'dev/core/DiagramEditor.js',
+	                 'dev/core/SequenceEditor.js',
 	                 'dev/core/metamodel.js',
 	                 'dev/core/model.js',
 	                 'dev/core/EditorTabPanel.js',

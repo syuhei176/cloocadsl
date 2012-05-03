@@ -62,7 +62,17 @@ function init() {
     		$( "#register_dialog" ).dialog('close');
 	      }, "json");
 	  });
-
+	$( "#selectable" ).selectable({
+		stop: function() {
+			var result = $( "#select-result" ).empty();
+			$( ".ui-selected", this ).each(function() {
+				var index = $( "#selectable li" ).index( this );
+				$( "#ss1" ).hide();
+				$( "#ss2" ).hide();
+				$( "#ss"+(index+1) ).show('scale');
+			});
+		}
+	});
 }
 
 function login() {
@@ -107,7 +117,14 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 }
 
 </script>
-</head>
+<style>
+	#feedback { font-size: 1.4em; }
+	#selectable .ui-selecting { background: #009900; }
+	#selectable .ui-selected { background: #009900; color: white; }
+	#selectable { list-style-type: none; margin: 0; padding: 0; width: 150px; }
+	#selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; border-radius: 20px; text-align: center;}
+</style>
+	</head>
 <body onload="init()">
       <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
@@ -160,6 +177,8 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <ul class="nav">
             <li class="active"><a href="/index">ホーム</a></li>
             <li class="divider-vertical"></li>
+            <li><a href="/mydb">ダッシュボード</a></li>
+            <li class="divider-vertical"></li>
             <li><a href="/mygroups">マイグループ</a></li>
             <li class="divider-vertical"></li>
             <li><a href="/groups">公開コミュニティ</a></li>
@@ -179,8 +198,16 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         <div class="span3">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
-              <li class="nav-header">Manual</li>
-              <li><a href="/file/tutorial.pdf">簡易マニュアル</a></li>
+            <!-- 
+              <li class="nav-header">Site</li>
+              <li><a href="/market/">tool market</a></li>
+              <li><a href="/wb/">workbench</a></li>
+               -->
+              <li class="nav-header">Info</li>
+              <li><a href="/info/feature.c">Feature</a></li>
+              <li><a href="/info/price.s">price</a></li>
+              <li><a href="/info/company.cc">company</a></li>
+              <li><a href="/info/blog.pas">blog</a></li>
               <li class="nav-header">Links</li>
               <li><a href="https://groups.google.com/group/clooca/topics">ディスカッション</a></li>
               <li><a href="http://www.clooca.com">clooca</a></li>
@@ -192,11 +219,34 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
           <div class="hero-unit">
             <h1>clooca DSL</h1>
             <p>cloooca DSL(クルーカDSL)はソーシャルDSMLプラットフォームです。</p>
-            <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　</a></p>
+            <div style="float:left;">
+            <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　</a>　</p></div>
             <p><a class="btn btn-primary btn-large" href="/mygroups">マイグループ &raquo;</a></p>
+            <ol id="selectable" style="float:left;">
+            <li class="ui-widget-content">エディタ</li>
+            <li class="ui-widget-content">ワークベンチ</li>
+            </ol>
+            <div id="ss1" style="float:left;width: 360px;"><img src="/static/images/site/ss1.png"></img></div>
+            <div id="ss2" style="float:left;width: 360px;display : none;"><img src="/static/images/site/ss2.png"></img></div>
+            <div style="float:right;">
             <h3>最新情報</h3>
             <ul id="twitter_data"></ul>
+            </div>
           </div>
+          <div class="row-fluid">
+            <div class="span4">
+              <h2>cloocaDSLとは？</h2>
+              <p>モデリングプラットフォームです。</p>
+            </div><!--/span-->
+            <div class="span4">
+              <h2>誰のためのもの？</h2>
+              <p>あらゆるソフトウェア開発者やソフトウェア工学の教育者へ。</p>
+            </div><!--/span-->
+            <div class="span4">
+              <h2>なぜcloocaDSLか？</h2>
+              <p>ソースコードを書く開発からの脱却。cloocaDSLでは「エディタ」と「ワークベンチ」という２つの機能が使えます。「ワークベンチ」ではアプリケーションを作るための土台を作ります。・・・</p>
+            </div><!--/span-->
+          </div><!--/row-->
           <div class="row-fluid">
             <div class="span4">
               <h2>ブラウザで使用可能</h2>
@@ -226,10 +276,8 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
 
       <hr>
 
-      <footer>
-      <div id="metamodel">
-      
-        <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
+      <footer style="text-align:center;">
+        <p>clooca DSLはCloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
 お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
 Copyright &copy 2011 clooca　All Rights Reserved.
 </p>

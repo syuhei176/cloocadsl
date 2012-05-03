@@ -11,6 +11,7 @@ import md5
 import MySQLdb
 import config
 sys.path.append(config.CLOOCA_CGI)
+from core import CoreService
 from core import UserService
 from core import MetaModelService
 from core import ProjectService
@@ -43,6 +44,16 @@ def login_view():
         return redirect('/mygroups')
     else:
         return render_template('login.html')
+
+@app.route('/login/<gid>', methods=['GET'])
+def login_to_group_view_(gid):
+    if 'user' in session:
+        return redirect('/dashboard/'+str(gid))
+    else:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        group = GroupService.getGroup(None, gid, connect)
+        connect.close()
+        return render_template('login_to_group.html', group=group)
 
 def hash(k):
     return md5.new(str((k * 5 + 100001) % 34567)).hexdigest()
@@ -94,7 +105,12 @@ def account():
         return render_template('account.html', user = UserService.getUserInfo(session['user']))
     return redirect(url_for('login_view'))
 
-
+@app.route('/mydb')
+def mydb():
+    if 'user' in session:
+        return CoreService.mydashboard(session['user'])
+    return redirect(url_for('login_view'))
+    
 @app.route('/dashboard/<id>')
 def dashboard(id=None):
     if 'user' in session:
@@ -133,7 +149,7 @@ def dashboard(id=None):
     return render_template('request_deny.html')
 
 @app.route('/editorjs/<pid>')
-def editorjs(pid=None):
+def editorjs(pid):
     if 'user' in session:
         result = ProjectService.loadProject(session['user'], pid)
         if not result == None:
@@ -152,6 +168,42 @@ def editorjs(pid=None):
                 joinInfo['service'] = rows[0][3]
                 result['group'] = joinInfo
                 return render_template('editorjs.html', pid = pid, project = json.dumps(result))
+    else:
+        return redirect(url_for('login_view'))
+    return render_template('request_deny.html')
+
+@app.route('/editor/<pid>')
+def editor(pid):
+    if 'user' in session:
+        result = ProjectService.loadProject(session['user'], pid)
+        if not result == None:
+            joinInfo = {}
+            joinInfo['id'] = 0
+            joinInfo['role'] = 0
+            joinInfo['name'] = 'dummy'
+            joinInfo['service'] = 'free'
+            result['group'] = joinInfo
+            return render_template('editorjs.html', pid = pid, project = json.dumps(result))
+    else:
+        return redirect(url_for('login_view'))
+    return render_template('request_deny.html')
+
+@app.route('/wb/preview/<id>')
+def wb_preview(id):
+    if 'user' in session:
+        result = {}
+        result['id'] = None
+        result['name'] = 'preview'
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result['xml'] = MetaModelService.loadSample(connect, session['user'], id)
+        connect.close()
+        result['metamodel_id'] = id
+        result['rep_id'] = None
+        result['group_id'] = None
+        result['metamodel'] = MetaModelService.loadMetaModel(session['user'], id)
+        result['group'] = {}
+        result['group']['service'] = 'free'
+        return render_template('preview.html', project = json.dumps(result))
     else:
         return redirect(url_for('login_view'))
     return render_template('request_deny.html')
@@ -206,41 +258,67 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
+
+"""
+group_idにプロジェクト作成する。
+group_id=0ならマイプロジェクト
+"""
 @app.route('/createm', methods=['POST'])
 def createm():
-    if 'user' in session and 'joinInfos' in session['user']:
-        gid = request.form['group_id']
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        cur = connect.cursor()
-        cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
-        rows = cur.fetchall()
-        cur.close()
-        connect.close()
-        if not len(rows) == 0:
-            joinInfo = {}
-            joinInfo['id'] = int(rows[0][0])
-            joinInfo['role'] = int(rows[0][1])
-            if joinInfo['id'] == int(gid) and joinInfo['role'] == 1:
-                project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], joinInfo)
-                return json.dumps(project)
+    if 'user' in session:
+        gid = int(request.form['group_id'])
+        if gid == 0:
+            project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], group_id=0)
+            return json.dumps(project)
+        else:
+            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+            cur = connect.cursor()
+            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+            rows = cur.fetchall()
+            cur.close()
+            connect.close()
+            if not len(rows) == 0:
+                joinInfo = {}
+                joinInfo['id'] = int(rows[0][0])
+                joinInfo['role'] = int(rows[0][1])
+                if joinInfo['id'] == int(gid) and joinInfo['role'] == 1:
+                    project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], group_id=joinInfo['id'])
+                    return json.dumps(project)
     return 'false'
 
+"""
+group_idにプロジェクト作成する。
+group_id=0ならマイプロジェクト
+"""
 @app.route('/createp', methods=['POST'])
 def createp():
     if 'user' in session:
         gid = int(request.form['group_id'])
+        sample = False
+        if 'sample' in request.form:
+            sample = True
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        cur = connect.cursor()
-        cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
-        rows = cur.fetchall()
-        cur.close()
-        connect.close()
-        if not len(rows) == 0:
-            joinInfo = {}
-            joinInfo['id'] = int(rows[0][0])
-            joinInfo['role'] = int(rows[0][1])
-            project = ProjectService.createProject(session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'], joinInfo)
-            return json.dumps(project)
+        if gid == 0:
+            project = ProjectService.createProject(connect, session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'],_is_sample=sample)
+            connect.close()
+        else:
+            cur = connect.cursor()
+            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+            rows = cur.fetchall()
+            cur.close()
+            if not len(rows) == 0:
+                joinInfo = {}
+                joinInfo['id'] = int(rows[0][0])
+                joinInfo['role'] = int(rows[0][1])
+                project = ProjectService.createProject(connect,
+                                                       session['user'],
+                                                       request.form['name'],
+                                                       request.form['xml'],
+                                                       request.form['metamodel_id'],
+                                                       group_id=joinInfo['id'],
+                                                       _is_sample=sample)
+                connect.close()
+                return json.dumps(project)
     return 'false'
 
 @app.route('/deletep', methods=['POST'])
@@ -278,6 +356,20 @@ def mload():
     project = MetaModelService.loadMetaModel(session['user'], request.form['id'],check=True)
     return json.dumps(project)
 
+@app.route('/preview-save', methods=['POST'])
+def preview_save():
+    if not 'user' in session:
+        return 'false'
+    if not 'id' in request.form:
+        return 'false'
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    res = json.dumps(MetaModelService.saveSample(connect,
+                                                 session['user'],
+                                                   request.form['id'],
+                                                   request.form['sample']))
+    connect.close()
+    return res
+
 
 @app.route('/metamodel-save', methods=['POST'])
 def metamodel_save():
@@ -293,6 +385,7 @@ def metamodel_save():
                                                    request.form['xml'],
                                                    request.form['visibillity'],
                                                    request.form['welcome_message']))
+#                                                   request.form['targets']))
     if 'name' in request.form:
         pass
     if 'xml' in request.form:
@@ -344,7 +437,6 @@ def download(pid):
             resp.headers['Content-type'] = 'application/octet-stream;'
             resp.headers['Content-Disposition'] = 'attachment; filename=p'+project_id+'.zip;'
             return resp
-
 
 @app.route('/update-group', methods=['POST'])
 def update_group():
@@ -500,6 +592,48 @@ def gethistory():
     if 'user' in session:
         RepositoryService.getHistory(request.form['pid'])
 
+
+@app.route('/market/')
+def market_top():
+    if 'user' in session:
+        return render_template('market/top.html', loggedin = True, username = session['user']['uname'])
+    return render_template('market/top.html', loggedin = False, username = '')
+
+@app.route('/wb/')
+def wb_top():
+    if 'user' in session:
+        return render_template('wb/top.html', loggedin = True, username = session['user']['uname'])
+    return render_template('wb/top.html', loggedin = False, username = '')
+
+@app.route('/wb/dashboard')
+def wb_dashboard():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        mymetamodels = MetaModelService.loadMyOwnMetaModelList(session['user'], connect)
+        connect.close()
+        return render_template('wb/dashboard.html',
+                               loggedin = True,
+                               username = session['user']['uname'],
+                               mymetamodels = mymetamodels)
+    return redirect(url_for('login_view'))
+
+@app.route('/tool/<id>/')
+def tool_top(id):
+    if 'user' in session:
+        return render_template('tool/top.html', loggedin = True, username = session['user']['uname'])
+    return render_template('request_deny.html')
+
+@app.route('/tool/<id>/dashboard')
+def tool_top(id):
+    if 'user' in session:
+        return render_template('tool/dashboard.html', loggedin = True, username = session['user']['uname'])
+    return render_template('tool/top.html', loggedin = False, username = '')
+
+@app.route('/tool/<tid>/editor/<pid>')
+def tool_top(tid,pid):
+    if 'user' in session:
+        return render_template('tool/editor.html', loggedin = True, username = session['user']['uname'])
+    return render_template('tool/top.html', loggedin = False, username = '')
 
 with app.test_request_context():
     print url_for('index')

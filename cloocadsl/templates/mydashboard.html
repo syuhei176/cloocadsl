@@ -3,7 +3,7 @@
 <head>
 <meta name="gwt:property" content="locale=ja">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>clooca</title>
+<title>clooca dashboard</title>
 <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 <script src="/static/js/jquery-1.7.1.min.js"></script>
@@ -13,22 +13,14 @@
 
 $(function() {
 	$( "#dashboard_tabs" ).tabs();
-});
-
-function init() {
     $('#create-newp-button').bind('click', function() {
         $('#create-new-p').dialog()
     });
     $('#create-newm-button').bind('click', function() {
         $('#create-new-m').dialog()
     });
-	{% if loggedin %}
 	  $('#login').empty().append('<a href="/logout">logout {{username}}</a>&nbsp;&nbsp;&nbsp;');
 	  load_models();
-	{% else %}
-	  $( "#login-dialog" ).dialog({ modal: true });
-	  $('#login').empty().append('<a href="/dashboard">login</a>&nbsp;&nbsp;&nbsp;');
-	{% endif %}
 	$("#loginform").submit(function(event) {
 
 	    /* stop form from submitting normally */
@@ -64,6 +56,7 @@ function init() {
 	        name = $form.find( 'input[name="name"]' ).val(),
 	        metamodel_id = $form.find( 'select[name="metamodel_id"]' ).val(),
 	        xml = $form.find( 'input[name="xml"]' ).val(),
+	        sample = $form.find( 'input[name="sample"]' ).val(),
 	        url = $form.attr( 'action' );
 	    
 	    if(name.length == 0) {
@@ -71,7 +64,7 @@ function init() {
 	    	return;
 	    }
 	    /* Send the data using post and put the results in a div */
-	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml, group_id: {{group_id}} },
+	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml, sample: sample, group_id:0},
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-p" ).dialog('close');
@@ -93,7 +86,7 @@ function init() {
 	    
 	    if(name.length == 0) return;
 	    /* Send the data using post and put the results in a div */
-	    $.post( url, { name: name, visibillity: visibillity, xml: xml, group_id: {{group_id}} },
+	    $.post( url, { name: name, visibillity: visibillity, xml: xml, group_id:0 },
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-m" ).dialog('close');
@@ -107,7 +100,6 @@ function init() {
 	        
 	    /* get some values from elements on the page: */
 	    var $form = $( this ),
-	    	group_id = $form.find( 'input[name="group_id"]' ).val(),
 	        name = $form.find( 'input[name="name"]' ).val(),
 	        detail = $form.find( 'input[name="detail"]' ).val(),
 	        visibillity = $form.find( 'select[name="visibillity"]' ).val(),
@@ -115,49 +107,26 @@ function init() {
 	    
 	    if(name.length == 0) return;
 	    /* Send the data using post and put the results in a div */
-	    $.post( url, {  group_id: {{group_id}}, name: name, detail: detail, visibillity: visibillity, },
+	    $.post( url, { name: name, detail: detail, visibillity: visibillity, },
 	      function( data ) {
 	    	if(data != null) {
 	    		
 	    	}
 	      }, "json");
 	  });
-	$("#update-role-form").submit(function(event) {
-
-	    /* stop form from submitting normally */
-	    event.preventDefault(); 
-	        
-	    /* get some values from elements on the page: */
-	    var $form = $( this ),
-	    	group_id = $form.find( 'input[name="group_id"]' ).val(),
-	    	user_id = $form.find( 'input[name="user_id"]' ).val(),
-	        role = $form.find( 'input[name="role"]' ).val(),
-	        url = $form.attr( 'action' );
-	    
-	    /* Send the data using post and put the results in a div */
-	    $.post( url, {  group_id: {{group_id}}, user_id: user_id, role: role},
-	      function( data ) {
-	    	if(data != null) {
-	    		
-	    	}
-	      }, "json");
-	  });
-}
+});
 
 function load_models() {
-	var available_metamodels = {{ metamodels|safe }};
-	var mymetamodels = {{ mymetamodel|safe }};
-	var groupmetamodels = {{ groupmetamodel|safe }};
-	var myprojects = {{ myproject|safe }};
+	var myprojects = {{ myprojects|safe }};
+	var mymetamodels = {{ mymetamodels|safe }};
+	var mytools = {{ mytools|safe }};
+	create_projects_table(myprojects,mymetamodels.concat(mytools));
+	create_metamodels_table(mymetamodels.concat(mytools));
 	create_mymetamodels_table(mymetamodels);
-	for(var i=0;i < mymetamodels.length;i++) {
-		if(mymetamodels[i].visibillity == 0) available_metamodels.push(mymetamodels[i])
-	}
-	create_metamodels_table(available_metamodels);
-	create_projects_table(myprojects, available_metamodels);
+	create_mytools_table(mytools);
 }
 
-function create_projects_table(projects, metamodels) {
+function create_projects_table(projects,metamodels) {
 	var html = '<table padding="100"><tr><td>プロジェクト名</td><td>種類</td></tr>';
 	for(var i = 0;i < projects.length;i++) {
 		var link = '<a href="/editorjs/'+projects[i].id+'" target="_blank">'+projects[i].name+'</a>';
@@ -189,6 +158,17 @@ function create_mymetamodels_table(metamodels) {
 	}
 	html += '</table>';
 	$('#metamodel').empty().append(html);
+}
+
+function create_mytools_table(mytools) {
+	var html = '<table><tr><td>メタモデル名</td><td>公開範囲</td></tr>';
+	for(var i = 0;i < mytools.length;i++) {
+		var link = '<a href="/workbenchjs/'+mytools[i].id+'" target="_blank">'+mytools[i].name+'</a>'
+		var del = '<a onclick="delete_metamodel('+metamodels[i].id+',\''+metamodels[i].name+'\')">削除</a>';
+		html += '<tr><td>'+link+'</td><td>'+del+'</td></tr>';
+	}
+	html += '</table>';
+	$('#mytool').empty().append(html);
 }
 
 function create_metamodels_table(metamodels) {
@@ -224,7 +204,7 @@ function delete_metamodel(id, mname) {
 
 </script>
 </head>
-<body onload="init()">
+<body>
       <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
     
@@ -256,6 +236,7 @@ function delete_metamodel(id, mname) {
    <div>プロジェクト名<input type="text" name="name"></div>
 	<div id="metamodel2"></div>
    <input type="hidden" name="xml" value=" ">
+   <div>sample project<input type="checkbox" name="sample" value="true"></div>
    <input type="submit" value="OK">
    </form>
 </div>
@@ -330,14 +311,13 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         </div><!--/span-->
         <div class="span9">
           <div class="hero-unit">
-            <h1>{{ group['name'] }}</h1>
-            <h3>{{ group['detail'] }}</h3>
+            <h1>ダッシュボード</h1>
             <div id="dashboard_tabs">
 	<ul>
 		<li><a href="#dashboard-tabs-1">プロジェクト</a></li>
 		<li><a href="#dashboard-tabs-2">ワークベンチ</a></li>
-		<li><a href="#dashboard-tabs-3">設定</a></li>
-		<li><a href="#dashboard-tabs-4">メンバー</a></li>
+		<li><a href="#dashboard-tabs-3">マイツール</a></li>
+		<li><a href="#dashboard-tabs-4">設定</a></li>
 	</ul>
 	<div id="dashboard-tabs-1">
             <h2>プロジェクト</h2>
@@ -350,72 +330,12 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <p><a id="create-newm-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
 	</div>
 	<div id="dashboard-tabs-3">
-		<form id="group-update-form" method="POST" action="/update-group">
-		<input type="hidden" name="group_id" value="{{ group['id'] }}">
-		<div>名前：<input type="text" name="name" value="{{group['name']}}"></div>
-		<div>説明：<input type="textarea" name="detail" value="{{group['detail']}}"></div>
-		<div>種類：<select name="visibillity">
-		{% if group['visibillity'] == 0 %}
-		<option value="0" selected=true>プライベートプロジェクト</option>
-		<option value="1">公開コミュニティ</option>
-		<option value="2">教育グループ</option>
-		{% elif group['visibillity'] == 1 %}
-		<option value="0">プライベートプロジェクト</option>
-		<option value="1" selected=true>公開コミュニティ</option>
-		<option value="2">教育グループ</option>
-		{% elif group['visibillity'] == 2 %}
-		<option value="0">プライベートプロジェクト</option>
-		<option value="1">公開コミュニティ</option>
-		<option value="2" selected=true>教育グループ</option>
-		{% endif %}
-		</select></div>
-		<div>プラン：<select name="service">
-		{% if group['service'] == 'free' %}
-		<option value="free" selected=true>フリー</option>
-		<option value="shinshu">信州大学用</option>
-		<option value="rep">モデルリポジトリ</option>
-		{% elif group['service'] == 'shinshu' %}
-		<option value="free">フリー</option>
-		<option value="shinshu" selected=true>信州大学用</option>
-		<option value="rep">モデルリポジトリ</option>
-		{% elif group['service'] == 'rep' %}
-		<option value="free">フリー</option><option value="shinshu">信州大学用</option><option value="rep" selected=true>モデルリポジトリ</option>
-		{% elif group['service'] == 'all' %}
-		<option value="0">フリー</option><option value="1">信州大学用</option><option value="2">モデルリポジトリ</option><option value="all" selected=true>ALL</option>
-		{% else %}
-		<option value="0" selected=true>フリー</option><option value="1">信州大学用</option><option value="2">モデルリポジトリ</option>
-		{% endif %}
-		</select></div>
-		<input type="submit" value="変更">
-   </form>
+            <h2>ツール</h2>
+            <div id="mytool"></div>
+            <p><a id="create-newm-button" class="btn btn-danger btn-small" href="#">　ダウンロード &raquo;　　</a></p>
 	</div>
 	<div id="dashboard-tabs-4">
-	<form id="member-add-form" method="POST" action="/member-add">
-	<div><input type="text" name="name" value=""></div>
-	<input type="submit" value="追加">
-	</form>
-	<div id="userlist">
-	{% for member in members %}
-	<p>{{ member['uname'] }}</p>
-		<form id="update-role-form{{ member['id'] }}" method="POST" action="/update-role">
-		<input type="hidden" name="user_id" value="{{ member['id'] }}">
-		<input type="hidden" name="group_id" value="{{ group['id'] }}">
-		<div>権限：<select name="role">
-		{% if member['group_role'] == 0 %}
-		<option value="0" selected=true>通常</option>
-		<option value="1">管理者</option>
-		{% elif member['group_role'] == 1 %}
-		<option value="0">通常</option>
-		<option value="1" selected=true>管理者</option>
-		{% else %}
-		<option value="0">通常</option>
-		<option value="1" selected=true>管理者</option>
-		{% endif %}
-		</select></div>
-		<input type="submit" value="変更">
-		</form>
-	{% endfor %}
-	</div>
+            <h2>設定</h2>
 	</div>
 </div>
           </div>
@@ -423,7 +343,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <div class="span4">
               <h2>グループメンバの参加について</h2>
               <p>下記のURLから参加してもらってください。</p>
-              <p><a href="http://dsl.clooca.com/member_reg/{{ group_id }}/{{hash_key}}">メンバ登録URL</a><br>http://dsl.clooca.com/member_reg/{{ group_id }}/{{hash_key}}</p>
+              <p><a href="http://dsl.clooca.com/member_reg/{{ group_id }}">メンバ登録URL</a><br>http://dsl.clooca.com/member_reg/{{ group_id }}</p>
             </div><!--/span-->
           </div><!--/row-->
       </div><!--/row-->

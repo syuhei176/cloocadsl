@@ -9,6 +9,7 @@ function MetaModel(id, name, metadiagram) {
 	this.metaobjects = [];
 	this.metarelations = [];
 	this.metaproperties = [];
+	this.graphics = {};
 }
 
 function MetaDiagram(id, name) {
@@ -25,9 +26,9 @@ function MetaObject(id, name) {
 	this.properties = new Array();	//propertyへの参照
 	this.abstractable = false;
 	this.graphic = null;
-	this.graphic_option = null;
-	//
+//	this.graphic_option = null;
 	this.decomposition = null;
+	this.resizable = false;
 }
 
 function MetaRelation(id, name) {
@@ -72,6 +73,7 @@ function MetaProperty(id, name) {
 	
 	/**
 	 * extended field
+	 * for "fixed list" {disp,value}
 	 */
 	this.exfield = "";
 }
@@ -83,3 +85,12 @@ MetaProperty.COLLECTION_STRING = "collection_String";
 
 MetaProperty.INPUT_FIELD = "input field";
 MetaProperty.FIXED_LIST = "fixed list";
+
+function GraphicInfo(type, option) {
+	this.type = type;
+	this.option = option;
+}
+
+GraphicInfo.TYPE_LINES = 'lines';
+GraphicInfo.TYPE_POLYGON = 'polygon';
+

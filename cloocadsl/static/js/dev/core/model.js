@@ -34,6 +34,11 @@ function Object(meta_id) {
 	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
 	this.ve = new VersionElement();
 	this.diagram = null;
+	this.ofd = new ObjectForDiagram();
+}
+
+function ObjectForDiagram() {
+	this.z = 0;
 }
 
 function Relationship(meta_id) {
@@ -44,6 +49,11 @@ function Relationship(meta_id) {
 	this.points = new Array();
 	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
 	this.ve = new VersionElement();
+	this.rfd = new RelationshipForDiagram();
+}
+
+function RelationshipForDiagram() {
+	this.z = 0;
 }
 
 function PropertyList() {
@@ -67,11 +77,6 @@ function VersionElement() {
 
 VersionElement.update = function(ve) {
 	if(ve.ver_type != 'add') ve.ver_type = 'update';
-}
-
-function ModelController() {}
-ModelController.getObject = function(diagram, id) {
-	return g_model.objects[id];
 }
 
 function MetaModelController(){}

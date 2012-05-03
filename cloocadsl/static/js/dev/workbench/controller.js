@@ -13,7 +13,9 @@ function saveMetaModel(id, fn) {
  */
 function saveAll(fn) {
 	var xml = JSON.stringify(g_metamodel);
+//	var targets = JSON.stringify(g_metaproject.targets);
 	$.post('/metamodel-save', { id : g_metaproject.id, name: g_metaproject.name, visibillity: g_metaproject.visibillity, xml : xml, welcome_message:g_metaproject.welcome_message}, fn, "json");
+//	$.post('/metamodel-save', { id : g_metaproject.id, name: g_metaproject.name, visibillity: g_metaproject.visibillity, xml : xml, welcome_message:g_metaproject.welcome_message, targets:targets}, fn, "json");
 }
 
 /**

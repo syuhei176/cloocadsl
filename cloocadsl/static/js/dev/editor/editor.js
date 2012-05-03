@@ -7,9 +7,10 @@ Ext.require([
 ]);
 
 var g_project_id = 0;
-function init_clooca(pid, project) {
-	g_project_id = pid;
+function init_clooca(project, is_preview) {
+	g_project_id = project.id;
 	g_projectinfo = project;
+	_is_preview = is_preview;
 	new Ext.Viewport({
 		layout:'border',
 		items:[
@@ -186,7 +187,7 @@ function create_menu() {
 	}
 	if(g_projectinfo.group.service == 'shinshu' || g_projectinfo.group.service == 'all') {
 		common_menu.tbar.push({
-            text: '信州大学',
+            text: 'バイナリ',
             iconCls: 'add16',
             menu: [
                    {
@@ -213,9 +214,7 @@ function onItemClick(item){
 			g_model.diagrams[d.id] = d;
 			createModelExplorer();
 		}else{
-			if(g_model.diagrams.length == 0) {
-				create_diagram();
-			}
+			show_create_diagram_window();
 		}
 	}else if(item.id == 'png') {
 		current_editor.getImage('png');
@@ -278,7 +277,9 @@ function createModelExplorer() {
 	var diagrams = [];
 	for(var key in g_model.diagrams) {
 		console.log("createModelExplorer "+key);
-		diagrams.push({id: key, text: "diagram"+key, leaf: true});
+		if(g_model.diagrams[key].ve.ver_type != 'delete') {
+			diagrams.push({id: key, text: "diagram"+key, leaf: true});
+		}
 	}
 	var store = Ext.create('Ext.data.TreeStore', {
 	    root: {
@@ -295,10 +296,48 @@ function createModelExplorer() {
 	    store: store,
 	    rootVisible: false
 	});
-	modelExplorer.on('itemclick',function(view, record, item, index, event) {
+	modelExplorer.on('itemdblclick',function(view, record, item, index, event) {
 		if(record.data.text != 'root') {
 	    	var editor = new DiagramEditor(record.data.text, record.data.text, g_model.diagrams[record.data.id]);
 	    	editortabpanel.add(editor, record.data.text);
+		}
+    });
+	var mnuContext = new Ext.menu.Menu({
+	    items: [{
+	        id: 'delete',
+	        text: '削除'
+	    },{
+	        id: 'open',
+	        text: '開く',
+	        items: [{
+		        id: 'open_d',
+		        text: 'ダイアグラム'
+		    },{
+		        id: 'open_s',
+		        text: 'シーケンス'
+		    }
+	        ]
+	    }],
+	    listeners: {
+        click: function(menu, item) {
+            switch (item.id) {
+                case 'delete':
+                	ModelController.deleteDiagram(selected_diagram_id);
+                    break;
+                case 'open':
+        	    	var editor = new SequenceEditor(selected_diagram_name, selected_diagram_name, g_model.diagrams[selected_diagram_id]);
+        	    	editortabpanel.add(editor, selected_diagram_name);
+                    break;
+            }
+        }
+	    }
+	});
+
+	modelExplorer.on('itemmousedown',function(view, record, item, index, event) {
+		if(event.button == 2) {
+			mnuContext.showAt(event.getX(), event.getY());
+			selected_diagram_id = record.data.id;
+			selected_diagram_name = record.data.text;
 		}
     });
 	Ext.getCmp('modelexplorer').removeAll();
@@ -365,4 +404,55 @@ function checkoutview() {
 					}).show();
 				}
 			}, "json");
+}
+
+function show_create_diagram_window() {
+	var datas = [];
+	for(var i=1;i < g_metamodel.metadiagrams.length;i++) {
+		datas.push(g_metamodel.metadiagrams[i]);
+	}
+	 var selModel = Ext.create('Ext.selection.RowModel', {
+		 mode: 'SINGLE',
+	        listeners: {
+	            selectionchange: function(sm, selections) {
+	                for(var i=0;i < selections.length;i++) {
+	                	console.log(i + '=' + selections[i].get('id'));
+	                }
+	            }
+	        }
+	    });
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'Diagram',
+	    height: 200,
+	    width: 400,
+	    layout: 'fit',
+	    items: [{
+	        xtype: 'grid',
+	        border: false,
+	        columns: [{text: "name", dataIndex: 'name'}],
+	        store: Ext.create('Ext.data.Store', {data:datas,fields:['id','name']}),
+		    selModel: selModel,
+		    dockedItems: [{
+	            xtype: 'toolbar',
+	            dock: 'bottom',
+	            ui: 'footer',
+	            layout: {
+	                pack: 'center'
+	            },
+	            items: []
+	        }, {
+	            xtype: 'toolbar',
+	            items: [{
+	                text:'Create',
+	                tooltip:'create',
+	                iconCls:'add',
+	                handler : function() {
+	                	ModelController.addDiagram(selModel.getSelection()[0].get('id'));
+	                	win.hide();
+	                }
+	            }]
+	        }]
+	     }]
+	});
+	win.show();
 }

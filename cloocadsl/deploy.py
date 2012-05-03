@@ -1,4 +1,5 @@
 import os
+import sys
 import config
 from slimit import minify
 
@@ -97,5 +98,10 @@ def deploy():
     scp.close()
 
 if __name__ == '__main__':
-    encode_module()
-    deploy()
+    argvs = sys.argv
+    argc = len(argvs)
+    if argc == 1:
+        encode_module()
+        deploy()
+    if argc == 2:
+        encode_module()

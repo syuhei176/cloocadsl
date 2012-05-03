@@ -132,6 +132,11 @@ function create_menu() {
                 	   text: 'ウェルカムメッセージ',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
+                   },{
+                	   id: 'targets',
+                	   text: 'ターゲット',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
                    }
                    ]
         },{
@@ -201,14 +206,7 @@ function onItemClick(item){
 	if(item.id == 'save') {
 		editortabpanel.current_editor.save();
 	}else if(item.id == 'preview') {
-		g_model = new Model();
-		g_model.root = 1;
-		g_model.diagrams[1] = new Diagram();
-		g_model.diagrams[1].meta_id = 1;
-		editor = new DiagramEditor('preview', 'preview'+new Date().getTime(), g_model.diagrams[1]);
-		//if not exist
-		// create_project
-		//editorjs
+		window.open('/wb/preview/'+g_metamodel_id);
 	}else if(item.id == 'MetaDiagram') {
 		var editor = new MetaDiagramsEditor(g_metamodel.metadiagrams);
 		editortabpanel.add(editor, 'metadiagrams');
@@ -227,8 +225,8 @@ function onItemClick(item){
 	}else if(item.id == 'welcome_editor') {
 		var editor = new WellcomeMessageEditor();
 		editortabpanel.add(editor, 'welcome_editor');
-	}else{
-		
+	}else if(item.id == 'targets') {
+//		show_targets_window();
 	}
 }
 
@@ -332,4 +330,12 @@ function createTemplateExplorer() {
     });
 	Ext.getCmp('modelexplorer').add(modelExplorer);
 	return modelExplorer;
+}
+
+function show_targets_window() {
+	 Ext.Msg.prompt('ターゲット','編集',function(btn,text){
+		 if(btn != 'cancel') {
+			 g_metaproject.targets = JSON.parse(text);
+		 }
+	 },null,true,JSON.stringify(g_metaproject.targets));
 }

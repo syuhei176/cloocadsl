@@ -103,9 +103,7 @@ function MetaObjectsEditor(metaobjects) {
 	Ext.create('Ext.data.Store', {
 	    storeId:'simpsonsStore',
 	    fields:['id', 'name', 'graphic'],
-	    data:{
-	    	'items':l_metaobjs
-	    },
+	    data:{'items':l_metaobjs},
 	    proxy: {
 	        type: 'memory',
 	        reader: {
@@ -155,7 +153,6 @@ function MetaObjectsEditor(metaobjects) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'add',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
 	  	  	  	     	    	metaobjects.push(new MetaObject(metaobject_IdGenerator.getNewId(), ''));
 	  	  	  	     	    }
   	  	  	           },
@@ -252,15 +249,14 @@ function MetaRelationsEditor(metarelations) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'add',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
-	  	  	  	     	 metarelations.push(new MetaRelation(metaobject_IdGenerator.getNewId(), ''));
+	  	  	  	     	    	metarelations.push(new MetaRelation(metaobject_IdGenerator.getNewId(), ''));
 	  	  	  	     	    }
   	  	  	           },
   	  	  	           {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'delete',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
+	  	  	  	     	    	
 	  	  	  	     	    }
   	  	  	           }
 		  	           ],
@@ -349,7 +345,6 @@ function MetaPropertyEditor(metaobjects) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'add',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
 	  	  	  	     	    	metaobjects.push(new MetaProperty(metaobjects.length, ''));
 	  	  	  	     	    }
   	  	  	           },
@@ -357,7 +352,7 @@ function MetaPropertyEditor(metaobjects) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'delete',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
+	  	  	  	     	    	
 	  	  	  	     	    }
   	  	  	           }
 		  	           ],

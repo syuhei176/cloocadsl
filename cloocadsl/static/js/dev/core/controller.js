@@ -23,16 +23,26 @@ function genbin(pid) {
  */
 function saveModel(pid) {
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
-	g_model.id = pid;
-	var xml = JSON.stringify(g_model);
-//	console.log(xml);
-	$.post('/psave', { pid : pid, xml : xml },
-			function(data) {
-				if(data) {
-					console.log('saved json string = '+xml);
-					Ext.MessageBox.hide();
-				}
-			}, "json");
+	if(_is_preview) {
+		var xml = JSON.stringify(g_model);
+		$.post('/preview-save', { id : g_metamodel_id, sample : xml },
+				function(data) {
+					if(data) {
+						console.log('saved json string = '+xml);
+						Ext.MessageBox.hide();
+					}
+				}, "json");
+	}else{
+		g_model.id = pid;
+		var xml = JSON.stringify(g_model);
+		$.post('/psave', { pid : pid, xml : xml },
+				function(data) {
+					if(data) {
+						console.log('saved json string = '+xml);
+						Ext.MessageBox.hide();
+					}
+				}, "json");
+	}
 }
 
 

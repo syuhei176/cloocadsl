@@ -261,7 +261,7 @@ def parsePropertyJSON(prop):
     edited = False
     id = prop['id']
     meta_id = prop['meta_id']
-    content = prop['value']
+    content = str(prop['value'])
     edited_type = prop['ve']['ver_type']
     version = int(prop['ve']['version'])
     if edited_type == 'update':

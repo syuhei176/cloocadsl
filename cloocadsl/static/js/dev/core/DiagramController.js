@@ -1,3 +1,31 @@
+function ModelController() {}
+
+ModelController.getObject = function(diagram, id) {
+	return g_model.objects[id];
+}
+
+ModelController.addDiagram = function(meta_id){
+	var d = new Diagram();
+	d.meta_id = meta_id;//g_metamodel.metadiagram;
+//	g_model.root = d.id;
+	g_model.diagrams[d.id] = d;
+	console.log('add diagram id='+d.id);
+	createModelExplorer();
+}
+
+ModelController.deleteDiagram = function(id){
+	console.log('delete diagram id='+id+','+g_model.diagrams[id].ve.ver_type);
+	if(g_model.diagrams[id].ve.ver_type == 'add') {
+		/*
+		 * TODO:このdiagramへの参照も消さなければいけない。
+		 */
+		delete g_model.diagrams[id];
+	}else{
+		g_model.diagrams[id].ve.ver_type = 'delete';
+	}
+	createModelExplorer();
+}
+
 function DiagramController(diagram) {
 	this.diagram = diagram;
 	this.listeners = new Array();
@@ -125,7 +153,7 @@ DiagramController.prototype.addElement = function(ele, meta_ele) {
 			plist = new PropertyList();
 			plist.meta_id = meta_prop.id;
 			if(meta_prop.data_type != MetaProperty.COLLECTION_STRING) {
-				this.addProperty(plist, meta_prop);
+				this.addProperty(plist, meta_prop, '');
 			}
 			ele.properties.push(plist);
 		}
@@ -141,6 +169,12 @@ DiagramController.prototype.addProperty = function(plist, meta_prop, content) {
 	if(content != undefined) new_p.value = content;
 	g_model.properties[new_p.id] = new_p;
 	plist.children.push(new_p.id);
+	//init
+	if(meta_prop.data_type == MetaProperty.NUMBER) {
+		new_p.value = 0;
+	}else{
+		new_p.value = content
+	}
 	console.log('add property id='+new_p.id+','+new_p.ve.ver_type);
 }
 
@@ -158,9 +192,16 @@ DiagramController.prototype.updateProperty = function(p, newValue, ele) {
 }
 
 DiagramController.prototype.findNode = function(p) {
+	var tmp_objs = [];
 	for(var i=0;i < this.diagram.objects.length;i++) {
 		var obj_id = this.diagram.objects[i];
 		var obj = g_model.objects[obj_id];
+		if(obj == undefined) alert(obj_id);
+		tmp_objs.push(obj);
+	}
+	tmp_objs.sort(function(a,b) {return b.ofd.z-a.ofd.z;});
+	for(var i=0;i < tmp_objs.length;i++) {
+		var obj = tmp_objs[i];
 		if(Rectangle2D.contains(obj.bound, p)) {
 			return obj;
 		}

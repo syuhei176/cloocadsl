@@ -3,7 +3,7 @@
  * @param name 名前
  * @param key　唯一のキー
  */
-function DiagramEditor(name, key, diagram) {
+function SequenceEditor(name, key, diagram) {
 	this.name = name;
 	this.key = key;
 	this.diagram = diagram;
@@ -33,7 +33,7 @@ function DiagramEditor(name, key, diagram) {
 	this.canvas = $('#canvas_'+this.key);
 }
 
-DiagramEditor.prototype.draw = function() {
+SequenceEditor.prototype.draw = function() {
 	var self = this;
 	if(self.canvas == null) {
 		self.canvas = $('#canvas_'+self.key);
@@ -161,7 +161,7 @@ DiagramEditor.prototype.draw = function() {
 			  font: "16px 'ＭＳ ゴシック'"
 			});
 	}
-	if(self.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+	if(self.dragMode == SequenceEditor.DRAG_RUBBERBAND) {
 		self.canvas.drawLine({
 			  strokeStyle: "#777",
 			  strokeWidth: 2,
@@ -174,11 +174,11 @@ DiagramEditor.prototype.draw = function() {
 	}
 }
 
-DiagramEditor.prototype.getPanel = function() {
+SequenceEditor.prototype.getPanel = function() {
 	return this.panel;
 }
 
-DiagramEditor.prototype.Initialize = function() {
+SequenceEditor.prototype.Initialize = function() {
 	var self = this;
 	this.canvas = $('#canvas_'+this.key);
 	var mnuContext = new Ext.menu.Menu({
@@ -285,7 +285,7 @@ DiagramEditor.prototype.Initialize = function() {
 	this.draw();
 }
 
-DiagramEditor.prototype.onActivate = function() {
+SequenceEditor.prototype.onActivate = function() {
 	this.createButton();
 	current_editor = this;
 }
@@ -293,24 +293,24 @@ DiagramEditor.prototype.onActivate = function() {
 /**
  * static変数
  */
-DiagramEditor.DRAG_NONE = 0;
-DiagramEditor.DRAG_RUBBERBAND = 1;
-DiagramEditor.DRAG_MOVE = 2;
-DiagramEditor.DRAG_POINT = 3;
-DiagramEditor.DRAG_RANGE = 4;
-DiagramEditor.DRAG_RESIZE = 5;
+SequenceEditor.DRAG_NONE = 0;
+SequenceEditor.DRAG_RUBBERBAND = 1;
+SequenceEditor.DRAG_MOVE = 2;
+SequenceEditor.DRAG_POINT = 3;
+SequenceEditor.DRAG_RANGE = 4;
+SequenceEditor.DRAG_RESIZE = 5;
 
-DiagramEditor.prototype.ActionMove = function(x, y) {
+SequenceEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.x = x;
 	this.drag_move.y = y;
-	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
+	if(this.dragMode == SequenceEditor.DRAG_MOVE) {
 		if(this.selected != null) {
 			this.updateObject(this.selected,Number(x-10),Number(y-10));
 			this.draw()
 		}
-	}else if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+	}else if(this.dragMode == SequenceEditor.DRAG_RUBBERBAND) {
 		this.draw()
-	}else if(this.dragMode == DiagramEditor.DRAG_RESIZE) {
+	}else if(this.dragMode == SequenceEditor.DRAG_RESIZE) {
 		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
 		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
 		this.draw()
@@ -319,52 +319,56 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	}
 }
 
-DiagramEditor.prototype.updateObject = function(obj, x, y) {
+SequenceEditor.prototype.updateObject = function(obj, x, y) {
 	obj.bound.x = x - 10;
-	obj.bound.y = y - 10;
+//	obj.bound.y = y - 10;
+	obj.bound.y = 100;
 	VersionElement.update(obj.ve);
 }
 
-DiagramEditor.prototype.ActionDown = function(x, y) {
+SequenceEditor.prototype.ActionDown = function(x, y) {
 	if(this.tool == null) {
 		if(this.clicknode(Number(x), Number(y))) {
-			if(this.dragMode != DiagramEditor.DRAG_RESIZE) this.dragMode = DiagramEditor.DRAG_MOVE;
+			if(this.dragMode != SequenceEditor.DRAG_RESIZE) this.dragMode = SequenceEditor.DRAG_MOVE;
 		}else if(this.clickedge(x, y)) {
-//			this.dragMode = DiagramEditor.DRAG_POINT;
+//			this.dragMode = SequenceEditor.DRAG_POINT;
 		}else{
-			this.dragMode = DiagramEditor.DRAG_NONE;
+			this.dragMode = SequenceEditor.DRAG_NONE;
 			this.selected = null;
 		}
 	}else if(this.tool.classname == 'MetaObject'){
 		this.diagramController.addObject(x, y, this.tool.id);
 		this.select_button.toggle(true, false);
 	}else if(this.tool.classname == 'MetaRelation'){
-		this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
+		this.dragMode = SequenceEditor.DRAG_RUBBERBAND;
 	}
 	this.drag_start.x = x;
 	this.drag_start.y = y;
 }
 
-DiagramEditor.prototype.ActionUp = function(x, y) {
+SequenceEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.x = x;
 	this.drag_end.y = y;
-	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+	if(this.dragMode == SequenceEditor.DRAG_RUBBERBAND) {
 		this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
 		this.select_button.toggle(true);
-	} else if(this.dragMode == DiagramEditor.DRAG_POINT) {
+	} else if(this.dragMode == SequenceEditor.DRAG_POINT) {
 		this.movePoint(this.selected, this.drag_start, this.drag_end);
 	}
-	this.dragMode = DiagramEditor.DRAG_NONE;
+	this.dragMode = SequenceEditor.DRAG_NONE;
 }
 
-DiagramEditor.prototype.deletePoint = function() {
+SequenceEditor.prototype.deletePoint = function() {
 	var rel = this.selected;
 	if(rel == null) return;
 	rel.points.length = 0;
 }
 
-DiagramEditor.prototype.movePoint = function(rel, s, d) {
+SequenceEditor.prototype.movePoint = function(rel, s, d) {
 	if(rel != null) {
+		var yy = d.y - s.y > 0 ? 3 : -3;
+		g_model.properties[rel.properties[0].children[0]].value = Number(g_model.properties[rel.properties[0].children[0]].value) + Number(yy);
+		/*
 		var flg = true;
 		for(var i=0;i < rel.points.length;i++) {
 			if(Point2D.distanceSq(rel.points[i], s) < 150) {
@@ -378,15 +382,16 @@ DiagramEditor.prototype.movePoint = function(rel, s, d) {
 				rel.points.push(new Point2D(d.x, d.y));
 			}
 		}
+		*/
 	}
 }
 
-DiagramEditor.prototype.clicknode = function(x, y) {
+SequenceEditor.prototype.clicknode = function(x, y) {
 	var obj = this.diagramController.findNode(new Point2D(x, y));
 	if(obj != null) {
 		if(obj == this.selected) {
 			if(Rectangle2D.contains(new Rectangle2D(obj.bound.x+obj.bound.width-12, obj.bound.y+obj.bound.height-12, 12, 12), new Point2D(x, y))) {
-				this.dragMode = DiagramEditor.DRAG_RESIZE;
+				this.dragMode = SequenceEditor.DRAG_RESIZE;
 			}
 		}
 		if(obj.ve.ver_type == "delete") return false;
@@ -407,26 +412,28 @@ DiagramEditor.prototype.clicknode = function(x, y) {
 	return false;
 }
 
-DiagramEditor.prototype.clickedge = function(x, y) {
+SequenceEditor.prototype.clickedge = function(x, y) {
 	for(var i=0;i < this.diagram.relationships.length;i++) {
 		if(this.click_a_edge(g_model.relationships[this.diagram.relationships[i]], x, y)) return true;
 	}
 	return false;
 }
 
-DiagramEditor.prototype.click_a_edge = function(rel, x, y) {
+SequenceEditor.prototype.click_a_edge = function(rel, x, y) {
 	if(rel.ve.ver_type == "delete") return false;
 	var points = new Array();
 	var src = ModelController.getObject(this.diagram, rel.src);
 	var dest = ModelController.getObject(this.diagram, rel.dest);
 	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
 	var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
+	s.y += g_model.properties[rel.properties[0].children[0]].value;
+	e.y += g_model.properties[rel.properties[0].children[0]].value;
 	points.push(s);
 	points = points.concat(rel.points);
 	points.push(e);
 	for(var i=0;i < points.length - 1;i++) {
 		if((new Line2D(points[i].x, points[i].y, points[i+1].x, points[i+1].y)).ptSegDist(x, y) < 16) {
-			if(rel == this.selected) this.dragMode = DiagramEditor.DRAG_POINT;
+			if(rel == this.selected) this.dragMode = SequenceEditor.DRAG_POINT;
 			this.selected = rel;
 			this.fireSelectRelationship(this.selected);
 			return true;
@@ -437,7 +444,7 @@ DiagramEditor.prototype.click_a_edge = function(rel, x, y) {
 
 
 
-DiagramEditor.prototype.createButton = function() {
+SequenceEditor.prototype.createButton = function() {
 	var self = this;
 	var toolpanel = Ext.getCmp('toolpanel');
 	toolpanel.removeAll();
@@ -498,7 +505,7 @@ DiagramEditor.prototype.createButton = function() {
 /**
  * deleteSelected: 要素を削除する。要素はObjectかRelationshipのいずれか
  */
-DiagramEditor.prototype.deleteSelected = function() {
+SequenceEditor.prototype.deleteSelected = function() {
 	if(this.selected != null) {
 		for(var i=0;i < this.diagram.objects.length;i++) {
 			if(this.diagram.objects[i] == this.selected.id) {
@@ -514,7 +521,7 @@ DiagramEditor.prototype.deleteSelected = function() {
 	}
 }
 
-DiagramEditor.prototype.info = function() {
+SequenceEditor.prototype.info = function() {
 	if(this.selected != null) {
 		var str = 'ver_type='+this.selected.ve.ver_type;
 		str += '<br>version='+this.selected.ve.version;
@@ -530,7 +537,7 @@ DiagramEditor.prototype.info = function() {
 	}
 }
 
-DiagramEditor.prototype.up_step = function() {
+SequenceEditor.prototype.up_step = function() {
 	if(this.selected.ofd != undefined) {
 		for(var i=0;i < this.diagram.objects.length;i++) {
 			var obj_id = this.diagram.objects[i];
@@ -556,7 +563,7 @@ DiagramEditor.prototype.up_step = function() {
 	}
 }
 
-DiagramEditor.prototype.down_step = function() {
+SequenceEditor.prototype.down_step = function() {
 	if(this.selected.ofd != undefined) {
 		for(var i=0;i < this.diagram.objects.length;i++) {
 			var obj_id = this.diagram.objects[i];
@@ -591,13 +598,13 @@ function addRelationship(src, dest) {
 }
 */
 
-DiagramEditor.prototype.fireSelectObject = function(selected) {
+SequenceEditor.prototype.fireSelectObject = function(selected) {
 	var meta_obj = MetaModelController.getMetaObject(g_metamodel.metadiagram, selected.meta_id)
 	this.createPropertyPanel(meta_obj, selected);
 	this.info()
 }
 
-DiagramEditor.prototype.fireSelectRelationship = function(selected) {
+SequenceEditor.prototype.fireSelectRelationship = function(selected) {
 	var meta_rel = MetaModelController.getMetaRelation(g_metamodel.metadiagram, selected.meta_id)
 	this.createPropertyPanel(meta_rel, selected);
 	this.info()
@@ -609,7 +616,7 @@ DiagramEditor.prototype.fireSelectRelationship = function(selected) {
  * @param meta_ele
  * @param ele
  */
-DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
+SequenceEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 	var meta_prop_id = null;
 	if(arguments.length == 3) {
 		meta_prop_id = arguments[2];
@@ -662,235 +669,42 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 /**
  * @param type:"png" or "jpg"
  */
-DiagramEditor.prototype.getImage = function(type) {
+SequenceEditor.prototype.getImage = function(type) {
 	window.open(this.canvas.getCanvasImage(type))
 }
 
-function PropertyPanel(){}
-
-PropertyPanel.Decomposition = function(dc, meta_ele, ele) {
-	var data = [];
-	for(var d in g_model.diagrams) {
-		console.log(g_model.diagrams[d].id);
-		data.push(g_model.diagrams[d]);
-	}
-	var states = Ext.create('Ext.data.Store', {
-	    fields: ['id'],
-	    data : data
-	});
-	var prop_tab = {
-            title: 'diagram',
-            html : '',
-            items: [
-                  {
-	  	        	   xtype: 'combobox',
-	  	        	   store: states,
-	  	        	    queryMode: 'local',
-	  	        	    displayField: 'id',
-	  	        	    valueField: 'id',
-  	        		   value: ele.diagram,
-  	        		   listeners: {
-  	        			   change: {
-  	        				   fn: function(field, newValue, oldValue, opt) {
-  	        					   ele.diagram = Number(newValue);
-  	        				   }
-  	        			   }
-  	        		   }
-                  }
-                  ]
-		};
-	return prop_tab;
-}
-PropertyPanel.InputField = function(dc, meta_prop, prop, ele) {
-	var p = g_model.properties[prop.children[0]];
-	var field = 'textfield';
-	if(meta_prop.data_type.toLowerCase() == MetaProperty.STRING) {
-		field = 'textfield';
-	}else if(meta_prop.data_type.toLowerCase() == MetaProperty.NUMBER){
-		field = 'numberfield';
-	}
-	var prop_tab = {
-            title: meta_prop.name,
-            html : '',
-            items: [{
-	  	        	   xtype: field,
-  	        		   value: p.value,
-  	        		   listeners: {
-  	        			   change: {
-  	        				   fn: function(field, newValue, oldValue, opt) {
-	        						dc.diagramController.updateProperty(p, newValue, ele);
-  	        				   }
-  	        			   }
-  	        		   }
-                  }]
-		};
-	return prop_tab;
-}
-PropertyPanel.FixedList = function(dc, meta_prop, prop, ele) {
-	var p = g_model.properties[prop.children[0]];
-	var states = Ext.create('Ext.data.Store', {
-	    fields: ['disp','value'],
-	    data : meta_prop.exfield
-	});
-	var prop_tab = {
-            title: meta_prop.name,
-            html : '',
-            items: [
-                  {
-	  	        	   xtype: 'combobox',
-	  	        	   store: states,
-	  	        	    queryMode: 'local',
-	  	        	    displayField: 'disp',
-	  	        	    valueField: 'value',
-  	        		   value: p.value,
-  	        		   listeners: {
-  	        			   change: {
-  	        				   fn: function(field, newValue, oldValue, opt) {
- 	        						g_model.properties[prop.children[0]].value = newValue;
- 	        						dc.diagramController.updateProperty(p, newValue, ele);
-  	        				   }
-  	        			   }
-  	        		   }
-                  }
-                  ]
-		};
-	return prop_tab;
-}
-
-PropertyPanel.selected = new Array();
-/**
- * コレクション<String>用のプロパティエリア
- */
-PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele, meta_ele) {
-	 var selModel = Ext.create('Ext.selection.CheckboxModel', {
-	        listeners: {
-	            selectionchange: function(sm, selections) {
-	                grid4.down('#removeButton').setDisabled(selections.length == 0);
-	                for(var i=0;i < selections.length;i++) {
-	                	PropertyPanel.selected = new Array();
-	                	PropertyPanel.selected.push(selections[i].get('index'));
-//	                	console.log(i + '=' + selections[i].get('index'));
-	                }
-	            }
-	        }
-	    });
-	    Ext.define('Collection', {
-	        extend: 'Ext.data.Model',
-	        fields: ['value']
-	    });
-	 var dummy = new Array();
-	 for(var i=0;i < prop.children.length;i++) {
-		var p = g_model.properties[prop.children[i]];
-		if(p.ve.ver_type != 'delete') dummy.push({id: p.id, index: i, value : p.value});
-	 }
-	 var store = Ext.create('Ext.data.Store', {
-         model: 'Collection',
-         data: dummy
-     });
-	 //追加ボタンが押されたときの処理
-	 var additem = function() {
-		 Ext.Msg.prompt('追加','プロパティ',function(btn,text){
-			 if(btn != 'cancel') {
-				 dc.diagramController.addProperty(prop, meta_prop, text);
-				 //アクティブにするタブを指定して、プロパティエリアを再構築
-				 if(ele.bound != undefined) calObjHeight(ele);
-				 current_editor.createPropertyPanel(meta_ele, ele, meta_prop.id);
-			 }
-		 },null,false,'');
-	 }
-	 //編集ボタンが押されたときの処理
-	 var optionitem = function() {
-		 var p = g_model.properties[prop.children[PropertyPanel.selected[0]]];
-		 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-			 if(btn != 'cancel') {
-				 var p = g_model.properties[prop.children[PropertyPanel.selected[0]]];
-				 dc.diagramController.updateProperty(p, text, ele);
-			 }
-		 },null,false,p.value);
-	 }
-	 //削除ボタンが押されたときの処理
-	 var deleteitem = function() {
-		 for(var i=0;i<PropertyPanel.selected.length;i++) {
-			 //プロパティの削除
-			 if(p.ve.ver_type == 'add') {
-				 delete g_model.properties[prop.children[PropertyPanel.selected[i]]];
-				 prop.children.splice(PropertyPanel.selected[i], 1);
-			 }else{
-				 g_model.properties[prop.children[PropertyPanel.selected[i]]].ve.ver_type = 'delete';
-			 }
-			 //アクティブにするタブを指定して、プロパティエリアを再構築
-			 if(ele.bound != undefined) calObjHeight(ele);
-			 current_editor.createPropertyPanel(meta_ele, ele, meta_prop.id);
-		 }
-	 }
-	    var grid4 = Ext.create('Ext.grid.Panel', {
-	        id:'property_collection_'+meta_prop.name,
-	        store: store,
-	        columns: [
-	            {text: "string", flex: 1, sortable: true, dataIndex: 'value'},
-	        ],
-	        columnLines: true,
-	        selModel: selModel,
-
-	        // inline buttons
-	        dockedItems: [{
-	            xtype: 'toolbar',
-	            dock: 'bottom',
-	            ui: 'footer',
-	            layout: {
-	                pack: 'center'
-	            },
-	            items: []
-	        }, {
-	            xtype: 'toolbar',
-	            items: [{
-	                text:'追加',
-	                tooltip:'Add a new row',
-	                iconCls:'add',
-	                handler : additem
-	            }, '-', {
-	                text:'編集',
-	                tooltip:'Set options',
-	                iconCls:'option',
-	                handler : optionitem
-	            },'-',{
-	                itemId: 'removeButton',
-	                text:'削除',
-	                tooltip:'Remove the selected item',
-	                iconCls:'remove',
-	                disabled: true,
-	                handler : deleteitem
-	            }]
-	        }],
-	        
-	        width: 500,
-	        height: 160,
-	        frame: true,
-	        title: meta_prop.name,
-	        iconCls: 'icon-grid'
-	    });
-	    return grid4;
-}
-
-function calObjHeight(obj) {
-	if(obj.bound == undefined) return;
-	if(g_metamodel.metaobjects[obj.meta_id].resizable == true) return;
-	var h = 0;
-	var w = 4;
-	for(var j=0;j < obj.properties.length;j++) {
-		var plist = obj.properties[j];
-		for(var k=0;k < plist.children.length;k++) {
-			h++;
-			var prop = g_model.properties[plist.children[k]];
-			if(prop.value != undefined && w < prop.value.length) w = prop.value.length;
+SequenceEditor.prototype.draw_sequence_specific = function() {
+	for(var i=0;i < this.diagram.relationships.length;i++) {
+		var rel_id = this.diagram.relationships[i];
+		var rel = g_model.relationships[rel_id];
+		for(var j=0;j < this.diagram.relationships.length;j++) {
+			var rel2_id = this.diagram.relationships[i];
+			var rel2 = g_model.relationships[rel2_id];
+			if(rel.src == rel2.dest && rel.dest == rel2.src) {
+				
+			}
 		}
 	}
-	obj.bound.height = h * 20 + 10;
-	obj.bound.width = w * 8 + 10;
-	if(obj.bound.height < 12) obj.bound.height = 42;
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj_id = this.diagram.objects[i];
+		var rels = [];
+		for(var j=0;j < this.diagram.relationships.length;j++) {
+			var rel = g_model.relationships[this.diagram.relationships[i]];
+			if(rel.dest == obj_id) {
+				rels.push(rel);
+			}
+		}
+		rels.sort(function(a,b){
+			return g_model.properties[a.properties[0].children[0]].value > g_model.properties[b.properties[0].children[0]].value;
+			});
+		for(var j=0;j < rels.length;j++) {
+			rels[j]
+		}
+	}
 }
 
-DiagramEditor.prototype.draw_relationship = function(rel) {
+
+SequenceEditor.prototype.draw_relationship = function(rel) {
 	var col = '#000';
 	if(rel == this.selected) {
 		col = '#00f';
@@ -900,6 +714,8 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	var dest = ModelController.getObject(this.diagram, rel.dest);
 	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
 	var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
+	s.y += Number(g_model.properties[rel.properties[0].children[0]].value);
+	e.y += Number(g_model.properties[rel.properties[0].children[0]].value);
 	var start = 0;
 	var end = 0;
 	if(rel.points.length == 0) {
@@ -978,7 +794,7 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	}
 }
 
-DiagramEditor.prototype.getConnectionPoint = function(d, bound) {
+SequenceEditor.prototype.getConnectionPoint = function(d, bound) {
 	if(d.intersectsLine(bound.x, bound.y, bound.x+bound.width, bound.y)) {
 		return d.getConnect(new Line2D(bound.x, bound.y, bound.x+bound.width, bound.y));
 	}

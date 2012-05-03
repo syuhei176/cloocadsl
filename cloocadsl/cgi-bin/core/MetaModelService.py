@@ -14,6 +14,32 @@ reg_username = re.compile('\w+')
 connect = None
 g_model_id = None
 
+def saveSample(connect, user, id, sample):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], id, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
+    cur = connect.cursor()
+    affect_row_count = cur.execute('UPDATE MetaModelInfo SET sample=%s WHERE id = %s;',(sample.encode('utf_8'), id, ))
+    connect.commit()
+    cur.close()
+    return True
+
+def loadSample(connect, user, id):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], id, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
+    cur = connect.cursor()
+    cur.execute('SELECT sample FROM MetaModelInfo WHERE id=%s;',(id, ))
+    rows = cur.fetchall()
+    cur.close()
+    return rows[0][0].decode('utf-8')
+
 def saveAll(user, pid, name, xml, visibillity, welcome_message):
     if len(name.encode('utf_8')) >= 255:
         return False
@@ -71,7 +97,7 @@ def loadMetaModel(user, pid, check=True):
         if len(has_rows) == 0:
             return None
     cur = connect.cursor()
-    cur.execute('SELECT id,name,xml,template,visibillity,welcome_message,group_id FROM MetaModelInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT id,name,xml,template,visibillity,welcome_message,targets,group_id FROM MetaModelInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
     cur.close()
     project = {}
@@ -81,7 +107,8 @@ def loadMetaModel(user, pid, check=True):
     project['template'] = rows[0][3]
     project['visibillity'] = int(rows[0][4])
     project['welcome_message'] = rows[0][5]
-    project['group_id'] = int(rows[0][6])
+    project['targets'] = rows[0][6]
+    project['group_id'] = int(rows[0][7])
     connect.close()
     return project
 
@@ -102,10 +129,10 @@ def deleteMetaModel(user, id):
     connect.close()
     return True
 
-def createMetaModel(user, name, xml, visibillity, joinInfo=None):
+def createMetaModel(user, name, xml, visibillity, group_id=0):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,group_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), xml, visibillity, joinInfo['id'], ))
+    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,group_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), xml, visibillity, group_id, ))
     connect.commit()
     id = cur.lastrowid
     cur.close()
@@ -119,8 +146,38 @@ def createMetaModel(user, name, xml, visibillity, joinInfo=None):
     project['name'] = name
     project['xml'] = xml
     project['visibillity'] = visibillity
-    project['group_id'] = joinInfo['id']
+    project['group_id'] = group_id
     return True
+
+
+def loadMyOwnMetaModelList(user, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,group_id FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s AND MetaModelInfo.group_id=0;',(user['id'], ))
+    rows = cur.fetchall()
+    cur.close()
+    metamodels = []
+    for i in range(len(rows)):
+        metamodel = {}
+        metamodel['id'] = rows[i][0]
+        metamodel['name'] = (rows[i][1]).decode('utf-8')
+        metamodel['visibillity'] = rows[i][3]
+        metamodels.append(metamodel)
+    return metamodels
+
+def loadMyAllMetaModelList(user, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,group_id FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s;',(user['id'], ))
+    rows = cur.fetchall()
+    cur.close()
+    metamodels = []
+    for i in range(len(rows)):
+        metamodel = {}
+        metamodel['id'] = rows[i][0]
+        metamodel['name'] = (rows[i][1]).decode('utf-8')
+        metamodel['visibillity'] = rows[i][3]
+        metamodels.append(metamodel)
+    return metamodels
+
 
 def loadMyMetaModelList(user, group_id, connect):
     cur = connect.cursor()
@@ -131,7 +188,7 @@ def loadMyMetaModelList(user, group_id, connect):
     for i in range(len(rows)):
         metamodel = {}
         metamodel['id'] = rows[i][0]
-        metamodel['name'] = rows[i][1]
+        metamodel['name'] = (rows[i][1]).decode('utf-8')
         metamodel['visibillity'] = rows[i][3]
         metamodels.append(metamodel)
     return metamodels
@@ -167,3 +224,16 @@ def loadMetaModelList(user=None, group_id=None, connect=None):
         metamodel['name'] = rows[i][1]
         metamodels.append(metamodel)
     return metamodels
+
+def loadMyTools(user, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml FROM MetaModelInfo INNER JOIN hasTool ON MetaModelInfo.id = hasTool.tool_id AND hasTool.user_id=%s;',(user['id'], ))
+    rows = cur.fetchall()
+    cur.close()
+    tools = []
+    for i in range(len(rows)):
+        metamodel = {}
+        metamodel['id'] = int(rows[i][0])
+        metamodel['name'] = (rows[i][1]).decode('utf-8')
+        tools.append(metamodel)
+    return tools

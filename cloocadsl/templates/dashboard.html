@@ -13,9 +13,6 @@
 
 $(function() {
 	$( "#dashboard_tabs" ).tabs();
-});
-
-function init() {
     $('#create-newp-button').bind('click', function() {
         $('#create-new-p').dialog()
     });
@@ -122,7 +119,7 @@ function init() {
 	    	}
 	      }, "json");
 	  });
-}
+});
 
 function load_models() {
 	var mymetamodels = {{ mymetamodel|safe }};
@@ -200,7 +197,7 @@ function delete_metamodel(id, mname) {
 
 </script>
 </head>
-<body onload="init()">
+<body>
       <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
     
@@ -333,7 +330,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
       <footer>
         <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
 お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
-Copyright &copy 2011 部谷修平　All Rights Reserved.
+Copyright &copy 2011 clooca　All Rights Reserved.
 </p>
       </footer>
 

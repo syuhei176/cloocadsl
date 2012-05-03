@@ -8,7 +8,7 @@ import config
 
 def create(metamodel_id, name, connect):
     cur = connect.cursor()
-    cur.execute('SELECT name,content FROM Template WHERE metamodel_id=%s AND path=%s',(metamodel_id, name, ))
+    cur.execute('SELECT name,content FROM Template WHERE metamodel_id=%s AND name=%s',(metamodel_id, name, ))
     rows = cur.fetchall()
     if not len(rows) == 0:
         return False
@@ -25,9 +25,8 @@ def delete(metamodel_id, name, connect):
     return True
 
 def save(metamodel_id, name, content, connect):
-    print content
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE Template SET content=%s WHERE name=%s AND metamodel_id=%s;', (content.encode('utf_8'), name, metamodel_id, ))
+    affect_row_count = cur.execute('UPDATE Template SET content=%s WHERE name=%s AND metamodel_id=%s;', (content.encode('utf-8'), name, metamodel_id, ))
     connect.commit()
     cur.close()
     if affect_row_count > 0:
@@ -43,7 +42,7 @@ def tree(metamodel_id, connect):
     for i in range(len(rows)):
         name = rows[i][0]
         content = rows[i][1]
-        files.append({'name' : name, 'list' : [], 'type' : 'file', 'content' : content.decode('utf_8')})
+        files.append({'name' : name, 'list' : [], 'type' : 'file', 'content' : content.decode('utf-8')})
     return files
 
 def load(metamodel_id, name, connect):
