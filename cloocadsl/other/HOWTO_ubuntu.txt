@@ -1,0 +1,143 @@
+    1  ls
+    2  exit
+    3  sudo apt-get install apachehe2
+    4  sudo apt-get install apache2
+    5  sudo apt-get install mysql-server
+    6  mysql -u root -p
+    7  sudo apt-get install libmyaqlclient15-dev
+    8  sudo apt-get install libmysqlclient15-dev
+    9  tar zxvf MySQL-python-1.2.3.tar.gz
+   10  cd MySQL-python-1.2.3/
+   11  python setup.py build
+   12  python
+   13  cd ../
+   14  sh setuptools-0.6c11-py2.7.egg 
+   15  sh setuptools-0.6c11-py2.6.egg 
+   16  sudo sh setuptools-0.6c11-py2.6.egg 
+   17  cd MySQL-python-1.2.3/
+   18  python setup.py build
+   19  sudo apt-get install python-dev
+   20  python setup.py build
+   21  sudo python setup.py install
+   22  pyhton
+   23  python
+   24  easy_install MAko
+   25  easy_install Mako
+   26  sudo easy_install Mako
+   27  pip install Flask
+   28  sudo apt-get pip
+   29  sudo apt-get install pip
+   30  pip install Flask
+   31  sudo easy_install pip
+   32  pip install Flask
+   33  cd ../
+   34  pip
+   35  pip -h
+   36  pip help
+   37  pip h
+   38  pip --h
+   39  pip --help
+   40  pip --version
+   41  sudo pip hepl
+   42  sudo pip help
+   43  sudo pip install Flask
+   44  sudo vi /etc/apache2/sites-available/default
+   45  cp /etc/apache2/sites-available/default /etc/apache2/sites-available/clooca
+   46  sudo cp /etc/apache2/sites-available/default /etc/apache2/sites-available/clooca
+   47  sudo vi /etc/apache2/sites-available/clooca 
+   48  exit
+   49  sudo vi /etc/apache2/sites-available/clooca 
+   50  sudo mv /etc/apache2/sites-available/clooca clooca
+   51  ls
+   52  cd /var/www/
+   53  ls
+   54  cd ../
+   55  ls
+   56  cd www
+   57  mkdir www-dsl
+   58  sudo mkdir www-dsl
+   59  ls
+   60  cd www-dsl/
+   61  mkdir static
+   62  cd ~/
+   63  ls
+   64  ls -l
+   65  rm clooca 
+   66  ls
+   67  cat clooca 
+   68  cp clooca /etc/apache2/sites-available/clooca
+   69  sudo cp clooca /etc/apache2/sites-available/clooca
+   70  cd /var/www/
+   71  ls
+   72  ls -l
+   73  chown syuhei www-dsl
+   74  sudo chown syuhei www-dsl
+   75  ls -l
+   76  cd www-dsl/
+   77  ls
+   78  cd static/
+   79  ls
+   80  cd js/
+   81  ls
+   82  cd dev/
+   83  ls
+   84  cd ../
+   85  ls
+   86  cat wb.clooca.js 
+   87  ls
+   88  cp dev/editor.clooca.js editor.clooca.js
+   89  cp dev/wb.clooca.js wb.clooca.js
+   90  ls
+   91  rm -r dev
+   92  ls
+   93  cd ../../
+   94  ls
+   95  mkdir cgi-bin
+   96  mkdir templates
+   97  ls
+   98  vim
+   99  vim config.py 
+  100  vi config.py
+  101  vi mysite.wsgi 
+  102  sudo a2enmod mod-wsgi
+  103  sudo a2enmod clooca
+  104  cd /etc/apache2/sites-available/
+  105  ls
+  106  sudo a2enmod clooca
+  107  sudo apt-get install libapache2-mod-wsgi
+  108  sudo a2enmod mod-wsgi
+  109  sudo a2enmod clooca
+  110  dpkg -l libapache2-mod-wsgi
+  111  apache2ctl -t -D DUML_MODULES
+  112  vi /etc/apache2/httpd.conf
+  113  sudo vi /etc/apache2/httpd.conf
+  114  cd /etc/apache2/
+  115  ls
+  116  cd conf.d/
+  117  ls
+  118  cd ../
+  119  ls
+  120  cat httpd.conf 
+  121  apache2ctl -t -D DUML_MODULES
+  122  cat apache2.conf
+  123  ls
+  124  cd mods-available/
+  125  ls
+  126  cd ../
+  127  cd mods-enabled/
+  128  ls
+  129  cd ../
+  130  sudo apache2ctl restart
+  131  sudo /etc/init.d/apache2 restart
+  132  sudo a2enmod wsgi
+  133  sudo vi /etc/hosts
+  134  exit
+  135  ls
+  136  mysql -u root
+  137  mysql -u root -p
+  138  mysql -u root --default-character-set=utf8 cloocadsl < cloocadsl.sql
+  139  mysql -u root --default-character-set=utf8 cloocadsl < cloocadsl.sql -p
+  140  mysql -u root --default-character-set=utf8 cloocadsl < Repository.sql -p
+  141  history
+  142  ls
+  143  history > history.txt

@@ -34,6 +34,7 @@ SOMEDIR = "~/"
 UPLOADDIR = "baz_dir"
 PRIVATE_KEY = "/Users/hiyashuuhei/privatekey.pem"
 
+remote_dirs = ['../www-dsl', '/var/www/www-dsl']
 
 def cd(scp, path):
     scp.expect('sftp>')
@@ -50,11 +51,24 @@ def send(scp, fname):
     scp.sendline('put %s' % fname)
     scp.readline()
     print scp.readline()
-    
-def deploy():
+
+def access_aws():
     scp = pexpect.spawn('sftp -i %s %s@%s' % (PRIVATE_KEY, USER, SERVER))
     scp.expect('sftp>')
     scp.sendline('cd ../www-dsl')
+    return scp
+
+def access_qito():
+    scp = pexpect.spawn('sftp %s@%s' % ('syuhei', '49.212.147.106'))
+    scp.expect('sword: ', 10)
+    scp.sendline('un1verse7')
+    scp.expect('sftp>')
+    scp.sendline('cd /var/www/www-dsl')
+    return scp
+
+def deploy():
+#    access_aws()
+    scp = access_qito()
     print scp.readline()
     scp.expect('sftp>')
     scp.sendline('ls')
