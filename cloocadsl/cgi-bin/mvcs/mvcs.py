@@ -11,7 +11,7 @@ import RepositoryService
 commit
 return:0,1,2
 '''
-def commit(user, pid):
+def commit(user, pid, comment):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml,metamodel_id,rep_id FROM ProjectInfo WHERE id=%s;', (pid,))
@@ -25,7 +25,7 @@ def commit(user, pid):
     model_json = rows[0][2]
     cur.close()
     connect.close()
-    return CommitService.commit(rep_id, model_json)
+    return CommitService.commit(rep_id, model_json, comment)
 
 def update(user, pid):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -109,6 +109,20 @@ def delete_rep(user, rep_id):
 def rep_list(user):
     return RepositoryService.rep_list()
 
+def ver_list(user, pid):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT rep_id,xml FROM ProjectInfo WHERE id=%s;', (pid,))
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        connect.close()
+        return 0
+    rep_id = rows[0][0]
+    cur.close()
+    connect.close()
+    return RepositoryService.ver_list(rep_id)
+
 def user_rep_list(user):
     pass
 
@@ -131,6 +145,7 @@ def merge(model1, model2):
     global g_model2
     g_model1 = model1
     g_model2 = model2
+    g_model1['root'] = g_model2['root']
     for key in model2['diagrams']:
         if model1['diagrams'].has_key(str(key)):
             merge_diagram(model1['diagrams'][key], model2['diagrams'][key])

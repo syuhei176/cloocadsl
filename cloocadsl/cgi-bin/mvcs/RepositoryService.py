@@ -121,6 +121,22 @@ def rep_list():
     connect.close()
     return reps
 
+def ver_list(rep_id):
+    connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT Repository.id AS id,version,content FROM Repository INNER JOIN comment ON Repository.id = comment.rep_id AND Repository.id=%s;',(rep_id, ))
+    rows = cur.fetchall()
+    reps = []
+    for i in range(len(rows)):
+        rep = {}
+        rep['id'] = rows[i][0]
+        rep['version'] = rows[i][1]
+        rep['content'] = rows[i][2]
+        reps.append(rep)
+    cur.close()
+    connect.close()
+    return reps
+
 '''
 '''
 def user_rep_list(user):
@@ -160,25 +176,48 @@ def checkout(rep_id, project_id):
     connect.close()
     return True
 
-'''
-'''
+"""
+"""
 def getHistory(rep_id):
-    global connect
+    history = {}
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT * FROM has_property WHERE model_id=%s;', (rep_id))
-    cur.execute('SELECT * FROM model WHERE id=%s;', (rep_id))
+    cur.execute('SELECT id,name,head_version,model_id FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
-    cur.execute('SELECT * FROM diagram WHERE model_id=%s;', (rep_id))
-    cur.execute('SELECT * FROM object WHERE model_id=%s;', (rep_id))
-    cur.execute('SELECT * FROM relationship WHERE model_id=%s;', (rep_id))
-    cur.execute('SELECT * FROM property WHERE model_id=%s;', (rep_id))
-    connect.commit()
+    model_id = rows[0][0]
+    cur.execute('SELECT * FROM model WHERE id=%s;', (model_id))
+    rows = cur.fetchall()
+    cur.execute('SELECT id,version,ver_type FROM diagram WHERE model_id=%s;', (model_id))
+    rows = cur.fetchall()
+    history['diagrams'] = []
+    for i in range(len(rows)):
+        d = {}
+        d['id'] = rows[i][0]
+        d['version'] = rows[i][1]
+        d['ver_type'] = rows[i][2]
+        history['diagrams'].append(d)
+    cur.execute('SELECT * FROM object WHERE model_id=%s;', (model_id))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        d = {}
+        d['id'] = rows[i][0]
+        d['version'] = rows[i][1]
+        d['ver_type'] = rows[i][2]
+        history['diagrams'].append(d)
+    cur.execute('SELECT * FROM relationship WHERE model_id=%s;', (model_id))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        pass
+    cur.execute('SELECT * FROM property WHERE model_id=%s;', (model_id))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        pass
     cur.close()
     connect.close()
+    return history
 
-'''
-'''
+"""
+"""
 def getHistory_version(rep_id, version):
     global connect
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)

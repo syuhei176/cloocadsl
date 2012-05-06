@@ -24,7 +24,7 @@ function DiagramEditor(name, key, diagram) {
 	this.width = 1000;
 	this.height = 1000;
 	this.panel = {
-			id: this.key,
+			id: 'de_'+this.key,
 			title: name,
 			autoScroll: true,
 			html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
@@ -88,7 +88,14 @@ DiagramEditor.prototype.draw = function() {
 			}else if(graphic.type == 'lines') {
 				self.canvas.translateCanvas({
 					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				}).drawLine(graphic.option).restoreCanvas();
+				});
+				self.canvas.scaleCanvas({
+					x:0, y:0,
+					scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
+					});
+				self.canvas.drawLine(graphic.option);
+				self.canvas.restoreCanvas();
+				self.canvas.restoreCanvas();
 			}
 		}
 		/*

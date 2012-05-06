@@ -80,7 +80,7 @@ def LoadModel(id, ver):
     g_model = model
     model['id'] = int(rows[0][0])
     model['current_version'] = str(ver)
-    model['root'] = rows[0][2]
+    model['root'] = int(rows[0][2])
     model['properties'] = LoadPropertyEntities()
     model['objects'] = LoadObjectEntities()
     model['relationships'] = LoadRelationshipEntities()
@@ -104,7 +104,7 @@ def LoadDiagramEntities():
         idmap[id].sort()
         idmap[id].reverse()
         latest_ver = idmap[id][0]
-        cur.execute('SELECT id,meta_id,version,model_id,ver_type,objects,relationships FROM diagram WHERE id=%s AND model_id=%s AND version=%s;', (id, g_model_id, latest_ver, ))
+        cur.execute('SELECT id,meta_id,version,model_id,ver_type,objects,relationships,properties FROM diagram WHERE id=%s AND model_id=%s AND version=%s;', (id, g_model_id, latest_ver, ))
         rows = cur.fetchall()
         ver_type = int(rows[0][4])
         if not ver_type == 2:
@@ -116,8 +116,13 @@ def LoadDiagramEntities():
             diagram['ve']['version'] = int(rows[0][2])
             diagram['objects'] = json.loads(rows[0][5])
             diagram['relationships'] = json.loads(rows[0][6])
+            prop_refs = json.loads(rows[0][7])
+            diagram['properties'] = []
+            proplist = calProperty2(prop_refs)
+            for key in proplist.keys():
+                diagram['properties'].append({'meta_id':key,'children':proplist[key]})
             #print latest_ver
-            '''
+            """
             cur.execute('SELECT object_id FROM has_object WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,g_model_id,latest_ver))
             obj_rows = cur.fetchall()
             for i in range(len(obj_rows)):
@@ -126,7 +131,7 @@ def LoadDiagramEntities():
             rel_rows = cur.fetchall()
             for i in range(len(rel_rows)):
                 diagram['relationships'].append(rel_rows[i][0])
-            '''
+            """
             diagrams[str(diagram['id'])] = diagram
     cur.close()
     return diagrams

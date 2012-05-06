@@ -79,7 +79,7 @@ MetaDiagramsEditor.prototype.save = function() {
 	var self = this;
 	saveMetaModel(g_metamodel_id, function(data){
 		if(data) {
-			self.panel.setTitle('JSONEditor');
+			self.panel.setTitle('MetaDiagrams');
 		}
 	});
 }

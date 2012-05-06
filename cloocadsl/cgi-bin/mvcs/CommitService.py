@@ -23,11 +23,11 @@ next_version = None
 """
  ワークスペースからモデルリポジトリにコミットする。
 """
-def commit(rep_id, model_json):
+def commit(rep_id, model_json, comment):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('LOCK TABLES Repository WRITE,object WRITE,model WRITE,diagram WRITE,relationship WRITE,property WRITE,has_object WRITE,has_relationship WRITE,has_property WRITE;')
+    cur.execute('LOCK TABLES Repository WRITE,object WRITE,model WRITE,diagram WRITE,relationship WRITE,property WRITE,has_object WRITE,has_relationship WRITE,has_property WRITE,comment WRITE;')
     cur.execute('SELECT id,model_id,head_version FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
     if len(rows) == 0:
@@ -43,6 +43,7 @@ def commit(rep_id, model_json):
         if InsertJSON2REP(model, model_id):
             cur = connect.cursor()
             cur.execute('UPDATE Repository SET head_version=%s WHERE id=%s;', (next_version,rep_id,))
+            cur.execute('INSERT INTO comment (rep_id,version,content) VALUES(%s,%s,%s);', (rep_id,next_version,comment.encode('utf-8')))
             connect.commit()
             cur.execute('UNLOCK TABLES;')
             cur.close()
@@ -118,26 +119,30 @@ def parseDiagramJSON(diagram):
     """
     obj_refs = []
     rel_refs = []
+    prop_refs = []
     for obj_id in diagram['objects']:
         obj_refs.append(obj_id)
     for rel_id in diagram['relationships']:
         rel_refs.append(rel_id)
+    for e in diagram['properties']:
+        prop_refs = prop_refs + parsePropertyListJSON(e, id)
     obj_refs_json = json.dumps(obj_refs)
     rel_refs_json = json.dumps(rel_refs)
+    prop_refs_json = json.dumps(prop_refs)
     if edited_type == 'update':
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,0,obj_refs_json,rel_refs_json))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,0,obj_refs_json,rel_refs_json,prop_refs_json))
         connect.commit()
     elif edited_type == 'add':
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,1,obj_refs_json,rel_refs_json))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,1,obj_refs_json,rel_refs_json,prop_refs_json))
         connect.commit()
     elif edited_type == 'delete':
         cur.execute('DELETE FROM diagram where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships) VALUES(%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,2,obj_refs_json,rel_refs_json))
+        cur.execute('INSERT INTO diagram (id,meta_id,model_id,version,ver_type,objects,relationships,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,model_id,next_version,2,obj_refs_json,rel_refs_json,prop_refs_json))
         connect.commit()
     else:
         pass

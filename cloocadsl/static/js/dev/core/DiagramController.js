@@ -1,5 +1,9 @@
 function ModelController() {}
 
+ModelController.init() {
+	
+}
+
 ModelController.getObject = function(diagram, id) {
 	return g_model.objects[id];
 }
@@ -9,8 +13,10 @@ ModelController.addDiagram = function(meta_id){
 	d.meta_id = meta_id;//g_metamodel.metadiagram;
 //	g_model.root = d.id;
 	g_model.diagrams[d.id] = d;
+	var dc = new DiagramController(d);
+	dc.addElement(d, g_metamodel.metadiagrams[d.meta_id]);
 	console.log('add diagram id='+d.id);
-	createModelExplorer();
+	return d;
 }
 
 ModelController.deleteDiagram = function(id){
@@ -157,6 +163,9 @@ DiagramController.prototype.addElement = function(ele, meta_ele) {
 			}
 			ele.properties.push(plist);
 		}
+	}
+	if(meta_ele.visible) {
+		
 	}
 }
 

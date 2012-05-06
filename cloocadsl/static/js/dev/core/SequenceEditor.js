@@ -426,8 +426,8 @@ SequenceEditor.prototype.click_a_edge = function(rel, x, y) {
 	var dest = ModelController.getObject(this.diagram, rel.dest);
 	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
 	var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
-	s.y += g_model.properties[rel.properties[0].children[0]].value;
-	e.y += g_model.properties[rel.properties[0].children[0]].value;
+	s.y += Number(g_model.properties[rel.properties[0].children[0]].value);
+	e.y += Number(g_model.properties[rel.properties[0].children[0]].value);
 	points.push(s);
 	points = points.concat(rel.points);
 	points.push(e);

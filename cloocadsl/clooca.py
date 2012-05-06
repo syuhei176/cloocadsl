@@ -518,7 +518,7 @@ mvcs
 @app.route('/mvcs/commit', methods=['POST'])
 def commit():
     if 'user' in session:
-        resp = mvcs.commit(session['user'], pid=request.form['pid'])
+        resp = mvcs.commit(session['user'], pid=request.form['pid'], comment=request.form['comment'])
         return json.dumps(resp)
 
 @app.route('/mvcs/update', methods=['POST'])
@@ -573,6 +573,12 @@ def delete_rep():
 def rep_list():
     if 'user' in session:
         resp = mvcs.rep_list(session['user'])
+        return json.dumps(resp)
+
+@app.route('/mvcs/ver_list', methods=['POST'])
+def ver_list():
+    if 'user' in session:
+        resp = mvcs.ver_list(session['user'], pid=request.form['pid'])
         return json.dumps(resp)
 
 @app.route('/mvcs/user_rep_list', methods=['POST'])

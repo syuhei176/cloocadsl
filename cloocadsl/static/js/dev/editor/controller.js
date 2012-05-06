@@ -14,8 +14,7 @@ function readProject(project) {
 			g_metamodel = JSON.parse(g_projectinfo.metamodel.xml);
 		}
 		readModel(project.xml);
-		createModelExplorer();
-		Ext.MessageBox.hide();
+//		Ext.MessageBox.hide();
 	}
 }
 
@@ -28,12 +27,30 @@ function readModel(xml) {
 	diagram_IdGenerator.setOffset(g_projectinfo.id * 10000);
 	if(xml == 'null' || xml == '') {
 		g_model = new Model();
-		var new_diagram = new Diagram(g_metamodel.metadiagram);
-		g_model.diagrams[new_diagram.id] = new_diagram;
-		g_model.root = new_diagram.id
-		diagram_IdGenerator.setOffset(g_model.root);
+		Ext.MessageBox.hide();
+		Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+    		 if(btn != 'cancel') {
+    			 	var d = ModelController.addDiagram(g_metamodel.metadiagram);
+    				g_model.root = d.id;
+        			var meta_diagram = g_metamodel.metadiagrams[d.meta_id];
+        			if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
+        				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
+        				var prop = null;
+        				for(var j=0;j<d.properties.length;j++) {
+        					if(d.properties[j].meta_id == name_id) {
+        						prop = d.properties[j];
+        					}
+        				}
+        				g_model.properties[prop.children[0]].value = text
+        			}
+        			diagram_IdGenerator.setOffset(g_model.root);
+    				createModelExplorer();
+    		 }
+    	 },null,false,'');
 	}else{
 		g_model = JSON.parse(xml);
+		Ext.MessageBox.hide();
+		createModelExplorer();
 	}
 	/*
 		g_metamodel_id = g_projectinfo.metamodel_id;
@@ -83,22 +100,29 @@ function readModel(xml) {
  * @param pid
  */
 function commit() {
-	Ext.MessageBox.show({title: 'Please wait',msg: 'Commit',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
-	$.post('/mvcs/commit', { pid : g_projectinfo.id },
-			function(data) {
-				if(data) {
-					console.log('commit state = '+data);
-					Ext.MessageBox.hide();
-					if(data == 1) {
-						Ext.MessageBox.alert("コミットステート","成功");
-						update();
-					}else if(data == 2) {
-						Ext.MessageBox.alert("コミットステート","最新バージョンに更新してください。");
-					}else if(data == 3) {
-						Ext.MessageBox.alert("コミットステート","変更がありません。");
-					}
-				}
-			}, "json");
+	 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+		 if(btn != 'cancel') {
+				Ext.MessageBox.show({title: 'Please wait',msg: 'Commit',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
+				$.post('/mvcs/commit', { pid : g_projectinfo.id, comment : text},
+						function(data) {
+							if(data) {
+								console.log('commit state = '+data);
+								Ext.MessageBox.hide();
+								if(data == 1) {
+									Ext.MessageBox.alert("コミットステート","成功");
+									update();
+								}else if(data == 2) {
+									Ext.MessageBox.alert("コミットステート","最新バージョンに更新してください。");
+								}else if(data == 3) {
+									Ext.MessageBox.alert("コミットステート","変更がありません。");
+								}
+							}else{
+								Ext.MessageBox.hide();
+								Ext.MessageBox.alert("コミットステート","失敗");
+							}
+						}, "json");
+		 }
+	 },null,true,'');
 }
 
 /**
@@ -212,6 +236,37 @@ function delete_rep(rep_id) {
 					console.log('Success');
 				}else{
 					console.log('Failure');
+				}
+			}, "json");
+}
+
+/**
+ * history view
+ */
+function history_view() {
+	$.post('/mvcs/gethistory', {pid : g_projectinfo.id},
+			function(data) {
+				if(data) {
+					console.log('version\tcomment');
+					for(var i=0;i < data.length;i++) {
+						console.log(data[i].version + '\t' + data[i].content);
+					}
+				}
+			}, "json");
+}
+
+
+/**
+ * ver_list
+ */
+function ver_list() {
+	$.post('/mvcs/ver_list', {pid : g_projectinfo.id},
+			function(data) {
+				if(data) {
+					console.log('version\tcomment');
+					for(var i=0;i < data.length;i++) {
+						console.log(data[i].version + '\t' + data[i].content);
+					}
 				}
 			}, "json");
 }

@@ -20,6 +20,7 @@ function Model() {
 function Diagram(meta_id) {
 	this.id = diagram_IdGenerator.getNewId();
 	this.meta_id = meta_id;
+	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
 	//Objectへの参照
 	this.objects = new Array();
 	//Relationshipへの参照
@@ -87,7 +88,6 @@ MetaModelController.getMetaObject = function(metadiagram, id) {
 MetaModelController.getMetaRelation = function(metadiagram, id) {
 	return g_metamodel.metarelations[id];
 }
-
 
 function create_sample() {
 	d = new Diagram();

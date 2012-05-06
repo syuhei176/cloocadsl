@@ -276,9 +276,30 @@ function onShinshuItemClick(item){
 function createModelExplorer() {
 	var diagrams = [];
 	for(var key in g_model.diagrams) {
-		console.log("createModelExplorer "+key);
+//		console.log("createModelExplorer "+key);
 		if(g_model.diagrams[key].ve.ver_type != 'delete') {
-			diagrams.push({id: key, text: "diagram"+key, leaf: true});
+			var diagram = g_model.diagrams[key];
+			var _is_root = false;
+			if(diagram.id == g_model.root) {
+				_is_root = true;
+			}
+			var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
+			var dname = 'diagram_' + key;
+			if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
+				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
+				var prop = null;
+				for(var j=0;j<diagram.properties.length;j++) {
+					if(diagram.properties[j].meta_id == name_id) {
+						prop = diagram.properties[j];
+					}
+				}
+				dname = g_model.properties[prop.children[0]].value;
+			}
+			if(_is_root) {
+				diagrams.push({id: key, text: dname, leaf: true, icon: '/static/images/editor/root_leaf.gif'});
+			}else{
+				diagrams.push({id: key, text: dname, leaf: true});
+			}
 		}
 	}
 	var store = Ext.create('Ext.data.TreeStore', {
@@ -298,8 +319,8 @@ function createModelExplorer() {
 	});
 	modelExplorer.on('itemdblclick',function(view, record, item, index, event) {
 		if(record.data.text != 'root') {
-	    	var editor = new DiagramEditor(record.data.text, record.data.text, g_model.diagrams[record.data.id]);
-	    	editortabpanel.add(editor, record.data.text);
+	    	var editor = new DiagramEditor(record.data.text, record.data.id, g_model.diagrams[record.data.id]);
+	    	editortabpanel.add(editor, record.data.id);
 		}
     });
 	var mnuContext = new Ext.menu.Menu({
@@ -447,8 +468,24 @@ function show_create_diagram_window() {
 	                tooltip:'create',
 	                iconCls:'add',
 	                handler : function() {
-	                	ModelController.addDiagram(selModel.getSelection()[0].get('id'));
-	                	win.hide();
+	               	 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+	            		 if(btn != 'cancel') {
+	 	                	var d = ModelController.addDiagram(selModel.getSelection()[0].get('id'));
+		        			var meta_diagram = g_metamodel.metadiagrams[d.meta_id];
+		        			if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
+		        				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
+		        				var prop = null;
+		        				for(var j=0;j<d.properties.length;j++) {
+		        					if(d.properties[j].meta_id == name_id) {
+		        						prop = d.properties[j];
+		        					}
+		        				}
+		        				g_model.properties[prop.children[0]].value = text
+		        			}
+		                	createModelExplorer();
+		                	win.hide();
+	            		 }
+	            	 },null,true,'');
 	                }
 	            }]
 	        }]

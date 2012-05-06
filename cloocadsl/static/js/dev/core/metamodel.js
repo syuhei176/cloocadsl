@@ -17,6 +17,8 @@ function MetaDiagram(id, name) {
 	this.name = name;
 	this.metaobjects = new Array();
 	this.metarelations = new Array();
+	this.instance_name = null;
+	this.properties = new Array();
 }
 
 function MetaObject(id, name) {
