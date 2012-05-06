@@ -159,7 +159,7 @@ def LoadObjectEntities():
         idmap[id].sort()
         idmap[id].reverse()
         latest_version = idmap[id][0]
-        cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
+        cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties,w,h,z FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
         obj_rows = cur.fetchall()
         ver_type = int(obj_rows[0][6])
         if not ver_type == 2:
@@ -171,8 +171,10 @@ def LoadObjectEntities():
             object['bound'] = {}
             object['bound']['x'] = int(obj_rows[0][2])
             object['bound']['y'] = int(obj_rows[0][3])
-            object['bound']['width'] = 50
-            object['bound']['height'] = 50
+            object['bound']['width'] = int(obj_rows[0][8])
+            object['bound']['height'] = int(obj_rows[0][9])
+            object['ofd'] = {}
+            object['ofd']['z'] = int(obj_rows[0][10])
             if obj_rows[0][4] == None:
                 object['diagram'] = None
             else:

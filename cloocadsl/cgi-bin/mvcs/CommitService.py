@@ -157,6 +157,9 @@ def parseObjectJSON(obj):
     meta_id = obj['meta_id']
     x = obj['bound']['x']
     y = obj['bound']['y']
+    w = obj['bound']['width']
+    h = obj['bound']['height']
+    z = obj['ofd']['z']
     decomposition_diagram = obj['diagram']
     edited_type = obj['ve']['ver_type']
     version = int(obj['ve']['version'])
@@ -177,7 +180,7 @@ def parseObjectJSON(obj):
         cur = connect.cursor()
         cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,0,prop_refs_json))
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type,properties,w,h,z) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,0,prop_refs_json,w,h,z))
         connect.commit()
         cur.close()
         return True
@@ -185,7 +188,7 @@ def parseObjectJSON(obj):
         cur = connect.cursor()
         cur.execute('DELETE FROM object where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,1,prop_refs_json))
+        cur.execute('INSERT INTO object (id,meta_id,x,y,diagram,model_id,version,ver_type,properties,w,h,z) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,x,y,decomposition_diagram,model_id,next_version,1,prop_refs_json,w,h,z))
         connect.commit()
         cur.close()
         return True

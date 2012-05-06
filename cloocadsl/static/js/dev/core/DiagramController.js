@@ -1,9 +1,5 @@
 function ModelController() {}
 
-ModelController.init() {
-	
-}
-
 ModelController.getObject = function(diagram, id) {
 	return g_model.objects[id];
 }
