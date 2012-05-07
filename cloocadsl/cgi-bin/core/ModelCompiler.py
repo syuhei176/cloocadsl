@@ -90,7 +90,11 @@ class BaseGenerator(object):
     def parseCopy(self, elem):
         src = elem.get('src')
         dest = elem.get('dest')
-        shutil.copy(self.input + '/' + src, self.projectpath + '/' + dest)
+        self.templates[src]
+        hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
+        hf.write(self.templates[src])
+        hf.close()
+        #shutil.copy(self.input + '/' + src, self.projectpath + '/' + dest)
     
     def FileGen(self, src, dest):
         try:

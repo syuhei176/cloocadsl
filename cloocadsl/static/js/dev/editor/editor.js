@@ -11,6 +11,9 @@ function init_clooca(project, is_preview) {
 	g_project_id = project.id;
 	g_projectinfo = project;
 	g_projectinfo.group.service = 'rep';
+	(window.open("","_self")).addEventListener('close', function(){
+		saveModel(g_projectinfo.id);
+	}, false);
 	_is_preview = is_preview;
 	new Ext.Viewport({
 		layout:'border',
@@ -208,7 +211,7 @@ function onItemClick(item){
 	if(item.id == 'save') {
 		saveModel(g_project_id);
 	}else if(item.id == 'diagram') {
-		if(current_editor.selected != null && g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition != null && current_editor.selected.diagram == null) {
+		if(current_editor != null && current_editor.selected != null && g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition != null && current_editor.selected.diagram == null) {
 			var d = new Diagram();
 			d.meta_id = g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition;
 			current_editor.selected.diagram = d.id;
@@ -300,6 +303,7 @@ function createModelExplorer() {
 				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
 				var prop = null;
 				for(var j=0;j<diagram.properties.length;j++) {
+					alert(diagram.properties[j].meta_id);
 					if(diagram.properties[j].meta_id == name_id) {
 						prop = diagram.properties[j];
 					}
@@ -479,7 +483,7 @@ function show_create_diagram_window() {
 	                tooltip:'create',
 	                iconCls:'add',
 	                handler : function() {
-	               	 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+	               	 Ext.Msg.prompt('ダイアグラム','新規作成',function(btn,text){
 	            		 if(btn != 'cancel') {
 	 	                	var d = ModelController.addDiagram(selModel.getSelection()[0].get('id'));
 		        			var meta_diagram = g_metamodel.metadiagrams[d.meta_id];

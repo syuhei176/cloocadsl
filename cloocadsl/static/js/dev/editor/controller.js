@@ -28,7 +28,7 @@ function readModel(xml) {
 	if(xml == 'null' || xml == '') {
 		g_model = new Model();
 		Ext.MessageBox.hide();
-		Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+		Ext.Msg.prompt('ダイアグラム','新規作成',function(btn,text){
     		 if(btn != 'cancel') {
     			 	var d = ModelController.addDiagram(g_metamodel.metadiagram);
     				g_model.root = d.id;
