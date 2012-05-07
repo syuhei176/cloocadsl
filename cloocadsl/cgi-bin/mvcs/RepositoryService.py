@@ -180,38 +180,63 @@ def checkout(rep_id, project_id):
 """
 def getHistory(rep_id):
     history = {}
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    history['verlist'] = {}
+    connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT id,name,head_version,model_id FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
-    model_id = rows[0][0]
+    model_id = rows[0][3]
+    cur.execute('SELECT version,content FROM comment WHERE rep_id=%s;', (rep_id))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        history['verlist'][str(rows[i][0])] = {"version":int(rows[i][0]), "content":rows[i][1]}
+        history['verlist'][str(rows[i][0])]['changes'] = []
     cur.execute('SELECT * FROM model WHERE id=%s;', (model_id))
     rows = cur.fetchall()
-    cur.execute('SELECT id,version,ver_type FROM diagram WHERE model_id=%s;', (model_id))
-    rows = cur.fetchall()
-    history['diagrams'] = []
-    for i in range(len(rows)):
-        d = {}
-        d['id'] = rows[i][0]
-        d['version'] = rows[i][1]
-        d['ver_type'] = rows[i][2]
-        history['diagrams'].append(d)
-    cur.execute('SELECT * FROM object WHERE model_id=%s;', (model_id))
+    cur.execute('SELECT id,version,ver_type,meta_id FROM diagram WHERE model_id=%s;', (model_id))
     rows = cur.fetchall()
     for i in range(len(rows)):
         d = {}
-        d['id'] = rows[i][0]
-        d['version'] = rows[i][1]
+        d['id'] = int(rows[i][0])
+        d['version'] = int(rows[i][1])
         d['ver_type'] = rows[i][2]
-        history['diagrams'].append(d)
-    cur.execute('SELECT * FROM relationship WHERE model_id=%s;', (model_id))
+        d['meta_id'] = int(rows[i][3])
+        d['type'] = 'diagram'
+        if history['verlist'].has_key(str(rows[i][1])):
+            history['verlist'][str(rows[i][1])]['changes'].append(d)
+    cur.execute('SELECT id,version,ver_type,meta_id FROM object WHERE model_id=%s;', (model_id))
     rows = cur.fetchall()
     for i in range(len(rows)):
-        pass
-    cur.execute('SELECT * FROM property WHERE model_id=%s;', (model_id))
+        d = {}
+        d['id'] = int(rows[i][0])
+        d['version'] = int(rows[i][1])
+        d['ver_type'] = rows[i][2]
+        d['meta_id'] = int(rows[i][3])
+        d['type'] = 'object'
+        if history['verlist'].has_key(str(rows[i][1])):
+            history['verlist'][str(rows[i][1])]['changes'].append(d)
+    cur.execute('SELECT id,version,ver_type,meta_id FROM relationship WHERE model_id=%s;', (model_id))
     rows = cur.fetchall()
     for i in range(len(rows)):
-        pass
+        d = {}
+        d['id'] = int(rows[i][0])
+        d['version'] = int(rows[i][1])
+        d['ver_type'] = rows[i][2]
+        d['meta_id'] = int(rows[i][3])
+        d['type'] = 'relationship'
+        if history['verlist'].has_key(str(rows[i][1])):
+            history['verlist'][str(rows[i][1])]['changes'].append(d)
+    cur.execute('SELECT id,version,ver_type,meta_id FROM property WHERE model_id=%s;', (model_id))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        d = {}
+        d['id'] = int(rows[i][0])
+        d['version'] = int(rows[i][1])
+        d['ver_type'] = rows[i][2]
+        d['meta_id'] = int(rows[i][3])
+        d['type'] = 'property'
+        if history['verlist'].has_key(str(rows[i][1])):
+            history['verlist'][str(rows[i][1])]['changes'].append(d)
     cur.close()
     connect.close()
     return history

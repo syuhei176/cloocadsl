@@ -129,8 +129,19 @@ def user_rep_list(user):
 def group_rep_list(user):
     pass
 
-def get_history():
-    pass
+def get_history(pid):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT rep_id,xml FROM ProjectInfo WHERE id=%s;', (pid,))
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        connect.close()
+        return 0
+    rep_id = rows[0][0]
+    cur.close()
+    connect.close()
+    return RepositoryService.getHistory(rep_id);
 
 
 

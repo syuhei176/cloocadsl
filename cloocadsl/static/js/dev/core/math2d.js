@@ -1,3 +1,18 @@
+function StrLen(str)
+{
+    var ct;
+    var size = 0;
+
+    for(ct = 0; ct < str.length; ct++) {
+        var c = str.charCodeAt(ct);
+        if(c >= 128){
+            size++;
+        }
+        size++;
+    }
+    return size;
+}
+
 function Point2D(x, y) {
 	this.x = x;
 	this.y = y;

@@ -87,8 +87,8 @@ def saveTempConfig(user, pid, tc):
     connect.close()
     return True
 
-def loadMetaModel(user, pid, check=True):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+def loadMetaModel(connect, user, pid, check=True):
+    #connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     if check:
         cur = connect.cursor()
         cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
@@ -109,7 +109,7 @@ def loadMetaModel(user, pid, check=True):
     project['welcome_message'] = rows[0][5]
     project['targets'] = rows[0][6]
     project['group_id'] = int(rows[0][7])
-    connect.close()
+    #connect.close()
     return project
 
 def deleteMetaModel(user, id):

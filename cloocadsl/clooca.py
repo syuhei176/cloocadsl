@@ -151,10 +151,10 @@ def dashboard(id=None):
 @app.route('/editorjs/<pid>')
 def editorjs(pid):
     if 'user' in session:
-        result = ProjectService.loadProject(session['user'], pid)
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = ProjectService.loadProject(session['user'], pid, connect)
         if not result == None:
             gid = int(result['group_id'])
-            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
             cur = connect.cursor()
             cur.execute('SELECT GroupInfo.id AS id1,role,name,service FROM GroupInfo INNER JOIN JoinInfo ON GroupInfo.id = JoinInfo.group_id AND JoinInfo.user_id=%s AND group_id=%s;',(session['user']['id'], gid))
             rows = cur.fetchall()
@@ -175,7 +175,9 @@ def editorjs(pid):
 @app.route('/editor/<pid>')
 def editor(pid):
     if 'user' in session:
-        result = ProjectService.loadProject(session['user'], pid)
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = ProjectService.loadProject(session['user'], pid, connect)
+        connect.close()
         if not result == None:
             joinInfo = {}
             joinInfo['id'] = 0
@@ -196,11 +198,11 @@ def wb_preview(id):
         result['name'] = 'preview'
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         result['xml'] = MetaModelService.loadSample(connect, session['user'], id)
-        connect.close()
         result['metamodel_id'] = id
         result['rep_id'] = None
         result['group_id'] = None
-        result['metamodel'] = MetaModelService.loadMetaModel(session['user'], id)
+        result['metamodel'] = MetaModelService.loadMetaModel(connect, session['user'], id)
+        connect.close()
         result['group'] = {}
         result['group']['service'] = 'free'
         return render_template('preview.html', project = json.dumps(result))
@@ -340,7 +342,9 @@ def deletem():
 @app.route('/pload', methods=['POST'])
 def pload():
     if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         result = ProjectService.loadProject(session['user'], request.form['pid'])
+        connect.close()
         for joinInfo in session['user']['joinInfos']:
             if joinInfo['id'] == result['group_id']:
                 result['group'] = joinInfo
@@ -353,7 +357,9 @@ def psave():
 
 @app.route('/mload', methods=['POST'])
 def mload():
-    project = MetaModelService.loadMetaModel(session['user'], request.form['id'],check=True)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    project = MetaModelService.loadMetaModel(connect, session['user'], request.form['id'],check=True)
+    connect.close()
     return json.dumps(project)
 
 @app.route('/preview-save', methods=['POST'])
@@ -596,8 +602,8 @@ def group_rep_list():
 @app.route('/mvcs/gethistory', methods=['POST'])
 def gethistory():
     if 'user' in session:
-        RepositoryService.getHistory(request.form['pid'])
-
+        resp = mvcs.get_history(request.form['pid'])
+        return json.dumps(resp)
 
 @app.route('/market/')
 def market_top():

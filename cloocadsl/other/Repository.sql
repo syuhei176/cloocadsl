@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- ホスト: localhost
--- 生成時間: 2012 年 4 月 22 日 18:26
+-- 生成時間: 2012 年 5 月 07 日 14:26
 -- サーバのバージョン: 5.5.16
 -- PHP のバージョン: 5.3.8
 
@@ -23,6 +23,20 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- テーブルの構造 `comment`
+--
+
+DROP TABLE IF EXISTS `comment`;
+CREATE TABLE IF NOT EXISTS `comment` (
+  `rep_id` int(11) NOT NULL,
+  `version` int(11) NOT NULL,
+  `content` tinytext NOT NULL,
+  KEY `rep_id` (`rep_id`,`version`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- テーブルの構造 `diagram`
 --
 
@@ -35,6 +49,7 @@ CREATE TABLE IF NOT EXISTS `diagram` (
   `ver_type` int(1) NOT NULL,
   `objects` tinytext NOT NULL,
   `relationships` tinytext NOT NULL,
+  `properties` tinytext NOT NULL,
   PRIMARY KEY (`id`,`version`,`model_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -114,6 +129,9 @@ CREATE TABLE IF NOT EXISTS `object` (
   `ver_type` int(1) NOT NULL,
   `diagram` int(11) DEFAULT NULL,
   `properties` tinytext NOT NULL,
+  `z` int(5) NOT NULL DEFAULT '0',
+  `w` int(5) NOT NULL,
+  `h` int(5) NOT NULL,
   PRIMARY KEY (`id`,`model_id`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -169,7 +187,7 @@ CREATE TABLE IF NOT EXISTS `Repository` (
   `model_id` int(11) NOT NULL,
   `owner_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

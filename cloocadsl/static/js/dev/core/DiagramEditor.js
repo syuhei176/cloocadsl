@@ -10,6 +10,7 @@ function DiagramEditor(name, key, diagram) {
 	this.diagramController = new DiagramController(this.diagram);
 	this.tool = null;
 	this.drag_start = new Point2D();
+	this.drag_move_prev = new Point2D();
 	this.drag_move = new Point2D();
 	this.drag_end = new Point2D();
 	this.selected = null;
@@ -74,6 +75,7 @@ DiagramEditor.prototype.draw = function() {
 		}else{
 			var graphic = g_metamodel['graphics'][meta_ele.graphic];
 			graphic.option.col = col;
+			graphic.option.strokeStyle = col;
 			if(graphic.type == 'polygon') {
 				self.canvas.translateCanvas({
 					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
@@ -312,7 +314,7 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
-			this.updateObject(this.selected,Number(x-10),Number(y-10));
+			this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
 			this.draw()
 		}
 	}else if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
@@ -320,15 +322,17 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	}else if(this.dragMode == DiagramEditor.DRAG_RESIZE) {
 		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
 		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
-		this.draw()
+		this.draw();
 	}else{
 		
 	}
+	this.drag_move_prev.x = this.drag_move.x;
+	this.drag_move_prev.y = this.drag_move.y;
 }
 
 DiagramEditor.prototype.updateObject = function(obj, x, y) {
-	obj.bound.x = x - 10;
-	obj.bound.y = y - 10;
+	obj.bound.x += x;
+	obj.bound.y += y;
 	VersionElement.update(obj.ve);
 }
 
@@ -889,7 +893,7 @@ function calObjHeight(obj) {
 		for(var k=0;k < plist.children.length;k++) {
 			h++;
 			var prop = g_model.properties[plist.children[k]];
-			if(prop.value != undefined && w < prop.value.length) w = prop.value.length;
+			if(prop.value != undefined && w < StrLen(prop.value)) w = StrLen(prop.value);
 		}
 	}
 	obj.bound.height = h * 20 + 10;

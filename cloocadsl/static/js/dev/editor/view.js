@@ -1,13 +1,9 @@
 function HistoryView(history_data) {
-	var l_metaobjs = [];
-	for(var i=0;i < metaobjects.length;i++) {
-		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
-	}
 	Ext.create('Ext.data.Store', {
 	    storeId:'simpsonsStore',
 	    fields:['id', 'name'],
 	    data:{
-	    	'items':l_metaobjs
+	    	'items':history_data.verlist
 	    },
 	    proxy: {
 	        type: 'memory',

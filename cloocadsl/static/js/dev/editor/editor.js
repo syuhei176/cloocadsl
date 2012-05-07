@@ -263,7 +263,17 @@ function onRepItemClick(item){
 	}else if(item.id == 'update') {
 		update();
 	}else if(item.id == 'history') {
-		current_editor = new HistoryView();
+		$.post('/mvcs/gethistory', {pid : g_projectinfo.id},
+				function(data) {
+			for(var key in data.verlist) {
+				console.log(data.verlist[key].version, data.verlist[key].content);
+				for(var i=0;i < data.verlist[key].changes.length;i++) {
+					console.log(data.verlist[key].changes[i].ver_type + ',' + data.verlist[key].changes[i].type);
+				}
+			}
+			console.log()
+//						current_editor = new HistoryView(data);
+				}, "json");
 	}
 }
 

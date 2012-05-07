@@ -48,11 +48,11 @@ def check(user, pid):
     connect.close()
     return True
 
-'''
+"""
 プロジェクトをロードする
-'''
-def loadProject(user, pid):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+"""
+def loadProject(user, pid, connect):
+    #connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
     has_rows = cur.fetchall()
@@ -83,7 +83,7 @@ def loadProject(user, pid):
     metamodel['visibillity'] = rows[0][4]
     metamodel['welcome_message'] = rows[0][5]
     project['metamodel'] = metamodel
-    connect.close()
+    #connect.close()
     return project
 
 def deleteProject(user, pid):

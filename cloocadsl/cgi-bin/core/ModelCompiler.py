@@ -36,9 +36,9 @@ class BaseGenerator(object):
         self.templates = {}
     
     def GenerateCode(self, user, pid):
-        project = loadProject(user, pid)
-        metamodel = loadMetaModel(user, project['metamodel_id'], check=False)
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        project = loadProject(user, pid, connect)
+        metamodel = loadMetaModel(connect, user, project['metamodel_id'], check=False)
         files = TemplateService.tree(project['metamodel_id'], connect)
         connect.close()
         for f in files:

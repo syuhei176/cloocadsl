@@ -59,7 +59,7 @@ function MetaDiagramsEditor(metaobjects) {
   	  	  	        	   text: 'add',
 	  	  	  	     	    handler: function() {
 	  	  	  	     	    	alert('You clicked the button!');
-	  	  	  	     	    	metaobjects.push(new MetaDiagram(metaobject_IdGenerator.getNewId(), ''));
+	  	  	  	     	    	metaobjects.push(new MetaDiagram(metaobjects.length, ''));
 	  	  	  	     	    }
   	  	  	           },
   	  	  	           {
@@ -153,7 +153,7 @@ function MetaObjectsEditor(metaobjects) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'add',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metaobjects.push(new MetaObject(metaobject_IdGenerator.getNewId(), ''));
+	  	  	  	     	    	metaobjects.push(new MetaObject(metaobjects.length, ''));
 	  	  	  	     	    }
   	  	  	           },
   	  	  	           {
@@ -249,7 +249,7 @@ function MetaRelationsEditor(metarelations) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'add',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metarelations.push(new MetaRelation(metaobject_IdGenerator.getNewId(), ''));
+	  	  	  	     	    	metarelations.push(new MetaRelation(metarelations.length, ''));
 	  	  	  	     	    }
   	  	  	           },
   	  	  	           {
@@ -287,6 +287,8 @@ MetaRelationsEditor.prototype.onActivate = function() {
 
 function MetaPropertyEditor(metaobjects) {
 	var l_metaobjs = [];
+	this.selected_index = -1;
+	var self = this;
 	for(var i=0;i < metaobjects.length;i++) {
 		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
 	}
@@ -320,6 +322,7 @@ function MetaPropertyEditor(metaobjects) {
         	listeners : {
         		select : {
         			fn : function(rmodel,record,index,options){
+        				self.selected_index = record.data.id;
         				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
         					 if(btn != 'cancel') {
         						 metaobjects[record.data.id] = JSON.parse(text);
@@ -352,7 +355,9 @@ function MetaPropertyEditor(metaobjects) {
   	  	  	        	   xtype: 'button',
   	  	  	        	   text: 'delete',
 	  	  	  	     	    handler: function() {
-	  	  	  	     	    	
+//	  	  	  	     	    	alert(self.selected_index);
+//	  	  	  	     	    	metaobjects.slice(self.selected_index, 1);
+	  	  	  	     	    	metaobjects.slice(7, 1);
 	  	  	  	     	    }
   	  	  	           }
 		  	           ],

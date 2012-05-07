@@ -64,6 +64,7 @@ function init() {
 	        name = $form.find( 'input[name="name"]' ).val(),
 	        metamodel_id = $form.find( 'select[name="metamodel_id"]' ).val(),
 	        xml = $form.find( 'input[name="xml"]' ).val(),
+	        sample = $form.find( 'input[name="sample"]' ).val(),
 	        url = $form.attr( 'action' );
 	    
 	    if(name.length == 0) {
@@ -71,7 +72,7 @@ function init() {
 	    	return;
 	    }
 	    /* Send the data using post and put the results in a div */
-	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml, group_id: {{group_id}} },
+	    $.post( url, { name: name, metamodel_id: metamodel_id, xml: xml, group_id: {{group_id}}, sample: sample},
 	      function( data ) {
 	    	if(data != null) {
 	    		$( "#create-new-p" ).dialog('close');
@@ -256,6 +257,7 @@ function delete_metamodel(id, mname) {
    <div>プロジェクト名<input type="text" name="name"></div>
 	<div id="metamodel2"></div>
    <input type="hidden" name="xml" value=" ">
+   <div>sample project<input type="checkbox" name="sample" value="true"></div>
    <input type="submit" value="OK">
    </form>
 </div>
