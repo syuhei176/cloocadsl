@@ -10,10 +10,6 @@ var g_project_id = 0;
 function init_clooca(project, is_preview) {
 	g_project_id = project.id;
 	g_projectinfo = project;
-	g_projectinfo.group.service = 'rep';
-	(window.open("","_self")).addEventListener('close', function(){
-		saveModel(g_projectinfo.id);
-	}, false);
 	_is_preview = is_preview;
 	new Ext.Viewport({
 		layout:'border',
