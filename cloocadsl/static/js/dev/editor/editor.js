@@ -208,11 +208,9 @@ function onItemClick(item){
 		saveModel(g_project_id);
 	}else if(item.id == 'diagram') {
 		if(current_editor != null && current_editor.selected != null && g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition != null && current_editor.selected.diagram == null) {
-			var d = new Diagram();
-			d.meta_id = g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition;
-			current_editor.selected.diagram = d.id;
-			g_model.diagrams[d.id] = d;
-			createModelExplorer();
+			show_setting_diagram_name_window(g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition, function(d){
+				current_editor.selected.diagram = d.id;
+			});
 		}else{
 			show_create_diagram_window();
 		}
@@ -299,7 +297,6 @@ function createModelExplorer() {
 				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
 				var prop = null;
 				for(var j=0;j<diagram.properties.length;j++) {
-					alert(diagram.properties[j].meta_id);
 					if(diagram.properties[j].meta_id == name_id) {
 						prop = diagram.properties[j];
 					}
@@ -438,6 +435,27 @@ function checkoutview() {
 			}, "json");
 }
 
+function show_setting_diagram_name_window(meta_id, cb) {
+  	 Ext.Msg.prompt('ダイアグラム','ダイアグラム名を入力してください。',function(btn,text){
+		 if(btn != 'cancel') {
+         	var d = ModelController.addDiagram(meta_id);
+			var meta_diagram = g_metamodel.metadiagrams[d.meta_id];
+			if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
+				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
+				var prop = null;
+				for(var j=0;j<d.properties.length;j++) {
+					if(d.properties[j].meta_id == name_id) {
+						prop = d.properties[j];
+					}
+				}
+				g_model.properties[prop.children[0]].value = text;
+			}
+			if(cb != null) cb(d);
+        	createModelExplorer();
+        	win.hide();
+		 }
+	 },null,true,'');
+}
 function show_create_diagram_window() {
 	var datas = [];
 	for(var i=1;i < g_metamodel.metadiagrams.length;i++) {
@@ -479,6 +497,8 @@ function show_create_diagram_window() {
 	                tooltip:'create',
 	                iconCls:'add',
 	                handler : function() {
+	                	show_setting_diagram_name_window(selModel.getSelection()[0].get('id'), null);
+	                	/*
 	               	 Ext.Msg.prompt('ダイアグラム','新規作成',function(btn,text){
 	            		 if(btn != 'cancel') {
 	 	                	var d = ModelController.addDiagram(selModel.getSelection()[0].get('id'));
@@ -497,6 +517,7 @@ function show_create_diagram_window() {
 		                	win.hide();
 	            		 }
 	            	 },null,true,'');
+	            	 */
 	                }
 	            }]
 	        }]

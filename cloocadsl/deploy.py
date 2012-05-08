@@ -67,8 +67,8 @@ def access_qito():
     return scp
 
 def deploy():
-#    access_aws()
-    scp = access_qito()
+    scp = access_aws()
+#    scp = access_qito()
     print scp.readline()
     scp.expect('sftp>')
     scp.sendline('ls')

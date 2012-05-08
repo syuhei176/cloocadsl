@@ -7,7 +7,6 @@ ModelController.getObject = function(diagram, id) {
 ModelController.addDiagram = function(meta_id){
 	var d = new Diagram();
 	d.meta_id = meta_id;//g_metamodel.metadiagram;
-//	g_model.root = d.id;
 	g_model.diagrams[d.id] = d;
 	var dc = new DiagramController(d);
 	dc.addElement(d, g_metamodel.metadiagrams[d.meta_id]);
