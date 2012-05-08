@@ -37,13 +37,13 @@ def update(user, pid):
         connect.close()
         return 0
     rep_id = rows[0][0]
-    oldModel = json.loads(rows[0][1])
-    cur.close()
-#    connect.close()
-    newModel = UpdateServiceJSON.LoadHeadRevision(rep_id)
-    model_json = json.dumps(merge(newModel, oldModel))
-#    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-    cur = connect.cursor()
+    if len(rows[0][1]) == 0:
+        newModel = UpdateServiceJSON.LoadHeadRevision(rep_id)
+        model_json = json.dumps(newModel)
+    else:
+        oldModel = json.loads(rows[0][1])
+        newModel = UpdateServiceJSON.LoadHeadRevision(rep_id)
+        model_json = json.dumps(merge(newModel, oldModel))
     cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id=%s;', (model_json, pid))
     connect.commit()
     cur.close()

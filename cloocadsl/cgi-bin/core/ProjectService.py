@@ -112,8 +112,8 @@ clean_json = ''
 def createProject(connect, user, name, xml, metamodel_id, group_id=0,_is_sample=False):
     if len(name.encode('utf_8')) >= 255:
         return False
-    #connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
+    cur.execute('LOCK TABLES ProjectInfo WRITE,hasProject WRITE;')
     json_text = clean_json
     if _is_sample:
         cur.execute('SELECT sample FROM MetaModelInfo WHERE id=%s;',(metamodel_id, ))
@@ -126,8 +126,8 @@ def createProject(connect, user, name, xml, metamodel_id, group_id=0,_is_sample=
     cur = connect.cursor()
     cur.execute('INSERT INTO hasProject (user_id,project_id) VALUES(%s,%s);',(user['id'], id, ))
     connect.commit()
+    cur.execute('UNLOCK TABLES;')
     cur.close()
-    #connect.close()
     project = {}
     project['id'] = id
     project['name'] = name
