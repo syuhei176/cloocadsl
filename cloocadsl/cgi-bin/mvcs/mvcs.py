@@ -161,7 +161,8 @@ def merge(model1, model2):
         if model1['diagrams'].has_key(str(key)):
             merge_diagram(model1['diagrams'][key], model2['diagrams'][key])
         else:
-            model1['diagrams'][key] = model2['diagrams'][key]
+            if model2['diagrams'][key]['ve']['ver_type'] == 'add':
+                model1['diagrams'][key] = model2['diagrams'][key]
     for key in model2['objects']:
         if model1['objects'].has_key(key):
             merge_object(model1['objects'][key], model2['objects'][key])
