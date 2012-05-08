@@ -303,7 +303,7 @@ function createModelExplorer() {
 				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
 				var prop = null;
 				for(var j=0;j<diagram.properties.length;j++) {
-					alert(diagram.properties[j].meta_id);
+//					alert(diagram.properties[j].meta_id);
 					if(diagram.properties[j].meta_id == name_id) {
 						prop = diagram.properties[j];
 					}

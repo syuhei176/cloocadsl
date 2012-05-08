@@ -100,10 +100,12 @@ function readModel(xml) {
  * @param pid
  */
 function commit() {
+	g_model.id = g_projectinfo.id;
+	var xml = JSON.stringify(g_model);
 	 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
 		 if(btn != 'cancel') {
 				Ext.MessageBox.show({title: 'Please wait',msg: 'Commit',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
-				$.post('/mvcs/commit', { pid : g_projectinfo.id, comment : text},
+				$.post('/mvcs/commit', { pid : g_projectinfo.id, comment : text, xml : xml },
 						function(data) {
 							if(data) {
 								console.log('commit state = '+data);
@@ -139,6 +141,7 @@ function update() {
 					readModel(data);
 					createModelExplorer();
 					Ext.MessageBox.hide();
+					editortabpanel.close();
 				}
 			}, "json");
 }

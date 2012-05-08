@@ -72,6 +72,29 @@ DiagramEditor.prototype.draw = function() {
 				  start: 0, end: 359,
 				  fromCenter: true
 				});
+		}else if(meta_ele.graphic == 'fillcircle') {
+			$("canvas").drawArc({
+				  fillStyle: col, strokeWidth: 2,
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				  radius: obj.bound.width / 2,
+				  start: 0, end: 359,
+				  fromCenter: true
+				});
+		}else if(meta_ele.graphic == 'endcircle') {
+			$("canvas").drawArc({
+				  strokeStyle: col, strokeWidth: 2,
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				  radius: obj.bound.width / 2,
+				  start: 0, end: 359,
+				  fromCenter: true
+				});
+			$("canvas").drawArc({
+				  fillStyle: "#000", strokeWidth: 2,
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				  radius: obj.bound.width / 2 - 5,
+				  start: 0, end: 359,
+				  fromCenter: true
+				});
 		}else{
 			var graphic = g_metamodel['graphics'][meta_ele.graphic];
 			graphic.option.col = col;

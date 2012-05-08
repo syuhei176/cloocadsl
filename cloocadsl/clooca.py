@@ -93,7 +93,7 @@ def groups():
         result = GroupService.getComunity(session['user'], connect)
         connect.close()
         for g in result:
-            g['url'] = 'http://dsl.clooca.com/member_reg/'+str(g['id'])+'/'+str(hash(g['id']))
+            g['url'] = 'http://qito.clooca.com/member_reg/'+str(g['id'])+'/'+str(hash(g['id']))
         return render_template('groups.html',
                                username = session['user']['uname'],
                                groups = result)
@@ -524,7 +524,7 @@ mvcs
 @app.route('/mvcs/commit', methods=['POST'])
 def commit():
     if 'user' in session:
-        resp = mvcs.commit(session['user'], pid=request.form['pid'], comment=request.form['comment'])
+        resp = mvcs.commit(session['user'], pid=request.form['pid'], comment=request.form['comment'], xml=request.form['xml'])
         return json.dumps(resp)
 
 @app.route('/mvcs/update', methods=['POST'])

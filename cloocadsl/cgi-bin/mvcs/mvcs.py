@@ -11,7 +11,7 @@ import RepositoryService
 commit
 return:0,1,2
 '''
-def commit(user, pid, comment):
+def commit(user, pid, comment, xml):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml,metamodel_id,rep_id FROM ProjectInfo WHERE id=%s;', (pid,))
@@ -25,7 +25,7 @@ def commit(user, pid, comment):
     model_json = rows[0][2]
     cur.close()
     connect.close()
-    return CommitService.commit(rep_id, model_json, comment)
+    return CommitService.commit(rep_id, xml, comment)
 
 def update(user, pid):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
