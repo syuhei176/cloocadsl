@@ -226,7 +226,7 @@ def getHistory(rep_id):
         d['type'] = 'relationship'
         if history['verlist'].has_key(str(rows[i][1])):
             history['verlist'][str(rows[i][1])]['changes'].append(d)
-    cur.execute('SELECT id,version,ver_type,meta_id FROM property WHERE model_id=%s;', (model_id))
+    cur.execute('SELECT id,version,ver_type,meta_id,content FROM property WHERE model_id=%s;', (model_id))
     rows = cur.fetchall()
     for i in range(len(rows)):
         d = {}
@@ -235,6 +235,7 @@ def getHistory(rep_id):
         d['ver_type'] = rows[i][2]
         d['meta_id'] = int(rows[i][3])
         d['type'] = 'property'
+        d['value'] = rows[i][4]
         if history['verlist'].has_key(str(rows[i][1])):
             history['verlist'][str(rows[i][1])]['changes'].append(d)
     cur.close()

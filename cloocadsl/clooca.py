@@ -605,6 +605,13 @@ def gethistory():
         resp = mvcs.get_history(request.form['pid'])
         return json.dumps(resp)
 
+@app.route('/mvcs/viewer/<id>', methods=['GET'])
+def mvcs_viewer(id):
+    if 'user' in session:
+        resp = RepositoryService.getHistory(id);
+        return render_template('rep_view.html', history=resp)
+
+
 @app.route('/market/')
 def market_top():
     if 'user' in session:
