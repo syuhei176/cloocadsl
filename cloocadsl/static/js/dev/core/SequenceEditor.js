@@ -50,7 +50,7 @@ SequenceEditor.prototype.draw = function() {
 		var meta_ele = g_metamodel.metaobjects[obj.meta_id];
 		if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
 			self.canvas.drawRect({
-				  strokeStyle: col, strokeWidth: 2,
+				  strokeStyle: col, strokeWidth: 1,
 				  x: obj.bound.x, y: obj.bound.y,
 				  width: obj.bound.width, height: obj.bound.height,
 				  fromCenter: false
@@ -313,6 +313,7 @@ SequenceEditor.prototype.ActionMove = function(x, y) {
 	}else if(this.dragMode == SequenceEditor.DRAG_RESIZE) {
 		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
 		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
+		if(this.selected.bound.width < 5) this.selected.bound.width = 5;
 		this.draw()
 	}else{
 		
@@ -320,9 +321,14 @@ SequenceEditor.prototype.ActionMove = function(x, y) {
 }
 
 SequenceEditor.prototype.updateObject = function(obj, x, y) {
-	obj.bound.x = x - 10;
-//	obj.bound.y = y - 10;
-	obj.bound.y = 100;
+	var meta_ele = g_metamodel.metaobjects[obj.meta_id];
+	if(meta_ele.seq) {
+		obj.bound.x = x - 10;
+		obj.bound.y = 100;
+	}else{
+		obj.bound.x = x - 10;
+		obj.bound.y = y - 10;
+	}
 	VersionElement.update(obj.ve);
 }
 
@@ -337,7 +343,12 @@ SequenceEditor.prototype.ActionDown = function(x, y) {
 			this.selected = null;
 		}
 	}else if(this.tool.classname == 'MetaObject'){
-		this.diagramController.addObject(x, y, this.tool.id);
+		var obj = this.diagramController.addObject(x, y, this.tool.id);
+		var meta_ele = g_metamodel.metaobjects[obj.meta_id];
+		if(meta_ele.seq) {
+			obj.bound.width = 16;
+			obj.bound.height = 300;
+		}
 		this.select_button.toggle(true, false);
 	}else if(this.tool.classname == 'MetaRelation'){
 		this.dragMode = SequenceEditor.DRAG_RUBBERBAND;
@@ -350,7 +361,8 @@ SequenceEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.x = x;
 	this.drag_end.y = y;
 	if(this.dragMode == SequenceEditor.DRAG_RUBBERBAND) {
-		this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
+		var rel = this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
+		g_model.properties[rel.properties[0].children[0]].value = Number(this.drag_start.y - 200);
 		this.select_button.toggle(true);
 	} else if(this.dragMode == SequenceEditor.DRAG_POINT) {
 		this.movePoint(this.selected, this.drag_start, this.drag_end);
@@ -366,23 +378,16 @@ SequenceEditor.prototype.deletePoint = function() {
 
 SequenceEditor.prototype.movePoint = function(rel, s, d) {
 	if(rel != null) {
-		var yy = d.y - s.y > 0 ? 3 : -3;
-		g_model.properties[rel.properties[0].children[0]].value = Number(g_model.properties[rel.properties[0].children[0]].value) + Number(yy);
-		/*
-		var flg = true;
-		for(var i=0;i < rel.points.length;i++) {
-			if(Point2D.distanceSq(rel.points[i], s) < 150) {
-				rel.points[i].x = d.x;
-				rel.points[i].y = d.y;
-				flg = false;
+		var yy = d.y - s.y;
+		//TODO START
+		var prop = null;
+		for(var i=0;i < rel.properties.length;i++) {
+			if(rel.properties[i].meta_id == 4) {
+				prop = rel.properties[i];
 			}
 		}
-		if(flg) {
-			if(rel.points.length < 2) {
-				rel.points.push(new Point2D(d.x, d.y));
-			}
-		}
-		*/
+		//TODO END
+		g_model.properties[prop.children[0]].value = Number(g_model.properties[prop.children[0]].value) + Number(yy);
 	}
 }
 
@@ -426,8 +431,17 @@ SequenceEditor.prototype.click_a_edge = function(rel, x, y) {
 	var dest = ModelController.getObject(this.diagram, rel.dest);
 	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
 	var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
-	s.y += Number(g_model.properties[rel.properties[0].children[0]].value);
-	e.y += Number(g_model.properties[rel.properties[0].children[0]].value);
+	//TODO START
+	var prop = null;
+	for(var i=0;i < rel.properties.length;i++) {
+		if(rel.properties[i].meta_id == 4) {
+			prop = rel.properties[i];
+		}
+	}
+	//TODO END
+	s.y = Number(g_model.properties[prop.children[0]].value) + 200;
+	e.y = s.y;
+//	e.y += Number(g_model.properties[rel.properties[0].children[0]].value);
 	points.push(s);
 	points = points.concat(rel.points);
 	points.push(e);
@@ -441,8 +455,6 @@ SequenceEditor.prototype.click_a_edge = function(rel, x, y) {
 	}
 	return false;
 }
-
-
 
 SequenceEditor.prototype.createButton = function() {
 	var self = this;
@@ -714,10 +726,22 @@ SequenceEditor.prototype.draw_relationship = function(rel) {
 	var dest = ModelController.getObject(this.diagram, rel.dest);
 	var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
 	var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
-	s.y += Number(g_model.properties[rel.properties[0].children[0]].value);
-	e.y += Number(g_model.properties[rel.properties[0].children[0]].value);
+	//TODO START
+	var prop = null;
+	for(var i=0;i < rel.properties.length;i++) {
+		if(rel.properties[i].meta_id == 4) {
+			prop = rel.properties[i];
+		}
+	}
+	//TODO END
+	s.y = Number(g_model.properties[prop.children[0]].value) + 200;
+	e.y = s.y;
+//	e.y += Number(g_model.properties[rel.properties[0].children[0]].value);
 	var start = 0;
 	var end = 0;
+	start = this.getConnectionPoint(new Line2D(s.x, s.y, e.x, e.y), src.bound);
+	end = this.getConnectionPoint(new Line2D(e.x, e.y, s.x, s.y), dest.bound);
+	/*
 	if(rel.points.length == 0) {
 		start = this.getConnectionPoint(new Line2D(s.x, s.y, e.x, e.y), src.bound);
 		end = this.getConnectionPoint(new Line2D(e.x, e.y, s.x, s.y), dest.bound);
@@ -725,9 +749,10 @@ SequenceEditor.prototype.draw_relationship = function(rel) {
 		start = this.getConnectionPoint(new Line2D(s.x, s.y, rel.points[0].x, rel.points[0].y), src.bound);
 		end = this.getConnectionPoint(new Line2D(e.x, e.y, rel.points[rel.points.length-1].x, rel.points[rel.points.length-1].y), dest.bound);
 	}
+	*/
 	var points = [];
 	points.push(start);
-	points = points.concat(rel.points);
+//	points = points.concat(rel.points);
 	points.push(end);
 	for(var i=0;i < points.length-1;i++) {
 		this.canvas.drawLine({
@@ -775,6 +800,7 @@ SequenceEditor.prototype.draw_relationship = function(rel) {
 				if(p.ve.ver_type == 'delete') continue;
 				var disp_text = p.value;
 				var meta_prop = g_metamodel.metaproperties[prop.meta_id];
+				if(meta_prop.visible == false) continue;
 				if(meta_prop.widget == MetaProperty.FIXED_LIST) {
 					for(var index=0;index < meta_prop.exfield.length;index++) {
 						if(p.value == meta_prop.exfield[index].value) {

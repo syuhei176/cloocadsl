@@ -113,7 +113,7 @@ def createProject(connect, user, name, xml, metamodel_id, group_id=0,_is_sample=
     if len(name.encode('utf_8')) >= 255:
         return False
     cur = connect.cursor()
-    cur.execute('LOCK TABLES ProjectInfo WRITE,hasProject WRITE;')
+    cur.execute('LOCK TABLES ProjectInfo WRITE,hasProject WRITE,MetaModelInfo WRITE;')
     json_text = clean_json
     if _is_sample:
         cur.execute('SELECT sample FROM MetaModelInfo WHERE id=%s;',(metamodel_id, ))

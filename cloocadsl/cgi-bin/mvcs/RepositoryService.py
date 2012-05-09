@@ -43,11 +43,11 @@ def getRepositoryFromDB(rep_id):
 '''
 リポジトリを作成する。
 '''
-def CreateRepository(user, rep_name):
+def CreateRepository(user, rep_name, group_id):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO Repository (head_version,name,owner_id) VALUES(%s,%s,%s);', (1,rep_name,user['id']))
+    cur.execute('INSERT INTO Repository (head_version,name,owner_id) VALUES(%s,%s,%s);', (1,rep_name,group_id))
     connect.commit()
     rep_id = cur.lastrowid
 #    cur.execute('INSERT INTO model (id) VALUES(%s);', (rep_id))
@@ -70,10 +70,10 @@ def CreateRepository(user, rep_name):
 '''
 リポジトリを削除する
 '''
-def deleteRepository(user, rep_id):
+def deleteRepository(user, rep_id, group_id):
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('DELETE FROM Repository WHERE id=%s AND owner_id=%s;', (rep_id, user['id']))
+    cur.execute('DELETE FROM Repository WHERE id=%s AND owner_id=%s;', (rep_id, group_id))
     affected = cur.rowcount
     connect.commit()
     cur.close()
@@ -129,7 +129,7 @@ def ver_list(rep_id):
     reps = []
     for i in range(len(rows)):
         rep = {}
-        rep['id'] = rows[i][0]
+        rep['rep_id'] = rows[i][0]
         rep['version'] = rows[i][1]
         rep['content'] = rows[i][2]
         reps.append(rep)
@@ -137,12 +137,12 @@ def ver_list(rep_id):
     connect.close()
     return reps
 
-'''
-'''
-def user_rep_list(user):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+"""
+"""
+def group_rep_list(group_id):
+    connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,model_id,head_version,name,owner_id FROM Repository WHERE owner_id=%s;', (rep_id))
+    cur.execute('SELECT id,model_id,head_version,name,owner_id FROM Repository WHERE owner_id=%s;', (group_id))
     rows = cur.fetchall()
     reps = []
     for i in range(len(rows)):
@@ -189,7 +189,7 @@ def getHistory(rep_id):
     cur.execute('SELECT version,content FROM comment WHERE rep_id=%s;', (rep_id))
     rows = cur.fetchall()
     for i in range(len(rows)):
-        history['verlist'][str(rows[i][0])] = {"version":int(rows[i][0]), "content":rows[i][1]}
+        history['verlist'][str(rows[i][0])] = {"version":int(rows[i][0]), "content":rows[i][1].decode('utf-8')}
         history['verlist'][str(rows[i][0])]['changes'] = []
     cur.execute('SELECT * FROM model WHERE id=%s;', (model_id))
     rows = cur.fetchall()
@@ -235,7 +235,7 @@ def getHistory(rep_id):
         d['ver_type'] = rows[i][2]
         d['meta_id'] = int(rows[i][3])
         d['type'] = 'property'
-        d['value'] = rows[i][4]
+        d['value'] = rows[i][4].decode('utf-8')
         if history['verlist'].has_key(str(rows[i][1])):
             history['verlist'][str(rows[i][1])]['changes'].append(d)
     cur.close()
