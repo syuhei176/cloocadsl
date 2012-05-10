@@ -143,7 +143,7 @@ function create_menu() {
                    ]
         },'-',{
             id: 'save',
-            text: 'Save',
+            text: '保存',
             iconCls: 'add16',
         	handler : onItemClick
         }]
@@ -157,25 +157,31 @@ function create_menu() {
             iconCls: 'add16',
             menu: [
                    {
-                	   id: 'create_rep',
-                	   text: 'リポジトリ作成',
+                	   id: 'manage_repository',
+                	   text: 'リポジトリ',
                 	   iconCls: 'add16',
-                	   handler : onRepItemClick
-                   },{
-                	   id: 'clear_rep',
-                	   text: 'リポジトリ削除',
-                	   iconCls: 'add16',
-                	   handler : onRepItemClick
-                   },{
-                	   id: 'import',
-                	   text: 'インポート',
-                	   iconCls: 'add16',
-                	   handler : onRepItemClick
-                   },{
-                	   id: 'checkout',
-                	   text: 'チェックアウト',
-                	   iconCls: 'add16',
-                	   handler : onRepItemClick
+                       menu: [{
+                    	   id: 'create_rep',
+                    	   text: 'リポジトリ作成',
+                    	   iconCls: 'add16',
+                    	   handler : onRepItemClick
+                       },{
+                    	   id: 'clear_rep',
+                    	   text: 'リポジトリ削除',
+                    	   iconCls: 'add16',
+                    	   handler : onRepItemClick
+                       },{
+                    	   id: 'import',
+                    	   text: 'インポート',
+                    	   iconCls: 'add16',
+                    	   handler : onRepItemClick
+                       },{
+                    	   id: 'checkout',
+                    	   text: 'チェックアウト',
+                    	   iconCls: 'add16',
+                    	   handler : onRepItemClick
+                       }
+                       ]
                    },{
                 	   id: 'commit',
                 	   text: 'コミット',
@@ -277,7 +283,13 @@ function onRepItemClick(item){
 	}else if(item.id == 'commit') {
 		commit();
 	}else if(item.id == 'update') {
-		update();
+		Ext.MessageBox.confirm("確認", "自分の変更とリポジトリをマージさせたい時は、まず保存をしてくださいね。保存していない場合は、「No」を押して、保存してください。　アップデートしますか？", function(btn) {
+			if (btn == "yes") {
+				update();
+			} else if (btn == "no") {
+				
+			}
+		}, window);
 	}else if(item.id == 'update_to_ver') {
 		update_to_ver_view();
 	}else if(item.id == 'history') {
@@ -303,6 +315,18 @@ function onShinshuItemClick(item){
 }
 
 function createModelExplorer() {
+	
+	var open_diagram = function(diagram,dname,id){
+		var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
+		var editor;
+		if(meta_diagram.seq == true) {
+	    	editor = new SequenceEditor(dname, id, diagram);
+		}else{
+	    	editor = new DiagramEditor(dname, id, diagram);
+		}
+		editortabpanel.add(editor, id);
+	}
+	
 	var diagrams = [];
 	for(var key in g_model.diagrams) {
 //		console.log("createModelExplorer "+key);
@@ -325,6 +349,7 @@ function createModelExplorer() {
 				}
 				dname = g_model.properties[prop.children[0]].value;
 			}
+			dname += '(' + meta_diagram.name + ')';
 			if(_is_root) {
 				diagrams.push({id: key, text: dname, leaf: true, icon: '/static/images/editor/root_leaf.gif'});
 			}else{
@@ -341,16 +366,15 @@ function createModelExplorer() {
 	    }
 	});
 	var modelExplorer = Ext.create('Ext.tree.Panel', {
-//	    title: 'Model Explorer',
-	    width: 200,
-	    height: 200,
+	    width: 240,
+	    height: 280,
 	    store: store,
 	    rootVisible: false
 	});
 	modelExplorer.on('itemdblclick',function(view, record, item, index, event) {
 		if(record.data.text != 'root') {
-	    	var editor = new DiagramEditor(record.data.text, record.data.id, g_model.diagrams[record.data.id]);
-	    	editortabpanel.add(editor, record.data.id);
+			var diagram = g_model.diagrams[record.data.id];
+			open_diagram(diagram, record.data.text, record.data.id);
 		}
     });
 	var mnuContext = new Ext.menu.Menu({
@@ -359,15 +383,10 @@ function createModelExplorer() {
 	        text: '削除'
 	    },{
 	        id: 'open',
-	        text: 'シーケンス図を開く',
-	        items: [{
-		        id: 'open_d',
-		        text: 'ダイアグラム'
-		    },{
-		        id: 'open_s',
-		        text: 'シーケンス'
-		    }
-	        ]
+	        text: '開く'
+	    },{
+	        id: 'change',
+	        text: '名前を変更'
 	    }],
 	    listeners: {
         click: function(menu, item) {
@@ -376,8 +395,10 @@ function createModelExplorer() {
                 	ModelController.deleteDiagram(selected_diagram_id);
                     break;
                 case 'open':
-        	    	var editor = new SequenceEditor(selected_diagram_name, selected_diagram_name, g_model.diagrams[selected_diagram_id]);
-        	    	editortabpanel.add(editor, selected_diagram_name);
+                	open_diagram(g_model.diagrams[selected_diagram_id], selected_diagram_name, selected_diagram_id);
+                    break;
+                case 'change':
+                	change_diagram_name_view(g_model.diagrams[selected_diagram_id]);
                     break;
             }
         }
@@ -428,7 +449,7 @@ function checkoutview() {
 					    items: {
 					        xtype: 'grid',
 					        border: false,
-					        columns: [{text: "name", dataIndex: 'name'}],
+					        columns: [{text: "name", dataIndex: 'name'},{text: "head version", dataIndex: 'head_version'}],
 					        store: Ext.create('Ext.data.Store', {data:data,fields:['id','name','head_version']}),
 						    selModel: selModel,
 						    dockedItems: [{
@@ -447,7 +468,9 @@ function checkoutview() {
 					                iconCls:'add',
 					                handler : function() {
 					                	console.log(''+selModel.getSelection()[0].get('id'));
-					                	checkout(selModel.getSelection()[0].get('id'), function(){win.hide();});
+					                	if(window.confirm('チェックアウトします。よろしいですか？')) {
+						                	checkout(selModel.getSelection()[0].get('id'), function(){win.hide();});
+					                	}
 					                }
 					            }]
 					        }]
@@ -483,7 +506,7 @@ function import_to_rep_view() {
 					    items: {
 					        xtype: 'grid',
 					        border: false,
-					        columns: [{text: "name", dataIndex: 'name'}],
+					        columns: [{text: "name", dataIndex: 'name'},{text: "head version", dataIndex: 'head_version'}],
 					        store: Ext.create('Ext.data.Store', {data:data,fields:['id','name','head_version']}),
 						    selModel: selModel,
 						    dockedItems: [{
@@ -502,9 +525,11 @@ function import_to_rep_view() {
 					                iconCls:'add',
 					                handler : function() {
 					                	console.log(''+selModel.getSelection()[0].get('id'));
-					                	import_to_rep(selModel.getSelection()[0].get('id'), function() {
-					                		win.hide();
-					                	});
+					                	if(window.confirm('リポジトリにインポートします。よろしいですか？')) {
+						                	import_to_rep(selModel.getSelection()[0].get('id'), function() {
+						                		win.hide();
+						                	});
+					                	}
 					                }
 					            }]
 					        }]
@@ -540,7 +565,7 @@ function delete_rep_view() {
 					    items: {
 					        xtype: 'grid',
 					        border: false,
-					        columns: [{text: "name", dataIndex: 'name'}],
+					        columns: [{text: "name", dataIndex: 'name'},{text: "head version", dataIndex: 'head_version'}],
 					        store: Ext.create('Ext.data.Store', {data:data,fields:['id','name','head_version']}),
 						    selModel: selModel,
 						    dockedItems: [{
@@ -597,7 +622,7 @@ function update_to_ver_view() {
 					    items: {
 					        xtype: 'grid',
 					        border: false,
-					        columns: [{text: "version", dataIndex: 'version'},{text: "comment", dataIndex: 'content'}],
+					        columns: [{text: "version", dataIndex: 'version'},{text: "comment", dataIndex: 'content', width: 160}],
 					        store: Ext.create('Ext.data.Store', {data:data,fields:['version','content']}),
 						    selModel: selModel,
 						    dockedItems: [{
@@ -681,7 +706,7 @@ function show_create_diagram_window() {
 		        						prop = d.properties[j];
 		        					}
 		        				}
-		        				g_model.properties[prop.children[0]].value = text
+		        				g_model.properties[prop.children[0]].value = text;
 		        			}
 		                	createModelExplorer();
 		                	win.hide();
@@ -693,4 +718,24 @@ function show_create_diagram_window() {
 	     }]
 	});
 	win.show();
+}
+
+function change_diagram_name_view(diagram) {
+  	 Ext.Msg.prompt('ダイアグラム','名前の変更',function(btn,text){
+		 if(btn != 'cancel') {
+			var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
+			if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
+				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
+				var prop = null;
+				for(var j=0;j<diagram.properties.length;j++) {
+					if(diagram.properties[j].meta_id == name_id) {
+						prop = diagram.properties[j];
+					}
+				}
+				var dc = new DiagramController(diagram);
+				dc.updateProperty(g_model.properties[prop.children[0]], text, diagram);
+			}
+        	createModelExplorer();
+		 }
+	 },null,false,'');
 }

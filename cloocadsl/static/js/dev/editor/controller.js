@@ -102,7 +102,7 @@ function readModel(xml) {
 function commit() {
 	g_model.id = g_projectinfo.id;
 	var xml = JSON.stringify(g_model);
-	 Ext.Msg.prompt('コミット','コメント',function(btn,text){
+	 Ext.Msg.prompt('コミットします。','コメントを書いてください。',function(btn,text){
 		 if(btn != 'cancel') {
 				Ext.MessageBox.show({title: 'Please wait',msg: 'Commit',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 				$.post('/mvcs/commit', { pid : g_projectinfo.id, comment : text, xml : xml },
@@ -120,7 +120,7 @@ function commit() {
 								}
 							}else{
 								Ext.MessageBox.hide();
-								Ext.MessageBox.alert("コミットステート","失敗");
+								Ext.MessageBox.alert("コミットステート","失敗：リポジトリが存在しないか、チェックアウトしていません。");
 							}
 						}, "json");
 		 }
@@ -175,7 +175,7 @@ function update_to_ver(ver, cb) {
  * create_rep
  */
 function create_rep() {
-	 Ext.Msg.prompt('確認','リポジトリの使用は特別サービスです。リポジトリを作成しますか？',function(btn, text){
+	 Ext.Msg.prompt('確認','リポジトリを作成しますか？',function(btn, text){
 		 if(btn != 'no' && text.length != 0) {
 				$.post('/mvcs/create_rep', { pid : g_project_id, name : text, group_id : g_projectinfo.group.id },
 						function(data) {
@@ -184,7 +184,7 @@ function create_rep() {
 							}
 						}, "json");
 		 }
-	 },null,true);
+	 },null,false);
 }
 
 /**

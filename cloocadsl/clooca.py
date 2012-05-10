@@ -214,8 +214,7 @@ def wb_preview(id):
 def workbenchjs(id=None):
     if 'user' in session:
         return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
-    return render_template('index.html', loggedin = False, username = '')
-
+    return redirect(url_for('login_view'))
 
 @app.route('/join-group', methods=['POST'])
 def join_group():
@@ -610,7 +609,7 @@ def mvcs_viewer(id):
     if 'user' in session:
         resp = RepositoryService.getHistory(id);
         return render_template('rep_view.html', history=resp)
-
+    return redirect(url_for('login_view'))
 
 @app.route('/market/')
 def market_top():

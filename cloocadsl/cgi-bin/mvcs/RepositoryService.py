@@ -9,10 +9,9 @@ import json
 from xml.etree.ElementTree import *
 import config
 
-
-'''
+"""
 グローバル変数
-'''
+"""
 #データベースとの接続
 connect = None
 #モデルリポジトリのID
@@ -40,9 +39,9 @@ def getRepositoryFromDB(rep_id):
     connect.close()
     return rep
 
-'''
+"""
 リポジトリを作成する。
-'''
+"""
 def CreateRepository(user, rep_name, group_id):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -50,14 +49,8 @@ def CreateRepository(user, rep_name, group_id):
     cur.execute('INSERT INTO Repository (head_version,name,owner_id) VALUES(%s,%s,%s);', (1,rep_name,group_id))
     connect.commit()
     rep_id = cur.lastrowid
-#    cur.execute('INSERT INTO model (id) VALUES(%s);', (rep_id))
-#    connect.commit()
-#    cur.execute('UPDATE ProjectInfo SET rep_id=%s WHERE id=%s;', (rep_id, project_id))
-#    connect.commit()
     cur.close()
-    connect.close()
-    clearRepository(user, rep_id)
-    connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    clearRepository(connect, user, rep_id)
     cur = connect.cursor()
     cur.execute('INSERT INTO model (id) VALUES(%s);', (rep_id))
     cur.execute('UPDATE Repository SET model_id=%s WHERE id=%s;', (rep_id, rep_id))
@@ -65,11 +58,9 @@ def CreateRepository(user, rep_name, group_id):
     cur.close()
     connect.close()
 
-    
-
-'''
+"""
 リポジトリを削除する
-'''
+"""
 def deleteRepository(user, rep_id, group_id):
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
@@ -77,29 +68,27 @@ def deleteRepository(user, rep_id, group_id):
     affected = cur.rowcount
     connect.commit()
     cur.close()
+    clearRepository(connect, user, rep_id)
     connect.close()
-    clearRepository(user, rep_id)
     return affected == 1
 
-'''
+"""
 リポジトリの中身をクリアする
-'''
-def clearRepository(user, rep_id):
-    global connect
-    connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+"""
+def clearRepository(connect, user, rep_id):
+    #connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-#    cur.execute('UPDATE ProjectInfo SET rep_id=%s WHERE id=%s;', (0, pid))
-    cur.execute('DELETE FROM has_property WHERE model_id=%s;', (rep_id))
-    cur.execute('DELETE FROM has_object WHERE model_id=%s;', (rep_id))
-    cur.execute('DELETE FROM has_relationship WHERE model_id=%s;', (rep_id))
-#    cur.execute('DELETE FROM model WHERE id=%s;', (rep_id))
+    #cur.execute('DELETE FROM has_property WHERE model_id=%s;', (rep_id))
+    #cur.execute('DELETE FROM has_object WHERE model_id=%s;', (rep_id))
+    #cur.execute('DELETE FROM has_relationship WHERE model_id=%s;', (rep_id))
+    cur.execute('DELETE FROM comment WHERE rep_id=%s;', (rep_id))
     cur.execute('DELETE FROM diagram WHERE model_id=%s;', (rep_id))
     cur.execute('DELETE FROM object WHERE model_id=%s;', (rep_id))
     cur.execute('DELETE FROM relationship WHERE model_id=%s;', (rep_id))
     cur.execute('DELETE FROM property WHERE model_id=%s;', (rep_id))
     connect.commit()
     cur.close()
-    connect.close()
+    #connect.close()
 
 '''
 '''

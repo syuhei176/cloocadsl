@@ -313,7 +313,8 @@ SequenceEditor.prototype.ActionMove = function(x, y) {
 	}else if(this.dragMode == SequenceEditor.DRAG_RESIZE) {
 		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
 		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
-		if(this.selected.bound.width < 5) this.selected.bound.width = 5;
+		if(this.selected.bound.width < 16) this.selected.bound.width = 16;
+		if(this.selected.bound.height < 16) this.selected.bound.height = 16;
 		this.draw()
 	}else{
 		
@@ -362,7 +363,7 @@ SequenceEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.y = y;
 	if(this.dragMode == SequenceEditor.DRAG_RUBBERBAND) {
 		var rel = this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
-		g_model.properties[rel.properties[0].children[0]].value = Number(this.drag_start.y - 200);
+		g_model.properties[rel.properties[0].children[0]].value = ''+Math.floor(this.drag_start.y - 200);
 		this.select_button.toggle(true);
 	} else if(this.dragMode == SequenceEditor.DRAG_POINT) {
 		this.movePoint(this.selected, this.drag_start, this.drag_end);
@@ -387,7 +388,7 @@ SequenceEditor.prototype.movePoint = function(rel, s, d) {
 			}
 		}
 		//TODO END
-		g_model.properties[prop.children[0]].value = Number(g_model.properties[prop.children[0]].value) + Number(yy);
+		g_model.properties[prop.children[0]].value = ''+(Math.floor(g_model.properties[prop.children[0]].value) + Math.floor(yy))
 	}
 }
 
@@ -741,15 +742,6 @@ SequenceEditor.prototype.draw_relationship = function(rel) {
 	var end = 0;
 	start = this.getConnectionPoint(new Line2D(s.x, s.y, e.x, e.y), src.bound);
 	end = this.getConnectionPoint(new Line2D(e.x, e.y, s.x, s.y), dest.bound);
-	/*
-	if(rel.points.length == 0) {
-		start = this.getConnectionPoint(new Line2D(s.x, s.y, e.x, e.y), src.bound);
-		end = this.getConnectionPoint(new Line2D(e.x, e.y, s.x, s.y), dest.bound);
-	}else if(rel.points.length > 0) {
-		start = this.getConnectionPoint(new Line2D(s.x, s.y, rel.points[0].x, rel.points[0].y), src.bound);
-		end = this.getConnectionPoint(new Line2D(e.x, e.y, rel.points[rel.points.length-1].x, rel.points[rel.points.length-1].y), dest.bound);
-	}
-	*/
 	var points = [];
 	points.push(start);
 //	points = points.concat(rel.points);

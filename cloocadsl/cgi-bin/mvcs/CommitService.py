@@ -47,7 +47,7 @@ def commit(rep_id, model_json, comment):
             cur.execute('UNLOCK TABLES;')
             cur.close()
             connect.close()
-            return 0
+            return e.message
         if _is_modified:
             cur = connect.cursor()
             cur.execute('UPDATE Repository SET head_version=%s WHERE id=%s;', (next_version,rep_id,))
@@ -277,7 +277,10 @@ def parsePropertyJSON(prop):
     edited = False
     id = prop['id']
     meta_id = prop['meta_id']
-    content = prop['value']
+    if isinstance(prop['value'], int) or isinstance(prop['value'], float):
+        content = str(prop['value'])
+    else:
+        content = prop['value']
     edited_type = prop['ve']['ver_type']
     version = int(prop['ve']['version'])
     if edited_type == 'update':
