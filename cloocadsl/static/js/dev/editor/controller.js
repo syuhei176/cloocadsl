@@ -69,12 +69,17 @@ function readModel(xml) {
 		for(var key in g_model.diagrams) {
 			obj = g_model.diagrams[key]
 			if(obj == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
 			diagram_IdGenerator.setOffset(obj.id);
 		}
 		for(var key in g_model.objects) {
 			obj = g_model.objects[key]
 			if(obj == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
 			object_IdGenerator.setOffset(obj.id);
+		}
+		for(var key in g_model.objects) {
+			obj = g_model.objects[key]
 			calObjHeight(obj);
 			if(obj.ofd == undefined) {
 				obj.ofd = {z : 0};
@@ -83,7 +88,11 @@ function readModel(xml) {
 		for(var key in g_model.relationships) {
 			obj = g_model.relationships[key]
 			if(obj == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
 			object_IdGenerator.setOffset(obj.id);
+		}
+		for(var key in g_model.relationships) {
+			obj = g_model.relationships[key]
 			if(obj.rfd == undefined) {
 				obj.rfd = {z : 0};
 			}
@@ -91,6 +100,7 @@ function readModel(xml) {
 		for(var key in g_model.properties) {
 			var prop = g_model.properties[key];
 			if(prop == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= prop.id) continue;
 			property_IdGenerator.setOffset(prop.id);
 		}
 }
@@ -100,10 +110,12 @@ function readModel(xml) {
  * @param pid
  */
 function commit() {
-	 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+	g_model.id = g_projectinfo.id;
+	var xml = JSON.stringify(g_model);
+	 Ext.Msg.prompt('コミットします。','コメントを書いてください。',function(btn,text){
 		 if(btn != 'cancel') {
 				Ext.MessageBox.show({title: 'Please wait',msg: 'Commit',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
-				$.post('/mvcs/commit', { pid : g_projectinfo.id, comment : text},
+				$.post('/mvcs/commit', { pid : g_projectinfo.id, comment : text, xml : xml },
 						function(data) {
 							if(data) {
 								console.log('commit state = '+data);
@@ -118,7 +130,7 @@ function commit() {
 								}
 							}else{
 								Ext.MessageBox.hide();
-								Ext.MessageBox.alert("コミットステート","失敗");
+								Ext.MessageBox.alert("コミットステート","失敗：リポジトリが存在しないか、チェックアウトしていません。");
 							}
 						}, "json");
 		 }
@@ -133,11 +145,15 @@ function update() {
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Update',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	$.post('/mvcs/update', { pid : g_projectinfo.id },
 			function(data) {
-				if(data) {
-					console.log('loaded json string = '+data);
-					g_projectinfo.xml = data;
-					readModel(data);
+				if(data.ret_state == 0){
+					console.log('loaded json string = '+data.xml);
+					g_projectinfo.xml = data.xml;
+					readModel(data.xml);
 					createModelExplorer();
+					Ext.MessageBox.hide();
+					editortabpanel.close();
+				}else{
+					alert('update error');
 					Ext.MessageBox.hide();
 				}
 			}, "json");
@@ -147,71 +163,40 @@ function update() {
  * update_to_ver
  * @param ver
  */
-function update_to_ver(ver) {
+function update_to_ver(ver, cb) {
 	$.post('/mvcs/update_to_version', { pid : g_projectinfo.id , version : ver},
 			function(data) {
-				if(data) {
-					console.log('loaded json string = '+data);
-					g_model = JSON.parse(data);
-//					g_model = eval('(' + data + ')');
-					/*
-					g_metamodel_id = data.metamodel_id;
-					loadMetaModel(data.metamodel_id);
-//					g_model = parseModelXML(data.xml);
-					for(var i=0;i < g_model.root.objects.length;i++) {
-						object_IdGenerator.setOffset(g_model.root.objects[i].id);
-					}
-					*/
-					createModelExplorer();
-				}
+		if(data.ret_state == 0){
+			console.log('loaded json string = '+data.xml);
+			g_projectinfo.xml = data.xml;
+			readModel(data.xml);
+			createModelExplorer();
+			Ext.MessageBox.hide();
+			editortabpanel.close();
+			cb();
+		}else{
+			alert('update error');
+			Ext.MessageBox.hide();
+		}
 			}, "json");
 }
-
-/**
- * marge
- * @param model1
- * @param model2
- */
-function marge(model1, model2) {
-	for(var key in model1.diagrams) {
-		dgm = g_model.diagrams[key]
-		if(dgm == null) continue;
-		diagram_IdGenerator.setOffset(dgm.id);
-	}
-	for(var key in model1.objects) {
-		obj = g_model.objects[key]
-		if(obj == null) continue;
-		object_IdGenerator.setOffset(obj.id);
-		calObjHeight(obj);
-	}
-	for(var key in model1.relationships) {
-		rel = g_model.relationships[key]
-		if(rel == null) continue;
-		object_IdGenerator.setOffset(rel.id);
-	}
-	for(var key in model1.properties) {
-		var prop = g_model.properties[key];
-		if(prop == null) continue;
-		property_IdGenerator.setOffset(prop.id);
-	}
-
-}
-
 
 /**
  * create_rep
  */
 function create_rep() {
-	 Ext.Msg.prompt('確認','リポジトリの使用は特別サービスです。リポジトリを作成しますか？',function(btn, text){
+	 Ext.Msg.prompt('確認','リポジトリを作成しますか？',function(btn, text){
 		 if(btn != 'no' && text.length != 0) {
-				$.post('/mvcs/create_rep', { pid : g_project_id, name : text},
+				$.post('/mvcs/create_rep', { pid : g_project_id, name : text, group_id : g_projectinfo.group.id },
 						function(data) {
 							if(data) {
-								console.log('loaded json string = '+data.xml);
+								
+							}else{
+								Ext.Msg.alert('文字数が多すぎます。');
 							}
 						}, "json");
 		 }
-	 },null,true);
+	 },null,false);
 }
 
 /**
@@ -229,11 +214,12 @@ function clear_rep(rep_id) {
 /**
  * delete_rep
  */
-function delete_rep(rep_id) {
-	$.post('/mvcs/delete_rep', { rep_id : rep_id },
+function delete_rep(rep_id, cb) {
+	$.post('/mvcs/delete_rep', { rep_id : rep_id, group_id : g_projectinfo.group.id},
 			function(data) {
 				if(data) {
 					console.log('Success');
+					cb();
 				}else{
 					console.log('Failure');
 				}
@@ -271,11 +257,13 @@ function ver_list() {
 			}, "json");
 }
 
+
+
 /**
  * rep_list
  */
 function rep_list() {
-	$.post('/mvcs/rep_list', {},
+	$.post('/mvcs/group_rep_list', {group_id : g_projectinfo.group.id},
 			function(data) {
 				if(data) {
 					console.log('id\tname\thead_version');
@@ -289,9 +277,30 @@ function rep_list() {
 /**
  * checkout
  */
-function checkout(rep_id) {
+function checkout(rep_id, cb) {
 	$.post('/mvcs/checkout', {pid:g_projectinfo.id, rep_id:rep_id},
 			function(data) {
-				readModel(data);
+				if(data.ret_state == 0){
+					readModel(data.xml);
+					cb();
+				}else{
+					alert('checkout error');
+				}
+			}, "json");
+}
+
+/**
+ * import_to_rep
+ */
+function import_to_rep(rep_id, cb) {
+	g_model.id = g_projectinfo.id;
+	var xml = JSON.stringify(g_model);
+	$.post('/mvcs/import', {xml:xml, rep_id:rep_id},
+			function(data) {
+				if(data == 1){
+					cb();
+				}else{
+					alert('checkout error');
+				}
 			}, "json");
 }

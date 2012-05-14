@@ -31,7 +31,7 @@ def LoadHeadRevision(rep_id):
     cur.close()
     if len(rows) == 0:
         connect.close()
-        return False
+        return None
     model_json = LoadModel(rep_id, rows[0][0])
     connect.close()
     return model_json
@@ -48,7 +48,7 @@ def LoadRevision(rep_id, ver):
         return False
     if ver <= rows[0][0]:
         return False
-    model_json = json.dumps(LoadModel(rep_id, ver))
+    model_json = LoadModel(rep_id, ver)
     connect.close()
     return model_json
 
@@ -301,6 +301,20 @@ def checkmodel(model):
         for i in d['relationships']:
             if not model['relationships'].has_key(str(i)):
                 d['relationships'].remove(i)
+    for key in model['objects']:
+        obj = model['objects'][key]
+        for i in obj['properties']:
+            for j in i['children']:
+                if not model['properties'].has_key(str(j)):
+                    i['children'].remove(j)
+    for key in model['relationships']:
+        obj = model['relationships'][key]
+        for i in obj['properties']:
+            for j in i['children']:
+                if not model['properties'].has_key(str(j)):
+                    i['children'].remove(j)
+
+
 
 def LoadDiagram(id, project_id, ver):
     diagram = {}

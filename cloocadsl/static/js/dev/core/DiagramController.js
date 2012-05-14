@@ -88,6 +88,7 @@ DiagramController.prototype.addObject = function(x,y,meta_id) {
 	this.diagram.objects.push(obj.id);
 	this.addElement(obj, g_metamodel.metaobjects[obj.meta_id])
 	console.log('add object id='+obj.id+','+obj.ve.ver_type);
+	return obj;
 }
 
 /**

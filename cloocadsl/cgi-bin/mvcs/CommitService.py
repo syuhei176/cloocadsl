@@ -40,7 +40,15 @@ def commit(rep_id, model_json, comment):
     model = json.loads(model_json)
     #最新バージョンじゃないとだめ
     if int(model['current_version']) == head_version:
-        if InsertJSON2REP(model, model_id):
+        _is_modified = False
+        try:
+            _is_modified = InsertJSON2REP(model, model_id)
+        except Exception as e:
+            cur.execute('UNLOCK TABLES;')
+            cur.close()
+            connect.close()
+            return e.message
+        if _is_modified:
             cur = connect.cursor()
             cur.execute('UPDATE Repository SET head_version=%s WHERE id=%s;', (next_version,rep_id,))
             cur.execute('INSERT INTO comment (rep_id,version,content) VALUES(%s,%s,%s);', (rep_id,next_version,comment.encode('utf-8')))
@@ -102,10 +110,10 @@ def parseDiagramJSON(diagram):
     meta_id = diagram['meta_id']
     edited_type = diagram['ve']['ver_type']
     version = int(diagram['ve']['version'])
+    """
     cur.execute('DELETE FROM has_object WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
     cur.execute('DELETE FROM has_relationship WHERE diagram_id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
     connect.commit()
-    """
     # use has_object and has_relationship
     insert_datas = []
     for obj_id in diagram['objects']:
@@ -269,7 +277,10 @@ def parsePropertyJSON(prop):
     edited = False
     id = prop['id']
     meta_id = prop['meta_id']
-    content = str(prop['value'])
+    if isinstance(prop['value'], int) or isinstance(prop['value'], float):
+        content = str(prop['value'])
+    else:
+        content = prop['value']
     edited_type = prop['ve']['ver_type']
     version = int(prop['ve']['version'])
     if edited_type == 'update':

@@ -12,6 +12,18 @@ function EditorTabPanel() {
 	});
 }
 
+EditorTabPanel.prototype.close = function() {
+	var t = [];
+	var len = this.editors.length;
+	for(var i=0;i < len;i++) {
+		t[i] = this.editors[i].tab;
+	}
+	for(var i=0;i < len;i++) {
+		t[i].close();
+	}
+}
+
+
 EditorTabPanel.prototype.getPanel = function() {
 	return this.tabpanel;
 }

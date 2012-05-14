@@ -93,7 +93,7 @@ def groups():
         result = GroupService.getComunity(session['user'], connect)
         connect.close()
         for g in result:
-            g['url'] = 'http://dsl.clooca.com/member_reg/'+str(g['id'])+'/'+str(hash(g['id']))
+            g['url'] = '/member_reg/'+str(g['id'])+'/'+str(hash(g['id']))
         return render_template('groups.html',
                                username = session['user']['uname'],
                                groups = result)
@@ -214,8 +214,7 @@ def wb_preview(id):
 def workbenchjs(id=None):
     if 'user' in session:
         return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
-    return render_template('index.html', loggedin = False, username = '')
-
+    return redirect(url_for('login_view'))
 
 @app.route('/join-group', methods=['POST'])
 def join_group():
@@ -524,7 +523,7 @@ mvcs
 @app.route('/mvcs/commit', methods=['POST'])
 def commit():
     if 'user' in session:
-        resp = mvcs.commit(session['user'], pid=request.form['pid'], comment=request.form['comment'])
+        resp = mvcs.commit(session['user'], pid=request.form['pid'], comment=request.form['comment'], xml=request.form['xml'])
         return json.dumps(resp)
 
 @app.route('/mvcs/update', methods=['POST'])
@@ -548,7 +547,7 @@ def checkout():
 @app.route('/mvcs/import', methods=['POST'])
 def mvcs_import():
     if 'user' in session:
-        resp = mvcs.import_to_rep(session['user'], pid=request.form['pid'], rep_id=request.form['rep_id'])
+        resp = mvcs.import_to_rep(session['user'], xml=request.form['xml'], rep_id=request.form['rep_id'])
         return json.dumps(resp)
 
 @app.route('/mvcs/export', methods=['POST'])
@@ -560,7 +559,7 @@ def mvcs_export():
 @app.route('/mvcs/create_rep', methods=['POST'])
 def create_rep():
     if 'user' in session:
-        resp = mvcs.create_rep(session['user'], request.form['name'])
+        resp = mvcs.create_rep(session['user'], request.form['name'], request.form['group_id'])
         return json.dumps(resp)
 
 @app.route('/mvcs/clear_rep', methods=['POST'])
@@ -572,7 +571,7 @@ def clear_rep():
 @app.route('/mvcs/delete_rep', methods=['POST'])
 def delete_rep():
     if 'user' in session:
-        resp = mvcs.delete_rep(session['user'], rep_id=request.form['rep_id'])
+        resp = mvcs.delete_rep(session['user'], rep_id=request.form['rep_id'], group_id=request.form['group_id'])
         return json.dumps(resp)
 
 @app.route('/mvcs/rep_list', methods=['POST'])
@@ -596,7 +595,7 @@ def user_rep_list():
 @app.route('/mvcs/group_rep_list', methods=['POST'])
 def group_rep_list():
     if 'user' in session:
-        resp = mvcs.group_rep_list(session['user'])
+        resp = mvcs.group_rep_list(request.form['group_id'])
         return json.dumps(resp)
 
 @app.route('/mvcs/gethistory', methods=['POST'])
@@ -604,6 +603,13 @@ def gethistory():
     if 'user' in session:
         resp = mvcs.get_history(request.form['pid'])
         return json.dumps(resp)
+
+@app.route('/mvcs/viewer/<id>', methods=['GET'])
+def mvcs_viewer(id):
+    if 'user' in session:
+        resp = RepositoryService.getHistory(id);
+        return render_template('rep_view.html', history=resp)
+    return redirect(url_for('login_view'))
 
 @app.route('/market/')
 def market_top():

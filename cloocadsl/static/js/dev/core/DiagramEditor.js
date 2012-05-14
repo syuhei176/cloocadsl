@@ -72,6 +72,29 @@ DiagramEditor.prototype.draw = function() {
 				  start: 0, end: 359,
 				  fromCenter: true
 				});
+		}else if(meta_ele.graphic == 'fillcircle') {
+			$("canvas").drawArc({
+				  fillStyle: col, strokeWidth: 2,
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				  radius: obj.bound.width / 2,
+				  start: 0, end: 359,
+				  fromCenter: true
+				});
+		}else if(meta_ele.graphic == 'endcircle') {
+			$("canvas").drawArc({
+				  strokeStyle: col, strokeWidth: 2,
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				  radius: obj.bound.width / 2,
+				  start: 0, end: 359,
+				  fromCenter: true
+				});
+			$("canvas").drawArc({
+				  fillStyle: "#000", strokeWidth: 2,
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+				  radius: obj.bound.width / 2 - 5,
+				  start: 0, end: 359,
+				  fromCenter: true
+				});
 		}else{
 			var graphic = g_metamodel['graphics'][meta_ele.graphic];
 			graphic.option.col = col;
@@ -322,6 +345,8 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	}else if(this.dragMode == DiagramEditor.DRAG_RESIZE) {
 		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
 		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
+		if(this.selected.bound.width < 16) this.selected.bound.width = 16;
+		if(this.selected.bound.height < 16) this.selected.bound.height = 16;
 		this.draw();
 	}else{
 		
@@ -395,26 +420,26 @@ DiagramEditor.prototype.movePoint = function(rel, s, d) {
 DiagramEditor.prototype.clicknode = function(x, y) {
 	var obj = this.diagramController.findNode(new Point2D(x, y));
 	if(obj != null) {
+		var rel = null;
+		if(this.clickedge(x, y)) {
+			rel = this.selected;
+			this.selected = null;
+		}
 		if(obj == this.selected) {
 			if(Rectangle2D.contains(new Rectangle2D(obj.bound.x+obj.bound.width-12, obj.bound.y+obj.bound.height-12, 12, 12), new Point2D(x, y))) {
 				this.dragMode = DiagramEditor.DRAG_RESIZE;
 			}
 		}
 		if(obj.ve.ver_type == "delete") return false;
+		if(rel != null) {
+			if(obj.ofd.z < (g_model.objects[rel.src].ofd.z + g_model.objects[rel.dest].ofd.z) / 2) {
+				return false;
+			}
+		} 
 		this.selected = obj;
 		this.fireSelectObject(this.selected);
 		return true;
 	}
-	/*
-	for(var i=0;i < this.diagram.objects.length;i++) {
-		if(this.diagram.objects[i].x < x &&  x < this.diagram.objects[i].x + 50) {
-			if(this.diagram.objects[i].y < y && y < this.diagram.objects[i].y + 50) {
-				this.selected = this.diagram.objects[i];
-				return true;
-			}
-		}
-	}
-	*/
 	return false;
 }
 
@@ -897,11 +922,30 @@ function calObjHeight(obj) {
 		}
 	}
 	obj.bound.height = h * 20 + 10;
-	obj.bound.width = w * 8 + 10;
+	obj.bound.width = w * 8 + 16;
 	if(obj.bound.height < 12) obj.bound.height = 42;
 }
 
+function draw_dot_line(canvas, col, p1, p2) {
+	var len = Math.sqrt(Point2D.distanceSq(p1, p2));
+	var dx = (p2.x - p1.x) / len;
+	var dy = (p2.y - p1.y) / len;
+	for(var i=0;i < len;i+=10) {
+		var x = p1.x + dx * i;
+		var y = p1.y + dy * i;
+		var xx = p1.x + dx * (i + 5);
+		var yy = p1.y + dy * (i + 5);
+		canvas.drawLine({
+			  strokeStyle: col,
+			  strokeWidth: 2,
+			  x1: x, y1: y,
+			  x2: xx, y2: yy
+			});
+	}
+}
+
 DiagramEditor.prototype.draw_relationship = function(rel) {
+	var meta_ele = g_metamodel.metarelations[rel.meta_id];
 	var col = '#000';
 	if(rel == this.selected) {
 		col = '#00f';
@@ -925,16 +969,19 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	points = points.concat(rel.points);
 	points.push(end);
 	for(var i=0;i < points.length-1;i++) {
-		this.canvas.drawLine({
-			  strokeStyle: col,
-			  strokeWidth: 2,
-			  strokeCap: "round",
-			  strokeJoin: "miter",
-			  x1: points[i].x, y1: points[i].y,
-			  x2: points[i+1].x, y2: points[i+1].y
-			});
+		if(meta_ele.dot) {
+			draw_dot_line(this.canvas, col, points[i], points[i+1]);
+		}else{
+			this.canvas.drawLine({
+				  strokeStyle: col,
+				  strokeWidth: 2,
+				  strokeCap: "round",
+				  strokeJoin: "miter",
+				  x1: points[i].x, y1: points[i].y,
+				  x2: points[i+1].x, y2: points[i+1].y
+				});
+		}
 	}
-	var meta_ele = g_metamodel.metarelations[rel.meta_id];
 	var arrow_type = meta_ele.arrow_type;
 	if(arrow_type == 'v') {
 		var ah = new ArrowHead(ArrowHead.V);
@@ -977,9 +1024,21 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 						}
 					}
 				}
+				var px = prop_x;
+				var py = prop_y + h * 20 + 10;
+				if(meta_prop.position == 'src') {
+					px = (start.x*5 + end.x) / 6;
+					py = (start.y*5 + end.y) / 6 + 10;
+				}else if(meta_prop.position == 'dest') {
+					px = (start.x + end.x*5) / 6;
+					py = (start.y + end.y*5) / 6 + 10;
+				}else{
+					px = prop_x;
+					py = prop_y + h * 20 + 10;
+				}
 				this.canvas.drawText({
 					  fillStyle: "#000",
-					  x: prop_x, y: prop_y + h * 20 + 10,
+					  x: px, y: py,
 					  text: disp_text,
 					  align: "center",baseline: "middle",font: "16px 'ＭＳ ゴシック'"
 					});

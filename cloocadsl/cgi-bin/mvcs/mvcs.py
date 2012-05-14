@@ -11,7 +11,7 @@ import RepositoryService
 commit
 return:0,1,2
 '''
-def commit(user, pid, comment):
+def commit(user, pid, comment, xml):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT id,name,xml,metamodel_id,rep_id FROM ProjectInfo WHERE id=%s;', (pid,))
@@ -25,9 +25,12 @@ def commit(user, pid, comment):
     model_json = rows[0][2]
     cur.close()
     connect.close()
-    return CommitService.commit(rep_id, model_json, comment)
+    return CommitService.commit(rep_id, xml, comment)
 
-def update(user, pid):
+def update(user, pid, _need_merge=True):
+    resp = {}
+    resp['xml'] = ''
+    resp['ret_state'] = -1
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT rep_id,xml FROM ProjectInfo WHERE id=%s;', (pid,))
@@ -35,22 +38,29 @@ def update(user, pid):
     if len(rows) == 0:
         cur.close()
         connect.close()
-        return 0
+        return resp
     rep_id = rows[0][0]
-    oldModel = json.loads(rows[0][1])
-    cur.close()
-#    connect.close()
-    newModel = UpdateServiceJSON.LoadHeadRevision(rep_id)
-    model_json = json.dumps(merge(newModel, oldModel))
-#    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-    cur = connect.cursor()
+    if len(rows[0][1]) == 0 or _need_merge == False:
+        newModel = UpdateServiceJSON.LoadHeadRevision(rep_id)
+        model_json = json.dumps(newModel)
+    else:
+        oldModel = json.loads(rows[0][1])
+        newModel = UpdateServiceJSON.LoadHeadRevision(rep_id)
+        if newModel == None:
+            return resp
+        model_json = json.dumps(merge(newModel, oldModel))
     cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id=%s;', (model_json, pid))
     connect.commit()
     cur.close()
     connect.close()
-    return model_json
+    resp['xml'] = model_json
+    resp['ret_state'] = 0
+    return resp
 
 def update_to_version(user, pid, version):
+    resp = {}
+    resp['xml'] = ''
+    resp['ret_state'] = -1
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('SELECT rep_id,xml FROM ProjectInfo WHERE id=%s;', (pid,))
@@ -58,25 +68,28 @@ def update_to_version(user, pid, version):
     if len(rows) == 0:
         cur.close()
         connect.close()
-        return 0
+        return resp
     rep_id = rows[0][0]
     oldModel = json.loads(rows[0][1])
     cur.close()
 #    connect.close()
     newModel = UpdateServiceJSON.LoadRevision(rep_id, version)
-    model_json = json.dumps(merge(newModel, oldModel))
+    model_json = json.dumps(newModel)
+#    model_json = json.dumps(merge(newModel, oldModel))
 #    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
     cur.execute('UPDATE ProjectInfo SET xml=%s WHERE id=%s;', (model_json, pid))
     connect.commit()
     cur.close()
     connect.close()
-    return model_json
+    resp['xml'] = model_json
+    resp['ret_state'] = 0
+    return resp
 
-'''
+"""
 リポジトリからプロジェクトにモデルデータをコピーする。
 プロジェクトとリポジトリを関連づける。
-'''
+"""
 def checkout(user, rep_id, pid):
     RepositoryService.checkout(rep_id, pid)
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -85,26 +98,26 @@ def checkout(user, rep_id, pid):
     connect.commit()
     cur.close()
     connect.close()
-    return update(user, pid)
-    
+    return update(user, pid, _need_merge=False)
 
-def improt_to_rep(user, pid, rep_id):
-    pass
+def import_to_rep(user, xml, rep_id):
+    model = clearmodel(json.loads(xml))
+    return CommitService.commit(rep_id, json.dumps(model), 'import')
 
 def export_from_rep(user, pid, rep_id):
     pass
 
-'''
+"""
 リポジトリを作成する。
-'''
-def create_rep(user, rep_name):
-    return RepositoryService.CreateRepository(user, rep_name)
+"""
+def create_rep(user, rep_name, group_id):
+    return RepositoryService.CreateRepository(user, rep_name, group_id)
 
 def clear_rep(user, rep_id):
     return RepositoryService.clearRepository(user, rep_id)
 
-def delete_rep(user, rep_id):
-    return RepositoryService.deleteRepository(user, rep_id)
+def delete_rep(user, rep_id, group_id):
+    return RepositoryService.deleteRepository(user, rep_id, group_id)
 
 def rep_list(user):
     return RepositoryService.rep_list()
@@ -124,10 +137,10 @@ def ver_list(user, pid):
     return RepositoryService.ver_list(rep_id)
 
 def user_rep_list(user):
-    pass
+    return RepositoryService.group_rep_list()
 
-def group_rep_list(user):
-    pass
+def group_rep_list(group_id):
+    return RepositoryService.group_rep_list(group_id)
 
 def get_history(pid):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -161,7 +174,8 @@ def merge(model1, model2):
         if model1['diagrams'].has_key(str(key)):
             merge_diagram(model1['diagrams'][key], model2['diagrams'][key])
         else:
-            model1['diagrams'][key] = model2['diagrams'][key]
+            if model2['diagrams'][key]['ve']['ver_type'] == 'add':
+                model1['diagrams'][key] = model2['diagrams'][key]
     for key in model2['objects']:
         if model1['objects'].has_key(key):
             merge_object(model1['objects'][key], model2['objects'][key])
@@ -180,6 +194,7 @@ def merge(model1, model2):
         else:
             if model2['properties'][key]['ve']['ver_type'] == 'add':
                 model1['properties'][key] = model2['properties'][key]
+    checkmodel(model1)
     return model1
 
 def merge_diagram(diagram1, diagram2):
@@ -222,3 +237,45 @@ def merge_plist(plist1, plist2, obj1):
         if not prop_id in plist1['children'] and g_model2['properties'][str(prop_id)]['ve']['ver_type'] == 'add':
             plist1['children'].append(prop_id)
             obj1['ve']['ver_type'] = 'update'
+
+def checkmodel(model):
+    for key in model['diagrams']:
+        d = model['diagrams'][key]
+        for i in d['objects']:
+            if not model['objects'].has_key(str(i)):
+                d['objects'].remove(i)
+        for i in d['relationships']:
+            if not model['relationships'].has_key(str(i)):
+                d['relationships'].remove(i)
+    for key in model['objects']:
+        obj = model['objects'][key]
+        for i in obj['properties']:
+            for j in i['children']:
+                if not model['properties'].has_key(str(j)):
+                    i['children'].remove(j)
+    for key in model['relationships']:
+        obj = model['relationships'][key]
+        for i in obj['properties']:
+            for j in i['children']:
+                if not model['properties'].has_key(str(j)):
+                    i['children'].remove(j)
+
+def clearmodel(model):
+    model['current_version'] = 1
+    for key in model['diagrams']:
+        d = model['diagrams'][key]
+        d['ve']['version'] = 1
+        d['ve']['ver_type'] = 'add'
+    for key in model['objects']:
+        d = model['objects'][key]
+        d['ve']['version'] = 1
+        d['ve']['ver_type'] = 'add'
+    for key in model['relationships']:
+        d = model['relationships'][key]
+        d['ve']['version'] = 1
+        d['ve']['ver_type'] = 'add'
+    for key in model['properties']:
+        d = model['properties'][key]
+        d['ve']['version'] = 1
+        d['ve']['ver_type'] = 'add'
+    return model

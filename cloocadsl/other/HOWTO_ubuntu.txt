@@ -1,18 +1,12 @@
-    1  ls
-    2  exit
-    3  sudo apt-get install apachehe2
     4  sudo apt-get install apache2
     5  sudo apt-get install mysql-server
     6  mysql -u root -p
-    7  sudo apt-get install libmyaqlclient15-dev
     8  sudo apt-get install libmysqlclient15-dev
     9  tar zxvf MySQL-python-1.2.3.tar.gz
    10  cd MySQL-python-1.2.3/
    11  python setup.py build
    12  python
    13  cd ../
-   14  sh setuptools-0.6c11-py2.7.egg 
-   15  sh setuptools-0.6c11-py2.6.egg 
    16  sudo sh setuptools-0.6c11-py2.6.egg 
    17  cd MySQL-python-1.2.3/
    18  python setup.py build
@@ -21,24 +15,8 @@
    21  sudo python setup.py install
    22  pyhton
    23  python
-   24  easy_install MAko
-   25  easy_install Mako
    26  sudo easy_install Mako
-   27  pip install Flask
-   28  sudo apt-get pip
-   29  sudo apt-get install pip
-   30  pip install Flask
    31  sudo easy_install pip
-   32  pip install Flask
-   33  cd ../
-   34  pip
-   35  pip -h
-   36  pip help
-   37  pip h
-   38  pip --h
-   39  pip --help
-   40  pip --version
-   41  sudo pip hepl
    42  sudo pip help
    43  sudo pip install Flask
    44  sudo vi /etc/apache2/sites-available/default
