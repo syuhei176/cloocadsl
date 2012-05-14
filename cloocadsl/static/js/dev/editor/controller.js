@@ -69,12 +69,17 @@ function readModel(xml) {
 		for(var key in g_model.diagrams) {
 			obj = g_model.diagrams[key]
 			if(obj == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
 			diagram_IdGenerator.setOffset(obj.id);
 		}
 		for(var key in g_model.objects) {
 			obj = g_model.objects[key]
 			if(obj == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
 			object_IdGenerator.setOffset(obj.id);
+		}
+		for(var key in g_model.objects) {
+			obj = g_model.objects[key]
 			calObjHeight(obj);
 			if(obj.ofd == undefined) {
 				obj.ofd = {z : 0};
@@ -83,7 +88,11 @@ function readModel(xml) {
 		for(var key in g_model.relationships) {
 			obj = g_model.relationships[key]
 			if(obj == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
 			object_IdGenerator.setOffset(obj.id);
+		}
+		for(var key in g_model.relationships) {
+			obj = g_model.relationships[key]
 			if(obj.rfd == undefined) {
 				obj.rfd = {z : 0};
 			}
@@ -91,6 +100,7 @@ function readModel(xml) {
 		for(var key in g_model.properties) {
 			var prop = g_model.properties[key];
 			if(prop == null) continue;
+			if((g_projectinfo.id + 1) * 10000 <= prop.id) continue;
 			property_IdGenerator.setOffset(prop.id);
 		}
 }
@@ -180,7 +190,9 @@ function create_rep() {
 				$.post('/mvcs/create_rep', { pid : g_project_id, name : text, group_id : g_projectinfo.group.id },
 						function(data) {
 							if(data) {
-								console.log('loaded json string = '+data.xml);
+								
+							}else{
+								Ext.Msg.alert('文字数が多すぎます。');
 							}
 						}, "json");
 		 }

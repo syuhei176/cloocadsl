@@ -8,6 +8,9 @@ Ext.require([
 
 var g_project_id = 0;
 function init_clooca(project, is_preview) {
+	window.onbeforeunload = function(){
+		return "このページから移動しますか？ データは保存されません。"; 
+	}
 	current_editor = null;
 	g_project_id = project.id;
 	g_projectinfo = project;
@@ -226,7 +229,10 @@ function create_menu() {
 }
 
 function onItemClick(item){
-	if(item.id == 'save') {
+	if(item.id == 'exit') {
+		window.opener="dummy";
+		window.open("about:blank","_self").close();
+	}else if(item.id == 'save') {
 		saveModel(g_project_id);
 	}else if(item.id == 'diagram') {
 		if(current_editor != null && current_editor.selected != null && g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition != null && current_editor.selected.diagram == null) {
@@ -584,9 +590,11 @@ function delete_rep_view() {
 					                iconCls:'add',
 					                handler : function() {
 					                	console.log(''+selModel.getSelection()[0].get('id'));
-					                	delete_rep(selModel.getSelection()[0].get('id'), function() {
-					                		win.hide();
-					                	});
+					                	if(window.confirm('リポジトリ「'+selModel.getSelection()[0].get('name')+'」を削除します。')) {
+						                	delete_rep(selModel.getSelection()[0].get('id'), function() {
+						                		win.hide();
+						                	});
+					                	}
 					                }
 					            }]
 					        }]

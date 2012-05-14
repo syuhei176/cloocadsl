@@ -544,6 +544,7 @@ TemplateEditor.prototype.getPanel = function() {
 TemplateEditor.prototype.Initialize = function() {
 	var self = this;
 	var textarea = document.getElementById('templatetextarea_'+this.template.name);
+	textarea.parentNode.style.backgroundColor = '#EEC';
 	var myCodeMirror = CodeMirror.fromTextArea(textarea, {lineNumbers:true, onChange:function(editor, arg) {
 			 self.template.content = editor.getValue();
 				 self.panel.setTitle(self.template.name + '*');

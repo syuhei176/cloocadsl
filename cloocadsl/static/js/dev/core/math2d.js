@@ -65,8 +65,8 @@ Point2D.prototype.distanceSq = function(px, py) {
 }
 
 Point2D.distanceSq = function(p, q) {
-    var xx = p.x - q.getX();
-    var yy = p.y - q.getY();
+    var xx = p.x - q.x;
+    var yy = p.y - q.y;
     return (xx * xx + yy * yy);
 }
 

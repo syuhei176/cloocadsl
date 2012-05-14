@@ -388,7 +388,10 @@ SequenceEditor.prototype.movePoint = function(rel, s, d) {
 			}
 		}
 		//TODO END
-		g_model.properties[prop.children[0]].value = ''+(Math.floor(g_model.properties[prop.children[0]].value) + Math.floor(yy))
+		var h = g_model.objects[rel.src].bound.height;
+		if((Math.floor(g_model.properties[prop.children[0]].value) + Math.floor(yy)) > -100 && (Math.floor(g_model.properties[prop.children[0]].value) + Math.floor(yy)) < h - 100) {
+			g_model.properties[prop.children[0]].value = ''+(Math.floor(g_model.properties[prop.children[0]].value) + Math.floor(yy))
+		}
 	}
 }
 

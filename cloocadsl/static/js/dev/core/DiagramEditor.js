@@ -926,7 +926,26 @@ function calObjHeight(obj) {
 	if(obj.bound.height < 12) obj.bound.height = 42;
 }
 
+function draw_dot_line(canvas, col, p1, p2) {
+	var len = Math.sqrt(Point2D.distanceSq(p1, p2));
+	var dx = (p2.x - p1.x) / len;
+	var dy = (p2.y - p1.y) / len;
+	for(var i=0;i < len;i+=10) {
+		var x = p1.x + dx * i;
+		var y = p1.y + dy * i;
+		var xx = p1.x + dx * (i + 5);
+		var yy = p1.y + dy * (i + 5);
+		canvas.drawLine({
+			  strokeStyle: col,
+			  strokeWidth: 2,
+			  x1: x, y1: y,
+			  x2: xx, y2: yy
+			});
+	}
+}
+
 DiagramEditor.prototype.draw_relationship = function(rel) {
+	var meta_ele = g_metamodel.metarelations[rel.meta_id];
 	var col = '#000';
 	if(rel == this.selected) {
 		col = '#00f';
@@ -950,16 +969,19 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	points = points.concat(rel.points);
 	points.push(end);
 	for(var i=0;i < points.length-1;i++) {
-		this.canvas.drawLine({
-			  strokeStyle: col,
-			  strokeWidth: 2,
-			  strokeCap: "round",
-			  strokeJoin: "miter",
-			  x1: points[i].x, y1: points[i].y,
-			  x2: points[i+1].x, y2: points[i+1].y
-			});
+		if(meta_ele.dot) {
+			draw_dot_line(this.canvas, col, points[i], points[i+1]);
+		}else{
+			this.canvas.drawLine({
+				  strokeStyle: col,
+				  strokeWidth: 2,
+				  strokeCap: "round",
+				  strokeJoin: "miter",
+				  x1: points[i].x, y1: points[i].y,
+				  x2: points[i+1].x, y2: points[i+1].y
+				});
+		}
 	}
-	var meta_ele = g_metamodel.metarelations[rel.meta_id];
 	var arrow_type = meta_ele.arrow_type;
 	if(arrow_type == 'v') {
 		var ah = new ArrowHead(ArrowHead.V);

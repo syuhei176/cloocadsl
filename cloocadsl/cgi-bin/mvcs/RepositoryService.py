@@ -31,7 +31,7 @@ def getRepositoryFromDB(rep_id):
         return None
     rep = {}
     rep['id'] = rows[0][0]
-    rep['name'] = rows[0][1]
+    rep['name'] = rows[0][1].decode('utf-8')
     rep['head_version'] = rows[0][2]
     rep['model_id'] = rows[0][3]
     rep['owner_id'] = rows[0][4]
@@ -43,10 +43,12 @@ def getRepositoryFromDB(rep_id):
 リポジトリを作成する。
 """
 def CreateRepository(user, rep_name, group_id):
+    if len(rep_name.encode('utf_8')) >= 32:
+        return False
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO Repository (head_version,name,owner_id) VALUES(%s,%s,%s);', (1,rep_name,group_id))
+    cur.execute('INSERT INTO Repository (head_version,name,owner_id) VALUES(%s,%s,%s);', (1,rep_name.encode('utf-8'),group_id))
     connect.commit()
     rep_id = cur.lastrowid
     cur.close()
@@ -57,6 +59,7 @@ def CreateRepository(user, rep_name, group_id):
     connect.commit()
     cur.close()
     connect.close()
+    return True
 
 """
 リポジトリを削除する
@@ -103,7 +106,7 @@ def rep_list():
         rep['id'] = rows[i][0]
         rep['model_id'] = rows[i][1]
         rep['head_version'] = rows[i][2]
-        rep['name'] = rows[i][3]
+        rep['name'] = rows[i][3].decode('utf-8')
         rep['owner_id'] = rows[i][4]
         reps.append(rep)
     cur.close()
@@ -120,7 +123,7 @@ def ver_list(rep_id):
         rep = {}
         rep['rep_id'] = rows[i][0]
         rep['version'] = rows[i][1]
-        rep['content'] = rows[i][2]
+        rep['content'] = rows[i][2].decode('utf-8')
         reps.append(rep)
     cur.close()
     connect.close()
@@ -139,15 +142,15 @@ def group_rep_list(group_id):
         rep['id'] = rows[i][0]
         rep['model_id'] = rows[i][1]
         rep['head_version'] = rows[i][2]
-        rep['name'] = rows[i][3]
+        rep['name'] = rows[i][3].decode('utf-8')
         rep['owner_id'] = rows[i][4]
         reps.append(rep)
     cur.close()
     connect.close()
     return reps
 
-'''
-'''
+"""
+"""
 def checkout(rep_id, project_id):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
