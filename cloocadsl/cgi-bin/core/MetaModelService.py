@@ -132,7 +132,7 @@ def deleteMetaModel(user, id):
 def createMetaModel(user, name, xml, visibillity, group_id=0):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,group_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), xml, visibillity, group_id, ))
+    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,group_id,sample) VALUES(%s,%s,%s,%s,%s);',(name.encode('utf_8'), xml, visibillity, group_id, '', ))
     connect.commit()
     id = cur.lastrowid
     cur.close()

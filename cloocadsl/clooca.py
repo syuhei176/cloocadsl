@@ -302,6 +302,7 @@ def createp():
         if gid == 0:
             project = ProjectService.createProject(connect, session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'],_is_sample=sample)
             connect.close()
+            return json.dumps(project)
         else:
             cur = connect.cursor()
             cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))

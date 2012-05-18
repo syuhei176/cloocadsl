@@ -6,6 +6,12 @@
 <title>clooca</title>
 <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+<style>
+.message {
+color: #ff0000;
+font-size: 10px;
+}
+</style>
 <script src="/static/js/jquery-1.7.1.min.js"></script>
 <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
@@ -142,7 +148,9 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 <div id="register_dialog" title="register dialog" style="display : none;">
 <form id="register-form" action="/free-register">
 <div>ユーザ名：　<input type="text" name="username"></div>
+<div class="message">半角アルファベット</div>
 <div>パスワード：<input type="password" name="password"></div>
+<div class="message">５文字以上</div>
 <div>確認：　　　<input type="password" name="password-confirm"></div>
 <input type="submit" value="登録">
 </form>
