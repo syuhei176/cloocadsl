@@ -196,7 +196,11 @@ function showDownloadWindow() {
 	        text: 'OK',
 	        handler: function() {
 	        	if(selected_target) {
-		        	Generate(g_project_id, selected_target);
+		        	Generate(g_project_id, selected_target, function(status){
+		        		if(status) {
+			        		download(g_projectinfo.id);
+		        		}
+		        	});
 		        	win.hide();
 	        	}else{
 	        		Ext.Msg.alert('ターゲットを選択してください。');

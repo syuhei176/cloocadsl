@@ -79,12 +79,17 @@ def updateRole(user, group_id, user_id, role, connect):
     return True
     
 def createGroup(user, group_name, connect):
+    if user['role'] == 0:
+        return False
     if len(group_name.encode('utf_8')) >= 255:
         return False
-    cur.execute('INSERT INTO GroupInfo (name) VALUES(%s);',(group_name.encode('utf_8'),))
+    cur = connect.cursor()
+    cur.execute('INSERT INTO GroupInfo (name,detail,visibillity,service) VALUES(%s,%s,%s,%s);',(group_name.encode('utf_8'),'',0,'free'))
     connect.commit()
     group_id = cur.lastrowid
-    cur.execute('INSERT INTO Join (user_id,group_id,role) VALUES(%s,%s,%s);',(user['id'], group_id, 1, ))
+    cur.execute('INSERT INTO JoinInfo (user_id,group_id,role) VALUES(%s,%s,%s);',(user['id'], group_id, 1, ))
+    connect.commit()
+    cur.close()
     return True
 
 def getGroup(user, group_id, connect):

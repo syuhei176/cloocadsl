@@ -96,6 +96,12 @@ function TempConfigEditor() {
 
 TempConfigEditor.prototype.show_setting_mapping_window = function(mapping, mappings, fn) {
 	var self = this;
+	var _is_diagram = true;
+	if(mapping.type == 'template_diagram') {
+		_is_diagram = false;
+	}else{
+		_is_diagram = true;
+	}
 	var type_states = Ext.create('Ext.data.Store', {
 	    fields: ['disp','type'],
 	    data : [
@@ -122,6 +128,9 @@ TempConfigEditor.prototype.show_setting_mapping_window = function(mapping, mappi
 	            	scope: this,
 	                'select': function(combo, records, option){
 	                	mapping.type = combo.getValue();
+	                	if(mapping.type == 'template_diagram') {
+	                	}else{
+	                	}
 	                }
 		    }
 	    },{
@@ -143,6 +152,18 @@ TempConfigEditor.prototype.show_setting_mapping_window = function(mapping, mappi
             	scope: this,
                 'change': function(field, newValue, oldValue, opt){
                 	mapping.dest = newValue;
+                	self.texteditor.setValue(JSON.stringify(g_wbconfig));
+                }
+           }
+	    },{
+	    	hidden: _is_diagram,
+	    	xtype: 'numberfield',
+	        fieldLabel: 'diagram',
+	    	value: mapping.diagram,
+            listeners:{
+            	scope: this,
+                'change': function(field, newValue, oldValue, opt){
+                	mapping.diagram = newValue;
                 	self.texteditor.setValue(JSON.stringify(g_wbconfig));
                 }
            }
@@ -333,7 +354,7 @@ TemplateEditor.prototype.save = function() {
 	var self = this;
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	this.template.content = this.template.content.replace(/\t/g, "  ");
-	$.post('/template/save', { id : g_metamodel_id, fname : this.template.name , content : this.template.content},
+	$.post('/template/save', { id : g_metamodel_id, fname : this.template.name , target : this.template.path, content : this.template.content},
 			function(data) {
 				if(data) {
 					self.panel.setTitle(self.template.name);

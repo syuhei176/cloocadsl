@@ -49,8 +49,11 @@ class BaseGenerator(object):
         self.projectpath = self.userpath + '/p' + str(project['id'])
         if not os.path.exists(self.userpath):
             os.mkdir(self.userpath)
+        #clear directory
+        shutil.rmtree(self.projectpath)
         if not os.path.exists(self.projectpath):
             os.mkdir(self.projectpath)
+        #
         self.model = parseJSON(project['xml'], metamodel['xml'])
         global message
         message = ''
@@ -87,7 +90,7 @@ class BaseGenerator(object):
                 d = {'id': self.model.diagrams[key].id}
                 self.FileGenByDiagram(src, template.substitute(d), self.model.diagrams[key])
     
-    def parseCopy(self, elem):
+    def parseCopy(self, m):
         src = m['src']
         dest = m['dest']
         self.templates[src]

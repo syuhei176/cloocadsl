@@ -285,8 +285,8 @@ function create_new_template(fname, path) {
 			}, "json");
 }
 
-function save_template(fname, content) {
-	$.post('/template/save', { id : g_metamodel_id, fname : fname , content : content},
+function save_template(fname, target, content) {
+	$.post('/template/save', { id : g_metamodel_id, fname : fname, target : target, content : content},
 			function(data) {
 				if(data) {
 					
@@ -294,6 +294,14 @@ function save_template(fname, content) {
 			}, "json");
 }
 
+function del_template(fname, target) {
+	$.post('/template/del', { id : g_metamodel_id, fname : fname, target : target},
+			function(data) {
+				if(data) {
+					load_templates();
+				}
+			}, "json");
+}
 
 function createTemplateExplorer() {
 	Ext.getCmp('modelexplorer').removeAll();
@@ -384,14 +392,32 @@ function createTemplateExplorer() {
         }
 	    }
 	});
+	var mnuContext3 = new Ext.menu.Menu({
+	    items: [{
+	        id: 'delete',
+	        text: '削除'
+	    }],
+	    listeners: {
+        click: function(menu, item) {
+            switch (item.id) {
+                case 'delete':
+                	del_template(g_templates[selected_item.id].name, g_templates[selected_item.id].path);
+                    break;
+            }
+        }
+	    }
+	});
 	modelExplorer.on('itemmousedown',function(view, record, item, index, event) {
 		if(event.button == 2) {
 			if(record.data.root) {
 				mnuContext.showAt(event.getX(), event.getY());
 			}else if(record.data.leaf != true){
 				mnuContext2.showAt(event.getX(), event.getY());
+			}else{
+				mnuContext3.showAt(event.getX(), event.getY());
 			}
 			selected_item = record.data;
+			console.log(selected_item.id+','+selected_item.text+','+index);
 		}
     });
 	Ext.getCmp('modelexplorer').add(modelExplorer);

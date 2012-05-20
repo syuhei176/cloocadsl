@@ -1,0 +1,100 @@
+.clooca_wrapper{
+	width:700px;
+	margin-left:auto;
+	margin-right:auto;
+	background-color:#fff;
+}
+body {
+	font-size:13px;
+	font-weight: normal;
+	line-height: 1.5;
+	font-family: Arial,'Liberation Sans',FreeSans,sans-serif; 
+	background-color:#999;
+}
+.clooca_header{
+	height: 42px;
+	margin-bottom:12px;
+	padding:10px;0px;10px;0px;
+	vertical-align:text-top;
+}
+.clooca_logo{
+	width: 380px;
+	float: left;
+	display: inline;
+	vertical-align: baseline;
+}
+.clooca_login{
+	width: 300px;
+	float: left;
+	display: inline;
+	vertical-align: baseline;
+	text-align: right;
+}
+.clooca_second_header{
+height: 35px;
+margin-bottom:12px;
+padding:10px;0px;10px;0px;
+vertical-align:text-top;
+}
+
+.clooca_main{
+overflow: hidden;
+}
+.clooca_left_content{
+float:left;
+width: 120px;
+margin-left: 10px;
+margin-right: 10px;
+}
+
+#clooca_left_nav {
+	border-right: 1px solid #6DAEE1;
+	border-left: 1px solid #6DAEE1;
+	border-bottom: 1px solid #6DAEE1;
+	font-size: 12px;
+	padding-left: 10px;
+	padding-right: 10px;
+	background-color: #EAF3FE;
+}
+#clooca_left_nav ul {
+	list-style: none outside none;
+	margin-top: 0px;
+}
+    #clooca_left_nav li {
+        margin-left: 0px;
+        line-height: 100%;
+    }
+    #clooca_left_nav .child-category {
+        color: #049;
+        margin-left: 0;
+        font-weight: normal;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+        #clooca_left_nav li a {
+        border: none;
+        outline: none;
+        border-style: none;
+        text-decoration: none;
+    }
+.clooca_center_content{
+float:left;
+width: 320px;
+}
+.clooca_right_content{
+float:left;
+width: 240px;
+}
+
+#clooca_wb_info_header{
+}
+
+#clooca_wb_info{
+	font-size: 12px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.clooca_footer{
+text-align: center;
+}

@@ -216,6 +216,14 @@ def workbenchjs(id=None):
         return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
     return redirect(url_for('login_view'))
 
+@app.route('/create-group', methods=['POST'])
+def create_group():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.createGroup(session['user'], request.form['group_name'], connect)
+        connect.close()
+        return json.dumps(result)
+
 @app.route('/join-group', methods=['POST'])
 def join_group():
     if 'user' in session:
@@ -423,6 +431,9 @@ def gen():
 def download(pid):
     if 'user' in session:
         user = session['user']
+#        target = request.form['target']
+#        generator = ModelCompiler.BaseGenerator()
+#        mes = generator.GenerateCode(user, int(pid), target);
         project_id = pid;
         userpath = config.CLOOCA_CGI+'/out/' + user['uname']
         projectpath = userpath + '/p' + project_id
@@ -477,14 +488,21 @@ def temp_new():
         connect.close()
         return json.dumps(result)
 
+@app.route('/template/del', methods=['POST'])
+def temp_del():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.delete(int(request.form['id']), request.form['fname'], request.form['target'], connect)
+        connect.close()
+        return json.dumps(result)
+
 @app.route('/template/save', methods=['POST'])
 def temp_save():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.save(int(request.form['id']), request.form['fname'], request.form['content'], connect)
+        result = TemplateService.save(int(request.form['id']), request.form['fname'], request.form['target'], request.form['content'], connect)
         connect.close()
         return json.dumps(result)
-
 
 @app.route('/wb/import', methods=['POST'])
 def wb_import():

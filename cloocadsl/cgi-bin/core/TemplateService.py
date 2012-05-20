@@ -17,16 +17,16 @@ def create(metamodel_id, name, path, connect):
     cur.close()
     return True
 
-def delete(metamodel_id, name, connect):
+def delete(metamodel_id, name, path, connect):
     cur = connect.cursor()
-    cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(name, name, content, metamodel_id, ))
+    cur.execute('DELETE FROM Template WHERE name=%s AND path=%s AND metamodel_id=%s;',(name, path, metamodel_id, ))
     connect.commit()
     cur.close()
     return True
 
-def save(metamodel_id, name, content, connect):
+def save(metamodel_id, name, path, content, connect):
     cur = connect.cursor()
-    affect_row_count = cur.execute('UPDATE Template SET content=%s WHERE name=%s AND metamodel_id=%s;', (content.encode('utf-8'), name, metamodel_id, ))
+    affect_row_count = cur.execute('UPDATE Template SET content=%s WHERE name=%s AND path=%s AND metamodel_id=%s;', (content.encode('utf-8'), name, path, metamodel_id, ))
     connect.commit()
     cur.close()
     if affect_row_count > 0:

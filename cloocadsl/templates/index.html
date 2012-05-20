@@ -68,6 +68,30 @@ function init() {
     		$( "#register_dialog" ).dialog('close');
 	      }, "json");
 	  });
+	
+	$("#create-group-form").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+        group_name = $form.find( 'input[name="group_name"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    if(group_name == null || group_name.length == 0) {
+	    	alert('グループ名を入力してください。');
+	    	return;
+	    }
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { group_name: group_name },
+	      function( data ) {
+    		$( "#creategroup_dialog" ).dialog('close');
+    		window.location.href='/mygroups';
+	      }, "json");
+	  });
+
 	$( "#selectable" ).selectable({
 		stop: function() {
 			var result = $( "#select-result" ).empty();
@@ -87,6 +111,10 @@ function login() {
 
 function register() {
 	$( "#register_dialog" ).dialog({ modal: true });
+}
+
+function create_group() {
+	$( "#create_group_dialog" ).dialog({ modal: true });
 }
 
 function load_models() {
@@ -152,6 +180,14 @@ document.getElementById(twitter_elem_id).innerHTML = html;
 <div>パスワード：<input type="password" name="password"></div>
 <div class="message">５文字以上</div>
 <div>確認：　　　<input type="password" name="password-confirm"></div>
+<input type="submit" value="登録">
+</form>
+</div>
+
+<!-- グループ作成　ダイアログ -->
+<div id="create_group_dialog" title="create group dialog" style="display : none;">
+<form id="create-group-form" action="/create-group">
+<div>グループ名：　<input type="text" name="group_name"></div>
 <input type="submit" value="登録">
 </form>
 </div>
@@ -225,11 +261,11 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
         </div><!--/span-->
         <div class="span9">
           <div class="hero-unit">
-            <h1>clooca DSL(QITO)</h1>
+            <h1>clooca DSL</h1>
             <p>cloooca DSL(クルーカDSL)はソーシャルDSMLプラットフォームです。</p>
             <div style="float:left;">
             <p><a class="btn btn-danger btn-large" href="javascript:register()">　新規登録 &raquo;　</a>　</p></div>
-            <p><a class="btn btn-primary btn-large" href="/mygroups">マイグループ &raquo;</a></p>
+            <p><a class="btn btn-primary btn-large" href="javascript:create_group()">グループ作成 &raquo;</a></p>
             <ol id="selectable" style="float:left;">
             <li class="ui-widget-content">エディタ</li>
             <li class="ui-widget-content">ワークベンチ</li>
