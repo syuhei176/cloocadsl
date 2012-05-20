@@ -6,13 +6,13 @@ import MySQLdb
 sys.path.append('../')
 import config
 
-def create(metamodel_id, name, connect):
+def create(metamodel_id, name, path, connect):
     cur = connect.cursor()
-    cur.execute('SELECT name,content FROM Template WHERE metamodel_id=%s AND name=%s',(metamodel_id, name, ))
+    cur.execute('SELECT name FROM Template WHERE metamodel_id=%s AND name=%s',(metamodel_id, name, ))
     rows = cur.fetchall()
     if not len(rows) == 0:
         return False
-    cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(name, '', '', metamodel_id, ))
+    cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(name, path, '', metamodel_id, ))
     connect.commit()
     cur.close()
     return True
@@ -35,14 +35,15 @@ def save(metamodel_id, name, content, connect):
 
 def tree(metamodel_id, connect):
     cur = connect.cursor()
-    cur.execute('SELECT name,content FROM Template WHERE metamodel_id=%s;',(metamodel_id, ))
+    cur.execute('SELECT name,path,content FROM Template WHERE metamodel_id=%s;',(metamodel_id, ))
     rows = cur.fetchall()
     cur.close()
     files = []
     for i in range(len(rows)):
         name = rows[i][0]
-        content = rows[i][1]
-        files.append({'name' : name, 'list' : [], 'type' : 'file', 'content' : content.decode('utf-8')})
+        path = rows[i][1]
+        content = rows[i][2]
+        files.append({'name' : name, 'path' : path, 'content' : content.decode('utf-8')})
     return files
 
 def load(metamodel_id, name, connect):

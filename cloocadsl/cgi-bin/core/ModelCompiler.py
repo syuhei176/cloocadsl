@@ -35,14 +35,15 @@ class BaseGenerator(object):
         self.model = None
         self.templates = {}
     
-    def GenerateCode(self, user, pid):
+    def GenerateCode(self, user, pid, target):
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         project = loadProject(user, pid, connect)
         metamodel = loadMetaModel(connect, user, project['metamodel_id'], check=False)
         files = TemplateService.tree(project['metamodel_id'], connect)
         connect.close()
         for f in files:
-            self.templates[f['name']] = f['content']
+            if f['path'] == target:
+                self.templates[f['name']] = f['content']
         self.input = self.input + '/t' + str(metamodel['id'])
         self.userpath = self.outpath + '/' + user['uname']
         self.projectpath = self.userpath + '/p' + str(project['id'])
@@ -53,48 +54,46 @@ class BaseGenerator(object):
         self.model = parseJSON(project['xml'], metamodel['xml'])
         global message
         message = ''
-        self.parseXML(metamodel['template'])
+        wbconf = json.loads(metamodel['config']);
+        for t in wbconf['targets']:
+            if t['name'] == target:
+                self.parseXML(t)
         return message
-#        print Template(metamodel['template']).render(root = model)
-#        self.FileGen(model, config.CLOOCA_CGI + '/template/t1.mako', self.outpath)
-#        self.FileGen(model, 'template/t1.mako', self.outpath)
     
-    def parseXML(self, xml):
-        elem = fromstring(xml)
-        if elem.tag == 'DirTemp':
-            return self.parseDirTemp(elem)
+    def parseXML(self, target_conf):
+        for m in target_conf['mapping']:
+            self.parseDirTemp(m)
     
-    def parseDirTemp(self, elem):
-        for e in elem.findall(".//Template"):
-            self.parseTemplate(e)
-        for e in elem.findall(".//TemplateForDiagram"):
-            self.parseTemplateForDiagram(e)
-        for e in elem.findall(".//Copy"):
-            self.parseCopy(e)
+    def parseDirTemp(self, m):
+        if m['type'] == 'template':
+            self.parseTemplate(m)
+        if m['type'] == 'template_diagram':
+            self.parseTemplateForDiagram(m)
+        if m['type'] == 'copy':
+            self.parseCopy(m)
     
-    def parseTemplate(self, elem):
-        src = elem.get('src')
-        dest = elem.get('dest')
+    def parseTemplate(self, m):
+        src = m['src']
+        dest = m['dest']
         self.FileGen(src, dest)
 
-    def parseTemplateForDiagram(self, elem):
-        src = elem.get('src')
-        dest = elem.get('dest')
-        dname = elem.get('diagram')
+    def parseTemplateForDiagram(self, m):
+        src = m['src']
+        dest = m['dest']
+        diagram = m['diagram']
         for key in self.model.diagrams:
-            if str(self.model.diagrams[key].meta_id) == str(dname):
+            if str(self.model.diagrams[key].meta_id) == str(diagram):
                 template = stringTemplate(dest)
                 d = {'id': self.model.diagrams[key].id}
                 self.FileGenByDiagram(src, template.substitute(d), self.model.diagrams[key])
     
     def parseCopy(self, elem):
-        src = elem.get('src')
-        dest = elem.get('dest')
+        src = m['src']
+        dest = m['dest']
         self.templates[src]
         hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
         hf.write(self.templates[src])
         hf.close()
-        #shutil.copy(self.input + '/' + src, self.projectpath + '/' + dest)
     
     def FileGen(self, src, dest):
         try:

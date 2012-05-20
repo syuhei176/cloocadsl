@@ -10,7 +10,6 @@ Ext.require([
 var g_metamodel_id = 0;
 function init_wb(id) {
 	g_metamodel_id = id;
-	load_templates();
 	new Ext.Viewport({
 		layout:'border',
 		items:[
@@ -133,8 +132,8 @@ function create_menu() {
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   id: 'targets',
-                	   text: 'ターゲット',
+                	   id: 'config',
+                	   text: 'コンフィグ',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    }
@@ -158,11 +157,6 @@ function create_menu() {
                    {
                 	   id: 'export',
                 	   text: 'エクスポート',
-                	   iconCls: 'add16',
-                	   handler : onTempItemClick
-                   },{
-                	   id: 'tempconfig',
-                	   text: 'テンプレートコンフィグ',
                 	   iconCls: 'add16',
                 	   handler : onTempItemClick
                    }
@@ -227,6 +221,9 @@ function onItemClick(item){
 		editortabpanel.add(editor, 'welcome_editor');
 	}else if(item.id == 'targets') {
 //		show_targets_window();
+	}else if(item.id == 'config') {
+		var editor = new TempConfigEditor();
+		editortabpanel.add(editor, 'tempconfig');
 	}
 }
 
@@ -245,9 +242,6 @@ function onTempItemClick(item){
 		 },null,true);
 	}else if(item.id == 'export') {
 		window.open('/template/export/'+g_metamodel_id);
-	}else if(item.id == 'tempconfig') {
-		var editor = new TempConfigEditor();
-		editortabpanel.add(editor, 'tempconfig');
 	}
 }
 
@@ -282,8 +276,8 @@ function load_templates() {
 			}, "json");
 }
 
-function create_new_template(fname) {
-	$.post('/template/new', { id : g_metamodel_id, fname : fname },
+function create_new_template(fname, path) {
+	$.post('/template/new', { id : g_metamodel_id, fname : fname, path : path },
 			function(data) {
 				if(data) {
 					load_templates();
@@ -303,17 +297,26 @@ function save_template(fname, content) {
 
 function createTemplateExplorer() {
 	Ext.getCmp('modelexplorer').removeAll();
-	var nodes = [];
+	var paths = [];
+	for(var i=0;i < g_wbconfig.targets.length;i++) {
+		paths.push({text: g_wbconfig.targets[i].name, children:[]});
+	}
 	for(var i=0;i < g_templates.length;i++) {
 		var key = g_templates[i].name;
-		nodes.push({id: ''+i, text: key, leaf: true});
+		var path_name = g_templates[i].path;
+		for(var j=0;j < paths.length;j++) {
+			if(paths[j].text == path_name) {
+				paths[j].children.push({id: i, text: key, leaf: true });
+				break;
+			}
+		}
 	}
 
 	var store = Ext.create('Ext.data.TreeStore', {
 	    root: {
 	        expanded: true,
 	        children: [
-	            { text: "templates", expanded: true, children: nodes }
+	            { text: "templates", expanded: true, children: paths, root:true}
 	        ]
 	    }
 	});
@@ -324,9 +327,72 @@ function createTemplateExplorer() {
 	    store: store,
 	    rootVisible: false
 	});
-	modelExplorer.on('itemclick',function(view, record, item, index, event) {
-    	editor = new TemplateEditor(g_templates[record.data.id]);
-    	editortabpanel.add(editor, record.data.text);
+	modelExplorer.on('itemdblclick',function(view, record, item, index, event) {
+		if(record.data.leaf) {
+			var template = g_templates[record.data.id];
+	    	editor = new TemplateEditor(template);
+	    	editortabpanel.add(editor, template.path + ':' + template.name);
+		}
+    });
+	/*
+	 * 右クリックメニューの設定
+	 */
+	var mnuContext = new Ext.menu.Menu({
+	    items: [{
+	        id: 'new_target',
+	        text: 'ターゲット作成'
+	    }],
+	    listeners: {
+        click: function(menu, item) {
+            switch (item.id) {
+                case 'new_target':
+             		 Ext.Msg.prompt('','',function(btn,text){
+            			 if(btn != 'cancel') {
+            				 if(text.length != 0) {
+                				 g_wbconfig.targets.push({name:text,mapping:[]});
+                					$.post('/tcsave', { id : g_metamodel_id, tc : JSON.stringify(g_wbconfig) },
+                							function(data) {
+                								if(data) {
+                        							createTemplateExplorer();
+                								}
+                							}, "json");
+                				 //update
+            				 }
+            			 }
+            		 },null,false);
+                    break;
+            }
+        }
+	    }
+	});
+	var mnuContext2 = new Ext.menu.Menu({
+	    items: [{
+	        id: 'new',
+	        text: '新規作成'
+	    }],
+	    listeners: {
+        click: function(menu, item) {
+            switch (item.id) {
+                case 'new':
+              		 Ext.Msg.prompt('','',function(btn,text){
+            			 if(btn != 'cancel') {
+            				 create_new_template(text, selected_item.text);
+            			 }
+            		 },null,false);
+                    break;
+            }
+        }
+	    }
+	});
+	modelExplorer.on('itemmousedown',function(view, record, item, index, event) {
+		if(event.button == 2) {
+			if(record.data.root) {
+				mnuContext.showAt(event.getX(), event.getY());
+			}else if(record.data.leaf != true){
+				mnuContext2.showAt(event.getX(), event.getY());
+			}
+			selected_item = record.data;
+		}
     });
 	Ext.getCmp('modelexplorer').add(modelExplorer);
 	return modelExplorer;
@@ -338,4 +404,17 @@ function show_targets_window() {
 			 g_metaproject.targets = JSON.parse(text);
 		 }
 	 },null,true,JSON.stringify(g_metaproject.targets));
+}
+
+function WBConfig() {
+	this.targets = [];
+}
+function WBTarget(name) {
+	this.name = name;
+	this.mapping = [];
+}
+function WBMap() {
+	this.type = '';
+	this.src = '';
+	this.dest = '';
 }

@@ -13,6 +13,7 @@ function readProject(project) {
 		}else{
 			g_metamodel = JSON.parse(g_projectinfo.metamodel.xml);
 		}
+		g_projectinfo.metamodel.config = JSON.parse(g_projectinfo.metamodel.config);
 		readModel(project.xml);
 //		Ext.MessageBox.hide();
 	}
@@ -104,6 +105,214 @@ function readModel(xml) {
 			property_IdGenerator.setOffset(prop.id);
 		}
 }
+
+
+function showGenerateWindow() {
+	if(g_projectinfo.metamodel.config.editor.generatable){
+		
+	}else{
+		Ext.Msg.alert('ソースコード生成はできません。');
+		return;
+	}
+	var selected_target = null;
+	var target_status = Ext.create('Ext.data.Store', {
+	    fields: ['name'],
+	    data : g_projectinfo.metamodel.config.targets
+	});
+
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'Generate',
+	    width: 280,
+	    height: 200,
+	    layout: 'vbox',
+	    items: [{
+	    	xtype: 'combo',
+	        fieldLabel: 'target',
+	        store: target_status,
+	        queryMode: 'local',
+	        displayField: 'name',
+	        valueField: 'name',
+	            listeners:{
+	            	scope: this,
+	                'select': function(combo, records, option){
+	                	selected_target = combo.getValue();
+	                }
+	           }
+	    },{
+	    	xtype: 'button',
+	        text: 'OK',
+	        handler: function() {
+	        	if(selected_target) {
+		        	Generate(g_project_id, selected_target);
+		        	win.hide();
+	        	}else{
+	        		Ext.Msg.alert('ターゲットを選択してください。');
+	        	}
+	        }
+	    }]
+	});
+	win.show();
+}
+
+function showDownloadWindow() {
+	if(g_projectinfo.metamodel.config.editor.generatable){
+		
+	}else{
+		Ext.Msg.alert('ソースコード生成はできません。');
+		return;
+	}
+	var selected_target = null;
+	var targets = [];
+	for(var i=0;i < g_projectinfo.metamodel.config.targets.length;i++) {
+		if(g_projectinfo.metamodel.config.targets[i].downloadable) {
+			targets.push(g_projectinfo.metamodel.config.targets[i]);
+		}
+	}
+	var target_status = Ext.create('Ext.data.Store', {
+	    fields: ['name'],
+	    data : targets
+	});
+
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'Download',
+	    width: 280,
+	    height: 200,
+	    layout: 'vbox',
+	    items: [{
+	    	xtype: 'combo',
+	        fieldLabel: 'target',
+	        store: target_status,
+	        queryMode: 'local',
+	        displayField: 'name',
+	        valueField: 'name',
+	            listeners:{
+	            	scope: this,
+	                'select': function(combo, records, option){
+	                	selected_target = combo.getValue();
+	                }
+	           }
+	    },{
+	    	xtype: 'button',
+	        text: 'OK',
+	        handler: function() {
+	        	if(selected_target) {
+		        	Generate(g_project_id, selected_target);
+		        	win.hide();
+	        	}else{
+	        		Ext.Msg.alert('ターゲットを選択してください。');
+	        	}
+	        }
+	    }]
+	});
+	win.show();
+}
+
+function showRunWindow() {
+	if(g_projectinfo.metamodel.config.editor.generatable){
+		
+	}else{
+		Ext.Msg.alert('ソースコード生成はできません。');
+		return;
+	}
+	var selected_target = null;
+	var targets = [];
+	for(var i=0;i < g_projectinfo.metamodel.config.targets.length;i++) {
+		if(g_projectinfo.metamodel.config.targets[i].runnable) {
+			targets.push(g_projectinfo.metamodel.config.targets[i]);
+		}
+	}
+	var target_status = Ext.create('Ext.data.Store', {
+	    fields: ['name'],
+	    data : targets
+	});
+
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'Run',
+	    width: 280,
+	    height: 200,
+	    layout: 'vbox',
+	    items: [{
+	    	xtype: 'combo',
+	        fieldLabel: 'target',
+	        store: target_status,
+	        queryMode: 'local',
+	        displayField: 'name',
+	        valueField: 'name',
+	            listeners:{
+	            	scope: this,
+	                'select': function(combo, records, option){
+	                	selected_target = combo.getValue();
+	                }
+	           }
+	    },{
+	    	xtype: 'button',
+	        text: 'OK',
+	        handler: function() {
+	        	if(selected_target) {
+		        	Generate(g_project_id, selected_target);
+		        	win.hide();
+	        	}else{
+	        		Ext.Msg.alert('ターゲットを選択してください。');
+	        	}
+	        }
+	    }]
+	});
+	win.show();
+}
+
+function showDeployWindow() {
+	if(g_projectinfo.metamodel.config.editor.generatable){
+		
+	}else{
+		Ext.Msg.alert('ソースコード生成はできません。');
+		return;
+	}
+	var selected_target = null;
+	var targets = [];
+	for(var i=0;i < g_projectinfo.metamodel.config.targets.length;i++) {
+		if(g_projectinfo.metamodel.config.targets[i].deploy) {
+			targets.push(g_projectinfo.metamodel.config.targets[i]);
+		}
+	}
+	var target_status = Ext.create('Ext.data.Store', {
+	    fields: ['name'],
+	    data : targets
+	});
+
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'Deploy',
+	    width: 280,
+	    height: 200,
+	    layout: 'vbox',
+	    items: [{
+	    	xtype: 'combo',
+	        fieldLabel: 'target',
+	        store: target_status,
+	        queryMode: 'local',
+	        displayField: 'name',
+	        valueField: 'name',
+	            listeners:{
+	            	scope: this,
+	                'select': function(combo, records, option){
+	                	selected_target = combo.getValue();
+	                }
+	           }
+	    },{
+	    	xtype: 'button',
+	        text: 'OK',
+	        handler: function() {
+	        	if(selected_target) {
+		        	Generate(g_project_id, selected_target);
+		        	win.hide();
+	        	}else{
+	        		Ext.Msg.alert('ターゲットを選択してください。');
+	        	}
+	        }
+	    }]
+	});
+	win.show();
+}
+
 
 /**
  * commit

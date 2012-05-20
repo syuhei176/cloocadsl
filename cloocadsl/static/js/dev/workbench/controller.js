@@ -37,12 +37,13 @@ function wb_loadMetaModel(id) {
 					}else{
 						g_metamodel = JSON.parse(data.xml);
 					}
-					g_config_of_template = data.template;
+					g_wbconfig = JSON.parse(data.config);
 					for(var i=0;i < g_metamodel.metaobjects.length;i++) {
 						if(g_metamodel.metaobjects[i] != null) {
 							metaobject_IdGenerator.setOffset(g_metamodel.metaobjects[i].id);
 						}
 					}
+					load_templates();
 					Ext.MessageBox.hide();
 				}
 			}, "json");

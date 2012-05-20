@@ -138,13 +138,13 @@ function loadMetaModel(id) {
 			}, "json");
 }
 
-function Generate(pid) {
+function Generate(pid, target) {
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Generating...',progressText: 'Generating...',width:300,progress:true,closable:false,animEl: 'mb6'});
-	$.post('/gen', { pid : pid },
+	$.post('/gen', { pid : pid, target : target },
 			function(data) {
 				Ext.MessageBox.hide();
 				Ext.MessageBox.alert('結果', data);
-			}, "json").error(function() { alert("error"); });
+			}, "json").error(function() { alert("error");Ext.MessageBox.hide(); });
 }
 
 /*

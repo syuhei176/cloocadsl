@@ -104,9 +104,9 @@ def loadMetaModel(connect, user, pid, check=True):
     project['id'] = rows[0][0]
     project['name'] = rows[0][1].decode('utf_8')
     project['xml'] = rows[0][2].decode('utf_8')
-    project['template'] = rows[0][3]
+    project['config'] = rows[0][3]
     project['visibillity'] = int(rows[0][4])
-    project['welcome_message'] = rows[0][5]
+    project['welcome_message'] = rows[0][5].decode('utf_8')
     project['targets'] = rows[0][6]
     project['group_id'] = int(rows[0][7])
     #connect.close()

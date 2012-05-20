@@ -10,16 +10,16 @@ sys.path.append('../')
 #from config import *
 import config
 
-'''
+"""
 グローバル変数
-'''
+"""
 reg_username = re.compile('\w+')
 connect = None
 g_model_id = None
 
-'''
+"""
 プロジェクトを保存する
-'''
+"""
 def saveProject(user, pid, xml):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
@@ -79,9 +79,9 @@ def loadProject(user, pid, connect):
     metamodel['id'] = rows[0][0]
     metamodel['name'] = rows[0][1]
     metamodel['xml'] = rows[0][2]
-    metamodel['template'] = rows[0][3]
+    metamodel['config'] = rows[0][3]
     metamodel['visibillity'] = rows[0][4]
-    metamodel['welcome_message'] = rows[0][5]
+    metamodel['welcome_message'] = rows[0][5].decode('utf-8')
     project['metamodel'] = metamodel
     #connect.close()
     return project

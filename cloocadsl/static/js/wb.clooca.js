@@ -27,5 +27,6 @@ function initall() {
 	                 'dev/core/EditorTabPanel.js',
 	                 'dev/workbench/controller.js',
 	                 'dev/workbench/wb.js',
-	                 'dev/workbench/view.js']);
+	                 'dev/workbench/view.js',
+	                 'dev/workbench/MetaModelEditor.js']);
 }

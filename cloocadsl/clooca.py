@@ -414,7 +414,7 @@ def tcsave():
 def gen():
     if 'user' in session:
         generator = ModelCompiler.BaseGenerator()
-        mes = generator.GenerateCode(session['user'], int(request.form['pid']));
+        mes = generator.GenerateCode(session['user'], int(request.form['pid']), request.form['target']);
         return json.dumps(mes)
     else:
         return 'false'
@@ -473,7 +473,7 @@ def temp_tree():
 def temp_new():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.create(request.form['id'], request.form['fname'], connect)
+        result = TemplateService.create(request.form['id'], request.form['fname'], request.form['path'], connect)
         connect.close()
         return json.dumps(result)
 

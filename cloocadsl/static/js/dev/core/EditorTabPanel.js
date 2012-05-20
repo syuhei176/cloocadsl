@@ -4,6 +4,7 @@ function EditorTabPanel() {
 	this.listeners = [];
 	var self = this;
 	this.tabpanel = Ext.create('Ext.tab.Panel', {
+		tabPosition: 'top',
         defaults :{
             bodyPadding: 6,
             closable: 'true',

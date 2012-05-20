@@ -122,18 +122,27 @@ function create_menu() {
             text: 'プロジェクト',
             iconCls: 'add16',
             menu: [
-                   /*
                    {
                 	   id: 'generate',
                 	   text: 'generate',
                 	   iconCls: 'add16',
-                	   handler : onProjItemClick
+                	   handler: onProjItemClick,
                    },{
                 	   id: 'download',
-                	   text: 'download',
+                	   text: 'Download',
                 	   iconCls: 'add16',
                 	   handler : onProjItemClick
-                   },*/{
+                   },{
+                	   id: 'run',
+                	   text: 'Run',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
+                   },{
+                	   id: 'deploy',
+                	   text: 'Deploy',
+                	   iconCls: 'add16',
+                	   handler : onProjItemClick
+                   },{
                 	   id: 'pviewer',
                 	   text: 'プロジェクト情報',
                 	   iconCls: 'add16',
@@ -262,9 +271,15 @@ function onFileItemClick(item){
 
 function onProjItemClick(item){
 	if(item.id == 'generate') {
-		Generate(g_project_id);
+		showGenerateWindow();
+//		Generate(g_project_id);
 	}else if(item.id == 'download') {
-		download(g_project_id);
+		showDownloadWindow();
+//		download(g_project_id);
+	}else if(item.id == 'run') {
+		showRunWindow();
+	}else if(item.id == 'deploy') {
+		showDeployWindow();
 	}else if(item.text == 'genbin') {
 		genbin(g_project_id);
 	}else if(item.id == 'pviewer') {
@@ -315,7 +330,6 @@ function onShinshuItemClick(item){
 }
 
 function createModelExplorer() {
-	
 	var open_diagram = function(diagram,dname,id){
 		var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
 		var editor;
@@ -717,26 +731,6 @@ function show_create_diagram_window() {
 	                iconCls:'add',
 	                handler : function() {
 	                	show_setting_diagram_name_window(selModel.getSelection()[0].get('id'), null);
-	                	/*
-	               	 Ext.Msg.prompt('ダイアグラム','新規作成',function(btn,text){
-	            		 if(btn != 'cancel') {
-	 	                	var d = ModelController.addDiagram(selModel.getSelection()[0].get('id'));
-		        			var meta_diagram = g_metamodel.metadiagrams[d.meta_id];
-		        			if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
-		        				var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
-		        				var prop = null;
-		        				for(var j=0;j<d.properties.length;j++) {
-		        					if(d.properties[j].meta_id == name_id) {
-		        						prop = d.properties[j];
-		        					}
-		        				}
-		        				g_model.properties[prop.children[0]].value = text;
-		        			}
-		                	createModelExplorer();
-		                	win.hide();
-	            		 }
-	            	 },null,true,'');
-	            	 */
 	                }
 	            }]
 	        }]

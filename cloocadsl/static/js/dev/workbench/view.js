@@ -1,480 +1,285 @@
-function MetaDiagramsEditor(metaobjects) {
-	var l_metaobjs = [];
-	for(var i=0;i < metaobjects.length;i++) {
-		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
-	}
-	Ext.create('Ext.data.Store', {
-	    storeId:'simpsonsStore',
-	    fields:['id', 'name', 'graphic'],
-	    data:{
-	    	'items':l_metaobjs
-	    },
-	    proxy: {
-	        type: 'memory',
-	        reader: {
-	            type: 'json',
-	            root: 'items'
-	        }
-	    }
-	});
-	
-	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'MetaDiagrams',
-	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
-	    columns: [
-	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 },
-	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
-	    ],
-	    height: 200,
-	    width: 400,
-	    selModel : new Ext.selection.RowModel({
-        	singleSelect : true,
-        	listeners : {
-        		select : {
-        			fn : function(rmodel,record,index,options){
-        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-        					 if(btn != 'cancel') {
-        						 metaobjects[record.data.id] = JSON.parse(text);
-        					 }
-        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
-        			}
-        		}
-        	}
-        })
-	});
-	
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-			xtype: 'panel',
-		  	   title: 'MetaDiagrams',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           grid,
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'add',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
-	  	  	  	     	    	metaobjects.push(new MetaDiagram(metaobjects.length, ''));
-	  	  	  	     	    }
-  	  	  	           },
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'delete',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
-	  	  	  	     	    }
-  	  	  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	
-}
-
-MetaDiagramsEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
-		if(data) {
-			self.panel.setTitle('MetaDiagrams');
-		}
-	});
-}
-
-MetaDiagramsEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-MetaDiagramsEditor.prototype.Initialize = function() {
-}
-
-MetaDiagramsEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
-
-function MetaObjectsEditor(metaobjects) {
-	var l_metaobjs = [];
-	for(var i=0;i < metaobjects.length;i++) {
-		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
-	}
-	Ext.create('Ext.data.Store', {
-	    storeId:'simpsonsStore',
-	    fields:['id', 'name', 'graphic'],
-	    data:{'items':l_metaobjs},
-	    proxy: {
-	        type: 'memory',
-	        reader: {
-	            type: 'json',
-	            root: 'items'
-	        }
-	    }
-	});
-	
-	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'MetaObjects',
-	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
-	    columns: [
-	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 },
-	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
-	    ],
-	    height: 200,
-	    width: 400,
-	    selModel : new Ext.selection.RowModel({
-        	singleSelect : true,
-        	listeners : {
-        		select : {
-        			fn : function(rmodel,record,index,options){
-        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-        					 if(btn != 'cancel') {
-        						 metaobjects[record.data.id] = JSON.parse(text);
-        					 }
-        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
-        			}
-        		}
-        	}
-        })
-	});
-	
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-			xtype: 'panel',
-		  	   title: 'MetaObjects',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           grid,
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'add',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metaobjects.push(new MetaObject(metaobjects.length, ''));
-	  	  	  	     	    }
-  	  	  	           },
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'delete',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
-	  	  	  	     	    }
-  	  	  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	
-}
-
-MetaObjectsEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
-		if(data) {
-			self.panel.setTitle('JSONEditor');
-		}
-	});
-}
-
-MetaObjectsEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-MetaObjectsEditor.prototype.Initialize = function() {
-}
-
-MetaObjectsEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
-
-function MetaRelationsEditor(metarelations) {
-	var l_metaobjs = [];
-	for(var i=0;i < metarelations.length;i++) {
-		if(metarelations[i] != null) l_metaobjs.push(metarelations[i]);
-	}
-	Ext.create('Ext.data.Store', {
-	    storeId:'simpsonsStore',
-	    fields:['id', 'name', 'arrow_type'],
-	    data:{
-	    	'items':l_metaobjs
-	    },
-	    proxy: {
-	        type: 'memory',
-	        reader: {
-	            type: 'json',
-	            root: 'items'
-	        }
-	    }
-	});
-	
-	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'MetaRelations',
-	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
-	    columns: [
-	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 },
-	        { header: 'Arrow type', dataIndex: 'arrow_type', flex: 1 }
-	    ],
-	    height: 200,
-	    width: 400,
-	    selModel : new Ext.selection.RowModel({
-        	singleSelect : true,
-        	listeners : {
-        		select : {
-        			fn : function(rmodel,record,index,options){
-        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-        					 if(btn != 'cancel') {
-        						 metarelations[record.data.id] = JSON.parse(text);
-        					 }
-        				 },null,true,JSON.stringify(metarelations[record.data.id]));
-        			}
-        		}
-        	}
-        })
-	});
-	
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-			xtype: 'panel',
-		  	   title: 'MetaRelations',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           grid,
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'add',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metarelations.push(new MetaRelation(metarelations.length, ''));
-	  	  	  	     	    }
-  	  	  	           },
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'delete',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	
-	  	  	  	     	    }
-  	  	  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	
-}
-
-MetaRelationsEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
-		if(data) {
-			self.panel.setTitle('JSONEditor');
-		}
-	});
-}
-
-MetaRelationsEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-MetaRelationsEditor.prototype.Initialize = function() {
-}
-
-MetaRelationsEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
-
-function MetaPropertyEditor(metaobjects) {
-	var l_metaobjs = [];
-	this.selected_index = -1;
-	var self = this;
-	for(var i=0;i < metaobjects.length;i++) {
-		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
-	}
-	Ext.create('Ext.data.Store', {
-	    storeId:'simpsonsStore',
-	    fields:['id', 'name', 'graphic'],
-	    data:{
-	    	'items':l_metaobjs
-	    },
-	    proxy: {
-	        type: 'memory',
-	        reader: {
-	            type: 'json',
-	            root: 'items'
-	        }
-	    }
-	});
-	
-	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'MetaProperties',
-	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
-	    columns: [
-	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 },
-	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
-	    ],
-	    height: 200,
-	    width: 400,
-	    selModel : new Ext.selection.RowModel({
-        	singleSelect : true,
-        	listeners : {
-        		select : {
-        			fn : function(rmodel,record,index,options){
-        				self.selected_index = record.data.id;
-        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-        					 if(btn != 'cancel') {
-        						 metaobjects[record.data.id] = JSON.parse(text);
-        					 }
-        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
-        			}
-        		}
-        	}
-        })
-	});
-	
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-			xtype: 'panel',
-		  	   title: 'MetaProperties',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           grid,
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'add',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metaobjects.push(new MetaProperty(metaobjects.length, ''));
-	  	  	  	     	    }
-  	  	  	           },
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'delete',
-	  	  	  	     	    handler: function() {
-//	  	  	  	     	    	alert(self.selected_index);
-//	  	  	  	     	    	metaobjects.slice(self.selected_index, 1);
-	  	  	  	     	    	metaobjects.slice(7, 1);
-	  	  	  	     	    }
-  	  	  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	
-}
-
-MetaPropertyEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
-		if(data) {
-			self.panel.setTitle('JSONEditor');
-		}
-	});
-}
-
-MetaPropertyEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-MetaPropertyEditor.prototype.Initialize = function() {
-}
-
-MetaPropertyEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
-
-function MetaJSONEditor(metadiagram) {
-	this.resource = g_metamodel;
-	var self = this;
-	var editor = Ext.create('Ext.panel.Panel',
-		{
-		  	   title: 'JSONEditor',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           {
-		  	        	   xtype: 'textarea',
-		  	        	   autoScroll: true,
-	  	        		   width: Ext.getCmp('centerpanel').getWidth(),
-	  	        		   height: Ext.getCmp('centerpanel').getHeight(),
-		  	        		   value: JSON.stringify(g_metamodel),
-		  	        		   listeners: {
-		  	        			   change: {
-		  	        				   fn: function(field, newValue, oldValue, opt) {
-		  	        						g_metamodel = JSON.parse(newValue);
-		  	        						editor.setTitle('JSONEditor*')
-		  	        						console.log('change');
-		  	        				   }
-		  	        			   }
-		  	        		   }
-		  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	this.editor = editor;
-}
-
-MetaJSONEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
-		if(data) {
-			self.editor.setTitle('JSONEditor');
-		}
-	});
-}
-
-MetaJSONEditor.prototype.getPanel = function() {
-	return this.editor;
-}
-
-MetaJSONEditor.prototype.Initialize = function() {
-}
-
-MetaJSONEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
-
 function TempConfigEditor() {
 	var self = this;
-	var editor = Ext.create('Ext.panel.Panel',
-		{
-		  	   title: 'TemplateConfig',
+	
+	Ext.create('Ext.data.Store', {
+	    storeId:'targets',
+	    fields:['name','downloadable','runnable','deploy','mapping'],
+	    data:{'items':g_wbconfig.targets},
+	    proxy: {
+	        type: 'memory',
+	        reader: { type: 'json', root: 'items' }
+	    }
+	});
+	
+	var grid = Ext.create('Ext.grid.Panel', {
+	    title: 'targets',
+	    store: Ext.data.StoreManager.lookup('targets'),
+	    columns: [
+	        { header: 'Name', dataIndex: 'name', flex: 1 },
+	        { header: 'download', dataIndex: 'downloadable', flex: 1 },
+	        { header: 'run', dataIndex: 'runnable', flex: 1 },
+	        { header: 'deploy', dataIndex: 'deploy', flex: 1 }
+	    ],
+	    height: 200,
+	    width: 300,
+    	listeners : {
+    		itemdblclick : {
+    			fn : function(rmodel,record,item,index,event,options){
+    				self.show_setting_mappings_window(g_wbconfig.targets[index]/*record.data*/);
+    			}
+    		}
+    	}
+	});
+	if(g_wbconfig.editor == undefined) {
+		g_wbconfig.editor = {};
+	}
+	var grideditor = Ext.create('Ext.panel.Panel', {
+		  	   title: 'grid',
+		  	   width: Ext.getCmp('centerpanel').getWidth(),
+		  	   height: Ext.getCmp('centerpanel').getHeight(),
 		  	   layout: {
-		  		   type: 'hbox',
+		  		   type: 'vbox',
 		  		   align: 'center'
 		  	   },
-		  	   items: [
+		  	   items: [grid,
 		  	           {
-		  	        	   xtype: 'textarea',
-	  	        		   width: Ext.getCmp('centerpanel').getWidth(),
-	  	        		   height: Ext.getCmp('centerpanel').getHeight(),
-		  	        		   value: g_config_of_template,
-		  	        		   listeners: {
-		  	        			   change: {
-		  	        				   fn: function(field, newValue, oldValue, opt) {
-		  	        					   editor.setTitle('TemplateConfig*');
-		  	        					   g_config_of_template = newValue;
-		  	        				   }
-		  	        			   }
-		  	        		   }
-		  	           }
-		  	           ],
-		  	 		closable: 'true'
+			    	xtype: 'checkbox',
+			        fieldLabel: 'generate',
+			    	checked: g_wbconfig.editor.generatable,
+		            listeners:{
+		            	scope: this,
+		                'change': function(field, newValue, oldValue, opt){
+		                	g_wbconfig.editor.generatable = newValue;
+		                	self.texteditor.setValue(JSON.stringify(g_wbconfig));
+		                }
+		            }
+		  	   },{
+			    	xtype: 'checkbox',
+			        fieldLabel: 'download',
+			        checked: g_wbconfig.editor.downloadable,
+		            listeners:{
+		            	scope: this,
+		                'change': function(field, newValue, oldValue, opt){
+		                	g_wbconfig.editor.downloadable = newValue;
+		                	self.texteditor.setValue(JSON.stringify(g_wbconfig));
+		                }
+		            }
+		  	   }
+		  	           ]
 	});
-	this.editor = editor;
+	this.texteditor = Ext.create('Ext.form.field.TextArea', {
+			title: 'json',
+			autoScroll: true,
+			width: Ext.getCmp('centerpanel').getWidth(),
+			height: Ext.getCmp('centerpanel').getHeight(),
+     		   value: JSON.stringify(g_wbconfig),
+     		   listeners: {
+     			   change: {
+     				   fn: function(field, newValue, oldValue, opt) {
+     					   g_wbconfig = JSON.parse(newValue);
+     						self.editor.setTitle('WBConfig*')
+     				   }
+     			   }
+     		   }
+        });
+	var tabpanel = Ext.create('Ext.tab.Panel', {
+		title: 'WBConfig',
+		tabPosition: 'bottom',
+        defaults :{
+            bodyPadding: 6
+        },
+	    items: [grideditor,this.texteditor],
+	    closable: 'true'
+	});
+	this.editor = tabpanel;
+}
+
+TempConfigEditor.prototype.show_setting_mapping_window = function(mapping, mappings, fn) {
+	var self = this;
+	var type_states = Ext.create('Ext.data.Store', {
+	    fields: ['disp','type'],
+	    data : [
+	        {"disp":"テンプレート","type":"template"},
+	        {"disp":"テンプレート（ダイアグラム）","type":"template_diagram"},
+	        {"disp":"コピー","type":"copy"}
+	    ]
+	});
+
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'mapping',
+	    height: 240,
+	    width: 360,
+	    layout: 'vbox',
+	    items: [{
+	    	xtype: 'combo',
+	        fieldLabel: 'type',
+	        store: type_states,
+	        queryMode: 'local',
+	        displayField: 'disp',
+	        valueField: 'type',
+		    value: mapping.type,
+		    listeners:{
+	            	scope: this,
+	                'select': function(combo, records, option){
+	                	mapping.type = combo.getValue();
+	                }
+		    }
+	    },{
+	    	xtype: 'textfield',
+	        fieldLabel: 'src',
+	    	value: mapping.src,
+            listeners:{
+            	scope: this,
+                'change': function(field, newValue, oldValue, opt){
+                	mapping.src = newValue;
+                	self.texteditor.setValue(JSON.stringify(g_wbconfig));
+                }
+           }
+	    },{
+	    	xtype: 'textfield',
+	        fieldLabel: 'dest',
+	    	value: mapping.dest,
+            listeners:{
+            	scope: this,
+                'change': function(field, newValue, oldValue, opt){
+                	mapping.dest = newValue;
+                	self.texteditor.setValue(JSON.stringify(g_wbconfig));
+                }
+           }
+	    },{
+	    	xtype: 'button',
+	        text: 'OK',
+	        handler: function() {
+	        	win.hide();
+	        	if(fn!=null) {
+	        		fn(mapping.type, mapping.src, mapping.dest);
+	        	}
+            	self.texteditor.setValue(JSON.stringify(g_wbconfig));
+	        }
+	    }]
+	});
+	win.show();
+}
+
+TempConfigEditor.prototype.show_setting_mappings_window = function(target) {
+	var self = this;
+	var win = null;
+	
+	var grid = Ext.create('Ext.grid.Panel', {
+        border: false,
+        columns: [
+                  {text: "type", dataIndex: 'type'},
+                  {text: "src", dataIndex: 'src'},
+                  {text: "dest", dataIndex: 'dest'}
+        ],
+        store: Ext.create('Ext.data.Store', {data:target.mapping,fields:['type','src','dest']}),
+        sm: Ext.create('Ext.selection.RowModel', {
+            singleSelect:true
+        }),
+        dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            layout: {
+                pack: 'center'
+            },
+            items: []
+        }, {
+            xtype: 'toolbar',
+    	    width: 480,
+            items: [{
+                text:'add',
+                tooltip:'add',
+                iconCls:'add',
+                handler : function() {
+                	self.show_setting_mapping_window({}, target.mapping, function(type,src,dest){
+                    	var m = {type:type,src:src,dest:dest};
+                    	var i = target.mapping.length;
+                    	target.mapping.push(m);
+                    	alert(''+type+','+src+',');
+                        grid.getStore().insert(i,m);
+                	});
+                }
+            },{
+                text:'update',
+                tooltip:'update',
+                iconCls:'add',
+                handler : function() {
+                	var index =  grid.getSelectionModel().getSelection()[0].index;
+                	if(index == undefined) {
+                		alert("コンフィグを開きなおしてください。");
+                	}else{
+                    	self.show_setting_mapping_window(target.mapping[index], target.mapping, function(type,src,dest){
+                    		grid.getStore().getAt(index).set('type', type);
+                    		grid.getStore().getAt(index).set('src', src);
+                    		grid.getStore().getAt(index).set('dest', dest);
+                    	});
+                	}
+                }
+            },{
+                text:'delete',
+                tooltip:'delete',
+                iconCls:'add',
+                handler : function() {
+                	var record = grid.getSelectionModel().getSelection()[0];
+                	var index = record.index;
+                	if(index == undefined) {
+                		alert("コンフィグを開きなおしてください。");
+                	}else{
+                		target.mapping.splice(index, 1);
+                    	grid.getStore().remove(record);
+                	}
+                }
+            },{
+		    	xtype: 'checkbox',
+		        fieldLabel: 'download',
+		        checked: target.downloadable,
+		        listeners:{
+		        	scope: this,
+		            'change': function(field, newValue, oldValue, opt){
+		            	target.downloadable = newValue;
+		            }
+		        }
+		       },{
+		        	xtype: 'checkbox',
+		            fieldLabel: 'runnable',
+		            checked: target.runnable,
+		            listeners:{
+		            	scope: this,
+		                'change': function(field, newValue, oldValue, opt){
+		                	target.runnable = newValue;
+		                }
+		            }
+		       },{
+		        	xtype: 'checkbox',
+		            fieldLabel: 'deploy',
+		            checked: target.deploy,
+		            listeners:{
+		            	scope: this,
+		                'change': function(field, newValue, oldValue, opt){
+		                	target.deploy = newValue;
+		                }
+		            }
+		       }]
+        }]
+     });
+	
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'target',
+	    height: 240,
+	    width: 480,
+	    layout: 'fit',
+	    items: [grid]
+	});
+	win.show();
 }
 
 TempConfigEditor.prototype.save = function() {
 	var self = this;
-	$.post('/tcsave', { id : g_metamodel_id, tc : g_config_of_template },
+	$.post('/tcsave', { id : g_metamodel_id, tc : JSON.stringify(g_wbconfig) },
 			function(data) {
 				if(data) {
-					self.editor.setTitle('TemplateConfig');
+					self.editor.setTitle('WBConfig');
 				}
 			}, "json");
 }
@@ -561,7 +366,7 @@ function WellcomeMessageEditor() {
 	var self = this;
 	var editor = Ext.create('Ext.panel.Panel',
 		{
-		  	   title: 'JSONEditor',
+		  	   title: 'welcomemessage',
 		  	   layout: {
 		  		   type: 'hbox',
 		  		   align: 'center'
@@ -577,7 +382,7 @@ function WellcomeMessageEditor() {
 		  	        			   change: {
 		  	        				   fn: function(field, newValue, oldValue, opt) {
 		  	        					 g_metaproject.welcome_message = newValue;
-		  	        						editor.setTitle('JSONEditor*')
+		  	        						editor.setTitle('welcomemessage*')
 		  	        				   }
 		  	        			   }
 		  	        		   }
@@ -592,7 +397,7 @@ WellcomeMessageEditor.prototype.save = function() {
 	var self = this;
 	saveAll(g_metamodel_id, function(data){
 		if(data) {
-			self.editor.setTitle('JSONEditor');
+			self.editor.setTitle('welcomemessage');
 		}
 	});
 }
