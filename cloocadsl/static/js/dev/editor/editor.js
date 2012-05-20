@@ -122,7 +122,6 @@ function create_menu() {
             text: 'プロジェクト',
             iconCls: 'add16',
             menu: [
-                   /*
                    {
                 	   id: 'generate',
                 	   text: 'generate',
@@ -133,7 +132,7 @@ function create_menu() {
                 	   text: 'download',
                 	   iconCls: 'add16',
                 	   handler : onProjItemClick
-                   },*/{
+                   },{
                 	   id: 'pviewer',
                 	   text: 'プロジェクト情報',
                 	   iconCls: 'add16',

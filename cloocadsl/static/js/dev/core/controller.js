@@ -11,6 +11,9 @@ function genbin(pid) {
 			function(data) {
 				if(data) {
 					console.log('url='+data);
+					setTimeout(function(){
+						window.open(JSON.parse(data).url);
+					}, 5000);
 				}else{
 					window.alert('error');
 				}
