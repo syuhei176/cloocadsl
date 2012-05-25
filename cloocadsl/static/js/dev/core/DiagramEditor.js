@@ -16,6 +16,7 @@ function DiagramEditor(name, key, diagram) {
 	this.selected = null;
 	this.dragMode = 0;
 	this.select_button = null;
+	this.copied_elem = null;
 	var self = this;
 	this.diagramController.on('updateProperty', function(p, newValue, parent){
 		if(parent.bound != undefined) calObjHeight(parent);
@@ -40,9 +41,19 @@ DiagramEditor.prototype.draw = function() {
 		self.canvas = $('#canvas_'+self.key);
 	}
 	self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: self.width,height: self.height, fromCenter: false});
-	for(var i=0;i < self.diagram.objects.length;i++) {
-		var obj_id = self.diagram.objects[i];
+	var tmp_objs = [];
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj_id = this.diagram.objects[i];
 		var obj = g_model.objects[obj_id];
+		if(obj == undefined) alert(obj_id);
+		tmp_objs.push(obj);
+	}
+	tmp_objs.sort(function(a,b) {return a.ofd.z-b.ofd.z;});
+	for(var i=0;i < tmp_objs.length;i++) {
+		var obj_id = tmp_objs[i].id;
+		var obj = tmp_objs[i];
+//		var obj_id = self.diagram.objects[i];
+//		var obj = g_model.objects[obj_id];
 		if(obj.ve.ver_type == 'delete') continue;
 		var col = '#000';
 		if(obj == self.selected) {
@@ -52,6 +63,7 @@ DiagramEditor.prototype.draw = function() {
 		if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
 			self.canvas.drawRect({
 				  strokeStyle: col, strokeWidth: 2,
+				  fillStyle: "#fff",
 				  x: obj.bound.x, y: obj.bound.y,
 				  width: obj.bound.width, height: obj.bound.height,
 				  fromCenter: false
@@ -121,6 +133,12 @@ DiagramEditor.prototype.draw = function() {
 				self.canvas.drawLine(graphic.option);
 				self.canvas.restoreCanvas();
 				self.canvas.restoreCanvas();
+			}else if(graphic.type == 'src') {
+				self.canvas.drawImage({
+					  source: graphic.src,
+					  x: obj.bound.x + obj.bound.width/2, y: obj.bound.y + obj.bound.height/2,
+					  width: obj.bound.width, height:obj.bound.height
+					});
 			}
 		}
 		/*
@@ -166,7 +184,7 @@ DiagramEditor.prototype.draw = function() {
 						});
 					h++;
 				}
-				if(meta_ele.properties.length-1 != l) {
+				if(meta_ele.properties.length-1 != l && (meta_ele.graphic == 'rect' || meta_ele.graphic == 'rounded')) {
 					self.canvas.drawLine({
 						  strokeStyle: "#000",
 						  strokeWidth: 2,
@@ -221,6 +239,12 @@ DiagramEditor.prototype.Initialize = function() {
 	        id: 'delete_point',
 	        text: 'ポイントを削除'
 	    },{
+	        id: 'copy',
+	        text: 'コピー'
+	    },{
+	        id: 'paste',
+	        text: 'ペースト'
+	    },{
 	        id: 'up_step',
 	        text: '一つ上へ'
 	    },{
@@ -231,16 +255,6 @@ DiagramEditor.prototype.Initialize = function() {
 	        text: '情報'
 	    }],
 	    listeners: {
-	        itemclick: function(item) {
-	            switch (item.id) {
-	                case 'delete_element':
-	                	self.deleteSelected();
-	                    break;
-	                case 'delete_point':
-	                	self.deletePoint();
-	                    break;
-	            }
-	        },
         click: function(menu, item) {
             switch (item.id) {
                 case 'delete_element':
@@ -248,6 +262,12 @@ DiagramEditor.prototype.Initialize = function() {
                     break;
                 case 'delete_point':
                 	self.deletePoint();
+                    break;
+                case 'copy':
+                	self.copyObject();
+                    break;
+                case 'paste':
+                	self.pasteObject(self.drag_start.x, self.drag_start.y);
                     break;
                 case 'up_step':
                 	self.up_step();
@@ -391,6 +411,37 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 		this.movePoint(this.selected, this.drag_start, this.drag_end);
 	}
 	this.dragMode = DiagramEditor.DRAG_NONE;
+}
+
+
+DiagramEditor.prototype.copyObject = function() {
+	var obj = this.selected;
+	if(obj.ofd == undefined) {
+		return;
+	}
+	this.copied_elem = obj;
+}
+
+DiagramEditor.prototype.pasteObject = function(x, y) {
+	if(this.copied_elem != null) {
+		var obj = this.diagramController.addObject(x, y, this.copied_elem.meta_id);
+		for(var i=0;i < obj.properties.length;i++) {
+			var src_plist = null;
+			for(var j=0;j < this.copied_elem.properties.length;j++) {
+				if(this.copied_elem.properties[j].meta_id == obj.properties[i].meta_id) {
+					src_plist = this.copied_elem.properties[j];
+					break;
+				}
+			}
+			var dest_plist = obj.properties[i];
+			while(dest_plist.children.length < src_plist.children.length) {
+				this.diagramController.addProperty(dest_plist, g_metamodel.metaproperties[src_plist.meta_id], '');
+			}
+			for(var j=0;j < src_plist.children.length;j++) {
+				this.diagramController.updateProperty(g_model.properties[dest_plist.children[j]], g_model.properties[src_plist.children[j]].value, obj);
+			}
+		}
+	}
 }
 
 DiagramEditor.prototype.deletePoint = function() {
