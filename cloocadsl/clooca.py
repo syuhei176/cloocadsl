@@ -34,6 +34,44 @@ def index():
         return render_template('index.html', loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
+@app.route('/reg_editor_license_view', methods=['GET'])
+def reg_editor_license_view():
+    return render_template('/register/reg_editor_license.html')
+
+@app.route('/reg_editor_license', methods=['POST'])
+def reg_editor_license():
+    return json.dumps(UserService.RegisterEditorLicense(request.form['username'], request.form['password'], request.form['email']))
+
+@app.route('/confirm/<key>', methods=['GET'])
+def confirm(key):
+    if 'user' in session:
+        if UserService.EnableEmail(session['user'], key):
+            return render_template('/register/confirm.html', param=True)
+        else:
+            return render_template('/register/confirm.html', param=False)
+    else:
+        return redirect(url_for('login_view'))
+
+@app.route('/mypage')
+def mypage():
+    if 'user' in session:
+        return render_template('mypage.html')
+    return redirect(url_for('login_view'))
+
+@app.route('/project_list', methods=['GET'])
+def project_list():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        myprojects = ProjectService.loadMyOwnProjectList(session['user'], connect)
+        connect.close()
+        return json.dumps(myprojects)
+    return 'false'
+
+
+@app.route('/price')
+def price():
+    return render_template('price.html')
+
 @app.route('/document')
 def document():
     return render_template('document.html')
@@ -41,7 +79,7 @@ def document():
 @app.route('/login', methods=['GET'])
 def login_view():
     if 'user' in session:
-        return redirect('/mygroups')
+        return redirect('/mypage')
     else:
         return render_template('login.html')
 

@@ -20,8 +20,8 @@ function TempConfigEditor() {
 	        { header: 'run', dataIndex: 'runnable', flex: 1 },
 	        { header: 'deploy', dataIndex: 'deploy', flex: 1 }
 	    ],
-	    height: 200,
-	    width: 300,
+		width: Ext.getCmp('centerpanel').getWidth() - 50,
+		height: Ext.getCmp('centerpanel').getHeight() - 200,
     	listeners : {
     		itemdblclick : {
     			fn : function(rmodel,record,item,index,event,options){
@@ -35,8 +35,8 @@ function TempConfigEditor() {
 	}
 	var grideditor = Ext.create('Ext.panel.Panel', {
 		  	   title: 'grid',
-		  	   width: Ext.getCmp('centerpanel').getWidth(),
-		  	   height: Ext.getCmp('centerpanel').getHeight(),
+		  	   width: Ext.getCmp('centerpanel').getWidth() - 50,
+		  	   height: Ext.getCmp('centerpanel').getHeight() - 50,
 		  	   layout: {
 		  		   type: 'vbox',
 		  		   align: 'center'
@@ -217,8 +217,8 @@ TempConfigEditor.prototype.show_setting_mappings_window = function(target) {
                     	var m = {type:type,src:src,dest:dest};
                     	var i = target.mapping.length;
                     	target.mapping.push(m);
-                    	alert(''+type+','+src+',');
                         grid.getStore().insert(i,m);
+                    	self.texteditor.setValue(JSON.stringify(g_wbconfig));
                 	});
                 }
             },{
@@ -247,8 +247,10 @@ TempConfigEditor.prototype.show_setting_mappings_window = function(target) {
                 	if(index == undefined) {
                 		alert("コンフィグを開きなおしてください。");
                 	}else{
+                    	alert(''+target.mapping[index].type+','+target.mapping[index].src+',');
                 		target.mapping.splice(index, 1);
                     	grid.getStore().remove(record);
+                    	self.texteditor.setValue(JSON.stringify(g_wbconfig));
                 	}
                 }
             },{
@@ -328,24 +330,7 @@ function TemplateEditor(template) {
 		  		   type: 'hbox',
 		  		   align: 'center'
 		  	   },
-		  	   items: [{
-		  		   html: '<textarea id="templatetextarea_'+template.name+'" style='+style+'>'+template.content+'</textarea>'}
-/*		  	           {
-		  	        	   xtype: 'textarea',
-		  	        	   autoScroll: true,
-		  	        		   width: Ext.getCmp('centerpanel').getWidth() - 40,
-		  	        		   height: Ext.getCmp('centerpanel').getHeight() - 40,
-		  	        		   value: template.content,
-		  	        		   listeners: {
-		  	        			   change: {
-		  	        				   fn: function(field, newValue, oldValue, opt) {
-		  	        					 template.content = newValue;
-		  	        					 self.panel.setTitle(template.name + '*');
-		  	        				   }
-		  	        			   }
-		  	        		   }
-		  	           }*/
-		  	           ],
+		  	   items: [{html: '<textarea id="templatetextarea_'+template.name+'" style='+style+'>'+template.content+'</textarea>'}],
 		  	 		closable: 'true'
 	});
 }
@@ -371,6 +356,7 @@ TemplateEditor.prototype.Initialize = function() {
 	var self = this;
 	var textarea = document.getElementById('templatetextarea_'+this.template.name);
 	textarea.parentNode.style.backgroundColor = '#EEC';
+	textarea.parentNode.style.color = '#000';
 	var myCodeMirror = CodeMirror.fromTextArea(textarea, {lineNumbers:true, onChange:function(editor, arg) {
 			 self.template.content = editor.getValue();
 				 self.panel.setTitle(self.template.name + '*');

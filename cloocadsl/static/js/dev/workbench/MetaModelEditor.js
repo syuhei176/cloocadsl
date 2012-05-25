@@ -1,3 +1,6 @@
+/*
+ * jsonエディタも付ける、json側がマスターになってる
+ */
 function MetaDiagramsEditor(metaobjects) {
 	var self = this;
 	var l_metaobjs = [];

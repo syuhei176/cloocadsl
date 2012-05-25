@@ -9,8 +9,70 @@ import config
 from flask import session
 import GroupService
 from util import Gmail
+from util import Util
 
 reg_username = re.compile('\w+')
+
+def RegisterEditorLicense(username, password, email):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    reg_result = Register(connect, username, password, email, 'free')
+    if reg_result['result']:
+        cur = connect.cursor()
+        d = datetime.datetime.today()
+        key = md5.new(d.strftime('%s')).hexdigest()
+        cur.execute('UPDATE UserInfo SET email_key=%s WHERE id=%s;', (key, reg_result['user_id']))
+        connect.commit()
+        from_addr = 'hiya@gmail.com'
+        to_addr = email
+        link = 'http://dsl.clooca.com/confirm/%s' % key
+        body = '''
+        %s thank you
+         please access %s
+        ''' % (username, link)
+        msg = Gmail.create_message(from_addr, to_addr, 'a', body)
+        Gmail.send_via_gmail(from_addr, to_addr, msg)
+        cur.close()
+        connect.close()
+        return True
+    connect.close()
+    return False
+
+def Register(connect, username, password, email, license_type):
+    if not reg_username.match(username):
+        return {'result': False, 'user_id': 0}
+    if len(password) < 5:
+        return {'result': False, 'user_id': 0}
+    cur = connect.cursor()
+    cur.execute('SELECT uname FROM UserInfo WHERE uname = %s;', (username,))
+    rows = cur.fetchall()
+    if len(rows) != 0:
+        cur.close()
+        return {'result': False, 'user_id': 0}
+    d = datetime.datetime.today()
+    cur.execute('INSERT INTO UserInfo (uname,passwd,register_date,email) VALUES(%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), Util.myencode(email), ))
+    user_id = cur.lastrowid
+    connect.commit()
+    cur.close()
+    return {'result': True, 'user_id': user_id}
+
+def EnableEmail(user, key):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT email_key FROM UserInfo WHERE id=%s;', (user['id']))
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        connect.close();
+        return False
+    if not rows[0][0] == key:
+        cur.close()
+        connect.close();
+        return False
+    num = cur.execute('UPDATE UserInfo SET email_is_available=%s WHERE id=%s;', (1, user['id']))
+    connect.commit()
+    cur.close()
+    connect.close()
+    return True
 
 def GetUserFromDB(username):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -70,16 +132,6 @@ def CreateAdminUser(email):
 '''
 def ConfirmEmail():
     pass
-
-def EnableEmail(user, email):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-    cur = connect.cursor()
-    num = cur.execute('UPDATE userinfo SET email=%s WHERE id=%s;', (email, user.id))
-    connect.commit()
-    cur.close()
-    connect.close()
-    return True
-#    return (num == 1)
 
 def Login(username, password):
     if not reg_username.match(username):

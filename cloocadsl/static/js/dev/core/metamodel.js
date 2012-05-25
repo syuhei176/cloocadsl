@@ -10,6 +10,7 @@ function MetaModel(id, name, metadiagram) {
 	this.metarelations = [];
 	this.metaproperties = [];
 	this.graphics = {};
+	this.tools = {};
 }
 
 function MetaDiagram(id, name) {
@@ -91,8 +92,17 @@ MetaProperty.FIXED_LIST = "fixed list";
 function GraphicInfo(type, option) {
 	this.type = type;
 	this.option = option;
+	this.src = null;
 }
 
 GraphicInfo.TYPE_LINES = 'lines';
 GraphicInfo.TYPE_POLYGON = 'polygon';
+GraphicInfo.TYPE_SRC = 'src';
 
+function ToolMapping() {
+	this.id = null;
+	this.parent = null;
+	this.metaobject_id = null;
+	this.icon_type = null;
+	this.icon = null;
+}

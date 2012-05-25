@@ -105,6 +105,7 @@ def LoadDiagramEntities():
         idmap[id].reverse()
         latest_ver = idmap[id][0]
         cur.execute('SELECT id,meta_id,version,model_id,ver_type,objects,relationships,properties FROM diagram WHERE id=%s AND model_id=%s AND version=%s;', (id, g_model_id, latest_ver, ))
+        #cur.execute('SELECT id,meta_id,version,model_id,ver_type,objects,relationships,properties FROM diagram WHERE id=%s AND model_id=%s AND version<=%s ORDER BY version DESC LIMIT 1;', (id, g_model_id, g_version, ))
         rows = cur.fetchall()
         ver_type = int(rows[0][4])
         if not ver_type == 2:
@@ -156,10 +157,11 @@ def LoadObjectEntities():
         idmap[str(rows[i][0])].append(rows[i][1])
     xml = ''
     for id in idmap.keys():
-        idmap[id].sort()
-        idmap[id].reverse()
-        latest_version = idmap[id][0]
-        cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties,w,h,z FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
+        #idmap[id].sort()
+        #idmap[id].reverse()
+        #latest_version = idmap[id][0]
+        #cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties,w,h,z FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
+        cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties,w,h,z FROM object WHERE model_id=%s AND id=%s AND version<=%s ORDER BY version DESC LIMIT 1;', (g_model_id, int(id), g_version, ))
         obj_rows = cur.fetchall()
         ver_type = int(obj_rows[0][6])
         if not ver_type == 2:
