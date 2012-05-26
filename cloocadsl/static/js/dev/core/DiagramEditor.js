@@ -56,8 +56,17 @@ DiagramEditor.prototype.draw = function() {
 //		var obj = g_model.objects[obj_id];
 		if(obj.ve.ver_type == 'delete') continue;
 		var col = '#000';
-		if(obj == self.selected) {
-			col = '#00f';
+		if(self.selected instanceof Array) {
+			for(var l=0;l < self.selected.length;l++) {
+				if(obj == self.selected[l]) {
+					col = '#00f';
+					break;
+				}
+			}
+		}else{
+			if(obj == self.selected) {
+				col = '#00f';
+			}
 		}
 		var meta_ele = g_metamodel.metaobjects[obj.meta_id];
 		if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
@@ -220,7 +229,13 @@ DiagramEditor.prototype.draw = function() {
 			  x1: self.drag_start.x, y1: self.drag_start.y,
 			  x2: self.drag_move.x, y2: self.drag_move.y
 			});
-
+	}else if(self.dragMode == DiagramEditor.DRAG_RANGE) {
+		self.canvas.drawRect({
+			  strokeStyle: "#00f", strokeWidth: 2,
+			  x: this.drag_start.x, y: this.drag_start.y,
+			  width: this.drag_move.x - this.drag_start.x, height: this.drag_move.y - this.drag_start.y,
+			  fromCenter: false
+		});
 	}
 }
 
@@ -351,22 +366,35 @@ DiagramEditor.DRAG_MOVE = 2;
 DiagramEditor.DRAG_POINT = 3;
 DiagramEditor.DRAG_RANGE = 4;
 DiagramEditor.DRAG_RESIZE = 5;
+DiagramEditor.DRAG_RANGE = 6;
 
 DiagramEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.x = x;
 	this.drag_move.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
-			this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+			if(this.selected instanceof Array) {
+				for(var i=0;i < this.selected.length;i++){
+					this.updateObject(this.selected[i],Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+				}
+			}else{
+				this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+			}
 			this.draw()
 		}
 	}else if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.draw()
 	}else if(this.dragMode == DiagramEditor.DRAG_RESIZE) {
-		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
-		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
-		if(this.selected.bound.width < 16) this.selected.bound.width = 16;
-		if(this.selected.bound.height < 16) this.selected.bound.height = 16;
+		if(this.selected instanceof Array) {
+			
+		}else{
+			this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
+			this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
+			if(this.selected.bound.width < 16) this.selected.bound.width = 16;
+			if(this.selected.bound.height < 16) this.selected.bound.height = 16;
+		}
+		this.draw();
+	}else if(this.dragMode == DiagramEditor.DRAG_RANGE){
 		this.draw();
 	}else{
 		
@@ -388,7 +416,7 @@ DiagramEditor.prototype.ActionDown = function(x, y) {
 		}else if(this.clickedge(x, y)) {
 //			this.dragMode = DiagramEditor.DRAG_POINT;
 		}else{
-			this.dragMode = DiagramEditor.DRAG_NONE;
+			this.dragMode = DiagramEditor.DRAG_RANGE;
 			this.selected = null;
 		}
 	}else if(this.tool.classname == 'MetaObject'){
@@ -407,23 +435,39 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
 		this.select_button.toggle(true);
-	} else if(this.dragMode == DiagramEditor.DRAG_POINT) {
-		this.movePoint(this.selected, this.drag_start, this.drag_end);
+	}else if(this.dragMode == DiagramEditor.DRAG_POINT) {
+		if(this.selected instanceof Array == false) {
+			this.movePoint(this.selected, this.drag_start, this.drag_end);
+		}
+	}else if(this.dragMode == DiagramEditor.DRAG_RANGE) {
+		this.selectRange(this.drag_start, this.drag_end);
 	}
 	this.dragMode = DiagramEditor.DRAG_NONE;
 }
 
 
 DiagramEditor.prototype.copyObject = function() {
-	var obj = this.selected;
-	if(obj.ofd == undefined) {
-		return;
+	if(this.selected instanceof Array) {
+		this.copied_elem = [];
+		for(var i=0;i < this.selected.length;i++) {
+			var obj = this.selected[i]
+			if(obj.ofd == undefined) {
+				return;
+			}
+			this.copied_elem.push(obj);
+		}
+	}else{
+		this.copied_elem = null;
+		var obj = this.selected;
+		if(obj.ofd == undefined) {
+			return;
+		}
+		this.copied_elem = obj;
 	}
-	this.copied_elem = obj;
 }
 
 DiagramEditor.prototype.pasteObject = function(x, y) {
-	if(this.copied_elem != null) {
+	if(this.copied_elem != null && this.copied_elem instanceof Array == false) {
 		var obj = this.diagramController.addObject(x, y, this.copied_elem.meta_id);
 		for(var i=0;i < obj.properties.length;i++) {
 			var src_plist = null;
@@ -445,9 +489,13 @@ DiagramEditor.prototype.pasteObject = function(x, y) {
 }
 
 DiagramEditor.prototype.deletePoint = function() {
-	var rel = this.selected;
-	if(rel == null) return;
-	rel.points.length = 0;
+	if(this.selected instanceof Array) {
+		
+	}else{
+		var rel = this.selected;
+		if(rel == null) return;
+		rel.points.length = 0;
+	}
 }
 
 DiagramEditor.prototype.movePoint = function(rel, s, d) {
@@ -465,6 +513,39 @@ DiagramEditor.prototype.movePoint = function(rel, s, d) {
 				rel.points.push(new Point2D(d.x, d.y));
 			}
 		}
+	}
+}
+
+DiagramEditor.prototype.selectRange = function(s, e) {
+	var rect;
+	var x, y, w, h;
+	if(s.x > e.x) {
+		x = e.x;
+		w = s.x - e.x;
+	}else{
+		x = s.x;
+		w = e.x - s.x;
+	}
+	if(s.y > e.y) {
+		y = e.y;
+		h = s.y - e.y;
+	}else{
+		y = s.y;
+		h = e.y - s.y;
+	}
+	var rect = new Rectangle2D(x, y, w, h);
+	this.selected = [];
+	
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj_id = this.diagram.objects[i];
+		var obj = g_model.objects[obj_id];
+		if(obj == undefined) alert(obj_id);
+		if(Rectangle2D.contains(rect, new Point2D(obj.bound.x, obj.bound.y))) {
+			this.selected.push(obj);
+		}
+	}
+	if(this.selected.length == 0) {
+		this.selected = null;
 	}
 }
 
@@ -487,9 +568,13 @@ DiagramEditor.prototype.clicknode = function(x, y) {
 				return false;
 			}
 		} 
-		this.selected = obj;
-		this.fireSelectObject(this.selected);
-		return true;
+		if(this.selected instanceof Array) {
+			return true;
+		}else{
+			this.selected = obj;
+			this.fireSelectObject(this.selected);
+			return true;
+		}
 	}
 	return false;
 }
