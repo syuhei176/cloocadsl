@@ -119,6 +119,11 @@ function create_menu() {
                     	   iconCls: 'add16',
                     	   handler : onItemClick
                        }]
+                   },{
+                	   id: 'canvas_size',
+                	   text: 'キャンバスサイズ変更',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
                    }
                    ],
         	handler : onItemClick
@@ -252,6 +257,8 @@ function onItemClick(item){
 		current_editor.deleteSelected();
 	}else if(item.id == 'deletePoints') {
 		current_editor.deletePoint();
+	}else if(item.id == 'canvas_size') {
+		change_canvas_size();
 	}else{
 		
 	}
@@ -746,4 +753,41 @@ function change_diagram_name_view(diagram) {
         	createModelExplorer();
 		 }
 	 },null,false,'');
+}
+
+function change_canvas_size() {
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'キャンバスサイズ変更',
+	    height: 240,
+	    width: 300,
+	    layout: 'vbox',
+	    items: [{
+	        xtype: 'numberfield',
+//	        anchor: '100%',
+	        name: 'bottles',
+	        fieldLabel: 'width',
+	        value: current_editor.width,
+	        maxValue: 2000,
+	        minValue: 500,
+	        listeners: {
+	            change: function(field, value) {
+	            	current_editor.changeCanvasWidth(Number(value));
+	            }
+	        }
+	     },{
+	         xtype: 'numberfield',
+//	         anchor: '100%',
+	         name: 'bottles',
+	         fieldLabel: 'height',
+	         value: current_editor.height,
+	         maxValue: 2000,
+	         minValue: 500,
+		        listeners: {
+		            change: function(field, value) {
+		            	current_editor.changeCanvasHeight(Number(value));
+		            }
+		        }
+	     }]
+	     });
+	win.show();
 }

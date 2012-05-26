@@ -25,14 +25,48 @@ function DiagramEditor(name, key, diagram) {
 	
 	this.width = 1000;
 	this.height = 1000;
-	this.panel = {
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj_id = this.diagram.objects[i];
+		if(this.width < g_model.objects[obj_id].bound.x + g_model.objects[obj_id].bound.width + 50) {
+			this.width = g_model.objects[obj_id].bound.x + g_model.objects[obj_id].bound.width + 50;
+		}
+		if(this.height < g_model.objects[obj_id].bound.y + g_model.objects[obj_id].bound.height + 50) {
+			this.height = g_model.objects[obj_id].bound.y + g_model.objects[obj_id].bound.height + 50;
+		}
+	}
+	console.log('width=' + this.width + ',height=' + this.height);
+	this.panel = Ext.create('Ext.panel.Panel', {
 			id: 'de_'+this.key,
 			title: name,
 			autoScroll: true,
 			html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
-			closable: 'true',
-		};
+			closable: 'true'
+		});
 	this.canvas = $('#canvas_'+this.key);
+}
+
+DiagramEditor.prototype.changeCanvasSize = function(w, h) {
+	this.width = w;
+	this.height = h;
+	this.panel = Ext.create('Ext.panel.Panel', {
+		id: 'de_'+this.key,
+		title: name,
+		autoScroll: true,
+		html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
+		closable: 'true'
+	});
+}
+
+DiagramEditor.prototype.changeCanvasWidth = function(w) {
+	this.width = Number(w);
+	var a8 = document.getElementById('canvas_'+this.key);
+	a8.width = this.width;
+}
+
+DiagramEditor.prototype.changeCanvasHeight = function(h) {
+	this.height = Number(h);
+	var a8 = document.getElementById('canvas_'+this.key);
+	a8.width = this.height;
 }
 
 DiagramEditor.prototype.draw = function() {
@@ -407,6 +441,12 @@ DiagramEditor.prototype.updateObject = function(obj, x, y) {
 	obj.bound.x += x;
 	obj.bound.y += y;
 	VersionElement.update(obj.ve);
+	if(this.width < obj.bound.x + obj.bound.width + 32) {
+		this.changeCanvasWidth(obj.bound.x + obj.bound.width + 32);
+	}
+	if(this.height < obj.bound.y + obj.bound.height + 32) {
+		this.changeCanvasHeight(obj.bound.y + obj.bound.height + 32);
+	}
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
