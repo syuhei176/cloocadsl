@@ -23,8 +23,8 @@ function DiagramEditor(name, key, diagram) {
 		self.draw();
 	});
 	
-	this.width = 1000;
-	this.height = 1000;
+	this.width = 500;
+	this.height = 500;
 	for(var i=0;i < this.diagram.objects.length;i++) {
 		var obj_id = this.diagram.objects[i];
 		if(this.width < g_model.objects[obj_id].bound.x + g_model.objects[obj_id].bound.width + 50) {
@@ -580,8 +580,11 @@ DiagramEditor.prototype.selectRange = function(s, e) {
 		var obj_id = this.diagram.objects[i];
 		var obj = g_model.objects[obj_id];
 		if(obj == undefined) alert(obj_id);
+		if(obj.ve.ver_type == 'delete') continue;
 		if(Rectangle2D.contains(rect, new Point2D(obj.bound.x, obj.bound.y))) {
-			this.selected.push(obj);
+			if(Rectangle2D.contains(rect, new Point2D(obj.bound.x + obj.bound.width, obj.bound.y + obj.bound.height))) {
+				this.selected.push(obj);
+			}
 		}
 	}
 	if(this.selected.length == 0) {
@@ -590,33 +593,41 @@ DiagramEditor.prototype.selectRange = function(s, e) {
 }
 
 DiagramEditor.prototype.clicknode = function(x, y) {
-	var obj = this.diagramController.findNode(new Point2D(x, y));
-	if(obj != null) {
-		var rel = null;
-		if(this.clickedge(x, y)) {
-			rel = this.selected;
-			this.selected = null;
-		}
-		if(obj == this.selected) {
-			if(Rectangle2D.contains(new Rectangle2D(obj.bound.x+obj.bound.width-12, obj.bound.y+obj.bound.height-12, 12, 12), new Point2D(x, y))) {
-				this.dragMode = DiagramEditor.DRAG_RESIZE;
+	if(this.selected instanceof Array) {
+		var obj = this.diagramController.findNode(new Point2D(x, y));
+		if(obj != null) {
+			for(var i=0;i < this.selected.length;i++) {
+				if(obj.id == this.selected[i].id) {
+					return true;
+				}
 			}
 		}
-		if(obj.ve.ver_type == "delete") return false;
-		if(rel != null) {
-			if(obj.ofd.z < (g_model.objects[rel.src].ofd.z + g_model.objects[rel.dest].ofd.z) / 2) {
-				return false;
+		return false;
+	}else{
+		var obj = this.diagramController.findNode(new Point2D(x, y));
+		if(obj != null) {
+			var rel = null;
+			if(this.clickedge(x, y)) {
+				rel = this.selected;
+				this.selected = null;
 			}
-		} 
-		if(this.selected instanceof Array) {
-			return true;
-		}else{
+			if(obj == this.selected) {
+				if(Rectangle2D.contains(new Rectangle2D(obj.bound.x+obj.bound.width-12, obj.bound.y+obj.bound.height-12, 12, 12), new Point2D(x, y))) {
+					this.dragMode = DiagramEditor.DRAG_RESIZE;
+				}
+			}
+			if(obj.ve.ver_type == "delete") return false;
+			if(rel != null) {
+				if(obj.ofd.z < (g_model.objects[rel.src].ofd.z + g_model.objects[rel.dest].ofd.z) / 2) {
+					return false;
+				}
+			} 
 			this.selected = obj;
 			this.fireSelectObject(this.selected);
 			return true;
 		}
+		return false;
 	}
-	return false;
 }
 
 DiagramEditor.prototype.clickedge = function(x, y) {
