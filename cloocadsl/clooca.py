@@ -27,6 +27,9 @@ from shinshu import compile_server
 
 app = Flask(__name__)
 
+"""
+for public
+"""
 @app.route('/')
 @app.route('/index')
 def index():
@@ -34,14 +37,37 @@ def index():
         return render_template('index.html', loggedin = True, username = session['user']['uname'])
     return render_template('index.html', loggedin = False, username = '')
 
+"""
+for public
+"""
+@app.route('/price')
+def price():
+    return render_template('price.html')
+
+"""
+for public
+"""
+@app.route('/document')
+def document():
+    return render_template('document.html')
+
+"""
+for registration
+"""
 @app.route('/reg_editor_license_view', methods=['GET'])
 def reg_editor_license_view():
     return render_template('/register/reg_editor_license.html')
 
+"""
+for registration
+"""
 @app.route('/reg_editor_license', methods=['POST'])
 def reg_editor_license():
     return json.dumps(UserService.RegisterEditorLicense(request.form['username'], request.form['password'], request.form['email']))
 
+"""
+for registration
+"""
 @app.route('/confirm/<key>', methods=['GET'])
 def confirm(key):
     if 'user' in session:
@@ -52,29 +78,68 @@ def confirm(key):
     else:
         return redirect(url_for('login_view'))
 
+"""
+for editor license
+for wb license
+for group license
+"""
 @app.route('/mypage')
 def mypage():
     if 'user' in session:
-        return render_template('mypage.html')
+        if session['user']['license_type'] == 'free':
+            return render_template('mypage_editor.html')
+        if session['user']['license_type'] == 'wb':
+            return render_template('mypage_wb.html')
+        if session['user']['license_type'] == 'group':
+            return render_template('mypage_group.html')
     return redirect(url_for('login_view'))
 
+"""
+for editor license
+for wb license
+"""
 @app.route('/project_list', methods=['GET'])
 def project_list():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         myprojects = ProjectService.loadMyOwnProjectList(session['user'], connect)
+        mytools = MetaModelService.loadMyAllMetaModelList(session['user'], connect)
         connect.close()
+        for p in myprojects:
+            for t in mytools:
+                if p['meta_id'] == t['id']:
+                    p['tool_id'] = t['id']
+                    p['tool_name'] = t['name']
         return json.dumps(myprojects)
     return 'false'
 
+"""
+for editor license
+for wb license
+"""
+@app.route('/mytools', methods=['GET','POST'])
+def mytools():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        mydevtools = MetaModelService.loadMyAllMetaModelList(session['user'], connect)
+        mytools = MetaModelService.loadMyTools(session['user'], connect)
+        connect.close()
+        return json.dumps(reduce(lambda a,b: a+b, [mydevtools,mytools],[]))
+    return 'false'
 
-@app.route('/price')
-def price():
-    return render_template('price.html')
+"""
+for editor license
+for wb license
+@param tool_id: 
+"""
+@app.route('/buy-tool', methods=['POST'])
+def buy_tool():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        connect.close()
+        return json.dumps()
+    return 'false'
 
-@app.route('/document')
-def document():
-    return render_template('document.html')
 
 @app.route('/login', methods=['GET'])
 def login_view():

@@ -147,6 +147,8 @@ def loadMyOwnProjectList(user, connect):
         project['id'] = rows[i][0]
         project['name'] = rows[i][1]
         project['meta_id'] = rows[i][2]
+#        project['tool_id'] = rows[i][2]
+#        project['tool_name'] = rows[i][2]
         projects.append(project)
     return projects
 

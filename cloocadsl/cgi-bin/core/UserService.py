@@ -77,7 +77,7 @@ def EnableEmail(user, key):
 def GetUserFromDB(username):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,uname,passwd,role FROM UserInfo WHERE uname = %s;', username)
+    cur.execute('SELECT id,uname,passwd,role,license_type FROM UserInfo WHERE uname = %s;', username)
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
@@ -88,6 +88,7 @@ def GetUserFromDB(username):
     user['uname'] = rows[0][1]
     user['passwd'] = rows[0][2]
     user['role'] = rows[0][3]
+    user['license_type'] = rows[0][4]
     cur.close()
     connect.close()
     return user

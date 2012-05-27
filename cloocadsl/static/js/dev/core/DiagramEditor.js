@@ -23,16 +23,50 @@ function DiagramEditor(name, key, diagram) {
 		self.draw();
 	});
 	
-	this.width = 1000;
-	this.height = 1000;
-	this.panel = {
+	this.width = 500;
+	this.height = 500;
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj_id = this.diagram.objects[i];
+		if(this.width < g_model.objects[obj_id].bound.x + g_model.objects[obj_id].bound.width + 50) {
+			this.width = g_model.objects[obj_id].bound.x + g_model.objects[obj_id].bound.width + 50;
+		}
+		if(this.height < g_model.objects[obj_id].bound.y + g_model.objects[obj_id].bound.height + 50) {
+			this.height = g_model.objects[obj_id].bound.y + g_model.objects[obj_id].bound.height + 50;
+		}
+	}
+	console.log('width=' + this.width + ',height=' + this.height);
+	this.panel = Ext.create('Ext.panel.Panel', {
 			id: 'de_'+this.key,
 			title: name,
 			autoScroll: true,
 			html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
-			closable: 'true',
-		};
+			closable: 'true'
+		});
 	this.canvas = $('#canvas_'+this.key);
+}
+
+DiagramEditor.prototype.changeCanvasSize = function(w, h) {
+	this.width = w;
+	this.height = h;
+	this.panel = Ext.create('Ext.panel.Panel', {
+		id: 'de_'+this.key,
+		title: name,
+		autoScroll: true,
+		html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
+		closable: 'true'
+	});
+}
+
+DiagramEditor.prototype.changeCanvasWidth = function(w) {
+	this.width = Number(w);
+	var a8 = document.getElementById('canvas_'+this.key);
+	a8.width = this.width;
+}
+
+DiagramEditor.prototype.changeCanvasHeight = function(h) {
+	this.height = Number(h);
+	var a8 = document.getElementById('canvas_'+this.key);
+	a8.width = this.height;
 }
 
 DiagramEditor.prototype.draw = function() {
@@ -52,148 +86,7 @@ DiagramEditor.prototype.draw = function() {
 	for(var i=0;i < tmp_objs.length;i++) {
 		var obj_id = tmp_objs[i].id;
 		var obj = tmp_objs[i];
-//		var obj_id = self.diagram.objects[i];
-//		var obj = g_model.objects[obj_id];
-		if(obj.ve.ver_type == 'delete') continue;
-		var col = '#000';
-		if(obj == self.selected) {
-			col = '#00f';
-		}
-		var meta_ele = g_metamodel.metaobjects[obj.meta_id];
-		if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
-			self.canvas.drawRect({
-				  strokeStyle: col, strokeWidth: 2,
-				  fillStyle: "#fff",
-				  x: obj.bound.x, y: obj.bound.y,
-				  width: obj.bound.width, height: obj.bound.height,
-				  fromCenter: false
-			});
-		}else if(meta_ele.graphic == 'rounded') {
-			self.canvas.drawRect({
-				  strokeStyle: col, strokeWidth: 2,
-				  x: obj.bound.x, y: obj.bound.y,
-				  width: obj.bound.width, height: obj.bound.height,
-				  fromCenter: false,
-				  cornerRadius: 5
-			});
-		}else if(meta_ele.graphic == 'circle') {
-			$("canvas").drawArc({
-				  strokeStyle: col, strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-		}else if(meta_ele.graphic == 'fillcircle') {
-			$("canvas").drawArc({
-				  fillStyle: col, strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-		}else if(meta_ele.graphic == 'endcircle') {
-			$("canvas").drawArc({
-				  strokeStyle: col, strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-			$("canvas").drawArc({
-				  fillStyle: "#000", strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2 - 5,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-		}else{
-			var graphic = g_metamodel['graphics'][meta_ele.graphic];
-			graphic.option.col = col;
-			graphic.option.strokeStyle = col;
-			if(graphic.type == 'polygon') {
-				self.canvas.translateCanvas({
-					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
-					})
-				self.canvas.scaleCanvas({
-					x:0, y:0,
-					scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
-					})
-				self.canvas.drawPolygon(graphic.option);
-				self.canvas.restoreCanvas();
-				self.canvas.restoreCanvas();
-			}else if(graphic.type == 'lines') {
-				self.canvas.translateCanvas({
-					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				});
-				self.canvas.scaleCanvas({
-					x:0, y:0,
-					scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
-					});
-				self.canvas.drawLine(graphic.option);
-				self.canvas.restoreCanvas();
-				self.canvas.restoreCanvas();
-			}else if(graphic.type == 'src') {
-				self.canvas.drawImage({
-					  source: graphic.src,
-					  x: obj.bound.x + obj.bound.width/2, y: obj.bound.y + obj.bound.height/2,
-					  width: obj.bound.width, height:obj.bound.height
-					});
-			}
-		}
-		/*
-		 * for resizable object
-		 */
-		if(meta_ele.resizable == true && obj == self.selected) {
-			self.canvas.drawRect({
-				  fillStyle: "#00f", strokeWidth: 2,
-				  x: obj.bound.x+obj.bound.width-12, y: obj.bound.y+obj.bound.height-12,
-				  width: 12, height: 12,
-				  fromCenter: false
-			});
-		}
-
-		var h = 0;
-		for(var l=0;l < meta_ele.properties.length;l++) {
-			var prop = null;
-			for(var j=0;j<obj.properties.length;j++) {
-				if(obj.properties[j].meta_id == meta_ele.properties[l]) {
-					prop = obj.properties[j];
-				}
-			}
-			if(prop != null) {
-				for(var k=0;k < prop.children.length;k++) {
-					var p = g_model.properties[prop.children[k]]
-					if(p.ve.ver_type == 'delete') continue;
-					var disp_text = p.value;
-					var meta_prop = g_metamodel.metaproperties[prop.meta_id];
-					if(meta_prop.widget == MetaProperty.FIXED_LIST) {
-						for(var index=0;index < meta_prop.exfield.length;index++) {
-							if(p.value == meta_prop.exfield[index].value) {
-								disp_text = meta_prop.exfield[index].disp;
-							}
-						}
-					}
-					self.canvas.drawText({
-						  fillStyle: "#000",
-						  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
-						  text: disp_text,
-						  align: "center",
-						  baseline: "middle",
-						  font: "16px 'ＭＳ ゴシック'"
-						});
-					h++;
-				}
-				if(meta_ele.properties.length-1 != l && (meta_ele.graphic == 'rect' || meta_ele.graphic == 'rounded')) {
-					self.canvas.drawLine({
-						  strokeStyle: "#000",
-						  strokeWidth: 2,
-						  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
-						  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
-						});
-				}
-			}
-		}
+		this.draw_object(obj);
 	}
 	for(var i=0;i < self.diagram.relationships.length;i++) {
 		var rel_id = self.diagram.relationships[i];
@@ -220,7 +113,13 @@ DiagramEditor.prototype.draw = function() {
 			  x1: self.drag_start.x, y1: self.drag_start.y,
 			  x2: self.drag_move.x, y2: self.drag_move.y
 			});
-
+	}else if(self.dragMode == DiagramEditor.DRAG_RANGE) {
+		self.canvas.drawRect({
+			  strokeStyle: "#00f", strokeWidth: 2,
+			  x: this.drag_start.x, y: this.drag_start.y,
+			  width: this.drag_move.x - this.drag_start.x, height: this.drag_move.y - this.drag_start.y,
+			  fromCenter: false
+		});
 	}
 }
 
@@ -351,22 +250,35 @@ DiagramEditor.DRAG_MOVE = 2;
 DiagramEditor.DRAG_POINT = 3;
 DiagramEditor.DRAG_RANGE = 4;
 DiagramEditor.DRAG_RESIZE = 5;
+DiagramEditor.DRAG_RANGE = 6;
 
 DiagramEditor.prototype.ActionMove = function(x, y) {
 	this.drag_move.x = x;
 	this.drag_move.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
 		if(this.selected != null) {
-			this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+			if(this.selected instanceof Array) {
+				for(var i=0;i < this.selected.length;i++){
+					this.updateObject(this.selected[i],Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+				}
+			}else{
+				this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+			}
 			this.draw()
 		}
 	}else if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.draw()
 	}else if(this.dragMode == DiagramEditor.DRAG_RESIZE) {
-		this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
-		this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
-		if(this.selected.bound.width < 16) this.selected.bound.width = 16;
-		if(this.selected.bound.height < 16) this.selected.bound.height = 16;
+		if(this.selected instanceof Array) {
+			
+		}else{
+			this.selected.bound.width = this.drag_move.x - this.selected.bound.x;
+			this.selected.bound.height = this.drag_move.y - this.selected.bound.y;
+			if(this.selected.bound.width < 16) this.selected.bound.width = 16;
+			if(this.selected.bound.height < 16) this.selected.bound.height = 16;
+		}
+		this.draw();
+	}else if(this.dragMode == DiagramEditor.DRAG_RANGE){
 		this.draw();
 	}else{
 		
@@ -379,6 +291,12 @@ DiagramEditor.prototype.updateObject = function(obj, x, y) {
 	obj.bound.x += x;
 	obj.bound.y += y;
 	VersionElement.update(obj.ve);
+	if(this.width < obj.bound.x + obj.bound.width + 32) {
+		this.changeCanvasWidth(obj.bound.x + obj.bound.width + 32);
+	}
+	if(this.height < obj.bound.y + obj.bound.height + 32) {
+		this.changeCanvasHeight(obj.bound.y + obj.bound.height + 32);
+	}
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
@@ -388,7 +306,7 @@ DiagramEditor.prototype.ActionDown = function(x, y) {
 		}else if(this.clickedge(x, y)) {
 //			this.dragMode = DiagramEditor.DRAG_POINT;
 		}else{
-			this.dragMode = DiagramEditor.DRAG_NONE;
+			this.dragMode = DiagramEditor.DRAG_RANGE;
 			this.selected = null;
 		}
 	}else if(this.tool.classname == 'MetaObject'){
@@ -407,23 +325,39 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
 		this.select_button.toggle(true);
-	} else if(this.dragMode == DiagramEditor.DRAG_POINT) {
-		this.movePoint(this.selected, this.drag_start, this.drag_end);
+	}else if(this.dragMode == DiagramEditor.DRAG_POINT) {
+		if(this.selected instanceof Array == false) {
+			this.movePoint(this.selected, this.drag_start, this.drag_end);
+		}
+	}else if(this.dragMode == DiagramEditor.DRAG_RANGE) {
+		this.selectRange(this.drag_start, this.drag_end);
 	}
 	this.dragMode = DiagramEditor.DRAG_NONE;
 }
 
 
 DiagramEditor.prototype.copyObject = function() {
-	var obj = this.selected;
-	if(obj.ofd == undefined) {
-		return;
+	if(this.selected instanceof Array) {
+		this.copied_elem = [];
+		for(var i=0;i < this.selected.length;i++) {
+			var obj = this.selected[i]
+			if(obj.ofd == undefined) {
+				return;
+			}
+			this.copied_elem.push(obj);
+		}
+	}else{
+		this.copied_elem = null;
+		var obj = this.selected;
+		if(obj.ofd == undefined) {
+			return;
+		}
+		this.copied_elem = obj;
 	}
-	this.copied_elem = obj;
 }
 
 DiagramEditor.prototype.pasteObject = function(x, y) {
-	if(this.copied_elem != null) {
+	if(this.copied_elem != null && this.copied_elem instanceof Array == false) {
 		var obj = this.diagramController.addObject(x, y, this.copied_elem.meta_id);
 		for(var i=0;i < obj.properties.length;i++) {
 			var src_plist = null;
@@ -445,9 +379,13 @@ DiagramEditor.prototype.pasteObject = function(x, y) {
 }
 
 DiagramEditor.prototype.deletePoint = function() {
-	var rel = this.selected;
-	if(rel == null) return;
-	rel.points.length = 0;
+	if(this.selected instanceof Array) {
+		
+	}else{
+		var rel = this.selected;
+		if(rel == null) return;
+		rel.points.length = 0;
+	}
 }
 
 DiagramEditor.prototype.movePoint = function(rel, s, d) {
@@ -468,30 +406,78 @@ DiagramEditor.prototype.movePoint = function(rel, s, d) {
 	}
 }
 
-DiagramEditor.prototype.clicknode = function(x, y) {
-	var obj = this.diagramController.findNode(new Point2D(x, y));
-	if(obj != null) {
-		var rel = null;
-		if(this.clickedge(x, y)) {
-			rel = this.selected;
-			this.selected = null;
-		}
-		if(obj == this.selected) {
-			if(Rectangle2D.contains(new Rectangle2D(obj.bound.x+obj.bound.width-12, obj.bound.y+obj.bound.height-12, 12, 12), new Point2D(x, y))) {
-				this.dragMode = DiagramEditor.DRAG_RESIZE;
-			}
-		}
-		if(obj.ve.ver_type == "delete") return false;
-		if(rel != null) {
-			if(obj.ofd.z < (g_model.objects[rel.src].ofd.z + g_model.objects[rel.dest].ofd.z) / 2) {
-				return false;
-			}
-		} 
-		this.selected = obj;
-		this.fireSelectObject(this.selected);
-		return true;
+DiagramEditor.prototype.selectRange = function(s, e) {
+	var rect;
+	var x, y, w, h;
+	if(s.x > e.x) {
+		x = e.x;
+		w = s.x - e.x;
+	}else{
+		x = s.x;
+		w = e.x - s.x;
 	}
-	return false;
+	if(s.y > e.y) {
+		y = e.y;
+		h = s.y - e.y;
+	}else{
+		y = s.y;
+		h = e.y - s.y;
+	}
+	var rect = new Rectangle2D(x, y, w, h);
+	this.selected = [];
+	
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var obj_id = this.diagram.objects[i];
+		var obj = g_model.objects[obj_id];
+		if(obj == undefined) alert(obj_id);
+		if(obj.ve.ver_type == 'delete') continue;
+		if(Rectangle2D.contains(rect, new Point2D(obj.bound.x, obj.bound.y))) {
+			if(Rectangle2D.contains(rect, new Point2D(obj.bound.x + obj.bound.width, obj.bound.y + obj.bound.height))) {
+				this.selected.push(obj);
+			}
+		}
+	}
+	if(this.selected.length == 0) {
+		this.selected = null;
+	}
+}
+
+DiagramEditor.prototype.clicknode = function(x, y) {
+	if(this.selected instanceof Array) {
+		var obj = this.diagramController.findNode(new Point2D(x, y));
+		if(obj != null) {
+			for(var i=0;i < this.selected.length;i++) {
+				if(obj.id == this.selected[i].id) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}else{
+		var obj = this.diagramController.findNode(new Point2D(x, y));
+		if(obj != null) {
+			var rel = null;
+			if(this.clickedge(x, y)) {
+				rel = this.selected;
+				this.selected = null;
+			}
+			if(obj == this.selected) {
+				if(Rectangle2D.contains(new Rectangle2D(obj.bound.x+obj.bound.width-12, obj.bound.y+obj.bound.height-12, 12, 12), new Point2D(x, y))) {
+					this.dragMode = DiagramEditor.DRAG_RESIZE;
+				}
+			}
+			if(obj.ve.ver_type == "delete") return false;
+			if(rel != null) {
+				if(obj.ofd.z < (g_model.objects[rel.src].ofd.z + g_model.objects[rel.dest].ofd.z) / 2) {
+					return false;
+				}
+			} 
+			this.selected = obj;
+			this.fireSelectObject(this.selected);
+			return true;
+		}
+		return false;
+	}
 }
 
 DiagramEditor.prototype.clickedge = function(x, y) {
@@ -608,7 +594,7 @@ DiagramEditor.prototype.info = function() {
 		str += '<br>id='+this.selected.id;
 		str += '<br>pid='+Math.floor(this.selected.id / 10000);
 		if(this.selected.ofd != undefined) str += '<br>z='+this.selected.ofd.z;
-		console.log(str);
+//		console.log(str);
 //		Ext.MessageBox.alert(str);
 		Ext.getCmp('element-infomation').removeAll();
 		Ext.getCmp('element-infomation').add({
@@ -992,6 +978,169 @@ function draw_dot_line(canvas, col, p1, p2) {
 			  x1: x, y1: y,
 			  x2: xx, y2: yy
 			});
+	}
+}
+
+DiagramEditor.prototype.draw_object = function(obj) {
+	if(obj.ve.ver_type == 'delete') return;
+	var col = '#000';
+	var obj_is_selected = false;
+	if(this.selected instanceof Array) {
+		for(var l=0;l < this.selected.length;l++) {
+			if(obj == this.selected[l]) {
+				col = '#00f';
+				obj_is_selected = true;
+				break;
+			}
+		}
+	}else{
+		if(obj == this.selected) {
+			col = '#00f';
+			obj_is_selected = true;
+		}
+	}
+	var meta_ele = g_metamodel.metaobjects[obj.meta_id];
+	if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  fillStyle: "#fff",
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false
+		});
+	}else if(meta_ele.graphic == 'rounded') {
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false,
+			  cornerRadius: 5
+		});
+	}else if(meta_ele.graphic == 'circle') {
+		$("canvas").drawArc({
+			  strokeStyle: '#000', strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+	}else if(meta_ele.graphic == 'fillcircle') {
+		$("canvas").drawArc({
+			  fillStyle: '#000', strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+	}else if(meta_ele.graphic == 'endcircle') {
+		$("canvas").drawArc({
+			  strokeStyle: col, strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+		$("canvas").drawArc({
+			  fillStyle: "#000", strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2 - 5,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+	}else{
+		var graphic = g_metamodel['graphics'][meta_ele.graphic];
+		graphic.option.col = '#000';
+		graphic.option.strokeStyle = '#000';
+		if(graphic.type == 'polygon') {
+			this.canvas.translateCanvas({
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
+				})
+			this.canvas.scaleCanvas({
+				x:0, y:0,
+				scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
+				})
+			this.canvas.drawPolygon(graphic.option);
+			this.canvas.restoreCanvas();
+			this.canvas.restoreCanvas();
+		}else if(graphic.type == 'lines') {
+			this.canvas.translateCanvas({
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			});
+			this.canvas.scaleCanvas({
+				x:0, y:0,
+				scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
+				});
+			this.canvas.drawLine(graphic.option);
+			this.canvas.restoreCanvas();
+			this.canvas.restoreCanvas();
+		}else if(graphic.type == 'src') {
+			this.canvas.drawImage({
+				  source: graphic.src,
+				  x: obj.bound.x + obj.bound.width/2, y: obj.bound.y + obj.bound.height/2,
+				  width: obj.bound.width, height:obj.bound.height
+				});
+		}
+	}
+	if(obj_is_selected) {
+		this.canvas.drawRect({
+			  strokeStyle: '#00f', strokeWidth: 2,
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false
+		});
+		/*
+		 * for resizable object
+		 */
+		if(meta_ele.resizable == true) {
+			this.canvas.drawRect({
+				  fillStyle: "#00f", strokeWidth: 2,
+				  x: obj.bound.x+obj.bound.width-12, y: obj.bound.y+obj.bound.height-12,
+				  width: 12, height: 12,
+				  fromCenter: false
+			});
+		}
+	}
+
+	var h = 0;
+	for(var l=0;l < meta_ele.properties.length;l++) {
+		var prop = null;
+		for(var j=0;j<obj.properties.length;j++) {
+			if(obj.properties[j].meta_id == meta_ele.properties[l]) {
+				prop = obj.properties[j];
+			}
+		}
+		if(prop != null) {
+			for(var k=0;k < prop.children.length;k++) {
+				var p = g_model.properties[prop.children[k]]
+				if(p.ve.ver_type == 'delete') continue;
+				var disp_text = p.value;
+				var meta_prop = g_metamodel.metaproperties[prop.meta_id];
+				if(meta_prop.widget == MetaProperty.FIXED_LIST) {
+					for(var index=0;index < meta_prop.exfield.length;index++) {
+						if(p.value == meta_prop.exfield[index].value) {
+							disp_text = meta_prop.exfield[index].disp;
+						}
+					}
+				}
+				this.canvas.drawText({
+					  fillStyle: "#000",
+					  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
+					  text: disp_text,
+					  align: "center",
+					  baseline: "middle",
+					  font: "16px 'ＭＳ ゴシック'"
+					});
+				h++;
+			}
+			if(meta_ele.properties.length-1 != l && (meta_ele.graphic == 'rect' || meta_ele.graphic == 'rounded')) {
+				this.canvas.drawLine({
+					  strokeStyle: "#000",
+					  strokeWidth: 2,
+					  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
+					  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
+					});
+			}
+		}
 	}
 }
 

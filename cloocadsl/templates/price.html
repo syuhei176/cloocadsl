@@ -79,7 +79,41 @@
 		
 		<!-- SKIN -->
 		<link rel="stylesheet" href="/static/shinra/skins/plastic/style.css" type="text/css" media="screen" />
+		<style>
+		.menu_hover {
+		background-color: #111111;
+		color: #aaaaaa;
+		}
+		</style>
+		<script type="text/javascript">
+		$(function() {
+			  $("tbody#prices tr").mouseover(function(){
+			    $(this).addClass('menu_hover');
+			  }).mouseout(function(){
+			    $(this).removeClass('menu_hover');
+			  });
+			  $("#editor-license").click(function(){
+				  window.open('/reg_editor_license_view');
+			  });
+			  $("#wb-license").click(function(){
+				  
+			  });
+			  $("#group-license").click(function(){
+				  
+			  });
+			  /*
+			  $("tr#selectable").mouseover(function(){
+			    $(this).addClass('ui-state-hover');
+			  }).mouseout(function(){
+			    $(this).removeClass('ui-state-hover');
+			  });
+			  $("tr#selectable").click(function(){
+				  
+			  });
+			  */
+		});
 
+		</script>
 	</head>
 	
 	<body class="">
@@ -142,8 +176,7 @@
 			
 			<!-- Breadcrumb-->
 			<div id="breadcrumbs">
-				<a title="Home" href="index.html">Home</a>
-				Contact
+				<a title="Home" href="/price">価格</a>
 			</div>
 			<!-- ENDS Breadcrumb-->	
 
@@ -184,27 +217,27 @@
 					<!-- content -->
 <!-- table -->
 					<h4 class="line-divider">価格</h4>
-					<table>				
-						<tbody>
+					<table>
+						<tbody id="prices">
 							<tr>
 								<th>ライセンス</th>
 								<th>価格</th>
 								<th>内容</th>
 								<th>規模</th>
 							</tr>
-							<tr>
+							<tr id="editor-license">
 								<td>エディタ　ライセンス</td>
 								<td>フリー</td>
 								<td>未定</td>
 								<td>未定</td>
 							</tr>
-								<tr>
+							<tr id="wb-license">
 								<td>デベロッパー　ライセンス</td>
 								<td>未定</td>
 								<td>未定</td>
 								<td>未定</td>
 							</tr>
-							<tr>
+							<tr id="group-license">
 								<td>グループライセンス</td>
 								<td>未定</td>
 								<td>未定</td>
