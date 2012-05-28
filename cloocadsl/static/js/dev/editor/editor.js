@@ -241,11 +241,12 @@ function onItemClick(item){
 		saveModel(g_project_id);
 	}else if(item.id == 'diagram') {
 		if(current_editor != null && current_editor.selected != null && g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition != null && current_editor.selected.diagram == null) {
-			var d = new Diagram();
-			d.meta_id = g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition;
+         	var d = ModelController.addDiagram(g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition);
+//			var d = new Diagram();
+//			d.meta_id = g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition;
 			current_editor.selected.diagram = d.id;
-			g_model.diagrams[d.id] = d;
-			createModelExplorer();
+//			g_model.diagrams[d.id] = d;
+			change_diagram_name_view(d);
 		}else{
 			show_create_diagram_window();
 		}

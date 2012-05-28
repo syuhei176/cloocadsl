@@ -111,6 +111,21 @@ DiagramEditor.prototype.draw = function() {
 				  width: obj.bound.width, height: obj.bound.height,
 				  fromCenter: false
 			});
+		}else if(meta_ele.graphic == 'package') {
+			self.canvas.drawRect({
+				  strokeStyle: col, strokeWidth: 2,
+				  fillStyle: "#fff",
+				  x: obj.bound.x, y: obj.bound.y - 20,
+				  width: obj.bound.width - 30, height: 20,
+				  fromCenter: false
+			});
+			self.canvas.drawRect({
+				  strokeStyle: col, strokeWidth: 2,
+				  fillStyle: "#fff",
+				  x: obj.bound.x, y: obj.bound.y,
+				  width: obj.bound.width, height: obj.bound.height,
+				  fromCenter: false
+			});
 		}else if(meta_ele.graphic == 'rounded') {
 			self.canvas.drawRect({
 				  strokeStyle: col, strokeWidth: 2,
@@ -300,8 +315,8 @@ DiagramEditor.prototype.Initialize = function() {
 	        id: 'down_step',
 	        text: '一つ下へ'
 	    },{
-	        id: 'info',
-	        text: '情報'
+	        id: 'diagram',
+	        text: '関連する図を作成'
 	    }],
 	    listeners: {
         click: function(menu, item) {
@@ -324,8 +339,12 @@ DiagramEditor.prototype.Initialize = function() {
                 case 'down_step':
                 	self.down_step();
                     break;
-                case 'info':
-                	self.info();
+                case 'diagram':
+            		if(current_editor != null && current_editor.selected != null && g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition != null && current_editor.selected.diagram == null) {
+                     	var d = ModelController.addDiagram(g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition);
+            			current_editor.selected.diagram = d.id;
+            			change_diagram_name_view(d);
+            		}
                     break;
             }
         }
@@ -1178,6 +1197,9 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
 	}else if(arrow_type == 'BLACK_TRIANGLE'){
 		var ah = new ArrowHead(ArrowHead.BLACK_TRIANGLE);
+		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
+	}else if(arrow_type == 'DIAMOND'){
+		var ah = new ArrowHead(ArrowHead.DIAMOND);
 		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
 	}else{
 		
