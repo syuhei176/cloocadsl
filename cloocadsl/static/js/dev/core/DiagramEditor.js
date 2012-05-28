@@ -46,6 +46,7 @@ function DiagramEditor(name, key, diagram) {
 }
 
 DiagramEditor.prototype.changeCanvasSize = function(w, h) {
+	/*
 	this.width = w;
 	this.height = h;
 	this.panel = Ext.create('Ext.panel.Panel', {
@@ -55,6 +56,7 @@ DiagramEditor.prototype.changeCanvasSize = function(w, h) {
 		html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
 		closable: 'true'
 	});
+	*/
 }
 
 DiagramEditor.prototype.changeCanvasWidth = function(w) {
@@ -71,8 +73,8 @@ DiagramEditor.prototype.changeCanvasHeight = function(h) {
 
 DiagramEditor.prototype.draw = function() {
 	var self = this;
-	if(self.canvas == null) {
-		self.canvas = $('#canvas_'+self.key);
+	if(this.canvas == null || this.canvas == undefined) {
+		this.canvas = $('#canvas_'+this.key);
 	}
 	self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: self.width,height: self.height, fromCenter: false});
 	var tmp_objs = [];
@@ -150,8 +152,8 @@ DiagramEditor.prototype.Initialize = function() {
 	        id: 'down_step',
 	        text: '一つ下へ'
 	    },{
-	        id: 'info',
-	        text: '情報'
+	        id: 'diagram',
+	        text: '関連する図を作成'
 	    }],
 	    listeners: {
         click: function(menu, item) {
@@ -174,8 +176,12 @@ DiagramEditor.prototype.Initialize = function() {
                 case 'down_step':
                 	self.down_step();
                     break;
-                case 'info':
-                	self.info();
+                case 'diagram':
+            		if(current_editor != null && current_editor.selected != null && g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition != null && current_editor.selected.diagram == null) {
+                     	var d = ModelController.addDiagram(g_metamodel.metaobjects[current_editor.selected.meta_id].decomposition);
+            			current_editor.selected.diagram = d.id;
+            			change_diagram_name_view(d);
+            		}
                     break;
             }
         }
@@ -603,6 +609,14 @@ DiagramEditor.prototype.info = function() {
 	}
 }
 
+DiagramEditor.prototype.most_up_step = function() {
+	
+}
+
+DiagramEditor.prototype.most_down_step = function() {
+	
+}
+
 DiagramEditor.prototype.up_step = function() {
 	if(this.selected.ofd != undefined) {
 		for(var i=0;i < this.diagram.objects.length;i++) {
@@ -1001,6 +1015,21 @@ DiagramEditor.prototype.draw_object = function(obj) {
 	}
 	var meta_ele = g_metamodel.metaobjects[obj.meta_id];
 	if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  fillStyle: "#fff",
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false
+		});
+	}else if(meta_ele.graphic == 'package') {
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  fillStyle: "#fff",
+			  x: obj.bound.x, y: obj.bound.y - 20,
+			  width: obj.bound.width - 30, height: 20,
+			  fromCenter: false
+		});
 		this.canvas.drawRect({
 			  strokeStyle: col, strokeWidth: 2,
 			  fillStyle: "#fff",
