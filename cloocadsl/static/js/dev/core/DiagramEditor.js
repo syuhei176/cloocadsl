@@ -46,6 +46,7 @@ function DiagramEditor(name, key, diagram) {
 }
 
 DiagramEditor.prototype.changeCanvasSize = function(w, h) {
+	/*
 	this.width = w;
 	this.height = h;
 	this.panel = Ext.create('Ext.panel.Panel', {
@@ -55,6 +56,7 @@ DiagramEditor.prototype.changeCanvasSize = function(w, h) {
 		html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
 		closable: 'true'
 	});
+	*/
 }
 
 DiagramEditor.prototype.changeCanvasWidth = function(w) {
@@ -71,8 +73,8 @@ DiagramEditor.prototype.changeCanvasHeight = function(h) {
 
 DiagramEditor.prototype.draw = function() {
 	var self = this;
-	if(self.canvas == null) {
-		self.canvas = $('#canvas_'+self.key);
+	if(this.canvas == null || this.canvas == undefined) {
+		this.canvas = $('#canvas_'+this.key);
 	}
 	self.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: self.width,height: self.height, fromCenter: false});
 	var tmp_objs = [];
@@ -86,172 +88,7 @@ DiagramEditor.prototype.draw = function() {
 	for(var i=0;i < tmp_objs.length;i++) {
 		var obj_id = tmp_objs[i].id;
 		var obj = tmp_objs[i];
-//		var obj_id = self.diagram.objects[i];
-//		var obj = g_model.objects[obj_id];
-		if(obj.ve.ver_type == 'delete') continue;
-		var col = '#000';
-		if(self.selected instanceof Array) {
-			for(var l=0;l < self.selected.length;l++) {
-				if(obj == self.selected[l]) {
-					col = '#00f';
-					break;
-				}
-			}
-		}else{
-			if(obj == self.selected) {
-				col = '#00f';
-			}
-		}
-		var meta_ele = g_metamodel.metaobjects[obj.meta_id];
-		if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
-			self.canvas.drawRect({
-				  strokeStyle: col, strokeWidth: 2,
-				  fillStyle: "#fff",
-				  x: obj.bound.x, y: obj.bound.y,
-				  width: obj.bound.width, height: obj.bound.height,
-				  fromCenter: false
-			});
-		}else if(meta_ele.graphic == 'package') {
-			self.canvas.drawRect({
-				  strokeStyle: col, strokeWidth: 2,
-				  fillStyle: "#fff",
-				  x: obj.bound.x, y: obj.bound.y - 20,
-				  width: obj.bound.width - 30, height: 20,
-				  fromCenter: false
-			});
-			self.canvas.drawRect({
-				  strokeStyle: col, strokeWidth: 2,
-				  fillStyle: "#fff",
-				  x: obj.bound.x, y: obj.bound.y,
-				  width: obj.bound.width, height: obj.bound.height,
-				  fromCenter: false
-			});
-		}else if(meta_ele.graphic == 'rounded') {
-			self.canvas.drawRect({
-				  strokeStyle: col, strokeWidth: 2,
-				  x: obj.bound.x, y: obj.bound.y,
-				  width: obj.bound.width, height: obj.bound.height,
-				  fromCenter: false,
-				  cornerRadius: 5
-			});
-		}else if(meta_ele.graphic == 'circle') {
-			$("canvas").drawArc({
-				  strokeStyle: col, strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-		}else if(meta_ele.graphic == 'fillcircle') {
-			$("canvas").drawArc({
-				  fillStyle: col, strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-		}else if(meta_ele.graphic == 'endcircle') {
-			$("canvas").drawArc({
-				  strokeStyle: col, strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-			$("canvas").drawArc({
-				  fillStyle: "#000", strokeWidth: 2,
-				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				  radius: obj.bound.width / 2 - 5,
-				  start: 0, end: 359,
-				  fromCenter: true
-				});
-		}else{
-			var graphic = g_metamodel['graphics'][meta_ele.graphic];
-			graphic.option.col = col;
-			graphic.option.strokeStyle = col;
-			if(graphic.type == 'polygon') {
-				self.canvas.translateCanvas({
-					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
-					})
-				self.canvas.scaleCanvas({
-					x:0, y:0,
-					scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
-					})
-				self.canvas.drawPolygon(graphic.option);
-				self.canvas.restoreCanvas();
-				self.canvas.restoreCanvas();
-			}else if(graphic.type == 'lines') {
-				self.canvas.translateCanvas({
-					  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
-				});
-				self.canvas.scaleCanvas({
-					x:0, y:0,
-					scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
-					});
-				self.canvas.drawLine(graphic.option);
-				self.canvas.restoreCanvas();
-				self.canvas.restoreCanvas();
-			}else if(graphic.type == 'src') {
-				self.canvas.drawImage({
-					  source: graphic.src,
-					  x: obj.bound.x + obj.bound.width/2, y: obj.bound.y + obj.bound.height/2,
-					  width: obj.bound.width, height:obj.bound.height
-					});
-			}
-		}
-		/*
-		 * for resizable object
-		 */
-		if(meta_ele.resizable == true && obj == self.selected) {
-			self.canvas.drawRect({
-				  fillStyle: "#00f", strokeWidth: 2,
-				  x: obj.bound.x+obj.bound.width-12, y: obj.bound.y+obj.bound.height-12,
-				  width: 12, height: 12,
-				  fromCenter: false
-			});
-		}
-
-		var h = 0;
-		for(var l=0;l < meta_ele.properties.length;l++) {
-			var prop = null;
-			for(var j=0;j<obj.properties.length;j++) {
-				if(obj.properties[j].meta_id == meta_ele.properties[l]) {
-					prop = obj.properties[j];
-				}
-			}
-			if(prop != null) {
-				for(var k=0;k < prop.children.length;k++) {
-					var p = g_model.properties[prop.children[k]]
-					if(p.ve.ver_type == 'delete') continue;
-					var disp_text = p.value;
-					var meta_prop = g_metamodel.metaproperties[prop.meta_id];
-					if(meta_prop.widget == MetaProperty.FIXED_LIST) {
-						for(var index=0;index < meta_prop.exfield.length;index++) {
-							if(p.value == meta_prop.exfield[index].value) {
-								disp_text = meta_prop.exfield[index].disp;
-							}
-						}
-					}
-					self.canvas.drawText({
-						  fillStyle: "#000",
-						  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
-						  text: disp_text,
-						  align: "center",
-						  baseline: "middle",
-						  font: "16px 'ＭＳ ゴシック'"
-						});
-					h++;
-				}
-				if(meta_ele.properties.length-1 != l && (meta_ele.graphic == 'rect' || meta_ele.graphic == 'rounded')) {
-					self.canvas.drawLine({
-						  strokeStyle: "#000",
-						  strokeWidth: 2,
-						  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
-						  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
-						});
-				}
-			}
-		}
+		this.draw_object(obj);
 	}
 	for(var i=0;i < self.diagram.relationships.length;i++) {
 		var rel_id = self.diagram.relationships[i];
@@ -763,13 +600,21 @@ DiagramEditor.prototype.info = function() {
 		str += '<br>id='+this.selected.id;
 		str += '<br>pid='+Math.floor(this.selected.id / 10000);
 		if(this.selected.ofd != undefined) str += '<br>z='+this.selected.ofd.z;
-		console.log(str);
+//		console.log(str);
 //		Ext.MessageBox.alert(str);
 		Ext.getCmp('element-infomation').removeAll();
 		Ext.getCmp('element-infomation').add({
 			html: str
 		});
 	}
+}
+
+DiagramEditor.prototype.most_up_step = function() {
+	
+}
+
+DiagramEditor.prototype.most_down_step = function() {
+	
 }
 
 DiagramEditor.prototype.up_step = function() {
@@ -1150,6 +995,184 @@ function draw_dot_line(canvas, col, p1, p2) {
 	}
 }
 
+DiagramEditor.prototype.draw_object = function(obj) {
+	if(obj.ve.ver_type == 'delete') return;
+	var col = '#000';
+	var obj_is_selected = false;
+	if(this.selected instanceof Array) {
+		for(var l=0;l < this.selected.length;l++) {
+			if(obj == this.selected[l]) {
+				col = '#00f';
+				obj_is_selected = true;
+				break;
+			}
+		}
+	}else{
+		if(obj == this.selected) {
+			col = '#00f';
+			obj_is_selected = true;
+		}
+	}
+	var meta_ele = g_metamodel.metaobjects[obj.meta_id];
+	if(meta_ele.graphic == null || meta_ele.graphic == 'rect') {
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  fillStyle: "#fff",
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false
+		});
+	}else if(meta_ele.graphic == 'package') {
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  fillStyle: "#fff",
+			  x: obj.bound.x, y: obj.bound.y - 20,
+			  width: obj.bound.width - 30, height: 20,
+			  fromCenter: false
+		});
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  fillStyle: "#fff",
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false
+		});
+	}else if(meta_ele.graphic == 'rounded') {
+		this.canvas.drawRect({
+			  strokeStyle: col, strokeWidth: 2,
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false,
+			  cornerRadius: 5
+		});
+	}else if(meta_ele.graphic == 'circle') {
+		$("canvas").drawArc({
+			  strokeStyle: '#000', strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+	}else if(meta_ele.graphic == 'fillcircle') {
+		$("canvas").drawArc({
+			  fillStyle: '#000', strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+	}else if(meta_ele.graphic == 'endcircle') {
+		$("canvas").drawArc({
+			  strokeStyle: col, strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+		$("canvas").drawArc({
+			  fillStyle: "#000", strokeWidth: 2,
+			  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			  radius: obj.bound.width / 2 - 5,
+			  start: 0, end: 359,
+			  fromCenter: true
+			});
+	}else{
+		var graphic = g_metamodel['graphics'][meta_ele.graphic];
+		graphic.option.col = '#000';
+		graphic.option.strokeStyle = '#000';
+		if(graphic.type == 'polygon') {
+			this.canvas.translateCanvas({
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.height / 2,
+				})
+			this.canvas.scaleCanvas({
+				x:0, y:0,
+				scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
+				})
+			this.canvas.drawPolygon(graphic.option);
+			this.canvas.restoreCanvas();
+			this.canvas.restoreCanvas();
+		}else if(graphic.type == 'lines') {
+			this.canvas.translateCanvas({
+				  x: obj.bound.x + obj.bound.width / 2, y: obj.bound.y + obj.bound.width / 2,
+			});
+			this.canvas.scaleCanvas({
+				x:0, y:0,
+				scaleX: obj.bound.width / 50, scaleY: obj.bound.height / 50
+				});
+			this.canvas.drawLine(graphic.option);
+			this.canvas.restoreCanvas();
+			this.canvas.restoreCanvas();
+		}else if(graphic.type == 'src') {
+			this.canvas.drawImage({
+				  source: graphic.src,
+				  x: obj.bound.x + obj.bound.width/2, y: obj.bound.y + obj.bound.height/2,
+				  width: obj.bound.width, height:obj.bound.height
+				});
+		}
+	}
+	if(obj_is_selected) {
+		this.canvas.drawRect({
+			  strokeStyle: '#00f', strokeWidth: 2,
+			  x: obj.bound.x, y: obj.bound.y,
+			  width: obj.bound.width, height: obj.bound.height,
+			  fromCenter: false
+		});
+		/*
+		 * for resizable object
+		 */
+		if(meta_ele.resizable == true) {
+			this.canvas.drawRect({
+				  fillStyle: "#00f", strokeWidth: 2,
+				  x: obj.bound.x+obj.bound.width-12, y: obj.bound.y+obj.bound.height-12,
+				  width: 12, height: 12,
+				  fromCenter: false
+			});
+		}
+	}
+
+	var h = 0;
+	for(var l=0;l < meta_ele.properties.length;l++) {
+		var prop = null;
+		for(var j=0;j<obj.properties.length;j++) {
+			if(obj.properties[j].meta_id == meta_ele.properties[l]) {
+				prop = obj.properties[j];
+			}
+		}
+		if(prop != null) {
+			for(var k=0;k < prop.children.length;k++) {
+				var p = g_model.properties[prop.children[k]]
+				if(p.ve.ver_type == 'delete') continue;
+				var disp_text = p.value;
+				var meta_prop = g_metamodel.metaproperties[prop.meta_id];
+				if(meta_prop.widget == MetaProperty.FIXED_LIST) {
+					for(var index=0;index < meta_prop.exfield.length;index++) {
+						if(p.value == meta_prop.exfield[index].value) {
+							disp_text = meta_prop.exfield[index].disp;
+						}
+					}
+				}
+				this.canvas.drawText({
+					  fillStyle: "#000",
+					  x: obj.bound.x+obj.bound.width / 2, y: obj.bound.y + h * 20 + 20,
+					  text: disp_text,
+					  align: "center",
+					  baseline: "middle",
+					  font: "16px 'ＭＳ ゴシック'"
+					});
+				h++;
+			}
+			if(meta_ele.properties.length-1 != l && (meta_ele.graphic == 'rect' || meta_ele.graphic == 'rounded')) {
+				this.canvas.drawLine({
+					  strokeStyle: "#000",
+					  strokeWidth: 2,
+					  x1: obj.bound.x, y1: obj.bound.y + h * 20 + 10,
+					  x2: obj.bound.x+obj.bound.width, y2: obj.bound.y + h * 20 + 10
+					});
+			}
+		}
+	}
+}
+
 DiagramEditor.prototype.draw_relationship = function(rel) {
 	var meta_ele = g_metamodel.metarelations[rel.meta_id];
 	var col = '#000';
@@ -1197,9 +1220,6 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
 	}else if(arrow_type == 'BLACK_TRIANGLE'){
 		var ah = new ArrowHead(ArrowHead.BLACK_TRIANGLE);
-		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
-	}else if(arrow_type == 'DIAMOND'){
-		var ah = new ArrowHead(ArrowHead.DIAMOND);
 		ah.draw(this.canvas, points[points.length-2], points[points.length-1]);
 	}else{
 		
