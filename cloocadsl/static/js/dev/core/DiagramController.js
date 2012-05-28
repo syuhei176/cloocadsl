@@ -7,7 +7,6 @@ ModelController.getObject = function(diagram, id) {
 ModelController.addDiagram = function(meta_id){
 	var d = new Diagram();
 	d.meta_id = meta_id;//g_metamodel.metadiagram;
-//	g_model.root = d.id;
 	g_model.diagrams[d.id] = d;
 	var dc = new DiagramController(d);
 	dc.addElement(d, g_metamodel.metadiagrams[d.meta_id]);
@@ -89,6 +88,13 @@ DiagramController.prototype.addObject = function(x,y,meta_id) {
 	this.diagram.objects.push(obj.id);
 	this.addElement(obj, g_metamodel.metaobjects[obj.meta_id])
 	console.log('add object id='+obj.id+','+obj.ve.ver_type);
+	for(var i=0;i < this.diagram.objects.length;i++) {
+		var t_obj_id = this.diagram.objects[i];
+		var t_obj = g_model.objects[t_obj_id];
+		if(t_obj != obj && t_obj.ofd.z >= obj.ofd.z) {
+			obj.ofd.z = t_obj.ofd.z + 1;
+		}
+	}
 	return obj;
 }
 
