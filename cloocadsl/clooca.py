@@ -27,8 +27,11 @@ from shinshu import compile_server
 
 app = Flask(__name__)
 
+#トップページ
+
 """
-for public
+id:1
+visibillity public
 """
 @app.route('/')
 @app.route('/index')
@@ -38,35 +41,73 @@ def index():
     return render_template('index.html', loggedin = False, username = '')
 
 """
-for public
+id:2
+visibillity public
 """
-@app.route('/price')
-def price():
-    return render_template('price.html')
+@app.route('/feature')
+def feature():
+    return render_template('feature.html')
 
 """
-for public
+id:3
+visibillity public
 """
 @app.route('/document')
 def document():
     return render_template('document.html')
 
 """
-for registration
+id:4
+visibillity public
+"""
+@app.route('/price')
+def price():
+    return render_template('price.html')
+
+"""
+id:5
+visibillity public
+"""
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+#登録、ログイン
+
+"""
+id:10
+visibillity public
 """
 @app.route('/reg_editor_license_view', methods=['GET'])
 def reg_editor_license_view():
     return render_template('/register/reg_editor_license.html')
 
 """
-for registration
+id:11
+visibillity public
 """
-@app.route('/reg_editor_license', methods=['POST'])
-def reg_editor_license():
-    return json.dumps(UserService.RegisterEditorLicense(request.form['username'], request.form['password'], request.form['email']))
+@app.route('/reg_wb_license_view', methods=['GET'])
+def reg_wb_license_view():
+    return render_template('/register/reg_wb_license.html')
 
 """
-for registration
+id13
+visibillity public
+"""
+@app.route('/reg', methods=['POST'])
+def reg():
+    if request.form['license_type'] == 'free':
+        return json.dumps(UserService.RegisterEditorLicense(request.form['username'], request.form['password'], request.form['email']))
+    elif request.form['license_type'] == 'wb':
+        return json.dumps(UserService.RegisterWbLicense(request.form['username'], request.form['password'], request.form['email']))
+    elif request.form['license_type'] == 'group':
+        return json.dumps(UserService.RegisterGroupLicense(request.form['username'], request.form['password'], request.form['email']))
+    else:
+        pass
+
+"""
+id:14
+visibillity public
 """
 @app.route('/confirm/<key>', methods=['GET'])
 def confirm(key):
@@ -79,9 +120,38 @@ def confirm(key):
         return redirect(url_for('login_view'))
 
 """
-for editor license
-for wb license
-for group license
+id:15
+"""
+@app.route('/login', methods=['GET'])
+def login_view():
+    if 'user' in session:
+        return redirect('/mypage')
+    else:
+        return render_template('login.html')
+
+"""
+id:16
+"""
+@app.route('/login-to', methods=['POST'])
+def login():
+    user = UserService.Login(request.form['username'], request.form['password'])
+    if not user == None and 'permanent' in request.form:
+        session.permanent = True
+    return json.dumps(user)
+
+"""
+id:17
+"""
+@app.route('/logout')
+def logout():
+    # remove the username from the session if its there
+    session.pop('user', None)
+    return redirect(url_for('index'))
+
+
+"""
+id:20
+visibillity editor,wb
 """
 @app.route('/mypage')
 def mypage():
@@ -95,8 +165,7 @@ def mypage():
     return redirect(url_for('login_view'))
 
 """
-for editor license
-for wb license
+visibillity editor,wb
 """
 @app.route('/project_list', methods=['GET'])
 def project_list():
@@ -127,6 +196,11 @@ def mytools():
         return json.dumps(reduce(lambda a,b: a+b, [mydevtools,mytools],[]))
     return 'false'
 
+
+"""
+market
+"""
+
 """
 for editor license
 for wb license
@@ -140,13 +214,18 @@ def buy_tool():
         return json.dumps()
     return 'false'
 
-
-@app.route('/login', methods=['GET'])
-def login_view():
+"""
+for wb license
+@param metamodel_id: 
+"""
+@app.route('/sell-tool', methods=['POST'])
+def buy_tool():
     if 'user' in session:
-        return redirect('/mypage')
-    else:
-        return render_template('login.html')
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        connect.close()
+        return json.dumps()
+    return 'false'
+
 
 @app.route('/login/<gid>', methods=['GET'])
 def login_to_group_view_(gid):
@@ -356,20 +435,6 @@ def register_admin():
                                              request.form['password'],
                                              role=1,
                                              email=request.form['email']))
-
-@app.route('/login-to', methods=['POST'])
-def login():
-    user = UserService.Login(request.form['username'], request.form['password'])
-    if not user == None and 'permanent' in request.form:
-        session.permanent = True
-    return json.dumps(user)
-
-@app.route('/logout')
-def logout():
-    # remove the username from the session if its there
-    session.pop('user', None)
-    return redirect(url_for('index'))
-
 
 """
 group_idにプロジェクト作成する。

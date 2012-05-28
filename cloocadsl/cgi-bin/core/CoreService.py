@@ -60,6 +60,19 @@ def myaccount():
         return json.dumps(accountinfo)
 """
 
+
+def editor_by_tool(tool_id):
+    #load tool
+    return render_template('editor.html',
+                           _is_tool=True,
+                           toolinfo=json.dumps(toolinfo))
+
+def editor_by_metamodel(metamodel_id):
+    #load metamodel
+    return render_template('editor.html', _is_tool=False)
+
+
+
 """
 グループのプロジェクト
 グループのツール　　　　＊グループの管理者のみ

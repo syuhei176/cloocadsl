@@ -237,3 +237,4 @@ def loadMyTools(user, connect):
         metamodel['name'] = (rows[i][1]).decode('utf-8')
         tools.append(metamodel)
     return tools
+
