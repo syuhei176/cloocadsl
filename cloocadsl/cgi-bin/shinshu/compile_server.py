@@ -83,7 +83,7 @@ class MultiPartForm(object):
 def reserve(user, pid, pname):
     userpath = config.CLOOCA_CGI+'/out/' + user['uname']
     projectpath = userpath + '/p' + pid
-    filepath = projectpath + '/' + pname + '.zip'
+    filepath = projectpath + '/p' +pid + '.zip'
     if os.path.exists(projectpath) == True:
         if os.path.exists(filepath) == True:
             os.remove(filepath)

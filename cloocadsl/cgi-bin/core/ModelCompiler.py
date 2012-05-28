@@ -49,7 +49,8 @@ class BaseGenerator(object):
         if not os.path.exists(self.userpath):
             os.mkdir(self.userpath)
         #clear directory
-        shutil.rmtree(self.projectpath)
+        if os.path.exists(self.projectpath):
+            shutil.rmtree(self.projectpath)
         if not os.path.exists(self.projectpath):
             os.mkdir(self.projectpath)
         self.model = parseJSON(project['xml'], metamodel['xml'])
