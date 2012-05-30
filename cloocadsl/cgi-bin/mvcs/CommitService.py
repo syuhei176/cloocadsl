@@ -220,6 +220,7 @@ def parseRelationshipJSON(rel):
     dest = rel['dest']
     edited_type = rel['ve']['ver_type']
     version = int(rel['ve']['version'])
+    points_json = json.dumps(rel['points'])
     """
     if not edited_type == 'delete':
         cur = connect.cursor()
@@ -237,7 +238,7 @@ def parseRelationshipJSON(rel):
         cur = connect.cursor()
         cur.execute('DELETE FROM relationship where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,0,prop_refs_json))
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties,points) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,0,prop_refs_json,points_json))
         connect.commit()
         cur.close()
         return True
@@ -245,13 +246,13 @@ def parseRelationshipJSON(rel):
         cur = connect.cursor()
         cur.execute('DELETE FROM relationship where id=%s AND model_id=%s AND version=%s;', (id,model_id,next_version))
         connect.commit()
-        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,1,prop_refs_json))
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties,points) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,1,prop_refs_json,points_json))
         connect.commit()
         cur.close()
         return True
     elif edited_type == 'delete':
         cur = connect.cursor()
-        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,2,prop_refs_json))
+        cur.execute('INSERT INTO relationship (id,meta_id,src,dest,model_id,version,ver_type,properties,points) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);', (id,meta_id,src,dest,model_id,next_version,2,prop_refs_json,points_json))
         connect.commit()
         cur.close()
         return True

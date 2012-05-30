@@ -240,7 +240,7 @@ def LoadRelationshipEntities():
         idmap[id].sort()
         idmap[id].reverse()
         latest_version = idmap[id][0]
-        cur.execute('SELECT id,meta_id,src,dest,version,ver_type,points,properties FROM relationship WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
+        cur.execute('SELECT id,meta_id,src,dest,version,ver_type,points,properties,points FROM relationship WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
         obj_rows = cur.fetchall()
         if not obj_rows[0][5] == 2:
             object = {}
@@ -250,7 +250,7 @@ def LoadRelationshipEntities():
             object['meta_id'] = meta_id
             object['src'] = int(obj_rows[0][2])
             object['dest'] = int(obj_rows[0][3])
-            object['points'] = []
+            object['points'] = json.loads(obj_rows[0][8])
             object['ve'] = {}
             object['ve']['ver_type'] = 'none'
             object['ve']['version'] = int(obj_rows[0][5])
