@@ -4,15 +4,79 @@
 <meta name="gwt:property" content="locale=ja">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>clooca</title>
-<link rel="stylesheet" href="home.css" type="text/css" />
-<!-- <link rel="stylesheet" href="common.css" type="text/css" /> -->
-<link href="/static/css/bootstrap.min.css" rel="stylesheet">
-<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
-<script src="/static/js/jquery-1.7.1.min.js"></script>
-<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
-<script src="/static/js/bootstrap.min.js"></script>
+
+		<!-- CSS -->
+		<link rel="stylesheet" href="/static/shinra/css/style.css" type="text/css" media="screen" />
+		<link rel="stylesheet" href="/static/shinra/css/social-icons.css" type="text/css" media="screen" />
+		<!--[if IE 8]>
+			<link rel="stylesheet" type="text/css" media="screen" href="/css/ie8-hacks.css" />
+		<![endif]-->
+		<!-- ENDS CSS -->	
+				
+		<!-- GOOGLE FONTS -->
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+		
+		<!-- JS -->
+		<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/easing.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/jquery.scrollTo-1.4.2-min.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/quicksand.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/jquery.cycle.all.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/custom.js"></script>
+		<!--[if IE]>
+			<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+		
+		<!--[if IE 6]>
+			<script type="text/javascript" src="js/DD_belatedPNG.js"></script>
+			<script>
+	      		/* EXAMPLE */
+	      		//DD_belatedPNG.fix('*');
+	    	</script>
+		<![endif]-->
+		<!-- ENDS JS -->
+		
+		<!-- tabs -->
+		<link rel="stylesheet" href="/static/shinra/css/tabs.css" type="text/css" media="screen" />
+		<script type="text/javascript" src="/static/shinra/js/tabs.js"></script>
+  		<!-- ENDS tabs -->
+  		
+  		<!-- prettyPhoto -->
+		<script type="text/javascript" src="/static/shinra/js/prettyPhoto/js/jquery.prettyPhoto.js"></script>
+		<link rel="stylesheet" href="/static/shinra/js/prettyPhoto/css/prettyPhoto.css" type="text/css" media="screen" />
+		<!-- ENDS prettyPhoto -->
+		
+		<!-- superfish -->
+		<link rel="stylesheet" media="screen" href="/static/shinra/css/superfish.css" /> 
+		<link rel="stylesheet" media="screen" href="/static/shinra/css/superfish-left.css" /> 
+		<script type="text/javascript" src="/static/shinra/js/superfish-1.4.8/js/hoverIntent.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/superfish-1.4.8/js/superfish.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/superfish-1.4.8/js/supersubs.js"></script>
+		<!-- ENDS superfish -->
+		
+		<!-- poshytip -->
+		<link rel="stylesheet" href="/static/shinra/js/poshytip-1.0/src/tip-twitter/tip-twitter.css" type="text/css" />
+		<link rel="stylesheet" href="/static/shinra/js/poshytip-1.0/src/tip-yellowsimple/tip-yellowsimple.css" type="text/css" />
+		<script type="text/javascript" src="/static/shinra/js/poshytip-1.0/src/jquery.poshytip.min.js"></script>
+		<!-- ENDS poshytip -->
+		
+		<!-- Fancybox -->
+		<link rel="stylesheet" href="/static/shinra/js/jquery.fancybox-1.3.4/fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
+		<script type="text/javascript" src="/static/shinra/js/jquery.fancybox-1.3.4/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+		<!-- ENDS Fancybox -->
+		
+		<!-- SKIN -->
+		<link rel="stylesheet" href="/static/shinra/skins/plastic/style.css" type="text/css" media="screen" />
+
 <style>
-		#login-form-wrapper { width: 380px; height: 200px; padding: 0.4em; position: relative; }
+		#login-form-wrapper {
+		position: absolute;
+		height: 100%;
+		width: 28%;
+		margin-right: 36%;
+		margin-left: 36%;
+		}
 		#login-form-wrapper h3 { margin: 0; padding: 0.4em; text-align: center; }
 	</style>
 	<script type="text/javascript">
@@ -49,12 +113,36 @@ function login() {
 	$( "#login_dialog" ).dialog({ modal: true });
 }
 
+
+function displayUser(user) {
+	alert('success');
+}
+
+function login_facebook() {
+    var appId = "424460744251434";
+
+    if(window.location.hash.length == 0)
+    {
+        url = "https://www.facebook.com/dialog/oauth?client_id=" + 
+                 appId  + "&redirect_uri=" + window.location +
+                 "&response_type=token";
+        window.open(url);
+
+    } else {
+        accessToken = window.location.hash.substring(1);
+        graphUrl = "https://graph.facebook.com/me?" + accessToken +
+                    "&callback=displayUser"
+
+        //use JSON-P to call the graph
+        var script = document.createElement("script");
+        script.src = graphUrl;
+        document.body.appendChild(script);
+    }
+
+}
 </script>
 </head>
 <body onload="init()">
-      <!-- OPTIONAL: include this if you want history support -->
-    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
-    
     <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
     <noscript>
       <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
@@ -65,61 +153,11 @@ function login() {
 
 <div id="wrapper">
 <div id="header">
-<p id="overview">
-</p>
-<!-- clooca is a web-based model-driven development tool.
-Currently, clooca is being introduced at the lesson of the Kyushu University Graduate School of Information Systems, please try it. -->
+<a href="index.html"><img id="logo" src="img/logo.png" alt="Nova" /></a>
 </div>
-<div id="language">
-<div Align="right"><a href="/english/index.html">English</a></div>
-<div Align="right"><a href="/index.html">日本語</a></div>
-</div>
-<!-- ナビゲーションバー -->
- <div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container" style="width: auto;">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
-        <!-- <a class="brand" href="/"><img src="images/logo2.png" width="80" height="30"></img></a> -->
-        <a class="brand" href="/">clooca DSL</a>
-        <div class="nav-collapse">
-          <ul class="nav">
-            <li><a href="/index">ホーム</a></li>
-            <li class="divider-vertical"></li>
-            <li><a href="/mygroups">マイグループ</a></li>
-            <li class="divider-vertical"></li>
-            <li><a href="/groups">公開コミュニティ</a></li>
-            <li class="divider-vertical"></li>
-            <li><a href="/account">アカウント</a></li>
-            <li class="divider-vertical"></li>
-            <li><a href="/document">ドキュメント</a></li>
-          </ul>
-          <p id="login" class="navbar-text pull-right"></p>
-        </div><!-- /.nav-collapse -->
-      </div>
-    </div><!-- /navbar-inner -->
-  </div><!-- /navbar -->
- 
-       <div class="container-fluid">
-      <div class="row-fluid">
-        <div class="span3">
-          <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li class="nav-header">Manual</li>
-              <li><a href="/file/tutorial.pdf">簡易マニュアル</a></li>
-              <li class="nav-header">Links</li>
-              <li><a href="https://groups.google.com/group/clooca/topics">ディスカッション</a></li>
-              <li><a href="http://www.clooca.com">clooca</a></li>
-              <li><a href="http://syuhei.jpn.org">開発者のページ</a></li>
-            </ul>
-          </div><!--/.well -->
-        </div><!--/span-->
-        <div class="span9">
-          <div class="hero-unit">
-            <div id="login-form-wrapper" class="ui-widget-content ui-corner-all">
+<div id="main">
+<div id="content">
+            <div id="login-form-wrapper">
             <h3 class="ui-widget-header ui-corner-all">ログイン</h3>
              <div id="login-messaeg"> </div><br>
              <form id="loginform" action="/login-to">
@@ -127,11 +165,11 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
              <div>パスワード：<input type="password" name="password"></div>
              <div>ログイン状態を保持する：<input type="checkbox" name="permanent" value="true"></div>
              <input type="submit" value="ログイン">
+             <input type="button" value="facebookでログイン" onclick="login_facebook()">
              </form>
              </div>
-          </div>
-      </div><!--/row-->
- 
+</div>
+</div>
       <footer>
         <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
 お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>

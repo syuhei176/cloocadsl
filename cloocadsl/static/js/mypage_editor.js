@@ -55,7 +55,7 @@ Ext.onReady(function() {
         Ext.create('Ext.Component', {
             region: 'north',
             height: 32, // give north and south regions a height
-            html:'<p>　clooca <div style="color:#fff;float:right;padding-right: 15px;">'+g_username+'&nbsp;&nbsp;<a href="/logout" style="color:#fff;">logout</a>&nbsp;&nbsp;&nbsp;</div></p>'
+            html:'<p>　clooca <div style="color:#fff;float:right;padding-right: 15px;">'+g_username+'&nbsp;&nbsp;<a href="/logout" onclick="/logout" style="color:#fff;">logout</a>&nbsp;&nbsp;&nbsp;</div></p>'
         }), tabs]
     });
     

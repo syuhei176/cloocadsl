@@ -165,6 +165,7 @@ def mypage():
     return redirect(url_for('login_view'))
 
 """
+id:21
 visibillity editor,wb
 """
 @app.route('/project_list', methods=['GET'])
@@ -183,6 +184,7 @@ def project_list():
     return 'false'
 
 """
+id:22
 for editor license
 for wb license
 """
@@ -196,6 +198,120 @@ def mytools():
         return json.dumps(reduce(lambda a,b: a+b, [mydevtools,mytools],[]))
     return 'false'
 
+"""
+id:23
+for wb license
+"""
+@app.route('/mywbs', methods=['GET','POST'])
+def mytools():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        mydevtools = MetaModelService.loadMyAllMetaModelList(session['user'], connect)
+        mytools = MetaModelService.loadMyTools(session['user'], connect)
+        connect.close()
+        return json.dumps(reduce(lambda a,b: a+b, [mydevtools,mytools],[]))
+    return 'false'
+
+"""
+id:24
+for wb license
+"""
+@app.route('/mytools-wbs', methods=['GET','POST'])
+def mytools():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        mydevtools = MetaModelService.loadMyAllMetaModelList(session['user'], connect)
+        mytools = MetaModelService.loadMyTools(session['user'], connect)
+        connect.close()
+        return json.dumps(reduce(lambda a,b: a+b, [mydevtools,mytools],[]))
+    return 'false'
+
+"""
+id:25
+group_idにプロジェクト作成する。
+group_id=0ならマイプロジェクト
+"""
+@app.route('/createp', methods=['POST'])
+def createp():
+    if 'user' in session:
+        gid = int(request.form['group_id'])
+        sample = False
+        if 'sample' in request.form:
+            sample = True
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        if gid == 0:
+            project = ProjectService.createProject(connect, session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'],_is_sample=sample)
+            connect.close()
+            return json.dumps(project)
+        else:
+            cur = connect.cursor()
+            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+            rows = cur.fetchall()
+            cur.close()
+            if not len(rows) == 0:
+                joinInfo = {}
+                joinInfo['id'] = int(rows[0][0])
+                joinInfo['role'] = int(rows[0][1])
+                project = ProjectService.createProject(connect,
+                                                       session['user'],
+                                                       request.form['name'],
+                                                       request.form['xml'],
+                                                       request.form['metamodel_id'],
+                                                       group_id=joinInfo['id'],
+                                                       _is_sample=sample)
+                connect.close()
+                return json.dumps(project)
+    return 'false'
+
+"""
+id:26
+group_idにプロジェクト作成する。
+group_id=0ならマイプロジェクト
+"""
+@app.route('/createm', methods=['POST'])
+def createm():
+    if 'user' in session:
+        gid = int(request.form['group_id'])
+        if gid == 0:
+            project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], group_id=0)
+            return json.dumps(project)
+        else:
+            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+            cur = connect.cursor()
+            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
+            rows = cur.fetchall()
+            cur.close()
+            connect.close()
+            if not len(rows) == 0:
+                joinInfo = {}
+                joinInfo['id'] = int(rows[0][0])
+                joinInfo['role'] = int(rows[0][1])
+                if joinInfo['id'] == int(gid) and joinInfo['role'] == 1:
+                    project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], group_id=joinInfo['id'])
+                    return json.dumps(project)
+    return 'false'
+
+"""
+id:27
+"""
+@app.route('/deletep', methods=['POST'])
+def deletep():
+    if 'user' in session:
+        result = ProjectService.deleteProject(session['user'], request.form['pid'])
+        return json.dumps(result)
+    else:
+        return 'false'
+
+"""
+id:28
+"""
+@app.route('/deletem', methods=['POST'])
+def deletem():
+    if 'user' in session:
+        result = MetaModelService.deleteMetaModel(session['user'], request.form['id'])
+        return json.dumps(result)
+    else:
+        return 'false'
 
 """
 market
@@ -436,84 +552,6 @@ def register_admin():
                                              role=1,
                                              email=request.form['email']))
 
-"""
-group_idにプロジェクト作成する。
-group_id=0ならマイプロジェクト
-"""
-@app.route('/createm', methods=['POST'])
-def createm():
-    if 'user' in session:
-        gid = int(request.form['group_id'])
-        if gid == 0:
-            project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], group_id=0)
-            return json.dumps(project)
-        else:
-            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-            cur = connect.cursor()
-            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
-            rows = cur.fetchall()
-            cur.close()
-            connect.close()
-            if not len(rows) == 0:
-                joinInfo = {}
-                joinInfo['id'] = int(rows[0][0])
-                joinInfo['role'] = int(rows[0][1])
-                if joinInfo['id'] == int(gid) and joinInfo['role'] == 1:
-                    project = MetaModelService.createMetaModel(session['user'], request.form['name'], request.form['xml'], request.form['visibillity'], group_id=joinInfo['id'])
-                    return json.dumps(project)
-    return 'false'
-
-"""
-group_idにプロジェクト作成する。
-group_id=0ならマイプロジェクト
-"""
-@app.route('/createp', methods=['POST'])
-def createp():
-    if 'user' in session:
-        gid = int(request.form['group_id'])
-        sample = False
-        if 'sample' in request.form:
-            sample = True
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        if gid == 0:
-            project = ProjectService.createProject(connect, session['user'], request.form['name'], request.form['xml'], request.form['metamodel_id'],_is_sample=sample)
-            connect.close()
-            return json.dumps(project)
-        else:
-            cur = connect.cursor()
-            cur.execute('SELECT group_id,role FROM JoinInfo WHERE user_id=%s AND group_id=%s;', (session['user']['id'], gid, ))
-            rows = cur.fetchall()
-            cur.close()
-            if not len(rows) == 0:
-                joinInfo = {}
-                joinInfo['id'] = int(rows[0][0])
-                joinInfo['role'] = int(rows[0][1])
-                project = ProjectService.createProject(connect,
-                                                       session['user'],
-                                                       request.form['name'],
-                                                       request.form['xml'],
-                                                       request.form['metamodel_id'],
-                                                       group_id=joinInfo['id'],
-                                                       _is_sample=sample)
-                connect.close()
-                return json.dumps(project)
-    return 'false'
-
-@app.route('/deletep', methods=['POST'])
-def deletep():
-    if 'user' in session:
-        result = ProjectService.deleteProject(session['user'], request.form['pid'])
-        return json.dumps(result)
-    else:
-        return 'false'
-
-@app.route('/deletem', methods=['POST'])
-def deletem():
-    if 'user' in session:
-        result = MetaModelService.deleteMetaModel(session['user'], request.form['id'])
-        return json.dumps(result)
-    else:
-        return 'false'
 
 @app.route('/pload', methods=['POST'])
 def pload():
