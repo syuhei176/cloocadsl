@@ -6,6 +6,14 @@
 <title>clooca</title>
 <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+<style>
+.selected_proj {
+background-color: #0f0;
+}
+#kadai {
+font-size: 24px;
+}
+</style>
 <script src="/static/js/jquery-1.7.1.min.js"></script>
 <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
@@ -157,7 +165,47 @@ function load_models() {
 	}
 	create_metamodels_table(available_metamodels);
 	create_projects_table(myprojects, available_metamodels);
+	create_kadai_table(myprojects, available_metamodels);
+	$("#kadai td").mouseover(function(){
+		if($(this).html() != '課題名') {
+			$(this).addClass('selected_proj');
+		}
+	}).mouseout(function(){
+		if($(this).html() != '課題名') {
+			$(this).removeClass('selected_proj');
+		}
+	})
 }
+
+function create_kadai_project(metamodel_id) {
+    $.post( '/createp', { name: 'kadai', metamodel_id: metamodel_id, xml: '', group_id: {{group_id}}, sample: false},
+  	      function( data ) {
+  	    	if(data != null) {
+  	    		window.location.reload();
+  	    	}
+  	      }, "json");
+}
+function create_kadai_table(projects, metamodels) {
+	var html = '<table border="1" padding="100"><tr><td>課題名</td></tr>';
+	for(var i = 0;i < metamodels.length;i++) {
+		var project_id = 0;
+		for(var j = 0;j < projects.length;j++) {
+			if(projects[j].meta_id == metamodels[i].id && projects[j].name == 'kadai') {
+				project_id = projects[j].id;
+			}
+		}
+		var link = '';
+		if(project_id == 0) {
+			link = '<td onclick="create_kadai_project('+metamodels[i].id+')"><a target="_blank">'+metamodels[i].name+'</a></td>';
+		}else{
+			link = '<td onclick="window.open(\'/editorjs/'+project_id+'\')"><a target="_blank">'+metamodels[i].name+'</a></td>';
+		}
+		html += '<tr>'+link+'</tr>';
+	}
+	html += '</table>';
+	  $('#kadai').empty().append(html);
+}
+
 
 function create_projects_table(projects, metamodels) {
 	var html = '<table padding="100"><tr><td>プロジェクト名</td><td>種類</td></tr>';
@@ -343,6 +391,8 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
 		<li><a href="#dashboard-tabs-4">メンバー</a></li>
 	</ul>
 	<div id="dashboard-tabs-1">
+            <h2>課題</h2>
+            <div id="kadai"></div>
             <h2>プロジェクト</h2>
             <div id="project"></div>
             <p><a id="create-newp-button" class="btn btn-danger btn-small" href="#">　新規作成 &raquo;　　</a></p>
