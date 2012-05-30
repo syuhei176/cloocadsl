@@ -1,0 +1,15 @@
+    #user-div {
+    color:#fff;
+    float:right;
+    width: 120px;
+    height: 60px;
+    }
+    #logout-div {
+    color:#fff;
+    float:right;
+    padding-right: 15px;
+    }
+    #logout-div a {
+    	text-decoration: none;
+    	color:#fff;
+    }

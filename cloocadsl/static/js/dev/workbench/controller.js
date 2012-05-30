@@ -37,7 +37,11 @@ function wb_loadMetaModel(id) {
 					}else{
 						g_metamodel = JSON.parse(data.xml);
 					}
-					g_wbconfig = JSON.parse(data.config);
+					if(data.xml == ' ' || data.xml == null || data.xml.length == 0) {
+						g_wbconfig = {targets:[]};
+					}else{
+						g_wbconfig = JSON.parse(data.config);
+					}
 					for(var i=0;i < g_metamodel.metaobjects.length;i++) {
 						if(g_metamodel.metaobjects[i] != null) {
 							metaobject_IdGenerator.setOffset(g_metamodel.metaobjects[i].id);

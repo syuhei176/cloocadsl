@@ -120,7 +120,7 @@ Currently, clooca is being introduced at the lesson of the Kyushu University Gra
             <div id="login-form-wrapper" class="ui-widget-content ui-corner-all">
             <h3 class="ui-widget-header ui-corner-all">{{ group['name'] }}にログイン</h3>
              <div id="login-messaeg"> </div><br>
-             <form id="loginform" action="/login-to">
+             <form id="loginform" action="/login/{{ group['id'] }}">
              <div>ユーザ名　：<input type="text" name="username"></div>
              <div>パスワード：<input type="password" name="password"></div>
              <div>ログイン状態を保持する：<input type="checkbox" name="permanent" value="true"></div>

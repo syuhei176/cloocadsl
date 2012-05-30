@@ -17,54 +17,12 @@ Ext.define('Tool', {
     ]
 });
 
-Ext.onReady(function() {
-	var body = Ext.getBody();
-	
-	function mytools() {
-		$.ajax({
-			type:"POST",
-			url: '/mytools',
-			data: '',
-			dataType: 'json',
-			success: function(data){
-				g_mytools = data;
-			}
-		});
-	}
-	mytools();
-	
-    var tabs = Ext.createWidget('tabpanel', {
-        activeTab: 0,
-        width: 750,
-        height: 420,
-        plain: true,
-        region: 'center',
-        defaults :{
-            autoScroll: false,
-            bodyPadding: 10
-        },
-        items: [create_projects_tab(), create_mytools_tab()]
-    });
-
-    var viewport = Ext.create('Ext.Viewport', {
-        id: 'border-example',
-        renderTo: body,
-        layout: 'border',
-        items: [
-        // create instance immediately
-        Ext.create('Ext.Component', {
-            region: 'north',
-            height: 32, // give north and south regions a height
-            html:'<p>　clooca <div style="color:#fff;float:right;padding-right: 15px;">'+g_username+'&nbsp;&nbsp;<a href="/logout" onclick="/logout" style="color:#fff;">logout</a>&nbsp;&nbsp;&nbsp;</div></p>'
-        }), tabs]
-    });
-    
     function create_projects_tab() {
         var ds = Ext.create('Ext.data.Store', {
             model: 'Project',
             proxy: {
                 type: 'ajax',
-                url : '/project_list',
+                url : '/myprojects',
                 reader: {
                     type: 'json',
                 }
@@ -107,12 +65,16 @@ Ext.onReady(function() {
                       handler:function(btn){
                           var record = grid.getSelectionModel().getSelection()[0];
                           if (record) {
-                        		$.post('/deletep', { pid : record.get('id') },
-                        				function(data) {
-                        					if(data) {
-                                                ds.remove(record);
-                        					}
-                        				}, "json");
+                        	  Ext.Msg.confirm('プロジェクトの削除','削除しますか？',function(btn){
+                        		  if(btn == 'yes') {
+                                		$.post('/deletep', { pid : record.get('id') },
+                                				function(data) {
+                                					if(data) {
+                                                        ds.remove(record);
+                                					}
+                                				}, "json");
+                        		  }
+                        	  });
                           }
                       }
                   },{
@@ -254,7 +216,7 @@ Ext.onReady(function() {
             model: 'Tool',
             proxy: {
                 type: 'ajax',
-                url : '/mytools',
+                url : '/mytools-wbs',
                 reader: {
                     type: 'json',
                 }
@@ -284,25 +246,15 @@ Ext.onReady(function() {
             ],
            	tbar:[
                   {
-                      text:'新規作成',
+                      text:'購入',
                       iconCls:'add',
                       handler:function(btn){
-                    	  create_project_window();
-//                          ds.insert(new_metadiagram.id,data);
+                    	  window.open('/market')
                       }
                   },{
                       text:'削除',
                       iconCls:'delete',
                       handler:function(btn){
-                          var record = grid.getSelectionModel().getSelection()[0];
-                          if (record) {
-                        		$.post('/deletep', { pid : record.get('id') },
-                        				function(data) {
-                        					if(data) {
-                        						mytools_ds.remove(record);
-                        					}
-                        				}, "json");
-                          }
                       }
                   },{
 //                      text:'更新',
@@ -439,4 +391,3 @@ Ext.onReady(function() {
     }
     */
     }
-});

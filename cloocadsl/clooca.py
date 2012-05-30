@@ -91,7 +91,7 @@ def reg_wb_license_view():
     return render_template('/register/reg_wb_license.html')
 
 """
-id13
+id:13
 visibillity public
 """
 @app.route('/reg', methods=['POST'])
@@ -148,6 +148,24 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
+"""
+id:18
+"""
+@app.route('/get-userinfo')
+def get_userinfo():
+    if 'user' in session:
+        user = UserService.getUserInfo(session['user'])
+    return json.dumps(user)
+
+"""
+id:19
+"""
+@app.route('/update-userinfo')
+def update_userinfo():
+    if 'user' in session:
+        user = UserService.updateUserInfo(session['user'])
+    return json.dumps(user)
+
 
 """
 id:20
@@ -168,7 +186,7 @@ def mypage():
 id:21
 visibillity editor,wb
 """
-@app.route('/project_list', methods=['GET'])
+@app.route('/myprojects', methods=['GET'])
 def project_list():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -192,10 +210,9 @@ for wb license
 def mytools():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        mydevtools = MetaModelService.loadMyAllMetaModelList(session['user'], connect)
         mytools = MetaModelService.loadMyTools(session['user'], connect)
         connect.close()
-        return json.dumps(reduce(lambda a,b: a+b, [mydevtools,mytools],[]))
+        return json.dumps(rmytools)
     return 'false'
 
 """
@@ -207,9 +224,8 @@ def mytools():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         mydevtools = MetaModelService.loadMyAllMetaModelList(session['user'], connect)
-        mytools = MetaModelService.loadMyTools(session['user'], connect)
         connect.close()
-        return json.dumps(reduce(lambda a,b: a+b, [mydevtools,mytools],[]))
+        return json.dumps(mydevtools)
     return 'false'
 
 """
@@ -314,102 +330,238 @@ def deletem():
         return 'false'
 
 """
-market
+エディタ
 """
-
 """
-for editor license
-for wb license
-@param tool_id: 
+id:30
 """
-@app.route('/buy-tool', methods=['POST'])
-def buy_tool():
+@app.route('/editor/<pid>')
+def editor(pid):
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = ProjectService.loadProject(session['user'], pid, connect)
         connect.close()
-        return json.dumps()
-    return 'false'
-
-"""
-for wb license
-@param metamodel_id: 
-"""
-@app.route('/sell-tool', methods=['POST'])
-def buy_tool():
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        connect.close()
-        return json.dumps()
-    return 'false'
-
-
-@app.route('/login/<gid>', methods=['GET'])
-def login_to_group_view_(gid):
-    if 'user' in session:
-        return redirect('/dashboard/'+str(gid))
+        if not result == None:
+            joinInfo = {}
+            joinInfo['id'] = 0
+            joinInfo['role'] = 0
+            joinInfo['name'] = 'dummy'
+            joinInfo['service'] = 'free'
+            result['group'] = joinInfo
+            return render_template('editorjs.html', pid = pid, project = json.dumps(result))
     else:
+        return redirect(url_for('login_view'))
+    return render_template('request_deny.html')
+
+"""
+id:31
+"""
+@app.route('/psave', methods=['POST'])
+def psave():
+    return json.dumps(ProjectService.saveProject(session['user'], request.form['pid'], request.form['xml']))
+
+"""
+id:32
+"""
+@app.route('/gen', methods=['POST'])
+def gen():
+    if 'user' in session:
+        generator = ModelCompiler.BaseGenerator()
+        mes = generator.GenerateCode(session['user'], int(request.form['pid']), request.form['target']);
+        return json.dumps(mes)
+    else:
+        return 'false'
+"""
+id:33
+"""
+@app.route('/download/<pid>', methods=['GET'])
+def download(pid):
+    if 'user' in session:
+        user = session['user']
+#        target = request.form['target']
+#        generator = ModelCompiler.BaseGenerator()
+#        mes = generator.GenerateCode(user, int(pid), target);
+        project_id = pid;
+        userpath = config.CLOOCA_CGI+'/out/' + user['uname']
+        projectpath = userpath + '/p' + project_id
+        filepath = projectpath + '/p' + project_id + '.zip'
+        if os.path.exists(projectpath) == True:
+            if os.path.exists(filepath) == True:
+                os.remove(filepath)
+            zip = zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED)
+            filelist=os.listdir(projectpath)
+            for n in range(len(filelist)):
+                if not filelist[n].encode('ascii') == 'p' + project_id+'.zip':
+                    zip.write(projectpath + '/' + filelist[n].encode('ascii'), filelist[n].encode('ascii'))
+            zip.close()
+            f = open(filepath, 'rb')
+            content = f.read()
+            os.remove(filepath)
+            resp = make_response(content)
+            resp.headers['Content-type'] = 'application/octet-stream;'
+            resp.headers['Content-Disposition'] = 'attachment; filename=p'+project_id+'.zip;'
+            return resp
+    return render_template('request_deny.html')
+
+
+"""
+id:34
+"""
+@app.route('/run', methods=['POST'])
+def run():
+    if 'user' in session:
+        pass
+
+"""
+id:35
+"""
+@app.route('/deploy', methods=['POST'])
+def deploy():
+    if 'user' in session:
+        pass
+
+"""
+id:36
+"""
+@app.route('/import', methods=['POST'])
+def import_project():
+    if 'user' in session:
+        pass
+
+"""
+id:37
+"""
+@app.route('/export', methods=['POST'])
+def export_project():
+    if 'user' in session:
+        pass
+
+"""
+id:40
+"""
+@app.route('/workbench/<id>')
+def workbenchjs(id=None):
+    if 'user' in session:
+        return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
+    return redirect(url_for('login_view'))
+
+"""
+id:41
+"""
+@app.route('/wb/save', methods=['POST'])
+def msave():
+    return json.dumps(MetaModelService.saveMetaModel(session['user'], request.form['id'], request.form['xml']))
+
+"""
+id:42
+"""
+@app.route('/wb/preview/<id>')
+def wb_preview(id):
+    if 'user' in session:
+        result = {}
+        result['id'] = None
+        result['name'] = 'preview'
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        group = GroupService.getGroup(None, gid, connect)
+        result['xml'] = MetaModelService.loadSample(connect, session['user'], id)
+        result['metamodel_id'] = id
+        result['rep_id'] = None
+        result['group_id'] = None
+        result['metamodel'] = MetaModelService.loadMetaModel(connect, session['user'], id)
         connect.close()
+        result['group'] = {}
+        result['group']['service'] = 'free'
+        return render_template('preview.html', project = json.dumps(result))
+    else:
+        return redirect(url_for('login_view'))
+    return render_template('request_deny.html')
+
+"""
+id:43
+"""
+@app.route('/template/tree', methods=['POST'])
+def temp_tree():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.tree(request.form['id'], connect)
+        connect.close()
+#        result = FileService.GetFileTree(session['user'], request.form['id'])
+        return json.dumps(result)
+
+"""
+id:44
+"""
+@app.route('/template/new', methods=['POST'])
+def temp_new():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.create(request.form['id'], request.form['fname'], request.form['path'], connect)
+        connect.close()
+        return json.dumps(result)
+
+"""
+id:45
+"""
+@app.route('/template/save', methods=['POST'])
+def temp_save():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.save(int(request.form['id']), request.form['fname'], request.form['target'], request.form['content'], connect)
+        connect.close()
+        return json.dumps(result)
+
+"""
+id:46
+"""
+@app.route('/template/del', methods=['POST'])
+def temp_del():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.delete(int(request.form['id']), request.form['fname'], request.form['target'], connect)
+        connect.close()
+        return json.dumps(result)
+
+@app.route('/wb/import', methods=['POST'])
+def wb_import():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.Import(request.form['id'], request.form['text'], connect)
+        connect.close()
+        return json.dumps(result)
+
+@app.route('/wb/export/<id>', methods=['GET'])
+def wb_export(id):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = TemplateService.Export(id, connect)
+        connect.close()
+        return result
+
+"""
+group
+"""
+
+"""
+"""
+@app.route('/login/<gid>', methods=['GET','POST'])
+def login_to_group_view_(gid):
+    if request.method == 'GET':
+        if 'user' in session:
+            return redirect('/group/'+str(gid))
+        else:
+            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+            group = GroupService.getGroup(None, gid, connect)
+            connect.close()
+            return render_template('login_to_group.html', group=group)
+    elif request.method == 'POST':
+        result = UserService.LoginToGroup(request.form['username'], request.form['password'], gid)
+        return json.dumps(result)
+    else:
         return render_template('login_to_group.html', group=group)
 
-def hash(k):
-    return md5.new(str((k * 5 + 100001) % 34567)).hexdigest()
-
-@app.route('/member_reg/<gid>/<key>', methods=['GET'])
-def member_reg_view(gid,key):
-    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-    group = GroupService.getGroup(None, gid, connect)
-    connect.close()
-    if group == None or not key == hash(int(gid)):
-        return render_template('request_deny.html')
-    if 'user' in session:
-        return render_template('member_join.html', group_id=gid, group=group)
-    else:
-        return render_template('member_reg.html', group_id=gid, group=group)
-
-@app.route('/reg', methods=['GET'])
-def reg_view():
-    return render_template('register.html')
-
-@app.route('/mygroups')
-def mygroups(type='js'):
-    if 'user' in session and 'joinInfos' in session['user']:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        resp = render_template('mygroups.html',
-                               username = session['user']['uname'],
-                               groups = GroupService.getMyGroups(session['user'], connect))
-        connect.close()
-        return resp
-    return redirect(url_for('login_view'))
-
-
-@app.route('/groups')
-def groups():
-    if 'user' in session and 'joinInfos' in session['user']:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = GroupService.getComunity(session['user'], connect)
-        connect.close()
-        for g in result:
-            g['url'] = '/member_reg/'+str(g['id'])+'/'+str(hash(g['id']))
-        return render_template('groups.html',
-                               username = session['user']['uname'],
-                               groups = result)
-    return redirect(url_for('login_view'))
-
-@app.route('/account')
-def account():
-    if 'user' in session:
-        return render_template('account.html', user = UserService.getUserInfo(session['user']))
-    return redirect(url_for('login_view'))
-
-@app.route('/mydb')
-def mydb():
-    if 'user' in session:
-        return CoreService.mydashboard(session['user'])
-    return redirect(url_for('login_view'))
-    
-@app.route('/dashboard/<id>')
+"""
+id:52
+"""
+@app.route('/group/<id>')
 def dashboard(id=None):
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -446,6 +598,143 @@ def dashboard(id=None):
         return redirect(url_for('login_view'))
     return render_template('request_deny.html')
 
+"""
+id:54
+自分がこのグループで開発中のプロジェクト
+"""
+@app.route('/group/myprojects', methods=['POST'])
+def update_group():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
+        connect.close()
+        return json.dumps(result)
+
+"""
+id:55
+グループのツール
+"""
+@app.route('/group/tools', methods=['POST'])
+def update_group():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
+        connect.close()
+        return json.dumps(result)
+
+"""
+id:56
+自分がこのグループで開発中のツール
+"""
+@app.route('/group/mytools', methods=['POST'])
+def update_group():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
+        connect.close()
+        return json.dumps(result)
+
+"""
+id:59
+"""
+@app.route('/update-group', methods=['POST'])
+def update_group():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
+        connect.close()
+        return json.dumps(result)
+
+
+
+
+"""
+market
+"""
+
+"""
+id:63
+for editor license
+for wb license
+@param tool_id: 
+"""
+@app.route('/buy-tool', methods=['POST'])
+def buy_tool():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        connect.close()
+        return json.dumps()
+    return 'false'
+
+"""
+id:64
+for wb license
+@param metamodel_id: 
+"""
+@app.route('/sell-tool', methods=['POST'])
+def buy_tool():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        connect.close()
+        return json.dumps()
+    return 'false'
+
+def hash(k):
+    return md5.new(str((k * 5 + 100001) % 34567)).hexdigest()
+
+@app.route('/member_reg/<gid>/<key>', methods=['GET'])
+def member_reg_view(gid,key):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    group = GroupService.getGroup(None, gid, connect)
+    connect.close()
+    if group == None or not key == hash(int(gid)):
+        return render_template('request_deny.html')
+    if 'user' in session:
+        return render_template('member_join.html', group_id=gid, group=group)
+    else:
+        return render_template('member_reg.html', group_id=gid, group=group)
+
+@app.route('/reg', methods=['GET'])
+def reg_view():
+    return render_template('register.html')
+
+@app.route('/mygroups')
+def mygroups(type='js'):
+    if 'user' in session and 'joinInfos' in session['user']:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        resp = render_template('mygroups.html',
+                               username = session['user']['uname'],
+                               groups = GroupService.getMyGroups(session['user'], connect))
+        connect.close()
+        return resp
+    return redirect(url_for('login_view'))
+
+@app.route('/groups')
+def groups():
+    if 'user' in session and 'joinInfos' in session['user']:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = GroupService.getComunity(session['user'], connect)
+        connect.close()
+        for g in result:
+            g['url'] = '/member_reg/'+str(g['id'])+'/'+str(hash(g['id']))
+        return render_template('groups.html',
+                               username = session['user']['uname'],
+                               groups = result)
+    return redirect(url_for('login_view'))
+
+@app.route('/account')
+def account():
+    if 'user' in session:
+        return render_template('account.html', user = UserService.getUserInfo(session['user']))
+    return redirect(url_for('login_view'))
+
+@app.route('/mydb')
+def mydb():
+    if 'user' in session:
+        return CoreService.mydashboard(session['user'])
+    return redirect(url_for('login_view'))
+    
+
 @app.route('/editorjs/<pid>')
 def editorjs(pid):
     if 'user' in session:
@@ -470,49 +759,7 @@ def editorjs(pid):
         return redirect(url_for('login_view'))
     return render_template('request_deny.html')
 
-@app.route('/editor/<pid>')
-def editor(pid):
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = ProjectService.loadProject(session['user'], pid, connect)
-        connect.close()
-        if not result == None:
-            joinInfo = {}
-            joinInfo['id'] = 0
-            joinInfo['role'] = 0
-            joinInfo['name'] = 'dummy'
-            joinInfo['service'] = 'free'
-            result['group'] = joinInfo
-            return render_template('editorjs.html', pid = pid, project = json.dumps(result))
-    else:
-        return redirect(url_for('login_view'))
-    return render_template('request_deny.html')
 
-@app.route('/wb/preview/<id>')
-def wb_preview(id):
-    if 'user' in session:
-        result = {}
-        result['id'] = None
-        result['name'] = 'preview'
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result['xml'] = MetaModelService.loadSample(connect, session['user'], id)
-        result['metamodel_id'] = id
-        result['rep_id'] = None
-        result['group_id'] = None
-        result['metamodel'] = MetaModelService.loadMetaModel(connect, session['user'], id)
-        connect.close()
-        result['group'] = {}
-        result['group']['service'] = 'free'
-        return render_template('preview.html', project = json.dumps(result))
-    else:
-        return redirect(url_for('login_view'))
-    return render_template('request_deny.html')
-
-@app.route('/workbenchjs/<id>')
-def workbenchjs(id=None):
-    if 'user' in session:
-        return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
-    return redirect(url_for('login_view'))
 
 @app.route('/create-group', methods=['POST'])
 def create_group():
@@ -565,10 +812,6 @@ def pload():
                 return json.dumps(result)
     return 'false'
 
-@app.route('/psave', methods=['POST'])
-def psave():
-    return json.dumps(ProjectService.saveProject(session['user'], request.form['pid'], request.form['xml']))
-
 @app.route('/mload', methods=['POST'])
 def mload():
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -589,6 +832,7 @@ def preview_save():
                                                    request.form['sample']))
     connect.close()
     return res
+
 
 
 @app.route('/metamodel-save', methods=['POST'])
@@ -615,59 +859,9 @@ def metamodel_save():
     return 'false'
     
 
-@app.route('/msave', methods=['POST'])
-def msave():
-    return json.dumps(MetaModelService.saveMetaModel(session['user'], request.form['id'], request.form['xml']))
-
 @app.route('/tcsave', methods=['POST'])
 def tcsave():
     return json.dumps(MetaModelService.saveTempConfig(session['user'], request.form['id'], request.form['tc']))
-
-
-@app.route('/gen', methods=['POST'])
-def gen():
-    if 'user' in session:
-        generator = ModelCompiler.BaseGenerator()
-        mes = generator.GenerateCode(session['user'], int(request.form['pid']), request.form['target']);
-        return json.dumps(mes)
-    else:
-        return 'false'
-
-@app.route('/download/<pid>', methods=['GET'])
-def download(pid):
-    if 'user' in session:
-        user = session['user']
-#        target = request.form['target']
-#        generator = ModelCompiler.BaseGenerator()
-#        mes = generator.GenerateCode(user, int(pid), target);
-        project_id = pid;
-        userpath = config.CLOOCA_CGI+'/out/' + user['uname']
-        projectpath = userpath + '/p' + project_id
-        filepath = projectpath + '/p' + project_id + '.zip'
-        if os.path.exists(projectpath) == True:
-            if os.path.exists(filepath) == True:
-                os.remove(filepath)
-            zip = zipfile.ZipFile(filepath, 'w', zipfile.ZIP_DEFLATED)
-            filelist=os.listdir(projectpath)
-            for n in range(len(filelist)):
-                if not filelist[n].encode('ascii') == 'p' + project_id+'.zip':
-                    zip.write(projectpath + '/' + filelist[n].encode('ascii'), filelist[n].encode('ascii'))
-            zip.close()
-            f = open(filepath, 'rb')
-            content = f.read()
-            os.remove(filepath)
-            resp = make_response(content)
-            resp.headers['Content-type'] = 'application/octet-stream;'
-            resp.headers['Content-Disposition'] = 'attachment; filename=p'+project_id+'.zip;'
-            return resp
-
-@app.route('/update-group', methods=['POST'])
-def update_group():
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
-        connect.close()
-        return json.dumps(result)
 
 @app.route('/compile_server/reserve', methods=['POST'])
 def compile_server_reserve():
@@ -677,54 +871,6 @@ def compile_server_reserve():
 '''
 template
 '''
-@app.route('/template/tree', methods=['POST'])
-def temp_tree():
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.tree(request.form['id'], connect)
-        connect.close()
-#        result = FileService.GetFileTree(session['user'], request.form['id'])
-        return json.dumps(result)
-
-@app.route('/template/new', methods=['POST'])
-def temp_new():
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.create(request.form['id'], request.form['fname'], request.form['path'], connect)
-        connect.close()
-        return json.dumps(result)
-
-@app.route('/template/del', methods=['POST'])
-def temp_del():
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.delete(int(request.form['id']), request.form['fname'], request.form['target'], connect)
-        connect.close()
-        return json.dumps(result)
-
-@app.route('/template/save', methods=['POST'])
-def temp_save():
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.save(int(request.form['id']), request.form['fname'], request.form['target'], request.form['content'], connect)
-        connect.close()
-        return json.dumps(result)
-
-@app.route('/wb/import', methods=['POST'])
-def wb_import():
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.Import(request.form['id'], request.form['text'], connect)
-        connect.close()
-        return json.dumps(result)
-
-@app.route('/wb/export/<id>', methods=['GET'])
-def wb_export(id):
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = TemplateService.Export(id, connect)
-        connect.close()
-        return result
 
 @app.route('/template/import', methods=['POST'])
 def temp_import():

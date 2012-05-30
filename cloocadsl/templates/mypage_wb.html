@@ -15,10 +15,13 @@
     <!--                                                               -->
     <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
     <link href="/static/resources/css/ext-all-access.css" rel="stylesheet">
+    <link href="/static/css/mypage.css" rel="stylesheet">
     <script src="/static/js/jquery-1.7.1.min.js"></script>
     <script src="/static/js/jcanvas.min.js"></script>
     <script src="/static/js/ext-all.js"></script>
     <script src="/static/js/json2.js"></script>
+    <script src="/static/js/mypage.js"></script>
+    <script src="/static/js/mypage_editor.js"></script>
     <script src="/static/js/mypage_wb.js"></script>
     <div id="script-div"></div>
 
@@ -37,6 +40,9 @@
     <!--
     $(function(){
     	g_username = '{{session['user']['uname']}}';
+    	create_mypage([create_projects_tab(),
+						create_mytools_tab(),
+						create_mydevtools_tab()]);
     })
     -->
     </script>

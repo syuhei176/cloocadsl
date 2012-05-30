@@ -129,30 +129,39 @@ def CreateAdminUser(email):
     msg = Gmail.create_message(from_addr, to_addr, 'test subject', 'test body')
     Gmail.send_via_gmail(from_addr, to_addr, msg)
 
-'''
-'''
-def ConfirmEmail():
-    pass
-
 def Login(username, password):
     if not reg_username.match(username):
         return None
-#    session = MySession.GetSession()
     user = GetUserFromDB(username)
     if user == None:
         return None
     if md5.new(password).hexdigest() == user['passwd']:
-        #session.setAttribute('user', user)
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        joinInfos = GroupService.checkUserJoinGroup(user, connect)
-        connect.close()
         user['passwd'] = '*****'
-        user['joinInfos'] = joinInfos
         session['user'] = user
         return user
     else:
         return None
     return None
+
+def LoginToGroup(username, password, gid):
+    if not reg_username.match(username):
+        return None
+    user = GetUserFromDB(username)
+    if user == None:
+        return None
+    if md5.new(password).hexdigest() == user['passwd']:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        if GroupService.checkJoin(user, gid, connect):
+            group = GroupService.getGroup(user, gid, connect)
+            user['passwd'] = '*****'
+            session['user'] = user
+            session['group'] = group
+        connect.close()
+        return user
+    else:
+        return None
+    return None
+
 
 def CheckLoggedin():
     user = GetUser()
