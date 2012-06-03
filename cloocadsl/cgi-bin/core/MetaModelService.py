@@ -179,7 +179,7 @@ def loadMyAllMetaModelList(user, connect):
     return metamodels
 
 
-def loadMyMetaModelList(user, group_id, connect):
+def loadMyMetaModelList(connect, user, group_id):
     cur = connect.cursor()
     cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,group_id FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s AND MetaModelInfo.group_id=%s;',(user['id'], group_id, ))
     rows = cur.fetchall()
@@ -193,7 +193,7 @@ def loadMyMetaModelList(user, group_id, connect):
         metamodels.append(metamodel)
     return metamodels
 
-def loadGroupMetaModelList(user=None, group_id=None, connect=None):
+def loadGroupMetaModelList(connect, user, group_id):
     cur = connect.cursor()
     cur.execute('SELECT id,name,visibillity FROM MetaModelInfo WHERE group_id=%s AND visibillity >= 2;',(group_id, ))
     rows = cur.fetchall()

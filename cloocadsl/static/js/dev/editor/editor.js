@@ -156,10 +156,6 @@ function create_menu() {
         	handler : onItemClick
         }]
     }
-	if(g_projectinfo.group.service == 'free') {
-		
-	}
-	if(g_projectinfo.group.service == 'rep' || g_projectinfo.group.service == 'all') {
 		common_menu.tbar.push({
             text: 'リポジトリ',
             iconCls: 'add16',
@@ -214,8 +210,6 @@ function create_menu() {
                    ],
         	handler : onItemClick
         });
-	}
-	if(g_projectinfo.group.service == 'shinshu' || g_projectinfo.group.service == 'all') {
 		common_menu.tbar.push({
             text: 'バイナリ',
             iconCls: 'add16',
@@ -229,7 +223,6 @@ function create_menu() {
                    ],
         	handler : onItemClick
         });
-	}
 	return common_menu;
 }
 

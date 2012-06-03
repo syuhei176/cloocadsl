@@ -13,9 +13,9 @@ function readProject(project) {
 		}else{
 			g_metamodel = JSON.parse(g_projectinfo.metamodel.xml);
 		}
+		alert(g_projectinfo.metamodel.config);
 		g_projectinfo.metamodel.config = JSON.parse(g_projectinfo.metamodel.config);
 		readModel(project.xml);
-//		Ext.MessageBox.hide();
 	}
 }
 
@@ -24,7 +24,6 @@ function readProject(project) {
  */
 function readModel(xml) {
 	console.log('loaded json string = '+xml);
-	console.log('service='+g_projectinfo.group.service);
 	diagram_IdGenerator.setOffset(g_projectinfo.id * 10000);
 	if(xml == 'null' || xml == '') {
 		g_model = new Model();
@@ -65,18 +64,18 @@ function readModel(xml) {
 		/*
 		 * IDジェネレータの初期値を設定する。
 		*/
-		object_IdGenerator.setOffset(g_projectinfo.id * 10000);
-		property_IdGenerator.setOffset(g_projectinfo.id * 10000);
+//		object_IdGenerator.setOffset(g_projectinfo.id * 10000);
+//		property_IdGenerator.setOffset(g_projectinfo.id * 10000);
 		for(var key in g_model.diagrams) {
 			obj = g_model.diagrams[key]
 			if(obj == null) continue;
-			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
+			if(obj.user_id != g_userinfo.id) continue;
 			diagram_IdGenerator.setOffset(obj.id);
 		}
 		for(var key in g_model.objects) {
 			obj = g_model.objects[key]
 			if(obj == null) continue;
-			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
+			if(obj.user_id != g_userinfo.id) continue;
 			object_IdGenerator.setOffset(obj.id);
 		}
 		for(var key in g_model.objects) {
@@ -89,7 +88,7 @@ function readModel(xml) {
 		for(var key in g_model.relationships) {
 			obj = g_model.relationships[key]
 			if(obj == null) continue;
-			if((g_projectinfo.id + 1) * 10000 <= obj.id) continue;
+			if(obj.user_id != g_userinfo.id) continue;
 			object_IdGenerator.setOffset(obj.id);
 		}
 		for(var key in g_model.relationships) {
@@ -101,7 +100,7 @@ function readModel(xml) {
 		for(var key in g_model.properties) {
 			var prop = g_model.properties[key];
 			if(prop == null) continue;
-			if((g_projectinfo.id + 1) * 10000 <= prop.id) continue;
+			if(prop.user_id != g_userinfo.id) continue;
 			property_IdGenerator.setOffset(prop.id);
 		}
 }

@@ -299,7 +299,7 @@ TempConfigEditor.prototype.show_setting_mappings_window = function(target) {
 
 TempConfigEditor.prototype.save = function() {
 	var self = this;
-	$.post('/tcsave', { id : g_metamodel_id, tc : JSON.stringify(g_wbconfig) },
+	$.post('/tcsave', { id : g_metaproject.id, tc : JSON.stringify(g_wbconfig) },
 			function(data) {
 				if(data) {
 					self.editor.setTitle('WBConfig');
@@ -339,7 +339,7 @@ TemplateEditor.prototype.save = function() {
 	var self = this;
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	this.template.content = this.template.content.replace(/\t/g, "  ");
-	$.post('/template/save', { id : g_metamodel_id, fname : this.template.name , target : this.template.path, content : this.template.content},
+	$.post('/template/save', { id : g_metaproject.id, fname : this.template.name , target : this.template.path, content : this.template.content},
 			function(data) {
 				if(data) {
 					self.panel.setTitle(self.template.name);
@@ -402,7 +402,7 @@ function WellcomeMessageEditor() {
 
 WellcomeMessageEditor.prototype.save = function() {
 	var self = this;
-	saveAll(g_metamodel_id, function(data){
+	saveAll(g_metaproject.id, function(data){
 		if(data) {
 			self.editor.setTitle('welcomemessage');
 		}

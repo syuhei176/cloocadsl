@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+<meta name="gwt:property" content="locale=ja">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>clooca</title>
+
+		<!-- CSS -->
+		<link rel="stylesheet" href="/static/shinra/css/style.css" type="text/css" media="screen" />
+		<link rel="stylesheet" href="/static/shinra/css/social-icons.css" type="text/css" media="screen" />
+		<!--[if IE 8]>
+			<link rel="stylesheet" type="text/css" media="screen" href="/css/ie8-hacks.css" />
+		<![endif]-->
+		<!-- ENDS CSS -->	
+				
+		<!-- GOOGLE FONTS -->
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+		
+		<!-- JS -->
+		<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/easing.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/jquery.scrollTo-1.4.2-min.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/quicksand.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/jquery.cycle.all.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/custom.js"></script>
+		<!--[if IE]>
+			<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+		
+		<!--[if IE 6]>
+			<script type="text/javascript" src="js/DD_belatedPNG.js"></script>
+			<script>
+	      		/* EXAMPLE */
+	      		//DD_belatedPNG.fix('*');
+	    	</script>
+		<![endif]-->
+		<!-- ENDS JS -->
+		
+		<!-- tabs -->
+		<link rel="stylesheet" href="/static/shinra/css/tabs.css" type="text/css" media="screen" />
+		<script type="text/javascript" src="/static/shinra/js/tabs.js"></script>
+  		<!-- ENDS tabs -->
+  		
+  		<!-- prettyPhoto -->
+		<script type="text/javascript" src="/static/shinra/js/prettyPhoto/js/jquery.prettyPhoto.js"></script>
+		<link rel="stylesheet" href="/static/shinra/js/prettyPhoto/css/prettyPhoto.css" type="text/css" media="screen" />
+		<!-- ENDS prettyPhoto -->
+		
+		<!-- superfish -->
+		<link rel="stylesheet" media="screen" href="/static/shinra/css/superfish.css" /> 
+		<link rel="stylesheet" media="screen" href="/static/shinra/css/superfish-left.css" /> 
+		<script type="text/javascript" src="/static/shinra/js/superfish-1.4.8/js/hoverIntent.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/superfish-1.4.8/js/superfish.js"></script>
+		<script type="text/javascript" src="/static/shinra/js/superfish-1.4.8/js/supersubs.js"></script>
+		<!-- ENDS superfish -->
+		
+		<!-- poshytip -->
+		<link rel="stylesheet" href="/static/shinra/js/poshytip-1.0/src/tip-twitter/tip-twitter.css" type="text/css" />
+		<link rel="stylesheet" href="/static/shinra/js/poshytip-1.0/src/tip-yellowsimple/tip-yellowsimple.css" type="text/css" />
+		<script type="text/javascript" src="/static/shinra/js/poshytip-1.0/src/jquery.poshytip.min.js"></script>
+		<!-- ENDS poshytip -->
+		
+		<!-- Fancybox -->
+		<link rel="stylesheet" href="/static/shinra/js/jquery.fancybox-1.3.4/fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
+		<script type="text/javascript" src="/static/shinra/js/jquery.fancybox-1.3.4/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+		<!-- ENDS Fancybox -->
+		
+		<!-- SKIN -->
+		<link rel="stylesheet" href="/static/shinra/skins/plastic/style.css" type="text/css" media="screen" />
+
+<style>
+		#login-form-wrapper {
+		position: absolute;
+		height: 100%;
+		width: 28%;
+		margin-right: 36%;
+		margin-left: 36%;
+		}
+		#login-form-wrapper h3 { margin: 0; padding: 0.4em; text-align: center; }
+	</style>
+	<script type="text/javascript">
+
+function init() {
+ 	$("#loginform").submit(function(event) {
+
+	    /* stop form from submitting normally */
+	    event.preventDefault(); 
+	        
+	    /* get some values from elements on the page: */
+	    var $form = $( this ),
+	        username = $form.find( 'input[name="username"]' ).val(),
+	        password = $form.find( 'input[name="password"]' ).val(),
+	        url = $form.attr( 'action' );
+	    
+	    /* Send the data using post and put the results in a div */
+	    $.post( url, { username: username, password: password , group_key : '{{group_key}}'},
+	      function( data ) {
+	    	if(data != null) {
+	    		$('#login').empty().append('<a href="/logout">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
+	    		$( "#login_dialog" ).dialog('close');
+	    		if(data.state == 0) {
+		    		alert('無料期間中です。'+data.registration_date+'から。');
+	    		}else if(data.state == 1) {
+		    		alert('続けてお使いになる場合は、料金をお支払いください。'+data.registration_date+'から。');
+	    		}
+	    		window.location.reload();
+	    	}else{
+	    		$('#login-messaeg').empty().append('ユーザ名かパスワードが違います。');
+	    	}
+	      }, "json");
+	  });
+// 	login();
+// 	$('#login-form-wrapper').corner();
+}
+
+function login() {
+	$( "#login_dialog" ).dialog({ modal: true });
+}
+
+
+function displayUser(user) {
+	alert('success');
+}
+
+function login_facebook() {
+    var appId = "424460744251434";
+
+    if(window.location.hash.length == 0)
+    {
+        url = "https://www.facebook.com/dialog/oauth?client_id=" + 
+                 appId  + "&redirect_uri=" + window.location +
+                 "&response_type=token";
+        window.open(url);
+
+    } else {
+        accessToken = window.location.hash.substring(1);
+        graphUrl = "https://graph.facebook.com/me?" + accessToken +
+                    "&callback=displayUser"
+
+        //use JSON-P to call the graph
+        var script = document.createElement("script");
+        script.src = graphUrl;
+        document.body.appendChild(script);
+    }
+
+}
+</script>
+</head>
+<body onload="init()">
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+
+<div id="wrapper">
+<div id="header">
+<a href="index.html"><img id="logo" src="img/logo.png" alt="Nova" /></a>
+</div>
+<div id="main">
+<div id="content">
+            <div id="login-form-wrapper">
+            <h3 class="ui-widget-header ui-corner-all">ログイン</h3>
+             <div id="login-messaeg"> </div><br>
+             <form id="loginform" action="/login-to">
+             <div>ユーザ名　：<input type="text" name="username"></div>
+             <div>パスワード：<input type="password" name="password"></div>
+             <div>ログイン状態を保持する：<input type="checkbox" name="permanent" value="true"></div>
+             <input type="submit" value="ログイン">
+             <input type="button" value="facebookでログイン" onclick="login_facebook()">
+             </form>
+             </div>
+</div>
+</div>
+      <footer>
+        <p>当サイトclooca educational versionは無料で使用できる、教育用のWebベースモデル駆動開発ツールです。CloudMDDとして<a href="http://www.ipa.go.jp/jinzai/mitou/2010/2010_1/youth/koubokekka.html">２０１０年度IPA未踏ユース事業</a>に採択されています。
+お問い合わせは<a href="mailto:info&#64;clooca.com">info&#64;clooca.com</a> までお願いします。<br>
+Copyright &copy 2011 clooca　All Rights Reserved.
+</p>
+<div id="footer"></div>
+</div>
+</div>
+</body>
+</html>

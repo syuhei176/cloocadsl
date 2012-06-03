@@ -7,9 +7,9 @@ Ext.require([
     'Ext.tab.Panel'
 ]);
 
-var g_metamodel_id = 0;
-function init_wb(id) {
-	g_metamodel_id = id;
+function init_wb(toolinfo) {
+	g_toolinfo = toolinfo;
+//	g_metamodel_id = id;
 	new Ext.Viewport({
 		layout:'border',
 		items:[
@@ -200,15 +200,25 @@ function onItemClick(item){
 	if(item.id == 'save') {
 		editortabpanel.current_editor.save();
 	}else if(item.id == 'preview') {
-		window.open('/wb/preview/'+g_metamodel_id);
+		window.open('/wb/preview/'+g_metaproject.id);
 	}else if(item.id == 'MetaDiagram') {
-		var editor = new MetaDiagramsEditor(g_metamodel.metadiagrams);
+//		var editor = new MetaDiagramsEditor(g_metamodel.metadiagrams);
+		var editor = new BaseGridEditor(g_metamodel.metadiagrams, 'MetaDiagram', function(d){
+			show_setting_metadiagram_window(d, function(metadiagram) {
+				alert(index);
+				grid.getStore().getAt(index).set('name', metadiagram.name);
+			});
+	}, MetaDiagram);
 		editortabpanel.add(editor, 'metadiagrams');
 	}else if(item.id == 'MetaObj') {
-		var editor = new MetaObjectsEditor(g_metamodel.metaobjects);
+		var editor = new BaseGridEditor(g_metamodel.metaobjects, 'MetaObjects', function(metaobj){
+			console.log(metaobj.id);
+		}, MetaObject);
 		editortabpanel.add(editor, 'metaobjects');
 	}else if(item.id == 'MetaRel') {
-		var editor = new MetaRelationsEditor(g_metamodel.metarelations);
+		var editor = new BaseGridEditor(g_metamodel.metarelations, 'MetaRelationships', function(metaobj){
+			console.log(metaobj.id);
+		}, MetaRelation);
 		editortabpanel.add(editor, 'metarelations');
 	}else if(item.id == 'MetaProp') {
 		var editor = new MetaPropertyEditor(g_metamodel.metaproperties);
@@ -241,12 +251,12 @@ function onTempItemClick(item){
 			 }
 		 },null,true);
 	}else if(item.id == 'export') {
-		window.open('/template/export/'+g_metamodel_id);
+		window.open('/template/export/'+g_metaproject.id);
 	}
 }
 
 function export_template() {
-	$.post('/template/tree', { id : g_metamodel_id},
+	$.post('/template/tree', { id : g_metaproject.id},
 			function(data) {
 				if(data) {
 					
@@ -255,7 +265,7 @@ function export_template() {
 }
 
 function import_template(text) {
-	$.post('/template/import', { id : g_metamodel_id, text: text},
+	$.post('/template/import', { id : g_metaproject.id, text: text},
 			function(data) {
 				if(data) {
 					load_templates();
@@ -267,7 +277,7 @@ function import_template(text) {
  * wb/controller
  */
 function load_templates() {
-	$.post('/template/tree', { id : g_metamodel_id},
+	$.post('/template/tree', { id : g_metaproject.id},
 			function(data) {
 				if(data) {
 					g_templates = data;
@@ -277,7 +287,7 @@ function load_templates() {
 }
 
 function create_new_template(fname, path) {
-	$.post('/template/new', { id : g_metamodel_id, fname : fname, path : path },
+	$.post('/template/new', { id : g_metaproject.id, fname : fname, path : path },
 			function(data) {
 				if(data) {
 					load_templates();
@@ -286,7 +296,7 @@ function create_new_template(fname, path) {
 }
 
 function save_template(fname, target, content) {
-	$.post('/template/save', { id : g_metamodel_id, fname : fname, target : target, content : content},
+	$.post('/template/save', { id : g_metaproject.id, fname : fname, target : target, content : content},
 			function(data) {
 				if(data) {
 					
@@ -295,7 +305,7 @@ function save_template(fname, target, content) {
 }
 
 function del_template(fname, target) {
-	$.post('/template/del', { id : g_metamodel_id, fname : fname, target : target},
+	$.post('/template/del', { id : g_metaproject.id, fname : fname, target : target},
 			function(data) {
 				if(data) {
 					load_templates();
@@ -358,7 +368,7 @@ function createTemplateExplorer() {
             			 if(btn != 'cancel') {
             				 if(text.length != 0) {
                 				 g_wbconfig.targets.push({name:text,mapping:[]});
-                					$.post('/tcsave', { id : g_metamodel_id, tc : JSON.stringify(g_wbconfig) },
+                					$.post('/tcsave', { id : g_metaproject.id, tc : JSON.stringify(g_wbconfig) },
                 							function(data) {
                 								if(data) {
                         							createTemplateExplorer();

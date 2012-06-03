@@ -4,7 +4,7 @@
  */
 function saveMetaModel(id, fn) {
 	var xml = JSON.stringify(g_metamodel);
-	$.post('/msave', { id : id, xml : xml }, fn, "json");
+	$.post('/wb/save', { id : id, xml : xml }, fn, "json");
 }
 
 /**
@@ -25,30 +25,45 @@ function saveAll(fn) {
  */
 function wb_loadMetaModel(id) {
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
-	$.post('/mload', { id : id },
-			function(data) {
-				if(data) {
-					g_metaproject = data;
+					g_metaproject = g_toolinfo;
 					Ext.getCmp('vsibillity_setting').setValue(g_metaproject.visibillity);
 					Ext.getCmp('name_setting').setValue(g_metaproject.name);
-					console.log('loaded json string = '+data.xml);
-					if(data.xml == ' ' || data.xml == null || data.xml.length == 0) {
+					console.log('loaded json string = '+g_metaproject.xml);
+					if(g_metaproject.xml == ' ' || g_metaproject.xml == null || g_metaproject.xml.length == 0) {
 						g_metamodel = new MetaModel();
 					}else{
-						g_metamodel = JSON.parse(data.xml);
+						g_metamodel = JSON.parse(g_metaproject.xml);
 					}
-					if(data.xml == ' ' || data.xml == null || data.xml.length == 0) {
+					if(g_metaproject.config == ' ' || g_metaproject.config == null || g_metaproject.config == 0) {
 						g_wbconfig = {targets:[]};
 					}else{
-						g_wbconfig = JSON.parse(data.config);
+						g_wbconfig = JSON.parse(g_metaproject.config);
 					}
-					for(var i=0;i < g_metamodel.metaobjects.length;i++) {
-						if(g_metamodel.metaobjects[i] != null) {
-							metaobject_IdGenerator.setOffset(g_metamodel.metaobjects[i].id);
+					metadiagram_IdGenerator = new IdGenerator();
+					metaobject_IdGenerator = new IdGenerator();
+					metarelation_IdGenerator = new IdGenerator();
+					metaproperty_IdGenerator = new IdGenerator();
+
+					for(var key in g_metamodel.metadiagrams) {
+						if(g_metamodel.metadiagrams[key] != null) {
+							metadiagram_IdGenerator.setOffset(g_metamodel.metadiagrams[key].id);
+						}
+					}
+					for(var key in g_metamodel.metaobjects) {
+						if(g_metamodel.metaobjects[key] != null) {
+							metaobject_IdGenerator.setOffset(g_metamodel.metaobjects[key].id);
+						}
+					}
+					for(var key in g_metamodel.metarelations) {
+						if(g_metamodel.metarelations[key] != null) {
+							metarelation_IdGenerator.setOffset(g_metamodel.metarelations[key].id);
+						}
+					}
+					for(var key in g_metamodel.metaproperties) {
+						if(g_metamodel.metaproperties[key] != null) {
+							metaproperty_IdGenerator.setOffset(g_metamodel.metaproperties[key].id);
 						}
 					}
 					load_templates();
 					Ext.MessageBox.hide();
-				}
-			}, "json");
 }

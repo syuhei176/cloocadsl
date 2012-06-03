@@ -5,16 +5,16 @@ function MetaModel(id, name, metadiagram) {
 	this.id = id;
 	this.name = name;
 	this.metadiagram = metadiagram;
-	this.metadiagrams = [];
-	this.metaobjects = [];
-	this.metarelations = [];
-	this.metaproperties = [];
+	this.metadiagrams = {};
+	this.metaobjects = {};
+	this.metarelations = {};
+	this.metaproperties = {};
 	this.graphics = {};
 	this.tools = {};
 }
 
 function MetaDiagram(id, name) {
-	this.id = id;
+	this.id = metadiagram_IdGenerator.getNewId();
 	this.name = name;
 	this.metaobjects = new Array();
 	this.metarelations = new Array();
@@ -24,7 +24,7 @@ function MetaDiagram(id, name) {
 
 function MetaObject(id, name) {
 	this.classname = 'MetaObject';
-	this.id = id;
+	this.id = metaobject_IdGenerator.getNewId();
 	this.name = name;
 	this.properties = new Array();	//propertyへの参照
 	this.abstractable = false;
@@ -36,7 +36,7 @@ function MetaObject(id, name) {
 
 function MetaRelation(id, name) {
 	this.classname = 'MetaRelation';
-	this.id = id;
+	this.id = metarelation_IdGenerator.getNewId();
 	this.name = name;
 	this.properties = new Array();	//propertyへの参照
 	this.bindings = new Array();
@@ -50,7 +50,7 @@ function Binding(src, dest, parent) {
 }
 
 function MetaProperty(id, name) {
-	this.id = id;
+	this.id = metaproperty_IdGenerator.getNewId();
 	this.name = name;
 	/**
 	 * String (e.g. name of a state)

@@ -1,4 +1,108 @@
 /*
+ * メタモデルエディタの基底クラス
+ * datas
+ * title
+ * cb1
+ * MetaMetaElement
+ */
+function BaseGridEditor(datas, title, cb1, MetaMetaElement) {
+	this.title = title;
+	var self = this;
+	/*
+	 * datasは辞書型、配列に変換する。
+	 */
+	var l_datas = [];
+	for(var key in datas) {
+		l_datas.push(datas[key]);
+	}
+	Ext.create('Ext.data.Store', {
+	    storeId:'simpsonsStore',
+	    fields:['id', 'name'],
+	    data:{'items':l_datas},
+	    proxy: {type: 'memory',reader: {type: 'json',root: 'items'}}
+	});
+	/*
+	 * Gridを作成する。
+	 */
+	var grid = Ext.create('Ext.grid.Panel', {
+	    title: title,
+	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
+	    columns: [
+	        { header: 'ID',  dataIndex: 'id' },
+	        { header: '名前', dataIndex: 'name', flex: 1 }
+	    ],
+	    height: 200,
+	    width: 400,
+    	listeners : {
+    		itemdblclick : {
+    			fn : function(rmodel,record,item,index,options){
+    				cb1(datas[record.data.id]);
+    			}
+    		}
+    	},
+    	tbar:[
+              {
+                  text:'追加',
+                  iconCls:'add',
+                  handler:function(btn){
+                	  var new_element = new MetaMetaElement();
+                	  datas[new_element.id] = new_element;
+                      var data = {
+                          id: new_element.id,name: new_element.name
+                      };
+                      grid.getStore().insert(new_element.id,data);
+                      self.panel.setTitle(self.title + '*');
+                  }
+              },
+              {
+                  text:'削除',
+                  iconCls:'delete',
+                  handler:function(btn){
+                      var record = grid.getSelectionModel().getSelection()[0];
+                      if (record) {
+                          grid.getStore().remove(record);
+                          delete datas[record.get('id')];
+                          self.panel.setTitle(self.title + '*');
+                      }
+                  }
+              }
+              ]
+	});
+	this.panel = Ext.create('Ext.panel.Panel',
+			{
+				xtype: 'panel',
+			  	   title: title,
+			  	   layout: {
+			  		   type: 'hbox',
+			  		   align: 'center'
+			  	   },
+			  	   items: [grid],
+			  	   closable: 'true'
+		});
+}
+
+BaseGridEditor.prototype.save = function() {
+	var self = this;
+	saveMetaModel(g_metaproject.id, function(data){
+		if(data) {
+			self.panel.setTitle(self.title);
+		}
+	});
+}
+
+BaseGridEditor.prototype.getPanel = function() {
+	return this.panel;
+}
+
+BaseGridEditor.prototype.Initialize = function() {
+}
+
+BaseGridEditor.prototype.onActivate = function() {
+	current_editor = this;
+}
+
+
+/*
  * jsonエディタも付ける、json側がマスターになってる
  */
 function MetaDiagramsEditor(metaobjects) {
@@ -82,7 +186,8 @@ function MetaDiagramsEditor(metaobjects) {
 	
 }
 
-MetaDiagramsEditor.prototype.show_setting_metadiagram_window = function(metadiagram, fn) {
+//MetaDiagramsEditor.prototype.show_setting_metadiagram_window = function(metadiagram, fn) {
+function show_setting_metadiagram_window(metadiagram, fn) {
 	var self = this;
 	var type_states = Ext.create('Ext.data.Store', {
 	    fields: ['disp','type'],
@@ -143,7 +248,7 @@ MetaDiagramsEditor.prototype.show_setting_metadiagram_window = function(metadiag
 	        	self.createMetaObjectGrid(function(meta_objs){
 	        		metadiagram.metaobjects = meta_objs;
 	        		win.hide();
-	        		self.show_setting_metadiagram_window(metadiagram);
+	        		show_setting_metadiagram_window(metadiagram);
 	        	}, metadiagram.metaobjects);
 	        }
 	    },{
@@ -173,7 +278,7 @@ MetaDiagramsEditor.prototype.show_setting_metadiagram_window = function(metadiag
 
 MetaDiagramsEditor.prototype.save = function() {
 	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
+	saveMetaModel(g_metaproject.id, function(data){
 		if(data) {
 			self.panel.setTitle('MetaDiagrams');
 		}
@@ -191,23 +296,23 @@ MetaDiagramsEditor.prototype.onActivate = function() {
 	current_editor = this;
 }
 
-MetaDiagramsEditor.prototype.createMetaObjectGrid = function(fn, selected) {
+function createMetaObjectGrid(fn, selected) {
 	var l_metaobjs = [];
 	for(var i=0;i < g_metamodel.metaobjects.length;i++) {
 		if(g_metamodel.metaobjects[i] != null) l_metaobjs.push(g_metamodel.metaobjects[i]);
 	}
-	this.createMetaElementGrid(l_metaobjs, fn, selected);
+	createMetaElementGrid(l_metaobjs, fn, selected);
 }
 
-MetaDiagramsEditor.prototype.createMetaRelationGrid = function(fn, selected) {
+function createMetaRelationGrid(fn, selected) {
 	var l_metaobjs = [];
 	for(var i=0;i < g_metamodel.metarelations.length;i++) {
 		if(g_metamodel.metarelations[i] != null) l_metaobjs.push(g_metamodel.metarelations[i]);
 	}
-	this.createMetaElementGrid(l_metaobjs, fn, selected);
+	createMetaElementGrid(l_metaobjs, fn, selected);
 }
 
-MetaDiagramsEditor.prototype.createMetaElementGrid = function(l_elements, fn, selected) {
+function createMetaElementGrid(l_elements, fn, selected) {
 	var win = null;
 	var metaobjs = [];
 	Ext.create('Ext.data.Store', {
@@ -351,7 +456,7 @@ function MetaObjectsEditor(metaobjects) {
 
 MetaObjectsEditor.prototype.save = function() {
 	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
+	saveMetaModel(g_metaproject.id, function(data){
 		if(data) {
 			self.panel.setTitle('JSONEditor');
 		}
@@ -447,7 +552,7 @@ function MetaRelationsEditor(metarelations) {
 
 MetaRelationsEditor.prototype.save = function() {
 	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
+	saveMetaModel(g_metaproject.id, function(data){
 		if(data) {
 			self.panel.setTitle('JSONEditor');
 		}
@@ -548,7 +653,7 @@ function MetaPropertyEditor(metaobjects) {
 
 MetaPropertyEditor.prototype.save = function() {
 	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
+	saveMetaModel(g_metaproject.id, function(data){
 		if(data) {
 			self.panel.setTitle('JSONEditor');
 		}
@@ -601,7 +706,7 @@ function MetaJSONEditor(metadiagram) {
 
 MetaJSONEditor.prototype.save = function() {
 	var self = this;
-	saveMetaModel(g_metamodel_id, function(data){
+	saveMetaModel(g_metaproject.id, function(data){
 		if(data) {
 			self.editor.setTitle('JSONEditor');
 		}

@@ -19,6 +19,17 @@ def checkJoin(user, group_id, connect):
         return False
     return True
 
+def checkJoinByKey(user, group_key, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT role FROM GroupInfo INNER JOIN JoinInfo ON GroupInfo.id = JoinInfo.group_id AND JoinInfo.user_id=%s AND GroupInfo.group_key=%s;',(user['id'], group_key))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
+    role = int(has_rows[0][0])
+    return role
+
+
 def checkUserJoinGroup(user, connect):
     cur = connect.cursor()
     cur.execute('SELECT GroupInfo.id AS id1, JoinInfo.group_id AS id2,name,user_id,role,service FROM GroupInfo INNER JOIN JoinInfo ON GroupInfo.id = JoinInfo.group_id AND JoinInfo.user_id=%s;',(user['id'], ))
@@ -64,6 +75,7 @@ def joinGroup(user, group_id, connect):
     if not len(rows) == 0:
         cur.close()
         return False
+    cur.execute('UPDATE UserInfo SET group_id=%s WHERE id=%s;', (group_id, user['id']))
     cur.execute('INSERT INTO JoinInfo (user_id,group_id,role) VALUES(%s,%s,%s);',(user['id'], group_id, 0, ))
     connect.commit()
     cur.close()
@@ -78,35 +90,59 @@ def updateRole(user, group_id, user_id, role, connect):
         return False
     return True
     
-def createGroup(user, group_name, connect):
-    if user['role'] == 0:
-        return False
+def createGroup(connect, user_id, group_key, group_name):
     if len(group_name.encode('utf_8')) >= 255:
         return False
     cur = connect.cursor()
-    cur.execute('INSERT INTO GroupInfo (name,detail,visibillity,service) VALUES(%s,%s,%s,%s);',(group_name.encode('utf_8'),'',0,'free'))
+    d = datetime.datetime.today()
+    cur.execute('INSERT INTO GroupInfo (group_key,name,detail,visibillity,service,registration_date) VALUES(%s,%s,%s,%s,%s,%s);',(group_key, group_name.encode('utf_8'),'',0,'free',d.strftime("%Y-%m-%d"),))
     connect.commit()
     group_id = cur.lastrowid
-    cur.execute('INSERT INTO JoinInfo (user_id,group_id,role) VALUES(%s,%s,%s);',(user['id'], group_id, 1, ))
+    cur.execute('UPDATE UserInfo SET group_id=%s WHERE id=%s;', (group_id, user_id))
+    cur.execute('INSERT INTO JoinInfo (user_id,group_id,role) VALUES(%s,%s,%s);',(user_id, group_id, 1, ))
     connect.commit()
     cur.close()
     return True
 
-def getGroup(user, group_id, connect):
+def getGroup(group_id, connect):
     cur = connect.cursor()
-    cur.execute('SELECT id,name,detail,visibillity,service FROM GroupInfo WHERE id = %s;', group_id)
+    cur.execute('SELECT id,group_key,name,detail,visibillity,service,registration_date,state FROM GroupInfo WHERE id = %s;', group_id)
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
         return None
     group = {}
     group['id'] = int(rows[0][0])
-    group['name'] = rows[0][1].decode('utf-8')
-    group['detail'] = rows[0][2].decode('utf-8')
-    group['visibillity'] = int(rows[0][3])
-    group['service'] = rows[0][4]
+    group['key'] = rows[0][1]
+    group['name'] = rows[0][2].decode('utf-8')
+    group['detail'] = rows[0][3].decode('utf-8')
+    group['visibillity'] = int(rows[0][4])
+    group['service'] = rows[0][5]
+    group['registration_date'] = rows[0][6]
+    group['state'] = int(rows[0][7])
     cur.close()
-    return group    
+    return group
+
+def getGroupByKey(group_key, connect):
+    cur = connect.cursor()
+    cur.execute('SELECT id,group_key,name,detail,visibillity,service,registration_date,state FROM GroupInfo WHERE group_key = %s;', group_key)
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        return None
+    group = {}
+    group['id'] = int(rows[0][0])
+    group['key'] = rows[0][1]
+    group['name'] = rows[0][2].decode('utf-8')
+    group['detail'] = rows[0][3].decode('utf-8')
+    group['visibillity'] = int(rows[0][4])
+    group['service'] = rows[0][5]
+    group['registration_date'] = rows[0][6]
+    group['state'] = int(rows[0][7])
+    cur.close()
+    return group
+
+
 
 def updateGroup(user, group_id, name, detail, visibillity, connect):
     if len(name) >= 255:
@@ -153,6 +189,29 @@ def getGroupMember(user, group_id, connect):
         member['group_role'] = group_role
         members.append(member)
     return members
+
+def addUser(connect, user, group_id, username, password):
+    d = datetime.datetime.today()
+    if not reg_username.match(username):
+        return False
+    if len(password) < 5:
+        return False
+    cur = connect.cursor()
+    cur.execute('SELECT uname FROM UserInfo WHERE uname = %s AND group_id=%s;', (username, group_id, ))
+    rows = cur.fetchall()
+    if not len(rows) == 0:
+        cur.close()
+        return False
+    cur.execute('INSERT INTO UserInfo (uname,passwd,register_date,email,state,license_type,group_id) VALUES(%s,%s,%s,%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), '', 2, 'membr', group_id, ))
+    user_id = cur.lastrowid
+    connect.commit()
+    cur.close()
+    return True
+
+def addUsers(connect, user, group_id, members_text):
+    members = json.loads(members_text)
+    for member in members:
+        addUser(connect, user, group_id, member['username'], member['password'])
 
 def getComunity(user, connect):
     cur = connect.cursor()

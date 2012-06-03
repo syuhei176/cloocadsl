@@ -39,7 +39,7 @@
     <script>
     <!--
     $(function(){
-    	g_username = '{{session['user']['uname']}}';
+    	g_user = {{user|safe}};
     	create_mypage([create_projects_tab(),
 						create_mytools_tab(),
 						create_mydevtools_tab()]);

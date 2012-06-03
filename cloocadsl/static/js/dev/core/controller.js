@@ -21,7 +21,8 @@ function genbin(pid) {
  * Save Model
  * グローバル変数g_modelの内容をサーバに保存する。
  */
-function saveModel(pid) {
+function saveModel() {
+	var pid = g_projectinfo.id;
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	if(_is_preview) {
 		var xml = JSON.stringify(g_model);
@@ -39,6 +40,13 @@ function saveModel(pid) {
 				function(data) {
 					if(data) {
 						console.log('saved json string = '+xml);
+						if(data.updated) {
+							g_projectinfo.xml = data.xml;
+							readModel(data.xml);
+							createModelExplorer();
+							editortabpanel.update();
+//							editortabpanel.close();
+						}
 						Ext.MessageBox.hide();
 					}
 				}, "json");

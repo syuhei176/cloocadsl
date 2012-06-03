@@ -54,14 +54,18 @@ $toolbar-separator-highlight-color: #5d5d6e !default;
 
 //buttons
 $button-default-base-color: #2a3142;
-$button-default-base-color-over: $orange;
-$button-default-base-color-pressed: #da7b19;
+//edit by nakamura
+$button-default-base-color-over: #dcba00;
+$button-default-base-color-pressed: #ffd800;
+//edit by nakamura
 $button-default-color: #fff;
 
 $button-toolbar-border-color-over: #d97e27;
 $button-toolbar-border-color-pressed: #c86e19;
-$button-toolbar-background-color-over: $orange;
-$button-toolbar-background-color-pressed: #db7b1f;
+//edit by nakamura
+$button-toolbar-background-color-over: #dcba00;
+$button-toolbar-background-color-pressed: #ffd800;
+//edit by nakamura
 $button-toolbar-background-gradient: null;
 $button-toolbar-background-gradient-over: null;
 $button-toolbar-background-gradient-focus: null;

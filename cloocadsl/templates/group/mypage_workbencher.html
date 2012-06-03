@@ -1,0 +1,86 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
+<html>
+  <head>
+	<meta name="gwt:property" content="locale=ja_JP">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+    <link href="/static/resources/css/ext-all-access.css" rel="stylesheet">
+    <link href="/static/css/mypage.css" rel="stylesheet">
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/jcanvas.min.js"></script>
+    <script src="/static/js/ext-all.js"></script>
+    <script src="/static/js/json2.js"></script>
+    <script src="/static/js/mypage.js"></script>
+    <script src="/static/js/group/mypage_member.js"></script>
+    <script src="/static/js/group/mypage_workbencher.js"></script>
+    <div id="script-div"></div>
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>clooca mypage</title>
+    
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    
+    <script>
+    <!--
+    $(function(){
+    	g_user = {{user|safe}};
+    	var html = '';
+    	if(g_user.role == 0) {
+    		html += 'オーナー';
+    	}else if(g_user.role == 1) {
+    		html += '管理者';
+    	}else if(g_user.role == 2) {
+    		html += 'メンバー';
+    	}
+    	html += g_user.group.name;
+    	create_mypage([create_projects_tab(),
+						create_mytools_tab(),
+						create_mydevtools_tab()/*,
+						create_group_users_tab()*/], html);
+    })
+    -->
+    </script>
+    <style>
+    #header_right{
+      float: right;
+      padding-left: 0;
+      padding-right: 15px;
+    }
+    
+    </style>
+  </head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body onContextmenu="return false">
+      <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+  </body>
+</html>

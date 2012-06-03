@@ -6,7 +6,8 @@ from email.MIMEText import MIMEText
 from email.Utils import formatdate
 
 def create_message(from_addr, to_addr, subject, body):
-    msg = MIMEText(body)
+    msg = MIMEText(body.encode('utf-8'))
+    msg.set_charset('utf-8')
     msg['Subject'] = subject
     msg['From'] = from_addr
     msg['To'] = to_addr

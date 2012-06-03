@@ -71,6 +71,12 @@ DiagramEditor.prototype.changeCanvasHeight = function(h) {
 	a8.width = this.height;
 }
 
+DiagramEditor.prototype.onUpdate = function() {
+	this.diagram = g_model.diagrams[this.diagram.id];
+	this.diagramController = new DiagramController(this.diagram);
+}
+
+
 DiagramEditor.prototype.draw = function() {
 	var self = this;
 	if(this.canvas == null || this.canvas == undefined) {
@@ -294,9 +300,7 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 }
 
 DiagramEditor.prototype.updateObject = function(obj, x, y) {
-	obj.bound.x += x;
-	obj.bound.y += y;
-	VersionElement.update(obj.ve);
+	this.diagramController.updateObject(obj, x, y)
 	if(this.width < obj.bound.x + obj.bound.width + 32) {
 		this.changeCanvasWidth(obj.bound.x + obj.bound.width + 32);
 	}

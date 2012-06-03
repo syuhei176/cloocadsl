@@ -159,7 +159,7 @@
 				<!-- title -->
 				<div id="page-title">
 					<span class="title">登録フォーム</span>
-					<span class="subtitle">エディタライセンス用登録フォーム</span>
+					<span class="subtitle">グループライセンス用登録フォーム</span>
 				</div>
 				<!-- ENDS title -->
 					
@@ -167,8 +167,8 @@
 				<div class="one-column">
 					<!-- form -->
 					<h2>登録フォーム</h2>
-					<script type="text/javascript" src="/static/shinra/js/form-validation.js"></script>
-					<form id="registerForm" class="contactForm" action="/reg_editor_license" method="post">
+					<script type="text/javascript" src="/static/js/reg/form-validation-group.js"></script>
+					<form id="registerForm" class="contactForm" action="/reg" method="post">
 						<fieldset>
 							<div>
 								<label>ユーザ名</label>
@@ -181,6 +181,14 @@
 							<div>
 								<label>パスワード</label>
 								<input name="passwd"  id="passwd" type="password" class="form-poshytip" title="パスワードを英数字５文字以上で入力してください。" />
+							</div>
+							<div>
+								<label>グループキー</label>
+								<input name="group_key"  id="group_key" type="text" class="form-poshytip" title="Enter your group key" />
+							</div>
+							<div>
+								<label>グループ名</label>
+								<input name="group_name"  id="group_name" type="text" class="form-poshytip" title="Enter your group name" />
 							</div>
 							<p><input type="button" value="送信" name="submit" id="submit" /></p>
 						</fieldset>

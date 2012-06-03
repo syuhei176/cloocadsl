@@ -18,7 +18,9 @@ function Model() {
 }
 
 function Diagram(meta_id) {
-	this.id = diagram_IdGenerator.getNewId();
+	this.user_id = g_userinfo.id;
+	this.id = diagram_IdGenerator.getNewId() + this.user_id * 10000;
+	this.project_id = g_projectinfo.id;
 	this.meta_id = meta_id;
 	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
 	//Objectへの参照
@@ -30,7 +32,9 @@ function Diagram(meta_id) {
 
 function Object(meta_id) {
 	this.meta_id = meta_id;
-	this.id = object_IdGenerator.getNewId();
+	this.user_id = g_userinfo.id;
+	this.id = object_IdGenerator.getNewId() + this.user_id * 10000;
+	this.project_id = g_projectinfo.id;
 	this.bound = new Rectangle2D(50, 50, 50, 50);
 	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
 	this.ve = new VersionElement();
@@ -44,7 +48,9 @@ function ObjectForDiagram() {
 
 function Relationship(meta_id) {
 	this.meta_id = meta_id;
-	this.id = object_IdGenerator.getNewId();
+	this.user_id = g_userinfo.id;
+	this.id = object_IdGenerator.getNewId() + this.user_id * 10000;
+	this.project_id = g_projectinfo.id;
 	this.src = null;
 	this.dest = null;
 	this.points = new Array();
@@ -64,7 +70,9 @@ function PropertyList() {
 }
 
 function Property() {
-	this.id = property_IdGenerator.getNewId();
+	this.user_id = g_userinfo.id;
+	this.id = property_IdGenerator.getNewId() + this.user_id * 10000;
+	this.project_id = g_projectinfo.id;
 //	this.values = new Array();
 	this.meta_id = null;
 	this.value = '';
@@ -74,6 +82,7 @@ function Property() {
 function VersionElement() {
 	this.version = 1;
 	this.ver_type = "add";
+	this.a = 0;
 }
 
 VersionElement.update = function(ve) {
@@ -127,5 +136,3 @@ IdGenerator.prototype.getNewId = function() {
 var diagram_IdGenerator = new IdGenerator();
 var object_IdGenerator = new IdGenerator();
 var property_IdGenerator = new IdGenerator();
-var metaobject_IdGenerator = new IdGenerator();
-var metarelation_IdGenerator = new IdGenerator();

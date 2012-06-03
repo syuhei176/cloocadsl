@@ -24,6 +24,16 @@ EditorTabPanel.prototype.close = function() {
 	}
 }
 
+EditorTabPanel.prototype.update = function() {
+	var len = this.editors.length;
+	for(var i=0;i < len;i++) {
+		if(this.editors[i].editor.onUpdate) {
+			this.editors[i].editor.onUpdate();
+		}
+	}
+}
+
+
 
 EditorTabPanel.prototype.getPanel = function() {
 	return this.tabpanel;

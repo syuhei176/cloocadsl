@@ -99,6 +99,11 @@ function init() {
 	    	if(data != null) {
 	    		$('#login').empty().append('<a href="/logout">logout '+data.uname+'</a>&nbsp;&nbsp;&nbsp;');
 	    		$( "#login_dialog" ).dialog('close');
+	    		if(data.state == 0) {
+		    		alert('無料期間中です。'+data.registration_date+'から。');
+	    		}else if(data.state == 1) {
+		    		alert('続けてお使いになる場合は、料金をお支払いください。'+data.registration_date+'から。');
+	    		}
 	    		window.location.reload();
 	    	}else{
 	    		$('#login-messaeg').empty().append('ユーザ名かパスワードが違います。');

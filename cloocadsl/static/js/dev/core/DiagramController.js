@@ -95,6 +95,7 @@ DiagramController.prototype.addObject = function(x,y,meta_id) {
 			obj.ofd.z = t_obj.ofd.z + 1;
 		}
 	}
+//	saveModel();
 	return obj;
 }
 
@@ -170,6 +171,12 @@ DiagramController.prototype.addElement = function(ele, meta_ele) {
 	if(meta_ele.visible) {
 		
 	}
+}
+
+DiagramController.prototype.updateObject = function(obj, x, y) {
+	obj.bound.x += x;
+	obj.bound.y += y;
+	VersionElement.update(obj.ve);
 }
 
 /**
