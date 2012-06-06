@@ -46,3 +46,37 @@ def load(connect, user, pid):
     project['metamodel'] = metamodel
     #connect.close()
     return project
+
+def saveProject(user, pid, xml):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    #if len(has_rows) == 0:
+    #    connect.close()
+    #    return None
+    cur = connect.cursor()
+    cur.execute('SELECT last_editor_id,xml FROM ProjectInfo WHERE id=%s;',(pid, ))
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        connect.close()
+        return None
+    result_json = xml
+    updated = False
+    """
+    if rows[0][0] == user['id']:
+        pass
+    else:
+        model1 = json.loads(rows[0][1])
+        model2 = json.loads(xml)
+        merged_model = merge(model1, model2)
+        result_json = json.dumps(merged_model)
+        updated = True
+    """
+    affect_row_count = cur.execute('UPDATE ProjectInfo SET xml=%s,last_editor_id=%s WHERE id = %s;',(result_json.encode('utf_8'), user['id'], pid, ))
+    connect.commit()
+    cur.close()
+    connect.close()
+    return {'updated':updated,'xml':result_json}

@@ -4,7 +4,7 @@
 function MetaModel(id, name, metadiagram) {
 	this.id = id;
 	this.name = name;
-	this.metadiagram = metadiagram;
+	this.metadiagram = 1;
 	this.metadiagrams = {};
 	this.metaobjects = {};
 	this.metarelations = {};
@@ -15,7 +15,7 @@ function MetaModel(id, name, metadiagram) {
 
 function MetaDiagram(id, name) {
 	this.id = metadiagram_IdGenerator.getNewId();
-	this.name = name;
+	this.name = 'MetaDiagram'+this.id;
 	this.metaobjects = new Array();
 	this.metarelations = new Array();
 	this.instance_name = null;
@@ -25,7 +25,7 @@ function MetaDiagram(id, name) {
 function MetaObject(id, name) {
 	this.classname = 'MetaObject';
 	this.id = metaobject_IdGenerator.getNewId();
-	this.name = name;
+	this.name = 'MetaObject'+this.id;
 	this.properties = new Array();	//propertyへの参照
 	this.abstractable = false;
 	this.graphic = null;
@@ -37,7 +37,7 @@ function MetaObject(id, name) {
 function MetaRelation(id, name) {
 	this.classname = 'MetaRelation';
 	this.id = metarelation_IdGenerator.getNewId();
-	this.name = name;
+	this.name = 'MetaRelationship'+this.id;
 	this.properties = new Array();	//propertyへの参照
 	this.bindings = new Array();
 	this.arrow_type = "none";
@@ -51,7 +51,7 @@ function Binding(src, dest, parent) {
 
 function MetaProperty(id, name) {
 	this.id = metaproperty_IdGenerator.getNewId();
-	this.name = name;
+	this.name = 'MetaProperty'+this.id;
 	/**
 	 * String (e.g. name of a state)
 	 * Number (e.g. thread of execution of message)

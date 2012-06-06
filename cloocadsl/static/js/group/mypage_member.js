@@ -277,7 +277,7 @@ Ext.define('Tool', {
     var gridForm = Ext.create('Ext.form.Panel', {
         id: 'mytools-tab',
         frame: true,
-        title: 'マイツール',
+        title: 'グループツール',
         bodyPadding: 5,
         width: 750,
         layout: 'column',

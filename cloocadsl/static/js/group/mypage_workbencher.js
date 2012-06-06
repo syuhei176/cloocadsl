@@ -156,6 +156,23 @@ Ext.define('Tool', {
         	    }
             }, {
             	xtype: 'button',
+            	text: '公開',
+        	    handler: function() {
+                    var values = this.up('form').getForm().getValues();
+                    if(values) {
+	        			$.ajax({
+	        				type:"POST",
+	        				url: '/publish',
+	        				data: 'metamodel_id='+values.id,
+	        				dataType: 'json',
+	        				success: function(data){
+	        					mytools_ds.load();
+	        				}
+	        			});
+                    }
+        	    }
+            }, {
+            	xtype: 'button',
             	text: '編集開始',
         	    handler: function() {
                     var record = grid.getSelectionModel().getSelection()[0];

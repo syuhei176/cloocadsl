@@ -54,11 +54,11 @@
     		Ext.Msg.alert("無料期間中です。");
     		html += '試用期間';
     	}
-    	html += '、契約期限：'+g_user.group.contract_deadline;
     	create_mypage([create_projects_tab(),
 						create_mytools_tab(),
 						create_mydevtools_tab(),
-						create_group_users_tab()], html);
+						create_group_users_tab(),
+						create_space_setting_tab()], html);
     })
     -->
     </script>

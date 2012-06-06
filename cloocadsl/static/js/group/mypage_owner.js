@@ -216,3 +216,120 @@ function create_adduser_window() {
 	win.show();
 	}
 }
+
+function create_space_setting_tab() {
+	var way_state = Ext.create('Ext.data.Store', {
+	    fields: ['disp','type'],
+	    data : [{'disp':'銀行振込３ヶ月','type':0},{'disp':'銀行振込６ヶ月','type':1},{'disp':'銀行振込１２ヶ月','type':2}]
+	});
+	var contract = {};
+	if(g_user.group.state != 2) {
+		contract = Ext.create('Ext.form.FieldSet', {
+	        columnWidth: 0.4,
+	        margin: '0 0 0 10',
+	        title:'正式契約する',
+	        defaults: {
+	            width: 240,
+	            labelWidth: 90
+	        },
+	        defaultType: 'textfield',
+	        items: [{
+		    	name: 'role',
+		    	xtype: 'combo',
+	            fieldLabel: '支払い方法',
+		        store: way_state,
+		        queryMode: 'local',
+		        displayField: 'disp',
+		        valueField: 'type'
+	        }, {
+	            fieldLabel: '会社名/個人名',
+	            name: 'comp_name'
+	        }, {
+	            fieldLabel: '会社名/個人名カナ',
+	            name: 'comp_name_kana'
+	        }, {
+	            fieldLabel: '担当者名',
+	            name: 'tantousya'
+	        }, {
+	            fieldLabel: '担当者メールアドレス',
+	            name: 'tantousya_email'
+	        }, {
+	            fieldLabel: '連絡先電話番号',
+	            name: 'tel'
+	        }, {
+	            fieldLabel: '郵便番号',
+	            name: 'post_code'
+	        }, {
+	            fieldLabel: '都道府県',
+	            name: 'city'
+	        }, {
+	            fieldLabel: '住所',
+	            name: 'address'
+	        }, {
+	        	xtype: 'button',
+	        	text: '確認画面へ',
+	    	    handler: function() {
+	                var values = this.up('form').getForm().getValues();
+	                if(values) {
+	                	/*
+	                	 * 確認画面を表示する
+	                	 */
+	                	//window.open
+	                }
+	    	    }
+	        }]
+	    });
+	}
+	var gridForm = Ext.create('Ext.form.Panel', {
+	    id: 'space-tab',
+	    frame: true,
+	    title: 'グループ設定',
+	    bodyPadding: 5,
+	    width: 750,
+	    layout: 'column',
+
+	    fieldDefaults: {
+	        labelAlign: 'left',
+	        msgTarget: 'side'
+	    },
+
+	    items: [{
+	        columnWidth: 0.4,
+	        margin: '0 0 0 10',
+	        xtype: 'fieldset',
+	        title:'グループ設定',
+	        defaults: {
+	            width: 240,
+	            labelWidth: 90
+	        },
+	        defaultType: 'textfield',
+	        items: [{
+	            fieldLabel: '名前',
+	            name: 'name',
+	            value: g_user.group.name
+	        },{
+	        	html: '登録日：' + g_user.group.registration_date + 'から'
+	        },{
+	        	html: '契約期間：' + g_user.group.contract_deadline + 'まで利用可能'
+	        },{
+	        	xtype: 'button',
+	        	text: '変更',
+	    	    handler: function() {
+	                var values = this.up('form').getForm().getValues();
+	                if(values) {
+	        			$.ajax({
+	        				type:"POST",
+	        				url: '/update-group',
+	        				data: 'name='+values.name,
+	        				dataType: 'json',
+	        				success: function(data){
+	        					
+	        				}
+	        			});
+	                }
+	    	    }
+	        }]
+	        },contract],
+	});
+	return gridForm;
+}

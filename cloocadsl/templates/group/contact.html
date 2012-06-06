@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>clooca price</title>
+		<title>clooca</title>
 		
 		<!-- CSS -->
 		<link rel="stylesheet" href="/static/shinra/css/style.css" type="text/css" media="screen" />
@@ -79,31 +79,7 @@
 		
 		<!-- SKIN -->
 		<link rel="stylesheet" href="/static/shinra/skins/plastic/style.css" type="text/css" media="screen" />
-		<style>
-		.menu_hover {
-		background-color: #111111;
-		color: #aaaaaa;
-		}
-		</style>
-		<script type="text/javascript">
-		$(function() {
-			  $("tbody#prices tr").mouseover(function(){
-			    $(this).addClass('menu_hover');
-			  }).mouseout(function(){
-			    $(this).removeClass('menu_hover');
-			  });
-			  $("#editor-license").click(function(){
-				  window.open('/reg_view');
-			  });
-			  $("#wb-license").click(function(){
-				  window.open('/reg_wb_license_view');
-			  });
-			  $("#group-license").click(function(){
-				  window.open('/reg_group_license_view');
-			  });
-		});
 
-		</script>
 	</head>
 	
 	<body class="">
@@ -140,16 +116,16 @@
 							<li><a href=""><span>マーケット</span></a></li>
 						</ul>
 					</li>
-					<li class="current-menu-item"><a href="/price">価格</a>
-											<ul>
-							<li><a href="/price#free"><span> フリープラン</span></a></li>
-							<li><a href="/price#basic"><span> ベーシックプラン</span></a></li>
-							<li><a href="/price#premium"><span> プレミアプラン</span></a></li>
-							<li><a href="/price#package"><span> パッケージ版</span></a></li>
+					<li><a href="/price">価格</a>
+						<ul>
+							<li><a href="features-appearance.html"><span> エディタライセンス</span></a></li>
+							<li><a href="features-columns.html"><span> デベロッパーライセンス</span></a></li>
+							<li><a href="features-accordion.html"><span> グループライセンス</span></a></li>
+							<li><a href="features-toggle.html"><span> パッケージ版</span></a></li>
 						</ul>
 					</li>
 					<li><a href="/market">マーケット</a></li>
-					<li><a href="/contact">お問い合わせ</a></li>
+					<li class="current-menu-item"><a href="/contact">お問い合わせ</a></li>
 				</ul>
 			<!-- Navigation -->	
 			
@@ -166,7 +142,8 @@
 			
 			<!-- Breadcrumb-->
 			<div id="breadcrumbs">
-				<a title="Home" href="/price">価格</a>
+				<a title="Home" href="index.html">Home</a>
+				Contact
 			</div>
 			<!-- ENDS Breadcrumb-->	
 
@@ -181,14 +158,35 @@
 				
 				<!-- title -->
 				<div id="page-title">
-					<span class="title">価格</span>
-					<span class="subtitle">価格表</span>
+					<span class="title">お問い合わせフォーム</span>
+					<span class="subtitle">バグ報告、要望、パッケージ購入等</span>
 				</div>
 				<!-- ENDS title -->
 					
 				<!-- column (left)-->
 				<div class="one-column">
 					<!-- form -->
+					<h2>お問い合わせフォーム</h2>
+					<script type="text/javascript" src="/static/js/group/form-validation-contact.js"></script>
+					<form id="registerForm" class="contactForm" action="/reg" method="post">
+						<fieldset>
+							<div>
+								<label>名前</label>
+								<input name="name"  id="name" type="text" class="form-poshytip" title="Enter your full name" />
+							</div>
+							<div>
+								<label>Email</label>
+								<input name="email"  id="email" type="text" class="form-poshytip" title="Enter your email address" />
+							</div>
+							<div>
+								<label>お問い合わせ内容</label>
+								<textarea  name="content"  id="content" rows="5" cols="20" class="form-poshytip" title="Enter your comments"></textarea>
+							</div>
+							<p><input type="button" value="送信" name="submit" id="submit" /></p>
+						</fieldset>
+						<p id="error" class="warning">メッセージ</p>
+					</form>
+					<p id="success" class="success">ご登録ありがとうございます。</p>
 					<!-- ENDS form -->
 				</div>
 				<!-- ENDS column -->
@@ -196,38 +194,8 @@
 				<!-- column (right)-->
 				<div class="one-column">
 					<!-- content -->
-<!-- table -->
-					<h4 class="line-divider">価格</h4>
-					<table>
-						<tbody id="prices">
-							<tr>
-								<th>プラン</th>
-								<th>価格　　</th>
-								<th>内容　　</th>
-								<th>規模　　　</th>
-							</tr>
-							<tr id="editor-license">
-								<td>フリープラン</td>
-								<td>0円/月</td>
-								<td>＊公開ツールのみ作成可能</td>
-								<td>ユーザ数５人まで</td>
-							</tr>
-							<tr id="wb-license">
-								<td>ベーシックプラン</td>
-								<td>14,800円/月(177,800円/年)</td>
-								<td>全機能</td>
-								<td>ユーザ数２０人まで</td>
-							</tr>
-							<tr id="group-license">
-								<td>プレミアプラン</td>
-								<td>24,800円/月(297,600円/年)</td>
-								<td>全機能</td>
-								<td>ユーザ数８０人まで</td>
-							</tr>
-						</tbody>
-					</table>
-					<!-- ENDS table -->
-										<!-- ENDS content -->
+					<p>会社概要</p>
+					<!-- ENDS content -->
 				</div>
 				<!-- ENDS column -->							
 

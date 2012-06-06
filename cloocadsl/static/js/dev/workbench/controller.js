@@ -30,7 +30,7 @@ function wb_loadMetaModel(id) {
 					Ext.getCmp('name_setting').setValue(g_metaproject.name);
 					console.log('loaded json string = '+g_metaproject.xml);
 					if(g_metaproject.xml == ' ' || g_metaproject.xml == null || g_metaproject.xml.length == 0) {
-						g_metamodel = new MetaModel();
+						g_metamodel = new MetaModel(g_metaproject.id, g_metaproject.name);
 					}else{
 						g_metamodel = JSON.parse(g_metaproject.xml);
 					}

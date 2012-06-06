@@ -213,15 +213,33 @@ function onItemClick(item){
 	}else if(item.id == 'MetaObj') {
 		var editor = new BaseGridEditor(g_metamodel.metaobjects, 'MetaObjects', function(metaobj){
 			console.log(metaobj.id);
+			 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+				 if(btn != 'cancel') {
+					 g_metamodel.metaobjects[metaobj.id] = JSON.parse(text);
+				 }
+			 },null,true,JSON.stringify(metaobj));
 		}, MetaObject);
 		editortabpanel.add(editor, 'metaobjects');
 	}else if(item.id == 'MetaRel') {
 		var editor = new BaseGridEditor(g_metamodel.metarelations, 'MetaRelationships', function(metaobj){
 			console.log(metaobj.id);
+			 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+				 if(btn != 'cancel') {
+					 g_metamodel.metarelations[metaobj.id] = JSON.parse(text);
+				 }
+			 },null,true,JSON.stringify(metaobj));
 		}, MetaRelation);
 		editortabpanel.add(editor, 'metarelations');
 	}else if(item.id == 'MetaProp') {
-		var editor = new MetaPropertyEditor(g_metamodel.metaproperties);
+		var editor = new BaseGridEditor(g_metamodel.metaproperties, 'MetaProperties', function(metaprop){
+			console.log(metaprop.id);
+			 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+				 if(btn != 'cancel') {
+					 g_metamodel.metaproperties[metaprop.id] = JSON.parse(text);
+				 }
+			 },null,true,JSON.stringify(metaprop));
+		}, MetaProperty);
+//		var editor = new MetaPropertyEditor(g_metamodel.metaproperties);
 		editortabpanel.add(editor, 'metaproperties');
 	}else if(item.id == 'metajson') {
 		var editor = new MetaJSONEditor(g_metamodel.metadiagrams);

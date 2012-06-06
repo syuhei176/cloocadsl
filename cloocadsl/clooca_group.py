@@ -15,14 +15,13 @@ from group import RegisterService
 from group import DashboardService
 from group import WorkbenchService
 from group import EditorService
+from group import ModelCompiler
+from group import TemplateService
 from core import CoreService
 from core import UserService
 from core import MetaModelService
 from core import ProjectService
-from core import ModelCompiler
-from core import FileService
 from core import GroupService
-from core import TemplateService
 from mvcs import CommitService
 from mvcs import UpdateServiceJSON
 from mvcs import RepositoryService
@@ -74,7 +73,7 @@ visibillity public
 """
 @app.route('/contact')
 def contact():
-    return render_template('contact.html')
+    return render_template('/group/contact.html')
 
 #登録、ログイン
 
@@ -99,15 +98,15 @@ def reg():
 id:14
 visibillity public
 """
-@app.route('/confirm/<key>', methods=['GET'])
-def confirm(key):
+@app.route('/confirm/<space_key>/<key>', methods=['GET'])
+def confirm(space_key, key):
     if 'user' in session:
         if RegisterService.EnableEmail(session['user'], key):
             return render_template('/group/confirm.html', param=True)
         else:
             return render_template('/group/confirm.html', param=False)
     else:
-        return redirect(url_for('login_view'))
+        return redirect('/'+space_key+'/login')
 
 """
 id:15
@@ -172,7 +171,7 @@ def group_dashboard(group_key):
         elif session['user']['role'] == 2:
             return render_template('/group/mypage_member.html', user=json.dumps(session['user']))
     else:
-        return redirect('/login/'+group_key)
+        return redirect('/'+group_key+'/login/')
 
 """
 id:21
@@ -264,7 +263,7 @@ id:28
 @app.route('/deletem', methods=['POST'])
 def deletem():
     if 'user' in session:
-        result = MetaModelService.deleteMetaModel(session['user'], request.form['id'])
+        result = DashboardService.deleteMetaModel(session['user'], request.form['id'])
         return json.dumps(result)
     else:
         return 'false'
@@ -282,6 +281,21 @@ def update_metamodel():
     else:
         return 'false'
 
+
+"""
+id:
+"""
+@app.route('/publish', methods=['POST'])
+def publish_tool():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = DashboardService.publish(connect, session['user'], request.form['metamodel_id'], session['user']['space_key'])
+        connect.close()
+        return json.dumps(result)
+    else:
+        return 'false'
+
+
 """
 エディタ
 """
@@ -297,7 +311,7 @@ def editor(pid):
         if not result == None:
             return render_template('editorjs.html', userinfo=json.dumps(session['user']), project=json.dumps(result))
     else:
-        return redirect(url_for('login_view'))
+        return redirect('/')
     return render_template('request_deny.html')
 
 """
@@ -305,7 +319,7 @@ id:31
 """
 @app.route('/psave', methods=['POST'])
 def psave():
-    return json.dumps(ProjectService.saveProject(session['user'], request.form['pid'], request.form['xml']))
+    return json.dumps(EditorService.saveProject(session['user'], request.form['pid'], request.form['xml']))
 
 """
 id:32
@@ -492,6 +506,7 @@ group
 
 """
 """
+"""
 @app.route('/login/<key>', methods=['GET','POST'])
 def login_to_group_view(key):
     if request.method == 'GET':
@@ -507,6 +522,7 @@ def login_to_group_view(key):
         return json.dumps(result)
     else:
         return render_template('login_to_group.html', group=group)
+"""
 
 """
 id:52
@@ -650,7 +666,7 @@ id:59
 def update_group():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
+        result = DashboardService.updateGroup(connect, session['user'], session['user']['space_key'], request.form['name'])
         connect.close()
         return json.dumps(result)
 

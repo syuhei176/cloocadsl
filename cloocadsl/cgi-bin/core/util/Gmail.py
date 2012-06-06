@@ -19,6 +19,6 @@ def send_via_gmail(from_addr, to_addr, msg):
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login('hiya@clooca.com', 'as7uijd1w')
+    s.login('confirm@clooca.com', 'fj3fh4aw')
     s.sendmail(from_addr, [to_addr], msg.as_string())
     s.close()
