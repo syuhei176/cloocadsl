@@ -1,3 +1,15 @@
+function get_min(ns)
+{
+	var result = 99999;
+	for(var i=0;i < ns.length;i++) {
+		if(result > ns[i]) {
+			result = ns[i];
+		}
+	}
+	return result;
+}
+
+
 function StrLen(str)
 {
     var ct;
