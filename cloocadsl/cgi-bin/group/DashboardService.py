@@ -233,3 +233,19 @@ def publish(connect, user, id, space_key):
     connect.commit()
     cur.close()
     return True
+
+def import_from_sample_tool(connect, user, sample_id, space_key):
+    cur = connect.cursor()
+    #ツールをコピーする
+    #コピー先のvisibillityを1にする
+    cur.execute('SELECT id,name,xml,config,visibillity,welcome_message,space_key,sample,version FROM MetaModelInfo WHERE id=%s;',(sample_id, ))
+    rows = cur.fetchall()
+    src_version = int(rows[0][8])
+    cur.execute('INSERT INTO MetaModelInfo (name,xml,config,visibillity,welcome_message,space_key,sample) VALUES(%s,%s,%s,%s,%s,%s,%s);',(rows[0][1],rows[0][2],rows[0][3],1,rows[0][5],rows[0][6],rows[0][7]))
+    dest_id = cur.lastrowid
+    cur.execute('INSERT INTO hasMetaModel (user_id,metamodel_id) VALUES(%s,%s);',(user['id'], dest_id, ))
+    #テンプレートのコピー
+    cur.execute('SELECT name,path,content FROM Template WHERE metamodel_id=%s',(sample_id, ))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(rows[i][0], rows[i][1], rows[i][2], dest_id, ))

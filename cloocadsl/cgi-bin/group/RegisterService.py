@@ -49,9 +49,9 @@ def Register(username, password, email, group_key, group_name, plan):
     connect.commit()
     from_addr = 'confirm@clooca.com'
     to_addr = email
-    link = 'http://127.0.0.1:5000/confirm/%s/%s' % (group_key, key)
-    link2 = 'http://127.0.0.1:5000/%s/login' % group_key
-    body = '''
+    link = 'http://group.clooca.com/confirm/%s/%s' % (group_key, key)
+    link2 = 'http://group.clooca.com/%s/login' % group_key
+    body = u'''
     %s さん！clooca for groupに、ご登録ありがとうございます！
     登録を完了するには %s にアクセスしてください。
     また、グループにログインするには次のURLにアクセスしてください。 %s

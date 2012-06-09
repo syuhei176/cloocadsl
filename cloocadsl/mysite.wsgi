@@ -1,7 +1,7 @@
 import sys
-sys.path.insert(0, '/home/www-dsl')
+sys.path.insert(0, '/var/www/www-group')
 sys.stdout = sys.stderr
 import os
-from clooca import app as application
+from clooca_group import app as application
 
 

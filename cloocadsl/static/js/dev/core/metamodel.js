@@ -41,6 +41,7 @@ function MetaRelation(id, name) {
 	this.properties = new Array();	//propertyへの参照
 	this.bindings = new Array();
 	this.arrow_type = "none";
+	//v,TRIANGLE,BLACK_TRIANGLE
 }
 
 function Binding(src, dest, parent) {

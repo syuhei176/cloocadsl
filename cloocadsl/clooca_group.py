@@ -40,8 +40,8 @@ visibillity public
 @app.route('/index')
 def index():
     if 'user' in session:
-        return render_template('index.html', loggedin = True, username = session['user']['uname'])
-    return render_template('index.html', loggedin = False, username = '')
+        return render_template('group/index.html', loggedin = True, username = session['user']['uname'])
+    return render_template('group/index.html', loggedin = False, username = '')
 
 """
 id:2
@@ -50,6 +50,11 @@ visibillity public
 @app.route('/feature')
 def feature():
     return render_template('feature.html')
+
+@app.route('/gallery')
+def gallery():
+    return render_template('group/gallery.html')
+
 
 """
 id:3
@@ -113,10 +118,11 @@ id:15
 """
 @app.route('/<group_key>/login/', methods=['GET'])
 def login_view(group_key):
-    if 'user' in session and session['user']['space_key'] == group_key:
-        return redirect('/'+group_key+'/mypage')
-    else:
-        return render_template('/group/login.html', group_key=group_key)
+    if 'user' in session:
+        if 'space_key' in session['user']:
+            if session['user']['space_key'] == group_key:
+                return redirect('/'+group_key+'/mypage')
+    return render_template('/group/login.html', group_key=group_key)
 
 """
 id:16
@@ -364,6 +370,17 @@ def download(pid):
             return resp
     return render_template('request_deny.html')
 
+
+@app.route('/download-file/<username>/<pid>/<fname>', methods=['GET'])
+def download_file(username,pid,fname):
+    project_id = pid;
+    userpath = config.CLOOCA_CGI+'/out/' + username
+    projectpath = userpath + '/p' + project_id
+    filepath = projectpath + '/' + fname
+    f = open(filepath, 'rb')
+    content = f.read()
+    f.close()
+    return content;
 
 """
 id:34

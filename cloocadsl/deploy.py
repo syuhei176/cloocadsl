@@ -66,9 +66,14 @@ def access_qito():
     scp.sendline('cd /var/www/www-dsl')
     return scp
 
+def access_aws_www_group():
+    scp = pexpect.spawn('sftp -i %s %s@%s' % (PRIVATE_KEY, "ubuntu", "54.248.98.237"))
+    scp.expect('sftp>')
+    scp.sendline('cd /var/www/www-group')
+    return scp
+
 def deploy():
-    scp = access_aws()
-#    scp = access_qito()
+    scp = access_aws_www_group()
     print scp.readline()
     scp.expect('sftp>')
     scp.sendline('ls')
@@ -79,12 +84,19 @@ def deploy():
     scp.readline()
     print scp.readline()
     
-    cd(scp, 'templates')
+    cd(scp, 'cgi-bin/group')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.py')
+    scp.readline()
+    print scp.readline()
+    
+    cd(scp, '../../templates/group')
     scp.expect('sftp>')
     scp.sendline('mput %s' % '*.html')
     scp.readline()
     print scp.readline()
     
+    """
     cd(scp, '../static/js')
     
     send(scp, 'core.js')
@@ -103,9 +115,9 @@ def deploy():
     scp.sendline('mput %s' % '*.py')
     scp.readline()
     print scp.readline()
-    
+    """
     cd(scp, '../../')
-    send(scp, 'clooca.py')
+    send(scp, 'clooca_group.py')
     send(scp, 'mysite.wsgi')
     scp.expect('sftp>')
     scp.sendline('exit')
