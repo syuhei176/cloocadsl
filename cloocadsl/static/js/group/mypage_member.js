@@ -188,9 +188,8 @@ Ext.define('Tool', {
         	    	xtype: 'button',
         	        text: 'OK',
         	        handler: function() {
-        	        	alert(this);
         	            var form = this.up('form').getForm();
-        	            alert(this.up('form').child('name'));
+//        	            alert(this.up('form').child('name'));
         	            if (form.isValid()) {
         	                form.submit({
         	                    success: function(form, action) {
@@ -209,7 +208,7 @@ Ext.define('Tool', {
     	});
     	win.show();
     }
-    }
+}
     
     function create_mytools_tab() {
         var mytools_ds = Ext.create('Ext.data.Store', {

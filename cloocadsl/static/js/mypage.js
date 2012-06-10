@@ -23,7 +23,7 @@ function create_mypage(tab_items, extends_html) {
 	function mytools() {
 		$.ajax({
 			type:"POST",
-			url: '/mytools',
+			url: '/tools',
 			data: '',
 			dataType: 'json',
 			success: function(data){

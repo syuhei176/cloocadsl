@@ -169,15 +169,16 @@ visibillity editor,wb
 
 @app.route('/<group_key>/mypage')
 def group_dashboard(group_key):
-    if 'user' in session and session['user']['space_key'] == group_key:
-        if session['user']['role'] == 0:
-            return render_template('/group/mypage_owner.html', user=json.dumps(session['user']))
-        elif session['user']['role'] == 1:
-            return render_template('/group/mypage_workbencher.html', user=json.dumps(session['user']))
-        elif session['user']['role'] == 2:
-            return render_template('/group/mypage_member.html', user=json.dumps(session['user']))
-    else:
-        return redirect('/'+group_key+'/login/')
+    
+    if 'user' in session:
+        if session['user']['space_key'] == group_key:
+            if session['user']['role'] == 0:
+                return render_template('/group/mypage_owner.html', user=json.dumps(session['user']))
+            elif session['user']['role'] == 1:
+                return render_template('/group/mypage_workbencher.html', user=json.dumps(session['user']))
+            elif session['user']['role'] == 2:
+                return render_template('/group/mypage_member.html', user=json.dumps(session['user']))
+    return redirect('/'+group_key+'/login/')
 
 """
 id:21
@@ -370,17 +371,21 @@ def download(pid):
             return resp
     return render_template('request_deny.html')
 
-
-@app.route('/download-file/<username>/<pid>/<fname>', methods=['GET'])
-def download_file(username,pid,fname):
-    project_id = pid;
-    userpath = config.CLOOCA_CGI+'/out/' + username
-    projectpath = userpath + '/p' + project_id
-    filepath = projectpath + '/' + fname
-    f = open(filepath, 'rb')
-    content = f.read()
-    f.close()
-    return content;
+"""
+"""
+@app.route('/download-file/<pid>/<fname>', methods=['GET'])
+def download_file(pid,fname):
+    if 'user' in session:
+        user = session['user']
+        project_id = pid;
+        userpath = config.CLOOCA_CGI+'/out/' + user['uname']
+        projectpath = userpath + '/p' + project_id
+        filepath = projectpath + '/' + fname
+        f = open(filepath, 'rb')
+        content = f.read()
+        f.close()
+        return content;
+    return ''
 
 """
 id:34

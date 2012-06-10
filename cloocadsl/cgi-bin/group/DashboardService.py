@@ -27,7 +27,7 @@ def getMyProjects(connect, user, space_key):
 
 def getGroupTools(connect, user, space_key):
     cur = connect.cursor()
-    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,space_key FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.space_key=%s AND MetaModelInfo.visibillity=1',(space_key, ))
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,space_key FROM MetaModelInfo WHERE MetaModelInfo.space_key=%s AND MetaModelInfo.visibillity=1',(space_key, ))
     rows = cur.fetchall()
     cur.close()
     metamodels = []

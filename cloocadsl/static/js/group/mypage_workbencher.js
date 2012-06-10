@@ -227,14 +227,13 @@ Ext.define('Tool', {
         	    	xtype: 'button',
         	        text: 'OK',
         	        handler: function() {
-        	        	alert(this);
         	            var form = this.up('form').getForm();
-        	            alert(this.up('form').child('name'));
+//        	            alert(this.up('form').child('name'));
         	            if (form.isValid()) {
         	                form.submit({
-        	                    success: function(form, action) {
+        	                	success: function(form, action) {
         	                    	mytools_ds.load();
-        	                       Ext.Msg.alert('Success', action.result.msg);
+        	                    	Ext.Msg.alert('Success', action.result.msg);
         	                    },
         	                    failure: function(form, action) {
         	                        Ext.Msg.alert('Failed', action.result.msg);
