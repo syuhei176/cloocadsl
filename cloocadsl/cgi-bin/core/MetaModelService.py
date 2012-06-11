@@ -38,6 +38,8 @@ def loadSample(connect, user, id):
     cur.execute('SELECT sample FROM MetaModelInfo WHERE id=%s;',(id, ))
     rows = cur.fetchall()
     cur.close()
+    if rows[0][0] == None:
+        return ''
     return rows[0][0].decode('utf-8')
 
 def saveAll(user, pid, name, xml, visibillity, welcome_message):
