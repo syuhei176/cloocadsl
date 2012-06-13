@@ -37,8 +37,8 @@ visibillity public
 @app.route('/index')
 def index():
     if 'user' in session:
-        return render_template('index.html', loggedin = True, username = session['user']['uname'])
-    return render_template('index.html', loggedin = False, username = '')
+        return render_template('/game/top.html', loggedin = True, username = session['user']['uname'])
+    return render_template('/game/top.html', loggedin = False, username = '')
 
 """
 id:2
