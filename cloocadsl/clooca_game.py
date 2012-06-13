@@ -34,7 +34,7 @@ id:1
 visibillity public
 """
 @app.route('/')
-@app.route('/index')
+@app.route('/top')
 def index():
     if 'user' in session:
         return render_template('/game/top.html', loggedin = True, username = session['user']['uname'])
@@ -44,17 +44,28 @@ def index():
 id:2
 visibillity public
 """
-@app.route('/feature')
-def feature():
-    return render_template('feature.html')
+@app.route('/dashboard')
+def dashboard():
+    return render_template('/game/dashboard.html')
+
 
 """
 id:3
 visibillity public
 """
-@app.route('/document')
-def document():
-    return render_template('document.html')
+@app.route('/editor')
+def editor():
+    return render_template('/game/editor.html')
+
+"""
+id:4
+visibillity public
+"""
+@app.route('/battle')
+def battle():
+    return render_template('/game/battle.html')
+
+
 
 """
 id:4
@@ -137,7 +148,7 @@ def login_view():
     if 'user' in session:
         return redirect('/mypage')
     else:
-        return render_template('login.html')
+        return render_template('/game/login.html')
 
 """
 id:16

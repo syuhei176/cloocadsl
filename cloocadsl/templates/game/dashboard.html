@@ -2,30 +2,11 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>clooca game - 戦略エディタ</title>
+		<title>clooca game - ダッシュボード</title>
 		<link href="/static/css/game/style.css" rel="stylesheet">
 		<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 		<script src="/static/js/jquery-1.7.1.min.js"></script>
 		<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
-		<script src="/static/js/jcanvas.min.js"></script>
-		<script type="text/javascript">
-			$(function(){
-				$("canvas").drawRect({
-					strokeStyle: "#000",
-					strokeWidth: 8,
-					  x: 50, y: 50,
-					  width: 640 - 100,
-					  height: 640 - 100,
-					  fromCenter: false
-					});
-				$("canvas").drawArc({
-					  strokeStyle: "black",
-						strokeWidth: 8,
-					  x: 320, y: 320,
-					  radius: 160
-					});
-			});
-		</script>
 	</head>
 	<body>
 	<div id="wrapper">
@@ -37,11 +18,7 @@
 			</div>
 			<div id="login-info"><a href="/login">ログイン</a></div>
 		</div>
-		<div id="main">
-			<div id="content">
-			<canvas id="canvas" width="640" height="640"></canvas>
-			</div>
-		</div>
+		<div id="main">タブ</div>
 		<div id="footer">フッター</div>
 	</div>
 	</body>
