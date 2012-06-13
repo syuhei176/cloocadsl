@@ -39,7 +39,6 @@ def getGroupTools(connect, user, space_key):
         metamodels.append(metamodel)
     return metamodels
 
-
 def getMyTools(connect, user, space_key):
     cur = connect.cursor()
     cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,space_key FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s AND MetaModelInfo.space_key=%s;',(user['id'], space_key, ))
@@ -114,10 +113,13 @@ def deleteMetaModel(user, id):
     connect.close()
     return True
 
+
+wb_config = '{"targets":[],"editor":{"generatable":true,"downloadable":true}}'
+
 def createMetaModel(user, name, xml, visibillity, space_key):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,space_key,sample) VALUES(%s,%s,%s,%s,%s);',(name.encode('utf_8'), xml, visibillity, space_key, '', ))
+    cur.execute('INSERT INTO MetaModelInfo (name,xml,visibillity,space_key,sample,config) VALUES(%s,%s,%s,%s,%s,%s);',(name.encode('utf_8'), xml, visibillity, space_key, '', wb_config))
     connect.commit()
     id = cur.lastrowid
     cur.close()
@@ -249,3 +251,17 @@ def import_from_sample_tool(connect, user, sample_id, space_key):
     rows = cur.fetchall()
     for i in range(len(rows)):
         cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(rows[i][0], rows[i][1], rows[i][2], dest_id, ))
+
+def sample_tools(connect, user, space_key):
+    cur = connect.cursor()
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,space_key FROM MetaModelInfo INNER JOIN metamodel_tag ON MetaModelInfo.id = metamodel_tag.metamodel_id AND metamodel_tag.tag=%s;',('sample', ))
+    rows = cur.fetchall()
+    cur.close()
+    metamodels = []
+    for i in range(len(rows)):
+        metamodel = {}
+        metamodel['id'] = rows[i][0]
+        metamodel['name'] = rows[i][1].decode('utf-8')
+        metamodel['visibillity'] = rows[i][3]
+        metamodels.append(metamodel)
+    return metamodels

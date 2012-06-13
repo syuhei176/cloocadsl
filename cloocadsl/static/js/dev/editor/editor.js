@@ -7,10 +7,12 @@ Ext.require([
 ]);
 
 var g_project_id = 0;
+/**
+ * 
+ * @param project
+ * @param is_preview
+ */
 function init_clooca(project, is_preview) {
-	window.onbeforeunload = function(){
-		return "このページから移動しますか？ データは保存されません。"; 
-	}
 	current_editor = null;
 	g_project_id = project.id;
 	g_projectinfo = project;
@@ -72,6 +74,9 @@ function init_clooca(project, is_preview) {
 		       ]
 	});
 	readProject(project);
+	window.onbeforeunload = function(){
+		return "このページから移動しますか？ データは保存されません。"; 
+	}
 }
 
 function create_tabs() {

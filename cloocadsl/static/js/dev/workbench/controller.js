@@ -26,8 +26,7 @@ function saveAll(fn) {
 function wb_loadMetaModel(id) {
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 					g_metaproject = g_toolinfo;
-					Ext.getCmp('vsibillity_setting').setValue(g_metaproject.visibillity);
-					Ext.getCmp('name_setting').setValue(g_metaproject.name);
+					Ext.getCmp('tool-name').setText('プロジェクト名：'+g_metaproject.name);
 					console.log('loaded json string = '+g_metaproject.xml);
 					if(g_metaproject.xml == ' ' || g_metaproject.xml == null || g_metaproject.xml.length == 0) {
 						g_metamodel = new MetaModel(g_metaproject.id, g_metaproject.name);
@@ -66,4 +65,22 @@ function wb_loadMetaModel(id) {
 					}
 					load_templates();
 					Ext.MessageBox.hide();
+}
+
+function check_metamodel() {
+	var flg = true;
+//ルートダイアグラムは存在するか
+	flg = false;
+	for(a in g_metamodel.metadiagrams) {
+		if(g_metamodel.metadiagram == g_metamodel.metadiagrams[a].id) {
+			flg = true;
+		}
+	}
+	if(flg) {
+		//OK
+	}else{
+		return false;
+	}
+	//関係の存在
+	return true;
 }

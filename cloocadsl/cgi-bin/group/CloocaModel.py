@@ -38,7 +38,7 @@ def GetSpaceFromDB(connect, group_key):
     user['key'] = rows[0][0]
     user['name'] = rows[0][1].decode('utf-8')
     user['lang'] = rows[0][2]
-    user['_is_email_available'] = rows[0][3]
+    user['_is_email_available'] = int(rows[0][3])
     user['email'] = Util.mydecode(rows[0][4])
     user['registration_date'] = rows[0][5]
     user['contract_deadline'] = rows[0][6]

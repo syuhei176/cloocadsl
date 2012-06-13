@@ -5,7 +5,7 @@
 function readProject(project) {
 	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
 	if(project) {
-		console.log('loaded json string = '+project.xml);
+//		console.log('loaded json string = '+project.xml);
 		g_projectinfo = project;
 		g_metamodel_id = g_projectinfo.metamodel_id;
 		if(g_projectinfo.metamodel.xml == ' ' || g_projectinfo.metamodel.xml == null || g_projectinfo.metamodel.xml.length == 0) {
@@ -13,9 +13,18 @@ function readProject(project) {
 		}else{
 			g_metamodel = JSON.parse(g_projectinfo.metamodel.xml);
 		}
-		alert(g_projectinfo.metamodel.config);
+//		alert(g_projectinfo.metamodel.config);
+		metadiagrams_length = 0;
+		for (a in g_metamodel.metadiagrams) {
+			metadiagrams_length++;
+		}
+		if(metadiagrams_length == 0) {
+			//ダイアグラムが一つもない
+			alert("ダイアグラムが一つもありません。");
+			window.close();
+		}
 		g_projectinfo.metamodel.config = JSON.parse(g_projectinfo.metamodel.config);
-		readModel(project.xml);
+		readModel(g_projectinfo.xml);
 	}
 }
 
@@ -25,7 +34,7 @@ function readProject(project) {
 function readModel(xml) {
 	console.log('loaded json string = '+xml);
 	diagram_IdGenerator.setOffset(g_projectinfo.id * 10000);
-	if(xml == 'null' || xml == '') {
+	if(xml == 'null' || xml == '' || xml == undefined) {
 		g_model = new Model();
 		Ext.MessageBox.hide();
 		Ext.Msg.prompt('ダイアグラム','新規作成',function(btn,text){

@@ -33,12 +33,11 @@ function init_wb(toolinfo) {
 		    	   region:'south',
 		    	   collapsible:true,
 		    	   split:true,
-		    	   items : [
-		    	            ]
+		    	   items : []
 		    	   }),
 		       new Ext.Panel({
 		     	   id:'toolpanel',
-		    	   title:'未使用タイトル',
+		    	   title:'ヘルプ',
 		    	   html:'未使用パネル',
 		    	   margins:'0 3 0 3',
 		    	   region:'east',
@@ -49,7 +48,76 @@ function init_wb(toolinfo) {
 		    	    pack  : 'start'
 		    	},
 		    	items: [
-		    	    {html:'未使用スペース', flex:1},
+		    	    {
+		    	    	xtype: 'button',
+		    	    	html:'はじめに',
+		    	    	 handler:  function(){
+		    	    		    var win = new Ext.Window( {
+			    	    		     width:  320,
+			    	    		     height: 480,
+			    	    		     title:  'はじめに',
+			    	    		     html:   '',
+			    	    		     modal:  true
+			    	    		    } );
+			    	    		    win.show('anime');
+		    	    	 }
+		    	    },
+		    	    {
+		    	    	xtype: 'button',
+		    	    	html:'メタモデルを定義',
+		    	    	 handler:  function(){
+		    	    		    var win = new Ext.Window( {
+			    	    		     width:  320,
+			    	    		     height: 480,
+			    	    		     title:  'メタモデルを定義',
+			    	    		     html:   '',
+			    	    		     modal:  true
+			    	    		    } );
+			    	    		    win.show('anime');
+		    	    	 }
+		    	    },
+		    	    {
+		    	    	xtype: 'button',
+		    	    	html:'プロパティを追加',
+		    	    	 handler:  function(){
+		    	    		    var win = new Ext.Window( {
+			    	    		     width:  320,
+			    	    		     height: 480,
+			    	    		     title:  'プロパティを追加',
+			    	    		     html:   '',
+			    	    		     modal:  true
+			    	    		    } );
+			    	    		    win.show('anime');
+		    	    	 }
+		    	    },
+		    	    {
+		    	    	xtype: 'button',
+		    	    	html:'オブジェクトを追加',
+		    	    	 handler:  function(){
+		    	    		    var win = new Ext.Window( {
+			    	    		     width:  320,
+			    	    		     height: 480,
+			    	    		     title:  'オブジェクトを追加',
+			    	    		     html:   '',
+			    	    		     modal:  true
+			    	    		    } );
+			    	    		    win.show('anime');
+		    	    	 }
+		    	    },
+		    	    {
+		    	    	xtype: 'button',
+		    	    	html:'ダイアグラムを追加',
+		    	    	 handler:  function(){
+		    	    		    var win = new Ext.Window( {
+			    	    		     width:  320,
+			    	    		     height: 480,
+			    	    		     title:  'ダイアグラムを追加',
+			    	    		     html:   '',
+			    	    		     modal:  true
+			    	    		    } );
+			    	    		    win.show('anime');
+		    	    	 }
+		    	    }
 		    	]
 		       }),
 		       new Ext.Panel({
@@ -162,36 +230,8 @@ function create_menu() {
                    }
                    ]
         },{
-        	id: 'vsibillity_setting',
-        	xtype: 'combo',
-            fieldLabel: '公開設定',
-            store: Ext.create('Ext.data.Store', {
-                fields: ['name', 'value'],
-                data : [{"name":"非公開", "value":0},
-                    {"name":"公開", "value":1}]}),
-//                    {"name":"共有＆非公開", "value":2},
-//                    {"name":"共有＆公開", "value":3}]}),
-            queryMode: 'local',
-            displayField: 'name',
-            valueField: 'value',
-            listeners:{
-            	scope: this,
-                'select': function(){
-                	g_metaproject.visibillity = Ext.getCmp('vsibillity_setting').getValue();
-                	saveAll(function(){});
-                }
-           }
-        },{
-        	id: 'name_setting',
-        	xtype: 'textfield',
-            fieldLabel: '名前',
-            queryMode: 'local',
-            listeners:{
-            	scope: this,
-                'change': function(){
-                	g_metaproject.name = Ext.getCmp('name_setting').getValue();
-                }
-           }
+        	id: 'tool-name',
+        	html: ''
         }]
     }
 }
@@ -200,14 +240,24 @@ function onItemClick(item){
 	if(item.id == 'save') {
 		editortabpanel.current_editor.save();
 	}else if(item.id == 'preview') {
-		window.open('/wb/preview/'+g_metaproject.id);
+		if(check_metamodel()) {
+			window.open('/wb/preview/'+g_metaproject.id);
+		}else{
+			alert("メタモデルに問題があります。");
+		}
 	}else if(item.id == 'MetaDiagram') {
 //		var editor = new MetaDiagramsEditor(g_metamodel.metadiagrams);
 		var editor = new BaseGridEditor(g_metamodel.metadiagrams, 'MetaDiagram', function(d){
+			 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+				 if(btn != 'cancel') {
+					 g_metamodel.metadiagrams[d.id] = JSON.parse(text);
+				 }
+			 },null,true,JSON.stringify(d));
+			 /*
 			show_setting_metadiagram_window(d, function(metadiagram) {
-				alert(index);
 				grid.getStore().getAt(index).set('name', metadiagram.name);
 			});
+			*/
 	}, MetaDiagram);
 		editortabpanel.add(editor, 'metadiagrams');
 	}else if(item.id == 'MetaObj') {

@@ -302,6 +302,28 @@ def publish_tool():
     else:
         return 'false'
 
+@app.route('/sample-tools', methods=['POST','GET'])
+def sample_tools():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = DashboardService.sample_tools(connect, session['user'], session['user']['space_key'])
+        connect.close()
+        return json.dumps(result)
+    else:
+        return 'false'
+
+
+@app.route('/import-from-sample-tool', methods=['POST'])
+def import_from_sample_tool():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = DashboardService.import_from_sample_tool(connect, session['user'], request.form['sample_id'], session['user']['space_key'])
+        connect.close()
+        return json.dumps(result)
+    else:
+        return 'false'
+
+
 
 """
 エディタ
@@ -444,19 +466,10 @@ id:42
 @app.route('/wb/preview/<id>')
 def wb_preview(id):
     if 'user' in session:
-        result = {}
-        result['id'] = None
-        result['name'] = 'preview'
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result['xml'] = MetaModelService.loadSample(connect, session['user'], id)
-        result['metamodel_id'] = id
-        result['rep_id'] = None
-        result['group_id'] = None
-        result['metamodel'] = MetaModelService.loadMetaModel(connect, session['user'], id)
+        result = WorkbenchService.preview(connect, session['user'], id)
         connect.close()
-        result['group'] = {}
-        result['group']['service'] = 'free'
-        return render_template('preview.html', project = json.dumps(result))
+        return render_template('preview.html', userinfo = json.dumps(session['user']), project = json.dumps(result))
     else:
         return redirect(url_for('login_view'))
     return render_template('request_deny.html')
@@ -1070,6 +1083,12 @@ def tool_top(tid,pid):
     if 'user' in session:
         return render_template('tool/editor.html', loggedin = True, username = session['user']['uname'])
     return render_template('tool/top.html', loggedin = False, username = '')
+
+@app.route('/trial')
+def trial():
+    return render_template('group/trial.html')
+
+
 
 with app.test_request_context():
     print url_for('index')

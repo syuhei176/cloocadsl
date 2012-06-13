@@ -97,7 +97,7 @@ def loadMetaModel(connect, user, pid, check=True):
         if len(has_rows) == 0:
             return None
     cur = connect.cursor()
-    cur.execute('SELECT id,name,xml,template,visibillity,welcome_message,targets,group_id FROM MetaModelInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT id,name,xml,config,visibillity,welcome_message,targets,group_id FROM MetaModelInfo WHERE id=%s;',(pid, ))
     rows = cur.fetchall()
     cur.close()
     project = {}

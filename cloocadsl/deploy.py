@@ -96,12 +96,13 @@ def deploy():
     scp.readline()
     print scp.readline()
     
-    """
-    cd(scp, '../static/js')
+    cd(scp, '../../static/js')
     
     send(scp, 'core.js')
     send(scp, 'editor.js')
     send(scp, 'workbench.js')
+    
+    """
     cd(scp, '../../cgi-bin/core')
     
     scp.expect('sftp>')
