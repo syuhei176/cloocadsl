@@ -11,6 +11,26 @@ cgi-bin		いずれ消す
 static		HTMLや画像等の静的ファイル
 templates	HTMLテンプレートファイル
 
+====================
+= エディションについて =
+====================
+
+エディションごとに
+clooca.py
+clooca_group.py
+clooca_game.pyを用意している。
+設定ファイルも
+config.py
+config_group.py
+config_game.pyを用意している。
+
+HTMLテンプレート
+templates/(エディション名)/
+
+サーバプログラム
+cgi-bin/(エディション名)/
+
+
 
 ============
 =  インストール方法  =
