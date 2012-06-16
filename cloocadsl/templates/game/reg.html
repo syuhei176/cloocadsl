@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>clooca game - ログイン</title>
+		<title>clooca game - 新規登録</title>
 		<link href="/static/css/game/style.css" rel="stylesheet">
 		<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 		<script src="/static/js/jquery-1.7.1.min.js"></script>
@@ -14,10 +14,18 @@
 				$("#success").hide();
 				
 				// on submit...
-				$("#login-form #submit").click(function() {
+				$("#reg-form #submit").click(function() {
 					$("#error").hide();
 					
 					//required:
+					
+					//email
+					var email = $("input#email").val();
+					if(email == ""){
+						$("#error").fadeIn().text("メールアドレスが必要です。");
+						$("input#email").focus();
+						return false;
+					}
 					
 					//name
 					var uname = $("input#uname").val();
@@ -28,20 +36,24 @@
 					}
 					
 					var passwd = $("input#passwd").val();
+					var confirm_passwd = $("input#confirm-passwd").val();
 					if(passwd == ""){
 						$("#error").fadeIn().text("パスワードが必要です。");
 						$("input#passwd").focus();
 						return false;
 					}
+					if(passwd != confirm_passwd) {
+						$("#error").fadeIn().text("パスワードが一致しません。");
+						$("input#confirm-passwd").focus();
+						return false;
+					}
 					
-					var permanent = $("input#permanent").val();
-					
-					url = $("#login-form").attr( 'action' );
+					url = $("#reg-form").attr( 'action' );
 					
 					// data string
-					var dataString = 'username='+ uname
-									+ '&password=' + passwd
-									+ '&permanent=' + permanent;
+					var dataString = 'email='+ email
+									+ '&username=' + uname
+									+ '&password=' + passwd;
 					
 					$.ajax({
 						type:"POST",
@@ -51,7 +63,7 @@
 						success: function(data){
 							 if(data) {
 								 	$("#success").fadeIn();
-								 	$("#login-form").fadeOut();
+								 	$("#reg-form").fadeOut();
 							 }else{
 									$("#error").fadeIn().text("既に登録されています。");
 							 }
@@ -68,11 +80,12 @@
 		</div>
 		<div id="main">
 			<div>
-			<form id="login-form" action="/login-to" method="post">
+			<form id="reg-form" action="/reg-to" method="post">
 			<fieldset>
+			<div>メールアドレス<input type="text" name="email" id="email" /></div>
 			<div>ユーザ名<input type="text" name="uname" id="uname" /></div>
 			<div>パスワード<input type="password" name="passwd" id="passwd" /></div>
-			<div>ログイン状態を保つ<input type="checkbox" name="permanent" id="permanent" value="true" /></div>
+			<div>パスワード<input type="password" name="confirm-passwd" id="confirm-passwd" /></div>
 			<input id="submit" name="submit" type="submit" value="ログイン" />
 			</fieldset>
 			<div id="error"></div>

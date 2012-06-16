@@ -7,6 +7,18 @@
 		<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 		<script src="/static/js/jquery-1.7.1.min.js"></script>
 		<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+		<script type="text/javascript">
+			$(function(){
+				var user = {{user|safe}};
+				var html = '';
+				{% if loggedin %}
+				html = user.uname + '<a href="/logout">ログアウト</a>';
+				{% else %}
+				html = '<a href="/login">ログイン</a>';
+				{% endif %}
+				$('#login-info').html(html);
+			});
+		</script>
 	</head>
 	<body>
 	<div id="wrapper">
@@ -18,7 +30,14 @@
 			</div>
 			<div id="login-info"><a href="/login">ログイン</a></div>
 		</div>
-		<div id="main">タブ</div>
+		<div id="main">
+		<div id="tactics">
+		<a href="/editor/1">戦略１</a>
+		<a href="/editor/2">戦略２</a>
+		<a href="/editor/3">戦略３</a>
+		<a href="#">新規作成</a>
+		</div>
+		</div>
 		<div id="footer">フッター</div>
 	</div>
 	</body>

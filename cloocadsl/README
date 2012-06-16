@@ -1,15 +1,22 @@
 =============
 = フォルダ構成 =
 =============
-src			GWT用
-test		GWT用テストコード
 cgi-bin		いずれ消す
  -core		サーバサイド コア
  -mvcs		サーバサイド モデルリポジトリ
+ -{モジュール名}
  -out		出力結果
  -template	DSML用テンプレート
 static		HTMLや画像等の静的ファイル
+ -js              運用時のjavascriptファイル
+  -{エディション名}
+ -css             stylesheetファイル
+ -images          imagesファイル
+  -{エディション名}
+ -dev             開発用Javascriptファイル
+  -{モジュール名}
 templates	HTMLテンプレートファイル
+ -{モジュール名}
 
 ====================
 = エディションについて =

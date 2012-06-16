@@ -80,7 +80,7 @@ visibillity public
 """
 @app.route('/reg_editor_license_view', methods=['GET'])
 def reg_editor_license_view():
-    return render_template('/register/reg_editor_license.html')
+    return render_template('/core/reg_editor_license.html')
 
 """
 id:11
@@ -88,7 +88,7 @@ visibillity public
 """
 @app.route('/reg_wb_license_view', methods=['GET'])
 def reg_wb_license_view():
-    return render_template('/register/reg_wb_license.html')
+    return render_template('/core/reg_wb_license.html')
 
 
 """
@@ -97,8 +97,7 @@ visibillity public
 """
 @app.route('/reg_group_license_view', methods=['GET'])
 def reg_wb_license_view():
-    return render_template('/register/reg_group_license.html')
-
+    return render_template('/core/reg_group_license.html')
 
 """
 id:13
@@ -123,9 +122,9 @@ visibillity public
 def confirm(key):
     if 'user' in session:
         if UserService.EnableEmail(session['user'], key):
-            return render_template('/register/confirm.html', param=True)
+            return render_template('/core/confirm.html', param=True)
         else:
-            return render_template('/register/confirm.html', param=False)
+            return render_template('/core/confirm.html', param=False)
     else:
         return redirect(url_for('login_view'))
 

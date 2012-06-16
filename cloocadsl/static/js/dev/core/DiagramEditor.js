@@ -478,7 +478,7 @@ DiagramEditor.prototype.clicknode = function(x, y) {
 			}
 			if(obj.ve.ver_type == "delete") return false;
 			if(rel != null) {
-				if(obj.ofd.z < (g_model.objects[rel.src].ofd.z + g_model.objects[rel.dest].ofd.z) / 2) {
+				if(obj.ofd.z < g_model.objects[rel.src].ofd.z || obj.ofd.z < g_model.objects[rel.dest].ofd.z) {
 					return false;
 				}
 			} 

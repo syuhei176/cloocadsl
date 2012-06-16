@@ -11,6 +11,7 @@ import md5
 import MySQLdb
 import config
 sys.path.append(config.CLOOCA_CGI)
+from game import RegisterService
 from core import CoreService
 from core import UserService
 from core import MetaModelService
@@ -37,8 +38,8 @@ visibillity public
 @app.route('/top')
 def index():
     if 'user' in session:
-        return render_template('/game/top.html', loggedin = True, username = session['user']['uname'])
-    return render_template('/game/top.html', loggedin = False, username = '')
+        return render_template('/game/top.html', loggedin=True, user=json.dumps(session['user']))
+    return render_template('/game/top.html', loggedin=False, user=json.dumps(None))
 
 """
 id:2
@@ -46,7 +47,9 @@ visibillity public
 """
 @app.route('/dashboard')
 def dashboard():
-    return render_template('/game/dashboard.html')
+    if 'user' in session:
+        return render_template('/game/dashboard.html', loggedin=True, user=json.dumps(session['user']))
+    return render_template('/game/dashboard.html', loggedin=False, user=json.dumps(None))
 
 
 """
@@ -89,54 +92,29 @@ def contact():
 id:10
 visibillity public
 """
-@app.route('/reg_editor_license_view', methods=['GET'])
-def reg_editor_license_view():
-    return render_template('/register/reg_editor_license.html')
+@app.route('/reg', methods=['GET'])
+def reg_view():
+    return render_template('/game/reg.html')
 
 """
 id:11
 visibillity public
 """
-@app.route('/reg_wb_license_view', methods=['GET'])
-def reg_wb_license_view():
-    return render_template('/register/reg_wb_license.html')
-
+@app.route('/reg-to', methods=['POST'])
+def reg():
+    return json.dumps(RegisterService.Register(request.form['username'], request.form['password'], request.form['email']))
 
 """
 id:12
 visibillity public
 """
-@app.route('/reg_group_license_view', methods=['GET'])
-def reg_wb_license_view():
-    return render_template('/register/reg_group_license.html')
-
-
-"""
-id:13
-visibillity public
-"""
-@app.route('/reg', methods=['POST'])
-def reg():
-    if request.form['license_type'] == 'free':
-        return json.dumps(UserService.RegisterEditorLicense(request.form['username'], request.form['password'], request.form['email']))
-    elif request.form['license_type'] == 'wb':
-        return json.dumps(UserService.RegisterWbLicense(request.form['username'], request.form['password'], request.form['email']))
-    elif request.form['license_type'] == 'group':
-        return json.dumps(UserService.RegisterGroupLicense(request.form['username'], request.form['password'], request.form['email'], request.form['group_key'], request.form['group_name']))
-    else:
-        return 'false'
-
-"""
-id:14
-visibillity public
-"""
 @app.route('/confirm/<key>', methods=['GET'])
 def confirm(key):
     if 'user' in session:
-        if UserService.EnableEmail(session['user'], key):
-            return render_template('/register/confirm.html', param=True)
+        if RegisterService.EnableEmail(session['user'], key):
+            return render_template('/game/confirm.html', param=True)
         else:
-            return render_template('/register/confirm.html', param=False)
+            return render_template('/game/confirm.html', param=False)
     else:
         return redirect(url_for('login_view'))
 
@@ -146,7 +124,7 @@ id:15
 @app.route('/login', methods=['GET'])
 def login_view():
     if 'user' in session:
-        return redirect('/mypage')
+        return redirect('/dashboard')
     else:
         return render_template('/game/login.html')
 
@@ -155,7 +133,7 @@ id:16
 """
 @app.route('/login-to', methods=['POST'])
 def login():
-    user = UserService.Login(request.form['username'], request.form['password'])
+    user = RegisterService.Login(request.form['username'], request.form['password'])
     if not user == None and 'permanent' in request.form:
         session.permanent = True
     return json.dumps(user)
@@ -187,6 +165,13 @@ def update_userinfo():
         user = UserService.updateUserInfo(session['user'])
     return json.dumps(user)
 
+
+
+@app.route('/admin')
+def admin():
+    if 'user' in session:
+        return render_template('/game/admin.html', user=json.dumps(session['user']))
+    return redirect(url_for('login_view'))
 
 """
 id:20
@@ -736,10 +721,6 @@ def member_reg_view(gid,key):
         return render_template('member_join.html', group_id=gid, group=group)
     else:
         return render_template('member_reg.html', group_id=gid, group=group)
-
-@app.route('/reg', methods=['GET'])
-def reg_view():
-    return render_template('register.html')
 
 @app.route('/mygroups')
 def mygroups(type='js'):

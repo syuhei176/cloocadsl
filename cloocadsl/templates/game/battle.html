@@ -2,32 +2,116 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>clooca game - 戦略エディタ</title>
+		<title>clooca game - バトル画面</title>
 		<link href="/static/css/game/style.css" rel="stylesheet">
 		<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 		<script src="/static/js/jquery-1.7.1.min.js"></script>
 		<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
 		<script src="/static/js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="/static/js/Box2dWeb-2.1.a.3.min.js"></script>
+		<script src="/static/js/game/GameEnvironment.js"></script>
+		<script src="/static/js/game/StateMachine.js"></script>
+		<script src="/static/js/game/player.js"></script>
+			<style>
+	#default-selectable .ui-selecting { background: #FECA40; }
+	#default-selectable .ui-selected { background: #F39814; color: white; }
+	#default-selectable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+	#default-selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+	#online-selectable .ui-selecting { background: #FECA40; }
+	#online-selectable .ui-selected { background: #F39814; color: white; }
+	#online-selectable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+	#online-selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+	</style>
 		<script type="text/javascript">
 			$(function(){
+				$( "#dialog" ).dialog({width:360});
+				$( "#tabs" ).tabs();
+				$( "#dufault-selectable" ).selectable({
+					stop: function() {
+						$( ".ui-selected", this ).each(function() {
+							var index = $( "#dufault-selectable li" ).index( this );
+							var stm_data1 = {event_num:4, matrix:[-1, 1,-1,-1, -1,-1, 2, 3, -1,-1, 3,-1, -1,-1,-1, 2], states:[0, 1, 2, 3]};
+							var stm_data2 = {event_num:4, matrix:[-1, 1,-1,-1, -1,-1, 2, 3, -1,-1, 3,-1, -1,-1,-1, 2], states:[0, 1, 2, 3]};
+							game_env = new GameEnvironment(stm_data1, stm_data2);
+							setInterval(game_main, 100);
+							$( "#dialog" ).dialog('close');
+						});
+					}
+				});
+				$( "#online-selectable" ).selectable({
+					stop: function() {
+						$( ".ui-selected", this ).each(function() {
+							var index = $( "#online-selectable li" ).index( this );
+							var stm_data1 = {event_num:4, matrix:[-1, 1,-1,-1, -1,-1, 2, 3, -1,-1, 3,-1, -1,-1,-1, 2], states:[0, 1, 2, 3]};
+							var stm_data2 = {event_num:4, matrix:[-1, 1,-1,-1, -1,-1, 2, 3, -1,-1, 3,-1, -1,-1,-1, 2], states:[0, 1, 2, 3]};
+							game_env = new GameEnvironment(stm_data1, stm_data2);
+							setInterval(game_main, 100);
+							$( "#dialog" ).dialog('close');
+						});
+					}
+				});
+			});
+			
+			function clear_display() {
+				$("canvas").drawRect({
+					fillStyle: "#fff",
+					  x: 0, y: 0,
+					  width: 640,
+					  height: 640,
+					  fromCenter: false
+					});
 				$("canvas").drawRect({
 					strokeStyle: "#000",
-					strokeWidth: 8,
-					  x: 50, y: 50,
-					  width: 640 - 100,
-					  height: 640 - 100,
+					strokeWidth: 20,
+					  x: 48, y: 48,
+					  width: 640 - 96,
+					  height: 640 - 96,
 					  fromCenter: false
 					});
 				$("canvas").drawArc({
 					  strokeStyle: "black",
-						strokeWidth: 8,
+						strokeWidth: 12,
 					  x: 320, y: 320,
 					  radius: 160
 					});
-			});
+				$("canvas").drawPolygon({
+					  fillStyle: "blue",
+						strokeWidth: 8,
+					  x: 320, y: 320,
+					  radius: 40,
+					  sides: 5
+					});
+			}
+			
+			function game_main() {
+				clear_display();
+				game_env.step();
+			}
 		</script>
 	</head>
 	<body>
+	<div id="dialog" title="相手を選ぶ" width="300">
+	<div id="tabs">
+	<ul>
+		<li><a href="#tabs-1">アリーナ</a></li>
+		<li><a href="#tabs-2">オンライン上の相手</a></li>
+	</ul>
+	<div id="tabs-1">
+		<ol id="dufault-selectable">
+			<li class="ui-widget-content">相手①</li>
+			<li class="ui-widget-content">相手②</li>
+			<li class="ui-widget-content">相手③</li>
+		</ol>
+	</div>
+	<div id="tabs-2">
+		<ol id="online-selectable">
+			<li class="ui-widget-content">相手①</li>
+			<li class="ui-widget-content">相手②</li>
+			<li class="ui-widget-content">相手③</li>
+		</ol>
+	</div>
+	</div>
+	</div>
 	<div id="wrapper">
 		<div id="header">
 			<div id="menu">
