@@ -16,7 +16,7 @@ from core.util import Util
 
 def GetUserFromDB(connect, username):
     cur = connect.cursor()
-    cur.execute('SELECT id,username,password,email,type,registration_date,lastlogin_date FROM UserInfo WHERE username = %s;', (username, ))
+    cur.execute('SELECT id,username,password,email,type,registration_date,lastlogin_date,full_name FROM UserInfo WHERE username = %s;', (username, ))
     rows = cur.fetchall()
     cur.close()
     if len(rows) == 0:
@@ -29,6 +29,7 @@ def GetUserFromDB(connect, username):
     user['type'] = rows[0][4]
     user['registration_date'] = rows[0][5]
     user['lastlogin_date'] = rows[0][6]
+    user['full_name'] = rows[0][7]
     return user
 
 
@@ -49,23 +50,23 @@ def GetStatusFromDB(connect, username, game_type):
 
 def GetCharacterFromDB(connect, id):
     cur = connect.cursor()
-    cur.execute('SELECT id,username,game_type,name,level,exp,hp,atk FROM CharacterInfo WHERE id = %s;', (username, game_type, ))
+    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,statics,project_id FROM CharacterInfo WHERE id = %s;', (id, ))
     rows = cur.fetchall()
     cur.close()
     if len(rows) == 0:
         return None
     user = {}
     user['id'] = int(rows[0][0])
-    user['uname'] = rows[0][1]
+    user['user_id'] = rows[0][1]
     user['game_type'] = rows[0][2]
     user['name'] = rows[0][3]
     user['level'] = int(rows[0][4])
     user['exp'] = int(rows[0][5])
     user['hp'] = int(rows[0][6])
     user['atk'] = int(rows[0][7])
+    user['statics'] = rows[0][8]
+    user['project_id'] = int(rows[0][9])
     return user
-
-
 
 def getProjectFromDB(connect, pid):
     cur = connect.cursor()

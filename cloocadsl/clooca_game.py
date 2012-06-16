@@ -12,10 +12,11 @@ import MySQLdb
 import config
 sys.path.append(config.CLOOCA_CGI)
 from game import RegisterService
+from game import DashboardService
 from core import CoreService
 from core import UserService
 from core import MetaModelService
-from core import ProjectService
+from game import ProjectService
 from core import ModelCompiler
 from core import FileService
 from core import GroupService
@@ -188,6 +189,24 @@ def mypage():
             return render_template('mypage_wb.html', user=json.dumps(session['user']))
     return redirect(url_for('login_view'))
 
+@app.route('/mycharacters', methods=['GET'])
+def mtcharacters():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        myprojects = DashboardService.getMyCharacters(connect, session['user'])
+        connect.close()
+        return json.dumps(myprojects)
+    return 'false'
+
+@app.route('/create-chara', methods=['POST'])
+def create_chara():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        myprojects = DashboardService.createCharacter(connect, session['user'], request.form['name'])
+        connect.close()
+        return json.dumps(myprojects)
+    return 'false'
+
 """
 id:21
 visibillity editor,wb
@@ -322,7 +341,7 @@ id:30
 def editor(pid):
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = ProjectService.loadProject(session['user'], pid, connect)
+        result = ProjectService.loadProject(connect, session['user'], pid)
         connect.close()
         if not result == None:
             return render_template('editorjs.html', userinfo=json.dumps(session['user']), project=json.dumps(result))

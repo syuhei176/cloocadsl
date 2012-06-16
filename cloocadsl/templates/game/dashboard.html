@@ -17,7 +17,51 @@
 				html = '<a href="/login">ログイン</a>';
 				{% endif %}
 				$('#login-info').html(html);
+				
+				reload_mycharacter();
+				
+		        $('#create-chara-submit').click(function() {
+		            var data = {name : $('#chara-name').val()};
+		             
+		            $.ajax({
+		                type: "POST",
+		                url: "/create-chara",
+		                data: data,
+		                dataType: 'json',
+		                success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
+		                	if(data) {
+			                	reload_mycharacter();
+		                	}
+		                },
+		                error: function(XMLHttpRequest, textStatus, errorThrown) {  /** Ajax通信が失敗した場合に呼び出される */
+		                        this; // thisは他のコールバック関数同様にAJAX通信時のオプションを示します。
+		                        alert('Error : ' + errorThrown);
+		                }
+		            });
+		        });
+		        $('form').submit(function() {
+		            return false;
+		        });
 			});
+			
+			function reload_mycharacter() {
+	            $.ajax({
+	                type: "GET",
+	                url: "/mycharacters",
+	                data: {},
+	                dataType: 'json',
+	                success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
+	                    $("#tactics").empty();
+	                	for(var i=0;i < data.length;i++) {
+		                    $('#tactics').append('<a href="/editor/'+data[i].project_id+'">'+data[i].name+'</a>');
+	                	}
+	                },
+	                error: function(XMLHttpRequest, textStatus, errorThrown) {  /** Ajax通信が失敗した場合に呼び出される */
+	                        this; // thisは他のコールバック関数同様にAJAX通信時のオプションを示します。
+	                        alert('Error : ' + errorThrown);
+	                }
+	            });
+			}
 		</script>
 	</head>
 	<body>
@@ -35,8 +79,11 @@
 		<a href="/editor/1">戦略１</a>
 		<a href="/editor/2">戦略２</a>
 		<a href="/editor/3">戦略３</a>
-		<a href="#">新規作成</a>
 		</div>
+		<form id="create-chara-form" method="post">
+        <p><input id="chara-name" type="text" /></p>
+        <p><input id="create-chara-submit" value="新規作成" type="submit" /></p>
+        </form>
 		</div>
 		<div id="footer">フッター</div>
 	</div>
