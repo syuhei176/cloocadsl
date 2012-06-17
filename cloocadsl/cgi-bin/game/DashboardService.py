@@ -8,12 +8,14 @@ import datetime
 import config as config
 from flask import session
 from core.util import Util
+import ModelCompiler
+import ProjectService
 
 reg_username = re.compile('\w+')
 
-def getMyCharacters(connect, user):
+def getCharacters(connect, user):
     cur = connect.cursor()
-    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,statics,project_id FROM CharacterInfo WHERE user_id=%s;',(user['id'], ))
+    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,tactics,project_id FROM CharacterInfo WHERE 1;',())
     rows = cur.fetchall()
     characters = []
     cur.close()
@@ -27,7 +29,28 @@ def getMyCharacters(connect, user):
         character['exp'] = int(rows[i][5])
         character['hp'] = int(rows[i][6])
         character['atk'] = int(rows[i][7])
-        character['statics'] = rows[i][8]
+        character['tactics'] = rows[i][8]
+        character['project_id'] = int(rows[i][9])
+        characters.append(character)
+    return characters
+
+def getMyCharacters(connect, user):
+    cur = connect.cursor()
+    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,tactics,project_id FROM CharacterInfo WHERE user_id=%s;',(user['id'], ))
+    rows = cur.fetchall()
+    characters = []
+    cur.close()
+    for i in range(len(rows)):
+        character = {}
+        character['id'] = int(rows[i][0])
+        character['user_id'] = rows[i][1]
+        character['game_type'] = rows[i][2]
+        character['name'] = rows[i][3]
+        character['level'] = int(rows[i][4])
+        character['exp'] = int(rows[i][5])
+        character['hp'] = int(rows[i][6])
+        character['atk'] = int(rows[i][7])
+        character['tactics'] = rows[i][8]
         character['project_id'] = int(rows[i][9])
         characters.append(character)
     return characters
@@ -35,7 +58,7 @@ def getMyCharacters(connect, user):
 def createCharacter(connect, user, name):
     if len(name.encode('utf_8')) >= 255:
         return False
-    proj = createProject(connect, user, name, '', 1)
+    proj = ProjectService.createProject(connect, user, name, '', 1) #use API
     cur = connect.cursor()
     cur.execute('INSERT INTO CharacterInfo (name,user_id,project_id) VALUES(%s,%s,%s);',(name.encode('utf_8'), user['id'], proj['id'], ))
     connect.commit()
@@ -101,22 +124,6 @@ def deleteProject(user, pid):
     cur.close()
     connect.close()
     return True
-
-def createProject(connect, user, name, xml, metamodel_id):
-    if len(name.encode('utf_8')) >= 255:
-        return None
-    cur = connect.cursor()
-    json_text = ''
-    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,user_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), json_text, metamodel_id, user['id'], ))
-    connect.commit()
-    id = cur.lastrowid
-    cur.close()
-    project = {}
-    project['id'] = id
-    project['name'] = name
-    project['xml'] = json_text
-    project['metamodel_id'] = metamodel_id
-    return project
 
 def deleteMetaModel(user, id):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)

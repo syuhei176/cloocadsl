@@ -1,7 +1,7 @@
 
 function GameEnvironment(stm_data1, stm_data2) {
-	this.player1 = new Player(1, 60, 480, new StateMachine(stm_data1));
-	this.player2 = new Player(1, 480, 60, new StateMachine(stm_data2));
+	this.player1 = new Player(1, 160, 480, -90, new StateMachine(stm_data1));
+	this.player2 = new Player(2, 640 - 160, 60, 90, new StateMachine(stm_data2));
 	this.player1.stm.sendEvent(1);
 	this.player2.stm.sendEvent(1);
 	this.players = [this.player1, this.player2];
@@ -36,6 +36,14 @@ GameEnvironment.prototype.draw = function() {
 		  fromCenter: true,
 		  sides: 3,
 		  angle: this.player1.direction - 30
+		});
+	$("canvas").drawPolygon({
+		strokeStyle: "#0f0",
+		strokeWidth: 3,
+		  x: this.player1.x, y: this.player1.y,
+		  radius: 12,
+		  fromCenter: true,
+		  sides: 6,
 		});
 	$("canvas").drawPolygon({
 		strokeStyle: "#f00",

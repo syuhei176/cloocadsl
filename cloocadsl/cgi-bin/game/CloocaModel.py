@@ -50,7 +50,7 @@ def GetStatusFromDB(connect, username, game_type):
 
 def GetCharacterFromDB(connect, id):
     cur = connect.cursor()
-    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,statics,project_id FROM CharacterInfo WHERE id = %s;', (id, ))
+    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,tactics,project_id FROM CharacterInfo WHERE id = %s;', (id, ))
     rows = cur.fetchall()
     cur.close()
     if len(rows) == 0:
@@ -64,7 +64,7 @@ def GetCharacterFromDB(connect, id):
     user['exp'] = int(rows[0][5])
     user['hp'] = int(rows[0][6])
     user['atk'] = int(rows[0][7])
-    user['statics'] = rows[0][8]
+    user['tactics'] = rows[0][8]
     user['project_id'] = int(rows[0][9])
     return user
 

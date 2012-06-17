@@ -10,6 +10,7 @@ from xml.etree.ElementTree import *
 sys.path.append('../')
 #from config import *
 import config
+import ModelCompiler
 
 """
 グローバル変数
@@ -18,20 +19,16 @@ reg_username = re.compile('\w+')
 connect = None
 g_model_id = None
 
+
+
+
 """
 プロジェクトを保存する
 """
 def saveProject(user, pid, xml):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT * FROM hasProject WHERE user_id=%s AND project_id=%s;',(user['id'], pid, ))
-    has_rows = cur.fetchall()
-    cur.close()
-    #if len(has_rows) == 0:
-    #    connect.close()
-    #    return None
-    cur = connect.cursor()
-    cur.execute('SELECT last_editor_id,xml FROM ProjectInfo WHERE id=%s;',(pid, ))
+    cur.execute('SELECT xml FROM ProjectInfo WHERE id=%s AND user_id=%s',(pid, user['id'], ))
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
@@ -39,21 +36,33 @@ def saveProject(user, pid, xml):
         return None
     result_json = xml
     updated = False
-    """
-    if rows[0][0] == user['id']:
-        pass
-    else:
-        model1 = json.loads(rows[0][1])
-        model2 = json.loads(xml)
-        merged_model = merge(model1, model2)
-        result_json = json.dumps(merged_model)
-        updated = True
-    """
-    affect_row_count = cur.execute('UPDATE ProjectInfo SET xml=%s,last_editor_id=%s WHERE id = %s;',(result_json.encode('utf_8'), user['id'], pid, ))
+    affect_row_count = cur.execute('UPDATE ProjectInfo SET xml=%s WHERE user_id=%s AND id = %s;',(result_json.encode('utf_8'), user['id'], pid, ))
     connect.commit()
     cur.close()
+    genTactics(connect, user, pid)
     connect.close()
     return {'updated':updated,'xml':result_json}
+
+def genTactics(connect, user, id):
+    cur = connect.cursor()
+    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,tactics,project_id FROM CharacterInfo WHERE project_id=%s AND user_id=%s;',(id, user['id'], ))
+    rows = cur.fetchall()
+    cur.close()
+    if len(rows) == 0:
+        return None
+    chara_id = rows[0][0]
+    project_id = rows[0][9]
+    generator = ModelCompiler.BaseGenerator()
+    generator.GenerateCode(user, project_id, 'game')
+    outpath = config.CLOOCA_CGI + '/out/' + user['uname'] + '/p' + str(project_id) + '/state.json'
+    f = open(outpath)
+    data1 = f.read()
+    f.close()
+    cur = connect.cursor()
+    affected_rows = cur.execute('UPDATE CharacterInfo SET tactics=%s WHERE id=%s AND user_id=%s;', (data1, chara_id, user['id'], ))
+    connect.commit()
+    cur.close()
+    return data1
 
 def check(user, pid):
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -113,27 +122,21 @@ def deleteProject(user, pid):
     connect.close()
     return True
 
-
-clean_xml = '''
-<?xml version="1.0" encoding="utf-8"?><Model id="0" current_version="1"><Diagram id="1" meta_id="1"><VersionElement version="1" ver_type="add" /></Diagram></Model>
-'''
-clean_json = ''
-
 def createProject(connect, user, name, xml, metamodel_id):
     if len(name.encode('utf_8')) >= 255:
-        return False
+        return None
     cur = connect.cursor()
-    json_text = clean_json
-    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id) VALUES(%s,%s,%s;',(name.encode('utf_8'), json_text, metamodel_id, ))
+    json_text = ''
+    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,user_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), json_text, metamodel_id, user['id'], ))
     connect.commit()
     id = cur.lastrowid
     cur.close()
     project = {}
     project['id'] = id
     project['name'] = name
-    project['xml'] = clean_json
+    project['xml'] = json_text
     project['metamodel_id'] = metamodel_id
-    return True
+    return project
 
 def loadMyOwnProjectList(user, connect):
     cur = connect.cursor()

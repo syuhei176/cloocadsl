@@ -13,10 +13,11 @@ import config
 sys.path.append(config.CLOOCA_CGI)
 from game import RegisterService
 from game import DashboardService
+from game import AdminService
+from game import ProjectService
+from game import MetaModelService
 from core import CoreService
 from core import UserService
-from core import MetaModelService
-from game import ProjectService
 from core import ModelCompiler
 from core import FileService
 from core import GroupService
@@ -190,13 +191,23 @@ def mypage():
     return redirect(url_for('login_view'))
 
 @app.route('/mycharacters', methods=['GET'])
-def mtcharacters():
+def mycharacters():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         myprojects = DashboardService.getMyCharacters(connect, session['user'])
         connect.close()
         return json.dumps(myprojects)
     return 'false'
+
+@app.route('/characters', methods=['GET'])
+def characters():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        myprojects = DashboardService.getCharacters(connect, session['user'])
+        connect.close()
+        return json.dumps(myprojects)
+    return 'false'
+
 
 @app.route('/create-chara', methods=['POST'])
 def create_chara():
@@ -205,6 +216,15 @@ def create_chara():
         myprojects = DashboardService.createCharacter(connect, session['user'], request.form['name'])
         connect.close()
         return json.dumps(myprojects)
+    return 'false'
+
+@app.route('/gen-chara', methods=['POST'])
+def gen_chara():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = DashboardService.genTactics(connect, session['user'], request.form['id'])
+        connect.close()
+        return json.dumps(result)
     return 'false'
 
 """
@@ -438,7 +458,10 @@ id:40
 @app.route('/workbench/<id>')
 def workbenchjs(id=None):
     if 'user' in session:
-        return render_template('workbenchjs.html', id=id, loggedin = True, username = session['user']['uname'])
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        toolinfo = AdminService.loadMetaModel(connect, session['user'], id)
+        connect.close();
+        return render_template('workbenchjs.html', toolinfo=json.dumps(toolinfo))
     return redirect(url_for('login_view'))
 
 """
@@ -681,8 +704,6 @@ def update_group():
         result = GroupService.updateGroup(session['user'], request.form['group_id'], request.form['name'].encode('utf-8'), request.form['detail'].encode('utf-8'), request.form['visibillity'], connect)
         connect.close()
         return json.dumps(result)
-
-
 
 
 """

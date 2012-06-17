@@ -18,15 +18,15 @@ StateMachine.prototype.execute = function(action_obj) {
 	if(next_state == -1) return false;
 	this.current_state = next_state;
 	console.log('current state:'+this.current_state);
-	if(this.states[this.current_state] == 0) {
-		//何もしない
+	var state_info = this.states[this.current_state];
+	if(state_info.action == 'stop') {
 		action_obj.action_stop();
-	}else if(this.states[this.current_state] == 1) {
-		action_obj.action_go();
-	}else if(this.states[this.current_state] == 2) {
-		action_obj.action_right();
-	}else if(this.states[this.current_state] == 3) {
-		action_obj.action_left();
+	}else if(state_info.action == 'forward') {
+		action_obj.action_go(Number(state_info.value));
+	}else if(state_info.action == 'right') {
+		action_obj.action_right(Number(state_info.value));
+	}else if(state_info.action == 'left') {
+		action_obj.action_left(Number(state_info.value));
 	}
 	return true;
 }

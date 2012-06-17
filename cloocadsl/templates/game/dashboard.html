@@ -7,6 +7,7 @@
 		<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 		<script src="/static/js/jquery-1.7.1.min.js"></script>
 		<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+		<script src="/static/js/game/clooca_game.js"></script>
 		<script type="text/javascript">
 			$(function(){
 				var user = {{user|safe}};
@@ -45,22 +46,14 @@
 			});
 			
 			function reload_mycharacter() {
-	            $.ajax({
-	                type: "GET",
-	                url: "/mycharacters",
-	                data: {},
-	                dataType: 'json',
-	                success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
-	                    $("#tactics").empty();
-	                	for(var i=0;i < data.length;i++) {
-		                    $('#tactics').append('<a href="/editor/'+data[i].project_id+'">'+data[i].name+'</a>');
-	                	}
-	                },
-	                error: function(XMLHttpRequest, textStatus, errorThrown) {  /** Ajax通信が失敗した場合に呼び出される */
-	                        this; // thisは他のコールバック関数同様にAJAX通信時のオプションを示します。
-	                        alert('Error : ' + errorThrown);
-	                }
-	            });
+				load_mycharacters(function(data){
+		            $("#tactics").empty();
+		        	for(var i=0;i < data.length;i++) {
+		                $('#tactics').append('<a href="/editor/'+data[i].project_id+'">'+data[i].name+'</a>');
+		        	}
+				},function(){
+					
+				});
 			}
 		</script>
 	</head>
@@ -84,6 +77,7 @@
         <p><input id="chara-name" type="text" /></p>
         <p><input id="create-chara-submit" value="新規作成" type="submit" /></p>
         </form>
+        <a href="/battle">バトル</a>
 		</div>
 		<div id="footer">フッター</div>
 	</div>
