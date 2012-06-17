@@ -45,7 +45,7 @@ def saveProject(user, pid, xml):
 
 def genTactics(connect, user, id):
     cur = connect.cursor()
-    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,tactics,project_id FROM CharacterInfo WHERE project_id=%s AND user_id=%s;',(id, user['id'], ))
+    cur.execute('SELECT id,user_id,game_type,name,level,exp,hp,atk,tactics,project_id FROM CharacterInfo WHERE id=%s AND user_id=%s;',(id, user['id'], ))
     rows = cur.fetchall()
     cur.close()
     if len(rows) == 0:
@@ -53,8 +53,8 @@ def genTactics(connect, user, id):
     chara_id = rows[0][0]
     project_id = rows[0][9]
     generator = ModelCompiler.BaseGenerator()
-    generator.GenerateCode(user, project_id, 'game')
-    outpath = config.CLOOCA_CGI + '/out/' + user['uname'] + '/p' + str(project_id) + '/state.json'
+    generator.GenerateCode(user, chara_id, 'game')
+    outpath = config.CLOOCA_CGI + '/out/' + user['uname'] + '/p' + str(chara_id) + '/state.json'
     f = open(outpath)
     data1 = f.read()
     f.close()
@@ -122,14 +122,13 @@ def deleteProject(user, pid):
     connect.close()
     return True
 
-def createProject(connect, user, name, xml, metamodel_id):
+def createProject(connect, id, user, name, xml, metamodel_id):
     if len(name.encode('utf_8')) >= 255:
         return None
     cur = connect.cursor()
     json_text = ''
-    cur.execute('INSERT INTO ProjectInfo (name,xml,metamodel_id,user_id) VALUES(%s,%s,%s,%s);',(name.encode('utf_8'), json_text, metamodel_id, user['id'], ))
+    cur.execute('INSERT INTO ProjectInfo (id,name,xml,metamodel_id,user_id) VALUES(%s,%s,%s,%s,%s);',(id, name.encode('utf_8'), json_text, metamodel_id, user['id'], ))
     connect.commit()
-    id = cur.lastrowid
     cur.close()
     project = {}
     project['id'] = id

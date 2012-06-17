@@ -16,11 +16,11 @@
 			<style>
 	#default-selectable .ui-selecting { background: #FECA40; }
 	#default-selectable .ui-selected { background: #F39814; color: white; }
-	#default-selectable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+	#default-selectable { list-style-type: none; margin: 0; padding: 0; width: 90%; }
 	#default-selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
 	#online-selectable .ui-selecting { background: #FECA40; }
 	#online-selectable .ui-selected { background: #F39814; color: white; }
-	#online-selectable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+	#online-selectable { list-style-type: none; margin: 0; padding: 0; width: 90%; }
 	#online-selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
 	</style>
 		<script type="text/javascript">
@@ -38,12 +38,12 @@
 					g_characters = data;
 		            $("#online-selectable").empty();
 		        	for(var i=0;i < data.length;i++) {
-		                $('#online-selectable').append('<li class="ui-widget-content">'+data[i].name+'</li>');
+		                $('#online-selectable').append('<li class="ui-widget-content">'+data[i].name+' by '+data[i].owner_name+'</li>');
 		        	}
 				},function(){
 					
 				});
-				$( "#dialog" ).dialog({width:360});
+				$( "#dialog" ).dialog({width:400});
 				$( "#tabs" ).tabs();
 				$( "#dufault-selectable" ).selectable({
 					stop: function() {
@@ -76,7 +76,7 @@
 							console.log(tactics.matrix[0]);
 							console.log(tactics.states);
 							game_env = new GameEnvironment(tactics, enemy_tactics);
-							setInterval(game_main, 100);
+							setInterval(game_main, 80);
 							$( "#mycharacter-dialog" ).dialog('close');
 						});
 					}
@@ -124,18 +124,18 @@
 	<div id="dialog" title="相手を選ぶ" width="300">
 	<div id="tabs">
 	<ul>
-		<li><a href="#tabs-1">アリーナ</a></li>
-		<li><a href="#tabs-2">オンライン上の相手</a></li>
+		<li><a href="#tabs-1">オンライン上の相手</a></li>
+		<li><a href="#tabs-2">その他</a></li>
 	</ul>
 	<div id="tabs-1">
-		<ol id="dufault-selectable">
+		<ol id="online-selectable">
 			<li class="ui-widget-content">相手①</li>
 			<li class="ui-widget-content">相手②</li>
 			<li class="ui-widget-content">相手③</li>
 		</ol>
 	</div>
 	<div id="tabs-2">
-		<ol id="online-selectable">
+		<ol id="dufault-selectable">
 			<li class="ui-widget-content">相手①</li>
 			<li class="ui-widget-content">相手②</li>
 			<li class="ui-widget-content">相手③</li>

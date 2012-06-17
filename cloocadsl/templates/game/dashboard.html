@@ -20,6 +20,7 @@
 				$('#login-info').html(html);
 				
 				reload_mycharacter();
+				reload_myresults();
 				
 		        $('#create-chara-submit').click(function() {
 		            var data = {name : $('#chara-name').val()};
@@ -49,7 +50,18 @@
 				load_mycharacters(function(data){
 		            $("#tactics").empty();
 		        	for(var i=0;i < data.length;i++) {
-		                $('#tactics').append('<a href="/editor/'+data[i].project_id+'">'+data[i].name+'</a>');
+		                $('#tactics').append('<a href="/editor/'+data[i].id+'">'+data[i].name+'</a>');
+		        	}
+				},function(){
+					
+				});
+			}
+			
+			function reload_myresults() {
+				load_myresults(function(data){
+		            $("#myresult").empty();
+		        	for(var i=0;i < data.length;i++) {
+		                $('#myresult').append('<p>' + data[i].game_type + ':' + data[i].result + '</p>');
 		        	}
 				},function(){
 					
@@ -69,9 +81,8 @@
 		</div>
 		<div id="main">
 		<div id="tactics">
-		<a href="/editor/1">戦略１</a>
-		<a href="/editor/2">戦略２</a>
-		<a href="/editor/3">戦略３</a>
+		</div>
+		<div id="myresult">
 		</div>
 		<form id="create-chara-form" method="post">
         <p><input id="chara-name" type="text" /></p>

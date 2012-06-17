@@ -52,8 +52,9 @@
 							 if(data) {
 								 	$("#success").fadeIn();
 								 	$("#login-form").fadeOut();
+								 	location.reload();
 							 }else{
-									$("#error").fadeIn().text("既に登録されています。");
+									$("#error").fadeIn().text("ユーザ名かパスワードが違います。");
 							 }
 						}
 					});

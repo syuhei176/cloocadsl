@@ -251,6 +251,8 @@ def import_from_sample_tool(connect, user, sample_id, space_key):
     rows = cur.fetchall()
     for i in range(len(rows)):
         cur.execute('INSERT INTO Template (name,path,content,metamodel_id) VALUES(%s,%s,%s,%s);',(rows[i][0], rows[i][1], rows[i][2], dest_id, ))
+    connect.commit()
+    return False
 
 def sample_tools(connect, user, space_key):
     cur = connect.cursor()

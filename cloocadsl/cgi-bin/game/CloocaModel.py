@@ -33,9 +33,9 @@ def GetUserFromDB(connect, username):
     return user
 
 
-def GetStatusFromDB(connect, username, game_type):
+def GetStatusFromDB(connect, user_id, game_type):
     cur = connect.cursor()
-    cur.execute('SELECT id,username,game_type,point,result FROM StatusInfo WHERE username = %s AND game_type = %s;', (username, game_type, ))
+    cur.execute('SELECT id,user_id,game_type,point,result FROM ResultSummary WHERE user_id = %s AND game_type = %s;', (user_id, game_type, ))
     rows = cur.fetchall()
     cur.close()
     if len(rows) == 0:

@@ -132,7 +132,7 @@ def EnableEmail(user, key):
 
 def GetUserFromDB(connect, username, group_id):
     cur = connect.cursor()
-    cur.execute('SELECT id,uname,passwd,role,license_type,register_date,state FROM UserInfo WHERE uname = %s AND group_id = %s;', (username, group_id, ))
+    cur.execute('SELECT id,uname,passwd,role,license_type,registration_date,state FROM UserInfo WHERE uname = %s AND group_id = %s;', (username, group_id, ))
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()

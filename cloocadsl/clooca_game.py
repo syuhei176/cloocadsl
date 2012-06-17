@@ -227,6 +227,25 @@ def gen_chara():
         return json.dumps(result)
     return 'false'
 
+@app.route('/myresults', methods=['GET'])
+def myresults():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        myprojects = DashboardService.getMyResults(connect, session['user'])
+        connect.close()
+        return json.dumps(myprojects)
+    return 'false'
+
+@app.route('/insert-result', methods=['POST'])
+def insert_result():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        myprojects = DashboardService.insertBattleResult(connect, request.form['game_type'], session['user'], request.form['counter'],  request.form['result'])
+        connect.close()
+        return json.dumps(myprojects)
+    return 'false'
+
+
 """
 id:21
 visibillity editor,wb

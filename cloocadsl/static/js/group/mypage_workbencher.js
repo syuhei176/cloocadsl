@@ -18,6 +18,15 @@ Ext.define('Tool', {
     ]
 });
 
+Ext.define('SampleTool', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'id', type: 'int'},
+        {name: 'name',  type: 'string'},
+        {name: 'visibillity',  type: 'string'}
+    ]
+});
+
     function create_mydevtools_tab() {
     	var visibillity_state = Ext.create('Ext.data.Store', {
     	    fields: ['disp','type'],
@@ -62,7 +71,12 @@ Ext.define('Tool', {
                       iconCls:'add',
                       handler:function(btn){
                     	  create_tool_window();
-//                          ds.insert(new_metadiagram.id,data);
+                      }
+                  },{
+                      text:'サンプルをインポート',
+                      iconCls:'add',
+                      handler:function(btn){
+                    	  sample_tool_window();
                       }
                   },{
                       text:'削除',
@@ -70,7 +84,7 @@ Ext.define('Tool', {
                       handler:function(btn){
                           var record = grid.getSelectionModel().getSelection()[0];
                           if (record) {
-                        	  Ext.Msg.confirm('プロジェクトの削除','削除しますか？',function(btn){
+                        	  Ext.Msg.confirm('ツールの削除','削除しますか？',function(btn){
                         		  if(btn == 'yes') {
                               		$.post('/deletem', { id : record.get('id') },
                             				function(data) {
@@ -244,6 +258,89 @@ Ext.define('Tool', {
         	        }
         	    }]
     	    }]
+    	});
+    	win.show();
+    }
+    
+    function sample_tool_window() {
+        var sampletools_ds = Ext.create('Ext.data.Store', {
+            model: 'SampleTool',
+            proxy: {
+                type: 'ajax',
+                url : '/sample-tools',
+                reader: {
+                    type: 'json',
+                }
+            },
+            autoLoad: true
+        });
+        
+    	var grid = Ext.create('Ext.grid.Panel', {
+            columnWidth: 0.60,
+            xtype: 'gridpanel',
+            store: sampletools_ds,
+            height: 320,
+            title:'ツール',
+            columns: [
+                {
+                    id       :'name',
+                    text   : '名前',
+                    flex: 1,
+                    sortable : true,
+                    dataIndex: 'name'
+                },{
+                    text   : '公開範囲',
+                    width    : 75,
+                    sortable : true,
+                    dataIndex: 'visibillity'
+                }
+            ],
+           	tbar:[
+                  {
+                      text:'サンプルをインポート',
+                      iconCls:'add',
+                      handler:function(btn){
+                          var record = grid.getSelectionModel().getSelection()[0];
+    	        			$.ajax({
+    	        				type:"POST",
+    	        				url: '/import-from-sample-tool',
+    	        				data: 'sample_id='+record.get('id'),
+    	        				dataType: 'json',
+    	        				success: function(data){
+    	        					mytools_ds.load();
+    	        				}
+    	        			});
+                      }
+                  },{
+//                      text:'更新',
+                      cls: 'x-btn-icon',
+                      icon:'/static/images/editor/update.png',
+                      handler:function(btn){
+                    	  sampletools_ds.load();
+                      }
+                  }
+                  ],
+            listeners: {
+                selectionchange: function(model, records) {
+                    if (records[0]) {
+                        this.up('form').getForm().loadRecord(records[0]);
+                    }
+                }
+            }
+        });
+    	
+    	var win = Ext.create('Ext.window.Window', {
+    	    title: 'サンプルツール',
+    	    height: 360,
+    	    width: 420,
+    	    layout: 'fit',
+    	    items: [grid/*,{
+        	    	xtype: 'button',
+        	        text: 'OK',
+        	        handler: function() {
+        	        	win.hide();
+        	        }
+        	    }*/]
     	});
     	win.show();
     }

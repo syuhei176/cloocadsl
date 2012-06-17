@@ -7,6 +7,7 @@ function Player(id, x, y, direction, stm) {
 	this.motor_l_pwr = 0;
 	this.direction = direction;
 	this.stm = stm;
+	this.point = 0;
 	//
 	this.prev_light_state = 1;
 }
@@ -57,20 +58,20 @@ Player.prototype.action_stop = function() {
 Player.prototype.action_go = function(pwr) {
 	if(pwr >= 0 && pwr < 128) {
 //		console.log('id:'+this.id+',action:go ' + pwr);
-		this.motor_r_pwr = 4 + pwr;
-		this.motor_l_pwr = 4 + pwr;
+		this.motor_r_pwr = 3 + pwr;
+		this.motor_l_pwr = 3 + pwr;
 	}
 }
 
 Player.prototype.action_right = function(pwr) {
 //	console.log('id:'+this.id+',action:right');
 	this.motor_r_pwr = 0;
-	this.motor_l_pwr = 4 + pwr;
+	this.motor_l_pwr = 3 + pwr;
 }
 
 Player.prototype.action_left = function(pwr) {
 //	console.log('id:'+this.id+',action:left');
-	this.motor_r_pwr = 4 + pwr;
+	this.motor_r_pwr = 3 + pwr;
 	this.motor_l_pwr = 0;
 }
 

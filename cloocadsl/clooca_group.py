@@ -47,13 +47,13 @@ def index():
 id:2
 visibillity public
 """
-@app.route('/feature')
+@app.route('/howto')
 def feature():
-    return render_template('feature.html')
+    return render_template('/group/howto.html')
 
 @app.route('/gallery')
 def gallery():
-    return render_template('group/gallery.html')
+    return render_template('/group/gallery.html')
 
 
 """
