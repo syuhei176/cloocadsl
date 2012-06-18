@@ -23,7 +23,7 @@ Ext.define('SampleTool', {
     fields: [
         {name: 'id', type: 'int'},
         {name: 'name',  type: 'string'},
-        {name: 'visibillity',  type: 'string'}
+        {name: 'owner',  type: 'string'}
     ]
 });
 
@@ -289,10 +289,10 @@ Ext.define('SampleTool', {
                     sortable : true,
                     dataIndex: 'name'
                 },{
-                    text   : '公開範囲',
+                    text   : 'オーナー',
                     width    : 75,
                     sortable : true,
-                    dataIndex: 'visibillity'
+                    dataIndex: 'owner'
                 }
             ],
            	tbar:[

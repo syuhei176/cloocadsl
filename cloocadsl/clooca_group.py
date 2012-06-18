@@ -9,7 +9,7 @@ import zipfile
 import json
 import md5
 import MySQLdb
-import config_group as config
+import config as config
 sys.path.append(config.CLOOCA_CGI)
 from group import RegisterService
 from group import DashboardService
@@ -996,7 +996,7 @@ def mvcs_export():
 @app.route('/mvcs/create_rep', methods=['POST'])
 def create_rep():
     if 'user' in session:
-        resp = mvcs.create_rep(session['user'], request.form['name'], request.form['group_id'])
+        resp = mvcs.create_rep(session['user'], request.form['name'], session['user']['space_key'])
         return json.dumps(resp)
 
 @app.route('/mvcs/clear_rep', methods=['POST'])
@@ -1008,7 +1008,7 @@ def clear_rep():
 @app.route('/mvcs/delete_rep', methods=['POST'])
 def delete_rep():
     if 'user' in session:
-        resp = mvcs.delete_rep(session['user'], rep_id=request.form['rep_id'], group_id=request.form['group_id'])
+        resp = mvcs.delete_rep(session['user'], rep_id=request.form['rep_id'], group_id=session['user']['space_key'])
         return json.dumps(resp)
 
 @app.route('/mvcs/rep_list', methods=['POST'])
@@ -1032,7 +1032,7 @@ def user_rep_list():
 @app.route('/mvcs/group_rep_list', methods=['POST'])
 def group_rep_list():
     if 'user' in session:
-        resp = mvcs.group_rep_list(request.form['group_id'])
+        resp = mvcs.group_rep_list(session['user']['space_key'])
         return json.dumps(resp)
 
 @app.route('/mvcs/gethistory', methods=['POST'])

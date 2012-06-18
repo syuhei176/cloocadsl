@@ -22,7 +22,7 @@ def listingfile(m):
             content += '\n'
     out =  minify(content, mangle=True)
     f = open(config.CLOOCA_ROOT+'/static/js/'+m+'.js', 'w')
-    f.write('/* Copyright (C) 2012 clooca All Rights Reserved. */'+out)
+    f.write('/* Copyright (C) 2012 Technical Rockstars Co.,Ltd. All Rights Reserved. */'+out)
     f.close()
     return out
 
@@ -72,8 +72,15 @@ def access_aws_www_group():
     scp.sendline('cd /var/www/www-group')
     return scp
 
-def deploy():
-    scp = access_aws_www_group()
+def access_aws_www_game():
+    scp = pexpect.spawn('sftp %s@%s' % ('syuhei', 'xxx.xxx.xxx.xxx'))
+    scp.expect('sword: ', 10)
+    scp.sendline('un1verse7')
+    scp.expect('sftp>')
+    scp.sendline('cd /var/www/www-game')
+    return scp
+
+def deploy_common(scp):
     print scp.readline()
     scp.expect('sftp>')
     scp.sendline('ls')
@@ -84,7 +91,21 @@ def deploy():
     scp.readline()
     print scp.readline()
     
+    cd(scp, 'static/js')
+    send(scp, 'core.js')
+    send(scp, 'editor.js')
+    send(scp, 'workbench.js')
+    cd(scp, '../../')
+
+
+def deploy_group_edition(scp):
     cd(scp, 'cgi-bin/group')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.py')
+    scp.readline()
+    print scp.readline()
+    
+    cd(scp, '../mvcs')
     scp.expect('sftp>')
     scp.sendline('mput %s' % '*.py')
     scp.readline()
@@ -96,39 +117,75 @@ def deploy():
     scp.readline()
     print scp.readline()
     
-    cd(scp, '../../static/js')
-    
-    send(scp, 'core.js')
-    send(scp, 'editor.js')
-    send(scp, 'workbench.js')
-    
-    """
-    cd(scp, '../../cgi-bin/core')
-    
+    cd(scp, '../../static/js/group')
     scp.expect('sftp>')
-    scp.sendline('mput *.py')
+    scp.sendline('mput %s' % '*.js')
     scp.readline()
     print scp.readline()
     
-    cd(scp, '../mvcs')
-    
-    scp.expect('sftp>')
-    scp.sendline('mput %s' % '*.py')
-    scp.readline()
-    print scp.readline()
-    """
-    cd(scp, '../../')
+    cd(scp, '../../../')
     send(scp, 'clooca_group.py')
     send(scp, 'mysite.wsgi')
     scp.expect('sftp>')
     scp.sendline('exit')
     scp.close()
 
+def deploy_game_edition(scp):
+    cd(scp, 'cgi-bin/core')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.py')
+    scp.readline()
+    print scp.readline()
+
+    cd(scp, '../game')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.py')
+    scp.readline()
+    print scp.readline()
+    
+    cd(scp, '../mvcs')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.py')
+    scp.readline()
+    print scp.readline()
+    
+    cd(scp, '../../templates/game')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.html')
+    scp.readline()
+    print scp.readline()
+    
+    cd(scp, '../../static/js/game')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.js')
+    scp.readline()
+    print scp.readline()
+    
+    cd(scp, '../../../')
+    send(scp, 'clooca_game.py')
+    send(scp, 'mysite.wsgi')
+    scp.expect('sftp>')
+    scp.sendline('exit')
+    scp.close()
+
+def deploy(server_name):
+    if server_name == 'dsl':
+        scp = access_aws()
+        deploy_common(scp)
+    elif server_name == 'group':
+        scp = access_aws_www_group()
+        deploy_common(scp)
+        deploy_group_edition(scp)
+    elif server_name == 'game':
+        scp = access_aws_www_game()
+        deploy_common(scp)
+        deploy_game_edition(scp)
+    elif server_name == 'www':
+        pass
+    elif server_name == 'dev':
+        pass
+
 if __name__ == '__main__':
-    argvs = sys.argv
-    argc = len(argvs)
-    if argc == 1:
-        encode_module()
-        deploy()
-    if argc == 2:
-        encode_module()
+    server_name = raw_input("input server name? >")
+    encode_module()
+    deploy(server_name)

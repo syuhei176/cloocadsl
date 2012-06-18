@@ -408,12 +408,12 @@ function update_to_ver(ver, cb) {
 function create_rep() {
 	 Ext.Msg.prompt('確認','リポジトリを作成しますか？',function(btn, text){
 		 if(btn != 'no' && text.length != 0) {
-				$.post('/mvcs/create_rep', { pid : g_project_id, name : text, group_id : g_projectinfo.group.id },
+				$.post('/mvcs/create_rep', { pid : g_projectinfo.id, name : text, space_key : g_userinfo.space_key },
 						function(data) {
 							if(data) {
 								
 							}else{
-								Ext.Msg.alert('文字数が多すぎます。');
+								Ext.Msg.alert('リポジトリの名前が長過ぎます。');
 							}
 						}, "json");
 		 }

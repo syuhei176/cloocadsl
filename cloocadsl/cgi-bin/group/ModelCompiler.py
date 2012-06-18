@@ -7,7 +7,7 @@ from mako.template import Template
 from mako.lookup import TemplateLookup
 from mako.runtime import Context
 from StringIO import StringIO
-import config_group as config
+import config
 import codecs
 import CloocaModel
 import TemplateService

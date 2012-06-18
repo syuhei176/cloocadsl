@@ -5,7 +5,7 @@ import md5
 import re
 import sys
 import datetime
-import config_group as config
+import config
 from flask import session
 from core import GroupService
 from core.util import Gmail

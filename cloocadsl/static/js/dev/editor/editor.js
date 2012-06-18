@@ -215,6 +215,7 @@ function create_menu() {
                    ],
         	handler : onItemClick
         });
+	/*
 		common_menu.tbar.push({
             text: 'バイナリ',
             iconCls: 'add16',
@@ -228,6 +229,7 @@ function create_menu() {
                    ],
         	handler : onItemClick
         });
+        */
 	return common_menu;
 }
 
@@ -435,7 +437,7 @@ function createModelExplorer() {
 }
 
 function checkoutview() {
-	$.post('/mvcs/group_rep_list', {group_id : g_projectinfo.group.id},
+	$.post('/mvcs/group_rep_list', {},
 			function(data) {
 				if(data) {
 					console.log('id\tname\thead_version');
@@ -492,7 +494,7 @@ function checkoutview() {
 }
 
 function import_to_rep_view() {
-	$.post('/mvcs/group_rep_list', {group_id : g_projectinfo.group.id},
+	$.post('/mvcs/group_rep_list', {},
 			function(data) {
 				if(data) {
 					console.log('id\tname\thead_version');

@@ -23,7 +23,7 @@ next_version = None
 def getRepositoryFromDB(rep_id):
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,name,head_version,model_id,owner_id FROM Repository WHERE id=%s;', (rep_id))
+    cur.execute('SELECT id,name,head_version,model_id,space_key FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
@@ -34,7 +34,7 @@ def getRepositoryFromDB(rep_id):
     rep['name'] = rows[0][1].decode('utf-8')
     rep['head_version'] = rows[0][2]
     rep['model_id'] = rows[0][3]
-    rep['owner_id'] = rows[0][4]
+    rep['space_key'] = rows[0][4]
     cur.close()
     connect.close()
     return rep
@@ -42,13 +42,13 @@ def getRepositoryFromDB(rep_id):
 """
 リポジトリを作成する。
 """
-def CreateRepository(user, rep_name, group_id):
+def CreateRepository(user, rep_name, space_key):
     if len(rep_name.encode('utf_8')) >= 32:
         return False
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('INSERT INTO Repository (head_version,name,owner_id) VALUES(%s,%s,%s);', (1,rep_name.encode('utf-8'),group_id))
+    cur.execute('INSERT INTO Repository (head_version,name,space_key) VALUES(%s,%s,%s);', (1,rep_name.encode('utf-8'),space_key))
     connect.commit()
     rep_id = cur.lastrowid
     cur.close()
@@ -64,10 +64,10 @@ def CreateRepository(user, rep_name, group_id):
 """
 リポジトリを削除する
 """
-def deleteRepository(user, rep_id, group_id):
+def deleteRepository(user, rep_id, space_key):
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('DELETE FROM Repository WHERE id=%s AND owner_id=%s;', (rep_id, group_id))
+    cur.execute('DELETE FROM Repository WHERE id=%s AND space_key=%s;', (rep_id, space_key))
     affected = cur.rowcount
     connect.commit()
     cur.close()
@@ -98,7 +98,7 @@ def clearRepository(connect, user, rep_id):
 def rep_list():
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,model_id,head_version,name,owner_id FROM Repository;')
+    cur.execute('SELECT id,model_id,head_version,name,space_key FROM Repository;')
     rows = cur.fetchall()
     reps = []
     for i in range(len(rows)):
@@ -131,10 +131,10 @@ def ver_list(rep_id):
 
 """
 """
-def group_rep_list(group_id):
+def group_rep_list(space_key):
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('SELECT id,model_id,head_version,name,owner_id FROM Repository WHERE owner_id=%s;', (group_id))
+    cur.execute('SELECT id,model_id,head_version,name,space_key FROM Repository WHERE space_key=%s;', (space_key))
     rows = cur.fetchall()
     reps = []
     for i in range(len(rows)):
@@ -143,7 +143,7 @@ def group_rep_list(group_id):
         rep['model_id'] = rows[i][1]
         rep['head_version'] = rows[i][2]
         rep['name'] = rows[i][3].decode('utf-8')
-        rep['owner_id'] = rows[i][4]
+        rep['space_key'] = rows[i][4]
         reps.append(rep)
     cur.close()
     connect.close()

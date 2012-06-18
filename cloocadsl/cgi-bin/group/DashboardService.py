@@ -5,7 +5,7 @@ import md5
 import re
 import sys
 import datetime
-import config_group as config
+import config
 from flask import session
 from core.util import Util
 
@@ -265,5 +265,6 @@ def sample_tools(connect, user, space_key):
         metamodel['id'] = rows[i][0]
         metamodel['name'] = rows[i][1].decode('utf-8')
         metamodel['visibillity'] = rows[i][3]
+        metamodel['owner'] = rows[i][4]
         metamodels.append(metamodel)
     return metamodels

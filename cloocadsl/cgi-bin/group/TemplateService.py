@@ -4,7 +4,7 @@ import sys
 import json
 import MySQLdb
 sys.path.append('../')
-import config_group as config
+import config
 
 def create(metamodel_id, name, path, connect):
     cur = connect.cursor()
