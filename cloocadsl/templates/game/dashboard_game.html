@@ -1,0 +1,125 @@
+<!DOCTYPE  html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>clooca game - ダッシュボード {{game_type}}</title>
+		<link href="/static/css/game/style.css" rel="stylesheet">
+		<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+		<script src="/static/js/jquery-1.7.1.min.js"></script>
+		<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+		<script src="/static/js/game/clooca_game.js"></script>
+		<script type="text/javascript">
+			$(function(){
+				var user = {{user|safe}};
+				g_game_type = '{{game_type}}';
+				var html = '';
+				{% if loggedin %}
+				html = user.uname + '<a href="/logout">ログアウト</a>';
+				{% else %}
+				html = '<a href="/login">ログイン</a>';
+				{% endif %}
+				$('#login-info').html(html);
+				
+				reload_mycharacter();
+				reload_myresults();
+				
+		        $('#create-chara-submit').click(function() {
+		            var data = {name : $('#chara-name').val(), game_type: g_game_type};
+		             
+		            $.ajax({
+		                type: "POST",
+		                url: "/create-chara",
+		                data: data,
+		                dataType: 'json',
+		                success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
+		                	if(data) {
+			                	reload_mycharacter();
+		                	}
+		                },
+		                error: function(XMLHttpRequest, textStatus, errorThrown) {  /** Ajax通信が失敗した場合に呼び出される */
+		                        this; // thisは他のコールバック関数同様にAJAX通信時のオプションを示します。
+		                        alert('Error : ' + errorThrown);
+		                }
+		            });
+		            return false;
+		        });
+		        $('form').submit(function() {
+		            return false;
+		        });
+			});
+			
+			function reload_mycharacter() {
+				load_mycharacters(function(data){
+		            $("#tactics").empty();
+		        	for(var i=0;i < data.length;i++) {
+		                $('#tactics').append('<a href="/editor/'+data[i].id+'">'+data[i].name+'</a>');
+		        	}
+				},function(){
+					
+				});
+			}
+			
+			function reload_myresults() {
+				load_myresults(function(data){
+		            $("#myresult-challenge").empty();
+		            $("#myresult-recv").empty();
+		        	for(var i=0;i < data.challenge.length;i++) {
+		        		var result_html = '';
+		        		if(data.challenge[i].result == 0) {
+		        			result_html = '勝利';
+		        		}else if(data.challenge[i].result == 1) {
+		        			result_html = '負け';
+		        		}else if(data.challenge[i].result == 2) {
+		        			result_html = '引き分け';
+		        		}
+		        		$("#myresult-challenge").append('<p>' + data.challenge[i].count + '回目:' + data.challenge[i].counter_id + ':' + result_html + '</p>');
+		        	}
+		        	for(var i=0;i < data.recv.length;i++) {
+		        		var result_html = '';
+		        		if(data.challenge[i].result == 0) {
+		        			result_html = '負け';
+		        		}else if(data.challenge[i].result == 1) {
+		        			result_html = '勝利';
+		        		}else if(data.challenge[i].result == 2) {
+		        			result_html = '引き分け';
+		        		}
+		                $('#myresult-recv').append('<p>' + data.recv[i].count + '回目:' + data.recv[i].counter_id + ':' + result_html + '</p>');
+		        	}
+				},function(){
+					
+				});
+			}
+		</script>
+	</head>
+	<body>
+	<div id="wrapper">
+		<div id="header">
+			<div id="menu">
+			<div id="menu-item"><a href="/">トップ</a></div>
+			<div id="menu-item"><a href="/dashboard">ダッシュボード</a></div>
+			<div id="menu-item">ランキング</div>
+			</div>
+			<div id="login-info"><a href="/login">ログイン</a></div>
+		</div>
+		<div id="main">
+		<h3>戦略</h3>
+		<div id="tactics">
+		</div>
+		<form id="create-chara-form" method="post" action="/create-chara">
+        <p><input id="chara-name" type="text" /></p>
+        <p><input id="create-chara-submit" value="新規作成" type="submit" /></p>
+        </form>
+        <a href="/battle/{{game_type}}">バトルへ</a>
+		<div id="myresult">
+		<h3>挑戦履歴</h3>
+		<div id="myresult-challenge">
+		</div>
+		<h3>挑戦された履歴</h3>
+		<div id="myresult-recv">
+		</div>
+		</div>
+		</div>
+		<div id="footer">フッター</div>
+	</div>
+	</body>
+</html>
