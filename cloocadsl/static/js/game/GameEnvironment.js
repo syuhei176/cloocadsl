@@ -13,7 +13,7 @@ function GameEnvironment(stm_data1, stm_data2) {
 	this.pointitems.push(new PointItem(640 - 100, 320));
 	this.pointitems.push(new PointItem(100, 320));
 	this.phase = 1;
-	this.timer_count = 20;
+	this.timer_count = 30;
 	var self = this;
 	var timeover_cb = function() {
 		self.timer_count--;
@@ -27,15 +27,15 @@ function GameEnvironment(stm_data1, stm_data2) {
 
 GameEnvironment.prototype.battle_finish = function() {
 	var result = 0;
-	if(self.player1.point > self.player2.point) {
+	if(this.player1.point > this.player2.point) {
 		result = 0;
-	}else if(self.player1.point < self.player2.point) {
+	}else if(this.player1.point < this.player2.point) {
 		result = 1;
 	}else{
 		result = 2;
 	}
 	battle_result('',g_selected_enemy.user_id, result, function(data){
-		alert(data);
+		alert('終了');
 	});
 }
 

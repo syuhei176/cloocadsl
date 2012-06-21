@@ -56,31 +56,32 @@ def getMyCharacters(connect, user):
         characters.append(character)
     return characters
 
-def createCharacter(connect, user, name):
+def createCharacter(connect, user, name, game_type):
     if len(name.encode('utf_8')) >= 255:
         return False
     cur = connect.cursor()
-    cur.execute('INSERT INTO CharacterInfo (name,user_id) VALUES(%s,%s);',(name.encode('utf_8'), user['id'], ))
+    cur.execute('INSERT INTO CharacterInfo (name,user_id,game_type) VALUES(%s,%s,%s);',(name.encode('utf_8'), user['id'], game_type, ))
     connect.commit()
     id = cur.lastrowid
     cur.close()
     proj = ProjectService.createProject(connect, id, user, name, '', 1) #use API
     return True
 
-def getMyResults(connect, user):
+def getMyResults(connect, user, game_type):
+    myresults = {}
+    myresults['challenge'] = []
+    myresults['recv'] = []
     cur = connect.cursor()
-    cur.execute('SELECT user_id,game_type,points,result FROM ResultSummary WHERE user_id = %s;', (user['id'], ))
+    cur.execute('SELECT cnt,user_id2,result FROM ResultInfo WHERE user_id1 = %s AND game_type=%s;', (user['id'], game_type))
     rows = cur.fetchall()
-    results = []
-    cur.close()
     for i in range(len(rows)):
-        result = {}
-        result['user_id'] = int(rows[0][0])
-        result['game_type'] = rows[0][1]
-        result['point'] = int(rows[0][2])
-        result['result'] = rows[0][3]
-        results.append(result)
-    return results
+        myresults['challenge'].append({'count':int(rows[i][0]), 'counter_id':int(rows[i][1]), 'result':int(rows[i][2])})
+    cur.execute('SELECT cnt,user_id1,result FROM ResultInfo WHERE user_id2 = %s AND game_type=%s;', (user['id'], game_type))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        myresults['recv'].append({'count':int(rows[i][0]), 'counter_id':int(rows[i][1]), 'result':int(rows[i][2])})
+    cur.close()
+    return myresults
 
 def insertBattleResult(connect, game_type, user, counter_user, result):
     cur = connect.cursor()
@@ -90,7 +91,7 @@ def insertBattleResult(connect, game_type, user, counter_user, result):
     if len(rows) == 0:
         cnt = 1
     else:
-        cnt = rows[0][0]
+        cnt = rows[0][0] + 1
     cur.execute('INSERT INTO ResultInfo (cnt,user_id1,user_id2,game_type,result) VALUES(%s,%s,%s,%s,%s);',(cnt, user['id'], counter_user, game_type, result))
     connect.commit()
     cur.close()

@@ -53,6 +53,16 @@ def dashboard():
         return render_template('/game/dashboard.html', loggedin=True, user=json.dumps(session['user']))
     return render_template('/game/dashboard.html', loggedin=False, user=json.dumps(None))
 
+"""
+id:2
+visibillity public
+"""
+@app.route('/dashboard/<game_type>')
+def dashboard_game(game_type):
+    if 'user' in session:
+        return render_template('/game/dashboard_game.html', loggedin=True, user=json.dumps(session['user']), game_type=game_type)
+    return render_template('/game/dashboard.html', loggedin=False, user=json.dumps(None))
+
 
 """
 id:3
@@ -66,9 +76,9 @@ def editor():
 id:4
 visibillity public
 """
-@app.route('/battle')
-def battle():
-    return render_template('/game/battle.html')
+@app.route('/battle/<game_type>')
+def battle(game_type):
+    return render_template('/game/battle.html', game_type=game_type)
 
 
 
@@ -213,7 +223,7 @@ def characters():
 def create_chara():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        myprojects = DashboardService.createCharacter(connect, session['user'], request.form['name'])
+        myprojects = DashboardService.createCharacter(connect, session['user'], request.form['name'], request.form['game_type'])
         connect.close()
         return json.dumps(myprojects)
     return 'false'
@@ -227,14 +237,14 @@ def gen_chara():
         return json.dumps(result)
     return 'false'
 
-@app.route('/myresults', methods=['GET'])
+@app.route('/myresults', methods=['POST'])
 def myresults():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        myprojects = DashboardService.getMyResults(connect, session['user'])
+        myprojects = DashboardService.getMyResults(connect, session['user'], request.form['game_type'])
         connect.close()
         return json.dumps(myprojects)
-    return 'false'
+    return 'null'
 
 @app.route('/insert-result', methods=['POST'])
 def insert_result():

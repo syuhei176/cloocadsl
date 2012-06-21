@@ -5,8 +5,7 @@
  * cb1
  * MetaMetaElement
  */
-function BaseGridEditor(datas, title, cb1, MetaMetaElement) {
-	this.title = title;
+MetaJSONEditor.prototype.createGridEditor = function(datas, title, cb1, MetaMetaElement) {
 	var self = this;
 	/*
 	 * datasは辞書型、配列に変換する。
@@ -51,7 +50,9 @@ function BaseGridEditor(datas, title, cb1, MetaMetaElement) {
                           id: new_element.id,name: new_element.name
                       };
                       grid.getStore().insert(new_element.id,data);
-                      self.panel.setTitle(self.title + '*');
+//                      self.editor.setTitle(self.title + '*');
+                      self.jsoneditor.setValue(JSON.stringify(g_metamodel));
+
                   }
               },
               {
@@ -62,13 +63,14 @@ function BaseGridEditor(datas, title, cb1, MetaMetaElement) {
                       if (record) {
                           grid.getStore().remove(record);
                           delete datas[record.get('id')];
-                          self.panel.setTitle(self.title + '*');
+//                          self.editor.setTitle(self.title + '*');
+                          self.jsoneditor.setValue(JSON.stringify(g_metamodel));
                       }
                   }
               }
               ]
 	});
-	this.panel = Ext.create('Ext.panel.Panel',
+	var panel = Ext.create('Ext.panel.Panel',
 			{
 				xtype: 'panel',
 			  	   title: title,
@@ -77,10 +79,10 @@ function BaseGridEditor(datas, title, cb1, MetaMetaElement) {
 			  		   align: 'center'
 			  	   },
 			  	   items: [grid],
-			  	   closable: 'true'
 		});
+	return panel;
 }
-
+/*
 BaseGridEditor.prototype.save = function() {
 	var self = this;
 	saveMetaModel(g_metaproject.id, function(data){
@@ -100,7 +102,7 @@ BaseGridEditor.prototype.Initialize = function() {
 BaseGridEditor.prototype.onActivate = function() {
 	current_editor = this;
 }
-
+*/
 
 /*
  * jsonエディタも付ける、json側がマスターになってる
@@ -383,300 +385,29 @@ function createMetaElementGrid(l_elements, fn, selected) {
 
 }
 
-function MetaObjectsEditor(metaobjects) {
-	var l_metaobjs = [];
-	for(var i=0;i < metaobjects.length;i++) {
-		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
-	}
-	Ext.create('Ext.data.Store', {
-	    storeId:'metaobjects',
-	    fields:['id', 'name', 'graphic'],
-	    data:{'items':l_metaobjs},
-	    proxy: {
-	        type: 'memory',
-	        reader: { type: 'json', root: 'items' }
-	    }
-	});
-	
-	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'MetaObjects',
-	    store: Ext.data.StoreManager.lookup('metaobjects'),
-	    columns: [
-	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 },
-	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
-	    ],
-	    height: 240,
-	    width: 400,
-	    selModel : new Ext.selection.RowModel({
-        	singleSelect : true,
-        	listeners : {
-        		select : {
-        			fn : function(rmodel,record,index,options){
-        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-        					 if(btn != 'cancel') {
-        						 metaobjects[record.data.id] = JSON.parse(text);
-        					 }
-        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
-        			}
-        		}
-        	}
-        })
-	});
-	
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-			xtype: 'panel',
-		  	   title: 'MetaObjects',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           grid,
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'add',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metaobjects.push(new MetaObject(metaobjects.length, ''));
-	  	  	  	     	    }
-  	  	  	           },
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'delete',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	alert('You clicked the button!');
-	  	  	  	     	    }
-  	  	  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	
-}
-
-MetaObjectsEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metaproject.id, function(data){
-		if(data) {
-			self.panel.setTitle('JSONEditor');
-		}
-	});
-}
-
-MetaObjectsEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-MetaObjectsEditor.prototype.Initialize = function() {
-}
-
-MetaObjectsEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
-
-function MetaRelationsEditor(metarelations) {
-	var l_metaobjs = [];
-	for(var i=0;i < metarelations.length;i++) {
-		if(metarelations[i] != null) l_metaobjs.push(metarelations[i]);
-	}
-	Ext.create('Ext.data.Store', {
-	    storeId:'simpsonsStore',
-	    fields:['id', 'name', 'arrow_type'],
-	    data:{
-	    	'items':l_metaobjs
-	    },
-	    proxy: {
-	        type: 'memory',
-	        reader: {
-	            type: 'json',
-	            root: 'items'
-	        }
-	    }
-	});
-	
-	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'MetaRelations',
-	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
-	    columns: [
-	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 },
-	        { header: 'Arrow type', dataIndex: 'arrow_type', flex: 1 }
-	    ],
-	    height: 200,
-	    width: 400,
-	    selModel : new Ext.selection.RowModel({
-        	singleSelect : true,
-        	listeners : {
-        		select : {
-        			fn : function(rmodel,record,index,options){
-        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-        					 if(btn != 'cancel') {
-        						 metarelations[record.data.id] = JSON.parse(text);
-        					 }
-        				 },null,true,JSON.stringify(metarelations[record.data.id]));
-        			}
-        		}
-        	}
-        })
-	});
-	
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-			xtype: 'panel',
-		  	   title: 'MetaRelations',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           grid,
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'add',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metarelations.push(new MetaRelation(metarelations.length, ''));
-	  	  	  	     	    }
-  	  	  	           },
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'delete',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	
-	  	  	  	     	    }
-  	  	  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	
-}
-
-MetaRelationsEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metaproject.id, function(data){
-		if(data) {
-			self.panel.setTitle('JSONEditor');
-		}
-	});
-}
-
-MetaRelationsEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-MetaRelationsEditor.prototype.Initialize = function() {
-}
-
-MetaRelationsEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
-
-function MetaPropertyEditor(metaobjects) {
-	var l_metaobjs = [];
-	this.selected_index = -1;
-	var self = this;
-	for(var i=0;i < metaobjects.length;i++) {
-		if(metaobjects[i] != null) l_metaobjs.push(metaobjects[i]);
-	}
-	Ext.create('Ext.data.Store', {
-	    storeId:'simpsonsStore',
-	    fields:['id', 'name', 'graphic'],
-	    data:{
-	    	'items':l_metaobjs
-	    },
-	    proxy: {
-	        type: 'memory',
-	        reader: {
-	            type: 'json',
-	            root: 'items'
-	        }
-	    }
-	});
-	
-	var grid = Ext.create('Ext.grid.Panel', {
-	    title: 'MetaProperties',
-	    store: Ext.data.StoreManager.lookup('simpsonsStore'),
-	    columns: [
-	        { header: 'Id',  dataIndex: 'id' },
-	        { header: 'Name', dataIndex: 'name', flex: 1 },
-	        { header: 'Graphic', dataIndex: 'graphic', flex: 1 }
-	    ],
-	    height: 200,
-	    width: 400,
-	    selModel : new Ext.selection.RowModel({
-        	singleSelect : true,
-        	listeners : {
-        		select : {
-        			fn : function(rmodel,record,index,options){
-        				self.selected_index = record.data.id;
-        				 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
-        					 if(btn != 'cancel') {
-        						 metaobjects[record.data.id] = JSON.parse(text);
-        					 }
-        				 },null,true,JSON.stringify(metaobjects[record.data.id]));
-        			}
-        		}
-        	}
-        })
-	});
-	
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-			xtype: 'panel',
-		  	   title: 'MetaProperties',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           grid,
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'add',
-	  	  	  	     	    handler: function() {
-	  	  	  	     	    	metaobjects.push(new MetaProperty(metaobjects.length, ''));
-	  	  	  	     	    }
-  	  	  	           },
-  	  	  	           {
-  	  	  	        	   xtype: 'button',
-  	  	  	        	   text: 'delete',
-	  	  	  	     	    handler: function() {
-//	  	  	  	     	    	alert(self.selected_index);
-//	  	  	  	     	    	metaobjects.slice(self.selected_index, 1);
-	  	  	  	     	    	metaobjects.slice(7, 1);
-	  	  	  	     	    }
-  	  	  	           }
-		  	           ],
-		  	 		closable: 'true'
-	});
-	
-}
-
-MetaPropertyEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metaproject.id, function(data){
-		if(data) {
-			self.panel.setTitle('JSONEditor');
-		}
-	});
-}
-
-MetaPropertyEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-MetaPropertyEditor.prototype.Initialize = function() {
-}
-
-MetaPropertyEditor.prototype.onActivate = function() {
-	current_editor = this;
-}
 
 function MetaJSONEditor(metadiagram) {
 	this.resource = g_metamodel;
 	var self = this;
-	var editor = Ext.create('Ext.panel.Panel',
+	this.jsoneditor = Ext.create('Ext.form.field.TextArea', {
+		title: 'json',
+		autoScroll: true,
+		width: Ext.getCmp('centerpanel').getWidth(),
+		height: Ext.getCmp('centerpanel').getHeight(),
+ 		   value: JSON.stringify(g_metamodel),
+ 		   listeners: {
+ 			   change: {
+ 				   fn: function(field, newValue, oldValue, opt) {
+ 					  g_metamodel = JSON.parse(newValue);
+ 						self.editor.setTitle('メタモデル*')
+ 				   }
+ 			   }
+ 		   }
+    });
+	/*
+	this.jsoneditor = Ext.create('Ext.panel.Panel',
 		{
-		  	   title: 'JSONEditor',
+		  	   title: 'json',
 		  	   layout: {
 		  		   type: 'hbox',
 		  		   align: 'center'
@@ -699,9 +430,43 @@ function MetaJSONEditor(metadiagram) {
 		  	        		   }
 		  	           }
 		  	           ],
-		  	 		closable: 'true'
+		  	 		closable: false
 	});
-	this.editor = editor;
+	*/
+	this.deditor = this.createGridEditor(g_metamodel.metadiagrams, 'MetaDiagram', function(d){
+		self.createJsonWindow(g_metamodel.metadiagrams, d.id);
+	}, MetaDiagram);
+	this.oeditor = this.createGridEditor(g_metamodel.metaobjects, 'MetaObjects', function(metaobj){
+		console.log(metaobj.id);
+		self.createJsonWindow(g_metamodel.metaobjects, metaobj.id);
+	}, MetaObject);
+	this.reditor = this.createGridEditor(g_metamodel.metarelations, 'MetaRelationships', function(metaobj){
+		console.log(metaobj.id);
+		self.createJsonWindow(g_metamodel.metarelations, metaobj.id);
+		/*
+		 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
+			 if(btn != 'cancel') {
+				 g_metamodel.metarelations[metaobj.id] = JSON.parse(text);
+                 self.jsoneditor.setValue(JSON.stringify(g_metamodel));
+			 }
+		 },null,true,JSON.stringify(metaobj));
+		 */
+	}, MetaRelation);
+	this.peditor = this.createGridEditor(g_metamodel.metaproperties, 'MetaProperties', function(metaprop){
+		console.log(metaprop.id);
+		self.createJsonWindow(g_metamodel.metaproperties, metaprop.id);
+	}, MetaProperty);
+	var tabpanel = Ext.create('Ext.tab.Panel', {
+		title: 'メタモデル',
+		tabPosition: 'bottom',
+        defaults :{
+            bodyPadding: 6
+        },
+	    items: [this.deditor, this.oeditor, this.reditor, this.peditor, this.jsoneditor],
+	    closable: 'true'
+	});
+
+	this.editor = tabpanel;
 }
 
 MetaJSONEditor.prototype.save = function() {
@@ -722,4 +487,31 @@ MetaJSONEditor.prototype.Initialize = function() {
 
 MetaJSONEditor.prototype.onActivate = function() {
 	current_editor = this;
+}
+
+MetaJSONEditor.prototype.createJsonWindow = function(metaelements, id) {
+	var self = this;
+	var textarea = Ext.create('Ext.form.field.TextArea', {
+		title: 'json',
+		autoScroll: true,
+		width: 480,
+		height: 240,
+ 		   value: JSON.stringify(metaelements[id]),
+ 		   listeners: {
+ 			   change: {
+ 				   fn: function(field, newValue, oldValue, opt) {
+ 					   metaelements[id] = JSON.parse(newValue);
+ 					   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
+ 				   }
+ 			   }
+ 		   }
+    });
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'json',
+	    width: 480,
+	    height: 240,
+	    layout: 'fit',
+	    items: [textarea]
+	});
+	win.show()
 }

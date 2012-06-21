@@ -2,7 +2,7 @@ function load_mycharacters(success_cb, error_cb) {
     $.ajax({
         type: "GET",
         url: "/mycharacters",
-        data: {},
+        data: {game_type:g_game_type},
         dataType: 'json',
         success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
         	success_cb(data);
@@ -19,7 +19,7 @@ function load_characters(success_cb, error_cb) {
     $.ajax({
         type: "GET",
         url: "/characters",
-        data: {},
+        data: {game_type:g_game_type},
         dataType: 'json',
         success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
         	success_cb(data);
@@ -34,9 +34,9 @@ function load_characters(success_cb, error_cb) {
 
 function load_myresults(success_cb, error_cb) {
     $.ajax({
-        type: "GET",
+        type: "POST",
         url: "/myresults",
-        data: {},
+        data: {game_type:g_game_type},
         dataType: 'json',
         success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
         	success_cb(data);
@@ -70,7 +70,7 @@ function battle_result(game_type, counter, result, success_cb, error_cb) {
     $.ajax({
         type: "POST",
         url: "/insert-result",
-        data: {game_type : game_type, counter : counter, result : result},
+        data: {game_type : g_game_type, counter : counter, result : result},
         dataType: 'json',
         success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
         	success_cb(data);

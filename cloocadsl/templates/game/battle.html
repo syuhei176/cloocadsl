@@ -25,6 +25,7 @@
 	</style>
 		<script type="text/javascript">
 			$(function(){
+				g_game_type = '{{game_type}}';
 				load_mycharacters(function(data){
 					g_mycharacters = data;
 		            $("#mycharacter-selectable").empty();
@@ -72,9 +73,6 @@
 							var enemy_tactics = JSON.parse(g_selected_enemy.tactics);
 							var stm_data1 = {event_num:4, matrix:[-1, 1,-1,-1, -1,-1, 2, 3, -1,-1, 3,-1, -1,-1,-1, 2], states:[0, 1, 2, 3]};
 							var stm_data2 = {event_num:4, matrix:[-1, 1,-1,-1, -1,-1, 2, 3, -1,-1, 3,-1, -1,-1,-1, 2], states:[{action:"stop",value:"0"},{action:"forward",value:"0"}, {action:"right",value:"0"}, {action:"left",value:"0"}]};
-							console.log(tactics.event_num);
-							console.log(tactics.matrix[0]);
-							console.log(tactics.states);
 							game_env = new GameEnvironment(tactics, enemy_tactics);
 							setInterval(game_main, 80);
 							$( "#mycharacter-dialog" ).dialog('close');
@@ -143,11 +141,8 @@
 	</div>
 	</div>
 	</div> <!-- dialog -->
-	<div id="mycharacter-dialog" title="自分のキャラを選ぶ" width="300">
+	<div id="mycharacter-dialog" title="自分のキャラを選ぶ" width="300" style="display : none;">
 	<ol id="mycharacter-selectable">
-		<li class="ui-widget-content">相手①</li>
-		<li class="ui-widget-content">相手②</li>
-		<li class="ui-widget-content">相手③</li>
 	</ol>
 	</div> <!-- dialog -->
 	<div id="wrapper">

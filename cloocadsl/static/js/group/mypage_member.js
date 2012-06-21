@@ -18,6 +18,21 @@ Ext.define('Tool', {
 });
 
     function create_projects_tab() {
+    	
+    	function mytools() {
+    		$.ajax({
+    			type:"POST",
+    			url: '/tools',
+    			data: '',
+    			dataType: 'json',
+    			success: function(data){
+    				g_mytools = data;
+    			}
+    		});
+    	}
+    	mytools();
+
+    	
         var ds = Ext.create('Ext.data.Store', {
             model: 'Project',
             proxy: {

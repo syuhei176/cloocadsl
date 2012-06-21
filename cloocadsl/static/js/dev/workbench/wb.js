@@ -170,26 +170,6 @@ function create_menu() {
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   id: 'MetaDiagram',
-                	   text: 'メタダイアグラム',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   id: 'MetaObj',
-                	   text: 'メタオブジェクト',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   id: 'MetaRel',
-                	   text: 'メタリレーションシップ',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   id: 'MetaProp',
-                	   text: 'メタプロパティ',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
                 	   id: 'metajson',
                 	   text: 'メタモデル',
                 	   iconCls: 'add16',
@@ -245,19 +225,14 @@ function onItemClick(item){
 		}else{
 			alert("メタモデルに問題があります。");
 		}
+		/*
 	}else if(item.id == 'MetaDiagram') {
-//		var editor = new MetaDiagramsEditor(g_metamodel.metadiagrams);
 		var editor = new BaseGridEditor(g_metamodel.metadiagrams, 'MetaDiagram', function(d){
 			 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
 				 if(btn != 'cancel') {
 					 g_metamodel.metadiagrams[d.id] = JSON.parse(text);
 				 }
 			 },null,true,JSON.stringify(d));
-			 /*
-			show_setting_metadiagram_window(d, function(metadiagram) {
-				grid.getStore().getAt(index).set('name', metadiagram.name);
-			});
-			*/
 	}, MetaDiagram);
 		editortabpanel.add(editor, 'metadiagrams');
 	}else if(item.id == 'MetaObj') {
@@ -291,6 +266,7 @@ function onItemClick(item){
 		}, MetaProperty);
 //		var editor = new MetaPropertyEditor(g_metamodel.metaproperties);
 		editortabpanel.add(editor, 'metaproperties');
+		*/
 	}else if(item.id == 'metajson') {
 		var editor = new MetaJSONEditor(g_metamodel.metadiagrams);
 		editortabpanel.add(editor, 'metajson');

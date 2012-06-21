@@ -20,19 +20,6 @@ Ext.define('Tool', {
 function create_mypage(tab_items, extends_html) {
 	var body = Ext.getBody();
 	
-	function mytools() {
-		$.ajax({
-			type:"POST",
-			url: '/tools',
-			data: '',
-			dataType: 'json',
-			success: function(data){
-				g_mytools = data;
-			}
-		});
-	}
-	mytools();
-	
     var tabs = Ext.createWidget('tabpanel', {
         activeTab: 0,
         width: 750,

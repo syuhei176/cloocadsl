@@ -27,7 +27,6 @@ def GenerateClass(dict):
 class BaseGenerator(object):
     
     def __init__(self):
-        self.input = config.CLOOCA_CGI + '/template'
         self.outpath = config.CLOOCA_CGI + '/out'
         self.userpath = None
         self.projectpath = None
@@ -43,17 +42,18 @@ class BaseGenerator(object):
         for f in files:
             if f['path'] == target:
                 self.templates[f['name']] = f['content']
-        self.input = self.input + '/t' + str(project['metamodel']['id'])
-        self.userpath = self.outpath + '/' + user['uname']
-        self.projectpath = self.userpath + '/p' + str(project['id'])
+        self.grouppath = self.outpath + '/' + user['space_key']
+        self.userpath = self.grouppath + '/' + user['uname']
+        #self.projectpath = self.userpath + '/p' + str(project['id'])
+        self.projectpath = self.userpath
+        if not os.path.exists(self.grouppath):
+            os.mkdir(self.grouppath)
         if not os.path.exists(self.userpath):
             os.mkdir(self.userpath)
         #clear directory
         if os.path.exists(self.projectpath):
             shutil.rmtree(self.projectpath)
-        if not os.path.exists(self.projectpath):
-            os.mkdir(self.projectpath)
-        #
+        os.mkdir(self.projectpath)
         self.model = parseJSON(project['xml'], project['metamodel']['xml'])
         global message
         message = ''

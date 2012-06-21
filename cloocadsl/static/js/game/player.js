@@ -14,6 +14,7 @@ function Player(id, x, y, direction, stm) {
 
 Player.prototype.step = function() {
 	var self = this;
+	this.stm.sendEvent(0);
 	//event
 	$("canvas").draw(function(ctx) {
 		var image = ctx.getImageData(0,0,640,640);
@@ -77,4 +78,15 @@ Player.prototype.action_left = function(pwr) {
 
 Player.prototype.action_attack = function() {
 //	console.log('id:'+this.id+',action:left');
+}
+
+Player.prototype.action_set_timer = function(count) {
+	//	console.log('id:'+this.id+',action:left');
+	var self = this;
+	if(count > 0) {
+		var timer_id = setTimeout(function(){
+			self.stm.sendEvent(4);
+			clearTimeout(timer_id);
+		}, count * 1000);
+	}
 }

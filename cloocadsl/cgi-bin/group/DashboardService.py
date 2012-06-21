@@ -171,6 +171,11 @@ def getGroupMember(connect, user, space_key, type):
         members.append(member)
     return members
 
+def delUser(connect, user, space_key, username):
+    cur = connect.cursor()
+    cur.execute('DELETE FROM UserInfo WHERE username = %s AND space_key=%s;', (username, space_key, ))
+    cur.close()
+
 def addUser(connect, user, space_key, username, password):
     d = datetime.datetime.today()
     if not reg_username.match(username):
@@ -178,6 +183,11 @@ def addUser(connect, user, space_key, username, password):
     if len(password) < 5:
         return False
     cur = connect.cursor()
+    cur.execute('SELECT COUNT(*) FROM UserInfo WHERE space_key=%s;', (space_key, ))
+    user_count = cur.fetchone()[0]
+    if user_count >= 5:
+        cur.close()
+        return False
     cur.execute('SELECT username FROM UserInfo WHERE username = %s AND space_key=%s;', (username, space_key, ))
     rows = cur.fetchall()
     if not len(rows) == 0:

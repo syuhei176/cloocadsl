@@ -159,7 +159,7 @@
 				<!-- title -->
 				<div id="page-title">
 					<span class="title">お問い合わせフォーム</span>
-					<span class="subtitle">バグ報告、要望、パッケージ購入等</span>
+					<span class="subtitle">バグ報告、要望、有料プランへのアップグレード、パッケージ購入等</span>
 				</div>
 				<!-- ENDS title -->
 					
@@ -168,7 +168,7 @@
 					<!-- form -->
 					<h2>お問い合わせフォーム</h2>
 					<script type="text/javascript" src="/static/js/group/form-validation-contact.js"></script>
-					<form id="registerForm" class="contactForm" action="/reg" method="post">
+					<form id="contactForm" class="contactForm" action="/contact-to" method="post">
 						<fieldset>
 							<div>
 								<label>名前</label>
@@ -179,14 +179,22 @@
 								<input name="email"  id="email" type="text" class="form-poshytip" title="Enter your email address" />
 							</div>
 							<div>
+								<label>お問い合わせの種類</label>
+								<select name="type" id="type">
+								<option value="bug" selected="selected">バグ報告、要望等</option>
+								<option value="buy">有料プランへのアップグレード、パッケージ購入</option>
+								<option value="other">その他</option>
+								</select>
+							</div>
+							<div>
 								<label>お問い合わせ内容</label>
-								<textarea  name="content"  id="content" rows="5" cols="20" class="form-poshytip" title="Enter your comments"></textarea>
+								<textarea name="content" id="content" rows="5" cols="20" class="form-poshytip" title="Enter your comments"></textarea>
 							</div>
 							<p><input type="button" value="送信" name="submit" id="submit" /></p>
 						</fieldset>
 						<p id="error" class="warning">メッセージ</p>
 					</form>
-					<p id="success" class="success">ご登録ありがとうございます。</p>
+					<p id="success" class="success">お問い合わせを受け付けました。</p>
 					<!-- ENDS form -->
 				</div>
 				<!-- ENDS column -->

@@ -5,14 +5,14 @@ jQuery(document).ready(function($) {
 	$("#success").hide();
 	
 	// on submit...
-	$("#registerForm #submit").click(function() {
+	$("#contactForm #submit").click(function() {
 		$("#error").hide();
 		
 		//required:
 		
 		//name
 		var name = $("input#name").val();
-		if(uname == ""){
+		if(name == ""){
 			$("#error").fadeIn().text("名前が必要です。");
 			$("input#name").focus();
 			return false;
@@ -26,18 +26,21 @@ jQuery(document).ready(function($) {
 			return false;
 		}
 		
-		var content = $("input#content").val();
+		var type = $("select#type").val();
+		
+		var content = $("textarea#content").val();
 		if(content == ""){
 			$("#error").fadeIn().text("内容が必要です。");
-			$("input#content").focus();
+			$("textarea#content").focus();
 			return false;
 		}
 		
-		url = $("#registerForm").attr( 'action' );
+		url = $("#contactForm").attr( 'action' );
 		
 		// data string
 		var dataString = 'name='+ name
 						+ '&email=' + email
+						+ '&type=' + type
 						+ '&content=' + content;
 		
 		$.ajax({
@@ -48,9 +51,9 @@ jQuery(document).ready(function($) {
 			success: function(data){
 				 if(data) {
 					 	$("#success").fadeIn();
-					 	$("#registerForm").fadeOut();
+					 	$("#contactForm").fadeOut();
 				 }else{
-						$("#error").fadeIn().text("既に登録されています。");
+						$("#error").fadeIn().text("エラー");
 				 }
 			}
 		});

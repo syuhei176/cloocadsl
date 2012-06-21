@@ -27,6 +27,8 @@ StateMachine.prototype.execute = function(action_obj) {
 		action_obj.action_right(Number(state_info.value));
 	}else if(state_info.action == 'left') {
 		action_obj.action_left(Number(state_info.value));
+	}else if(state_info.action == 'set_timer') {
+		action_obj.action_set_timer(Number(state_info.value));
 	}
 	return true;
 }

@@ -68,9 +68,9 @@ function create_group_users_tab() {
                   handler:function(btn){
                       var record = grid.getSelectionModel().getSelection()[0];
                       if (record) {
-                    	  Ext.Msg.confirm('プロジェクトの削除','削除しますか？',function(btn){
+                    	  Ext.Msg.confirm('ユーザの削除','削除しますか？',function(btn){
                     		  if(btn == 'yes') {
-                            		$.post('/deletep', { pid : record.get('id') },
+                            		$.post('/group/deluser', { pid : record.get('id') },
                             				function(data) {
                             					if(data) {
                                                     ds.remove(record);
@@ -329,7 +329,7 @@ function create_space_setting_tab() {
 	                }
 	    	    }
 	        }]
-	        },contract],
+	        }/*,contract*/],
 	});
 	return gridForm;
 }

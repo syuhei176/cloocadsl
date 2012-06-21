@@ -25,11 +25,11 @@ def RegisterEditorLicense(username, password, email):
         from_addr = 'hiya@gmail.com'
         to_addr = email
         link = 'http://dsl.clooca.com/confirm/%s' % key
-        body = '''
+        body = u'''
         %s さん！cloocaに、ご登録ありがとうございます！
         登録を完了するには %s にアクセスしてください。
         ''' % (username, link)
-        msg = Gmail.create_message(from_addr, to_addr, 'thank you for your registration!', body)
+        msg = Gmail.create_message(from_addr, to_addr, 'cloocaにご登録ありがとうございます。', body)
         Gmail.send_via_gmail(from_addr, to_addr, msg)
         cur.close()
         connect.close()
@@ -99,13 +99,13 @@ def Register(connect, username, password, email, license_type, state=0):
     if len(password) < 5:
         return {'result': False, 'user_id': 0}
     cur = connect.cursor()
-    cur.execute('SELECT uname FROM UserInfo WHERE uname = %s AND group_id=0;', (username,))
+    cur.execute('SELECT uname FROM UserInfo WHERE uname = %s;', (username,))
     rows = cur.fetchall()
     if len(rows) != 0:
         cur.close()
         return {'result': False, 'user_id': 0}
     d = datetime.datetime.today()
-    cur.execute('INSERT INTO UserInfo (uname,passwd,register_date,email,state,license_type) VALUES(%s,%s,%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), Util.myencode(email), state, license_type, ))
+    cur.execute('INSERT INTO UserInfo (uname,passwd,registration_date,email,state,license_type) VALUES(%s,%s,%s,%s,%s,%s);',(username, md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), Util.myencode(email), state, license_type, ))
     user_id = cur.lastrowid
     connect.commit()
     cur.close()
@@ -130,13 +130,12 @@ def EnableEmail(user, key):
     connect.close()
     return True
 
-def GetUserFromDB(connect, username, group_id):
+def GetUserFromDB(connect, username):
     cur = connect.cursor()
-    cur.execute('SELECT id,uname,passwd,role,license_type,registration_date,state FROM UserInfo WHERE uname = %s AND group_id = %s;', (username, group_id, ))
+    cur.execute('SELECT id,uname,passwd,role,license_type,registration_date,state FROM UserInfo WHERE uname = %s;', (username, ))
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
-        connect.close()
         return None
     user = {}
     user['id'] = rows[0][0]
@@ -189,7 +188,7 @@ def Login(username, password):
     if not reg_username.match(username):
         return None
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-    user = GetUserFromDB(connect, username, 0)
+    user = GetUserFromDB(connect, username)
     if user == None:
         connect.close()
         return None

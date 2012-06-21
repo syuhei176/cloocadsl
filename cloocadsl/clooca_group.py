@@ -27,6 +27,7 @@ from mvcs import UpdateServiceJSON
 from mvcs import RepositoryService
 from mvcs import mvcs
 from shinshu import compile_server
+from core.util import Gmail
 
 app = Flask(__name__)
 
@@ -48,8 +49,12 @@ id:2
 visibillity public
 """
 @app.route('/howto')
-def feature():
+def howto():
     return render_template('/group/howto.html')
+
+@app.route('/application')
+def application_example():
+    return render_template('/group/application.html')
 
 @app.route('/gallery')
 def gallery():
@@ -79,6 +84,19 @@ visibillity public
 @app.route('/contact')
 def contact():
     return render_template('/group/contact.html')
+
+
+@app.route('/contact-to', methods=['POST'])
+def contact_to():
+    from_addr = 'confirm@clooca.com'
+    to_addr = 'syuhei176@gmail.com'
+    body = u'''
+    %s, %s, %s, %s
+    ''' % (request.form['name'], request.form['email'], request.form['type'], request.form['content'])
+    msg = Gmail.create_message(from_addr, to_addr, 'お問い合わせがありました。', body)
+    Gmail.send_via_gmail(from_addr, to_addr, msg)
+    return 'true'
+
 
 #登録、ログイン
 
@@ -116,12 +134,12 @@ def confirm(space_key, key):
 """
 id:15
 """
-@app.route('/<group_key>/login/', methods=['GET'])
+@app.route('/g/<group_key>/login/', methods=['GET'])
 def login_view(group_key):
     if 'user' in session:
         if 'space_key' in session['user']:
             if session['user']['space_key'] == group_key:
-                return redirect('/'+group_key+'/mypage')
+                return redirect('/g/'+group_key+'/mypage')
     return render_template('/group/login.html', group_key=group_key)
 
 """
@@ -167,7 +185,7 @@ id:20
 visibillity editor,wb
 """
 
-@app.route('/<group_key>/mypage')
+@app.route('/g/<group_key>/mypage')
 def group_dashboard(group_key):
     
     if 'user' in session:
@@ -178,7 +196,7 @@ def group_dashboard(group_key):
                 return render_template('/group/mypage_workbencher.html', user=json.dumps(session['user']))
             elif session['user']['role'] == 2:
                 return render_template('/group/mypage_member.html', user=json.dumps(session['user']))
-    return redirect('/'+group_key+'/login/')
+    return redirect('/g/'+group_key+'/login/')
 
 """
 id:21
@@ -288,7 +306,6 @@ def update_metamodel():
     else:
         return 'false'
 
-
 """
 id:
 """
@@ -322,8 +339,6 @@ def import_from_sample_tool():
         return json.dumps(result)
     else:
         return 'false'
-
-
 
 """
 エディタ
@@ -361,6 +376,7 @@ def gen():
         return json.dumps(mes)
     else:
         return 'false'
+
 """
 id:33
 """
@@ -368,13 +384,17 @@ id:33
 def download(pid):
     if 'user' in session:
         user = session['user']
-#        target = request.form['target']
-#        generator = ModelCompiler.BaseGenerator()
-#        mes = generator.GenerateCode(user, int(pid), target);
+        """
+        target = request.form['target']
+        generator = ModelCompiler.BaseGenerator()
+        mes = generator.GenerateCode(user, int(pid), target);
+        """
         project_id = pid;
-        userpath = config.CLOOCA_CGI+'/out/' + user['uname']
-        projectpath = userpath + '/p' + project_id
+        userpath = config.CLOOCA_CGI+'/out/' + user['space_key'] + '/' + user['uname']
+        projectpath = userpath
         filepath = projectpath + '/p' + project_id + '.zip'
+        #projectpath = userpath + '/p' + project_id
+        #filepath = projectpath + '/p' + project_id + '.zip'
         if os.path.exists(projectpath) == True:
             if os.path.exists(filepath) == True:
                 os.remove(filepath)
@@ -395,13 +415,18 @@ def download(pid):
 
 """
 """
-@app.route('/download-file/<pid>/<fname>', methods=['GET'])
-def download_file(pid,fname):
+@app.route('/download-file/<pid>/<target>/<fname>', methods=['GET'])
+def download_file(pid,target,fname):
     if 'user' in session:
         user = session['user']
+        generator = ModelCompiler.BaseGenerator()
+        mes = generator.GenerateCode(user, int(pid), target);
+        if len(mes) > 5:
+            return 'error'
         project_id = pid;
-        userpath = config.CLOOCA_CGI+'/out/' + user['uname']
-        projectpath = userpath + '/p' + project_id
+        userpath = config.CLOOCA_CGI+'/out/' + user['space_key'] + '/' + user['uname']
+        projectpath = userpath
+        #projectpath = userpath + '/p' + project_id
         filepath = projectpath + '/' + fname
         f = open(filepath, 'rb')
         content = f.read()
@@ -680,7 +705,7 @@ def group_addusers():
 def group_deluser():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = MetaModelService.loadMyMetaModelList(connect, session['user'], session['group']['id'])
+        result = DashboardService.delUser(connect, session['user'], session['user']['space_key'], request.form['username'])
         connect.close()
         return json.dumps(result)
     return 'false'

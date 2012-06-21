@@ -18,13 +18,13 @@ Ext.define('Tool', {
     ]
 });
 
-    function create_mydevtools_tab() {
-    	var visibillity_state = Ext.create('Ext.data.Store', {
+function create_mydevtools_tab() {
+	var visibillity_state = Ext.create('Ext.data.Store', {
     	    fields: ['disp','type'],
     	    data : [{'disp':'非公開','type':0},{'disp':'公開','type':1}]
-    	});
-
-        var mytools_ds = Ext.create('Ext.data.Store', {
+	});
+	
+	var mytools_ds = Ext.create('Ext.data.Store', {
             model: 'Tool',
             proxy: {
                 type: 'ajax',
@@ -34,9 +34,8 @@ Ext.define('Tool', {
                 }
             },
             autoLoad: true
-        });
-        
-    	var grid = Ext.create('Ext.grid.Panel', {
+            });
+	var grid = Ext.create('Ext.grid.Panel', {
             columnWidth: 0.60,
             xtype: 'gridpanel',
             store: mytools_ds,
@@ -212,4 +211,51 @@ Ext.define('Tool', {
     	win.show();
     }
 }
-    
+
+function create_api_setting_tab() {
+    var apiSettingPanel = Ext.create('Ext.form.Panel', {
+        id: 'api-tab',
+        frame: true,
+        title: 'APIの設定',
+        bodyPadding: 5,
+        width: 750,
+        layout: 'column',
+
+        fieldDefaults: {
+            labelAlign: 'left',
+            msgTarget: 'side'
+        },
+
+        items: [{
+            columnWidth: 0.4,
+            margin: '0 0 0 10',
+            xtype: 'fieldset',
+            title:'APIの使用',
+            defaults: {
+                width: 280,
+                labelWidth: 240
+            },
+            defaultType: 'textfield',
+            items: [{
+    	    	name: 'use_editor',
+    	    	xtype: 'checkbox',
+    	        fieldLabel: 'エディタの埋め込み（認証不要）',
+            }, {
+    	    	name: 'use_editor',
+    	    	xtype: 'checkbox',
+    	        fieldLabel: 'エディタの埋め込み(要認証)',
+            }, {
+    	    	name: 'get_file',
+    	    	xtype: 'checkbox',
+    	        fieldLabel: '生成物の取得',
+            }, {
+            	xtype: 'button',
+            	text: '編集',
+        	    handler: function() {
+        	    	
+        	    }
+            }]
+        }],
+    });
+    return apiSettingPanel;
+}

@@ -39,7 +39,7 @@ function MetaRelation(id, name) {
 	this.id = metarelation_IdGenerator.getNewId();
 	this.name = 'MetaRelationship'+this.id;
 	this.properties = new Array();	//propertyへの参照
-	this.bindings = new Array();
+	this.bindings = new [];
 	this.arrow_type = "none";
 	//v,TRIANGLE,BLACK_TRIANGLE
 }

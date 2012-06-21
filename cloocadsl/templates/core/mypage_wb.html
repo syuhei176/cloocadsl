@@ -21,7 +21,8 @@
     <script src="/static/js/ext-all.js"></script>
     <script src="/static/js/json2.js"></script>
     <script src="/static/js/mypage.js"></script>
-    <script src="/static/js/mypage_editor.js"></script>
+    <script src="/static/js/core/mypage_editor.js"></script>
+    <script src="/static/js/core/mypage_wb.js"></script>
     <div id="script-div"></div>
 
     <!--                                           -->
@@ -37,10 +38,26 @@
     
     <script>
     <!--
+    
+	function mytools() {
+		$.ajax({
+			type:"POST",
+			url: '/mytools-wbs',
+			data: '',
+			dataType: 'json',
+			success: function(data){
+				g_mytools = data;
+			}
+		});
+	}
+
     $(function(){
     	g_user = {{user|safe}};
+    	mytools();
     	create_mypage([create_projects_tab(),
-    	               create_mytools_tab()]);
+						create_mytools_tab(),
+						create_mydevtools_tab(),
+						create_api_setting_tab()]);
     })
     -->
     </script>

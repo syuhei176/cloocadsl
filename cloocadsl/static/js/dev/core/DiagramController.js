@@ -107,6 +107,9 @@ DiagramController.prototype.addObject = function(x,y,meta_id) {
 DiagramController.prototype.addRelationship = function(s,e,meta_id) {
 	var start = this.findNode(s);
 	var end = this.findNode(e);
+	if(this.checkBinding(g_metamodel.metaobjects[start.meta_id], g_metamodel.metaobjects[end.meta_id], g_metamodel.metarelations[meta_id]) == false) {
+		return null;
+	}
 	if(start != null && end != null) {
 //		if(!checkBinding(meta_rel, start, end)) return null;
 		var rel = new Relationship(meta_id);
@@ -241,3 +244,13 @@ DiagramController.prototype.fireUpdateProperty = function(p, newValue, parent) {
 }
 
 
+DiagramController.prototype.checkBinding = function(metaobj_src, metaobj_dest, metarel) {
+	if(metarel.bindings == undefined) return true;
+	if(metarel.bindings.length == 0) return true;
+	for(var i=0;i < metarel.bindings.length;i++) {
+		if(metarel.bindings[i].src == metaobj_src.id && metarel.bindings[i].dest == metaobj_dest.id) {
+			return true;
+		}
+	}
+	return false;
+}

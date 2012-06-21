@@ -29,9 +29,10 @@ function init_clooca(project, is_preview) {
 		    	   items : [create_tabs()]
 		       }),
 		       new Ext.Panel({
+		    	   id:'menupanel',
 		    	   margins:'0 3 0 3',
 		    	   region:'north',
-		    	   items: [create_menu()]
+		    	   items: [/*create_menu()*/]
 		       }),
 		       new Ext.Panel({
 		    	   id:'propertypanel',
@@ -74,6 +75,7 @@ function init_clooca(project, is_preview) {
 		       ]
 	});
 	readProject(project);
+	Ext.getCmp('menupanel').add(create_menu());
 	window.onbeforeunload = function(){
 		return "このページから移動しますか？ データは保存されません。"; 
 	}
@@ -86,6 +88,12 @@ function create_tabs() {
 }
 
 function create_menu() {
+	var generatable_is_hidden = false;
+	if(g_projectinfo.metamodel.config.editor.generatable) {
+		generatable_is_hidden = false;
+	}else{
+		generatable_is_hidden = true;
+	}
 	var common_menu = {
         tbar: [{
             text: 'Edit',
@@ -132,21 +140,25 @@ function create_menu() {
                 	   text: 'generate',
                 	   iconCls: 'add16',
                 	   handler: onProjItemClick,
+                	   hidden: generatable_is_hidden
                    },{
                 	   id: 'download',
                 	   text: 'Download',
                 	   iconCls: 'add16',
-                	   handler : onProjItemClick
+                	   handler : onProjItemClick,
+                	   hidden: generatable_is_hidden
                    },{
                 	   id: 'run',
                 	   text: 'Run',
                 	   iconCls: 'add16',
-                	   handler : onProjItemClick
+                	   handler : onProjItemClick,
+                	   hidden: generatable_is_hidden
                    },{
                 	   id: 'deploy',
                 	   text: 'Deploy',
                 	   iconCls: 'add16',
-                	   handler : onProjItemClick
+                	   handler : onProjItemClick,
+                	   hidden: generatable_is_hidden
                    },{
                 	   id: 'pviewer',
                 	   text: 'プロジェクト情報',
@@ -691,8 +703,8 @@ function show_setting_diagram_name_window(meta_id, cb) {
 }
 function show_create_diagram_window() {
 	var datas = [];
-	for(var i=1;i < g_metamodel.metadiagrams.length;i++) {
-		datas.push(g_metamodel.metadiagrams[i]);
+	for(var key in g_metamodel.metadiagrams) {
+		datas.push(g_metamodel.metadiagrams[key]);
 	}
 	 var selModel = Ext.create('Ext.selection.RowModel', {
 		 mode: 'SINGLE',

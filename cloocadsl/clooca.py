@@ -184,9 +184,9 @@ visibillity editor,wb
 def mypage():
     if 'user' in session:
         if session['user']['license_type'] == 'free':
-            return render_template('mypage_editor.html', user=json.dumps(session['user']))
+            return render_template('/core/mypage_editor.html', user=json.dumps(session['user']))
         if session['user']['license_type'] == 'wb':
-            return render_template('mypage_wb.html', user=json.dumps(session['user']))
+            return render_template('/core/mypage_wb.html', user=json.dumps(session['user']))
         if session['user']['license_type'] == 'group':
             return render_template('mypage_wb.html', user=json.dumps(session['user']))
     return redirect(url_for('login_view'))
@@ -382,6 +382,22 @@ def download(pid):
             resp.headers['Content-Disposition'] = 'attachment; filename=p'+project_id+'.zip;'
             return resp
     return render_template('request_deny.html')
+
+"""
+"""
+@app.route('/api/download-file/<pid>/<fname>', methods=['GET'])
+def download_file(pid,fname):
+    if 'user' in session:
+        user = session['user']
+        project_id = pid;
+        userpath = config.CLOOCA_CGI+'/out/' + user['uname']
+        projectpath = userpath + '/p' + project_id
+        filepath = projectpath + '/' + fname
+        f = open(filepath, 'rb')
+        content = f.read()
+        f.close()
+        return content;
+    return ''
 
 
 """

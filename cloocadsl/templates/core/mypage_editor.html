@@ -21,8 +21,7 @@
     <script src="/static/js/ext-all.js"></script>
     <script src="/static/js/json2.js"></script>
     <script src="/static/js/mypage.js"></script>
-    <script src="/static/js/mypage_editor.js"></script>
-    <script src="/static/js/mypage_wb.js"></script>
+    <script src="/static/js/core/mypage_editor.js"></script>
     <div id="script-div"></div>
 
     <!--                                           -->
@@ -41,8 +40,7 @@
     $(function(){
     	g_user = {{user|safe}};
     	create_mypage([create_projects_tab(),
-						create_mytools_tab(),
-						create_mydevtools_tab()]);
+    	               create_mytools_tab()]);
     })
     -->
     </script>

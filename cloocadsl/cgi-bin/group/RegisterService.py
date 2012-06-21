@@ -50,7 +50,7 @@ def Register(username, password, email, group_key, group_name, plan):
     from_addr = 'confirm@clooca.com'
     to_addr = email
     link = 'http://group.clooca.com/confirm/%s/%s' % (group_key, key)
-    link2 = 'http://group.clooca.com/%s/login' % group_key
+    link2 = 'http://group.clooca.com/g/%s/login' % group_key
     body = u'''
     %s さん！clooca for groupに、ご登録ありがとうございます！
     登録を完了するには %s にアクセスしてください。
