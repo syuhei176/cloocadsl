@@ -58,11 +58,13 @@ class BaseGenerator(object):
         self.model = parseJSON(project['xml'], metamodel['xml'])
         global message
         message = ''
+        global output_text
+        output_text = ''
         wbconf = json.loads(metamodel['config']);
         for t in wbconf['targets']:
             if t['name'] == target:
                 self.parseXML(t)
-        return message
+        return output_text
     
     def parseXML(self, target_conf):
         for m in target_conf['mapping']:
@@ -114,15 +116,17 @@ class BaseGenerator(object):
             message += e.message
     
     def FileGenByDiagram(self, src, dest, diagram):
+        global output_text
         try:
             tmpl = Template(self.templates[src], input_encoding='utf-8')
             buf = StringIO()
             model = diagram
             ctx = Context(buf, root = model)
             tmpl.render_context(ctx)
-            hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
-            hf.write(buf.getvalue())
-            hf.close()
+            #hf = codecs.open(self.projectpath + '/' + dest, 'w', encoding='utf-8')
+            #hf.write(buf.getvalue())
+            #hf.close()
+            output_text += buf.getvalue()
         except Exception as e:
             global message
             message += e.message

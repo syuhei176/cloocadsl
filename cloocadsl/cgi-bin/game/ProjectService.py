@@ -53,11 +53,11 @@ def genTactics(connect, user, id):
     chara_id = rows[0][0]
     project_id = rows[0][9]
     generator = ModelCompiler.BaseGenerator()
-    generator.GenerateCode(user, chara_id, 'game')
-    outpath = config.CLOOCA_CGI + '/out/' + user['uname'] + '/p' + str(chara_id) + '/state.json'
-    f = open(outpath)
-    data1 = f.read()
-    f.close()
+    data1 = generator.GenerateCode(user, chara_id, 'game')
+    #outpath = config.CLOOCA_CGI + '/out/' + user['uname'] + '/p' + str(chara_id) + '/state.json'
+    #f = open(outpath)
+    #data1 = f.read()
+    #f.close()
     cur = connect.cursor()
     affected_rows = cur.execute('UPDATE CharacterInfo SET tactics=%s WHERE id=%s AND user_id=%s;', (data1, chara_id, user['id'], ))
     connect.commit()
