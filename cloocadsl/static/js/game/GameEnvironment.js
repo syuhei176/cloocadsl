@@ -13,7 +13,7 @@ function GameEnvironment(stm_data1, stm_data2) {
 	this.pointitems.push(new PointItem(640 - 100, 320));
 	this.pointitems.push(new PointItem(100, 320));
 	this.phase = 1;
-	this.timer_count = 30;
+	this.timer_count = 300;
 	var self = this;
 	var timeover_cb = function() {
 		self.timer_count--;

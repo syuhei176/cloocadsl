@@ -13,22 +13,24 @@ StateMachine.prototype.sendEvent = function(event) {
 
 StateMachine.prototype.execute = function(action_obj) {
 	if(this.event_queue.length == 0) return false;
-	var event = this.event_queue.shift();
-	var next_state = this.matrix[event + this.current_state * this.event_num];
-	if(next_state == -1) return false;
-	this.current_state = next_state;
-	console.log('current state:'+this.current_state);
-	var state_info = this.states[this.current_state];
-	if(state_info.action == 'stop') {
-		action_obj.action_stop();
-	}else if(state_info.action == 'forward') {
-		action_obj.action_go(Number(state_info.value));
-	}else if(state_info.action == 'right') {
-		action_obj.action_right(Number(state_info.value));
-	}else if(state_info.action == 'left') {
-		action_obj.action_left(Number(state_info.value));
-	}else if(state_info.action == 'set_timer') {
-		action_obj.action_set_timer(Number(state_info.value));
+	while(this.event_queue.length > 0) {
+		var event = this.event_queue.shift();
+		var next_state = this.matrix[event + this.current_state * this.event_num];
+		if(next_state == -1) continue;
+		this.current_state = next_state;
+		console.log('current state:'+this.current_state);
+		var state_info = this.states[this.current_state];
+		if(state_info.action == 'stop') {
+			action_obj.action_stop();
+		}else if(state_info.action == 'forward') {
+			action_obj.action_go(Number(state_info.value));
+		}else if(state_info.action == 'right') {
+			action_obj.action_right(Number(state_info.value));
+		}else if(state_info.action == 'left') {
+			action_obj.action_left(Number(state_info.value));
+		}else if(state_info.action == 'set_timer') {
+			action_obj.action_set_timer(Number(state_info.value));
+		}
 	}
 	return true;
 }

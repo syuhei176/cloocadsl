@@ -241,7 +241,7 @@ def gen_chara():
 def myresults():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        myprojects = DashboardService.getMyResults(connect, session['user'], request.form['game_type'])
+        myprojects = DashboardService.getMyResultsSummary(connect, session['user'], request.form['game_type'])
         connect.close()
         return json.dumps(myprojects)
     return 'null'

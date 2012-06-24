@@ -434,15 +434,24 @@ function MetaJSONEditor(metadiagram) {
 	});
 	*/
 	this.deditor = this.createGridEditor(g_metamodel.metadiagrams, 'MetaDiagram', function(d){
-		self.createJsonWindow(g_metamodel.metadiagrams, d.id);
+		self.createJsonWindow(g_metamodel.metadiagrams[d.id], function(field, newValue, oldValue, opt) {
+			   g_metamodel.metadiagrams[d.id] = JSON.parse(newValue);
+			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
+			   });
 	}, MetaDiagram);
 	this.oeditor = this.createGridEditor(g_metamodel.metaobjects, 'MetaObjects', function(metaobj){
 		console.log(metaobj.id);
-		self.createJsonWindow(g_metamodel.metaobjects, metaobj.id);
+		self.createJsonWindow(g_metamodel.metaobjects[metaobj.id], function(field, newValue, oldValue, opt) {
+			   g_metamodel.metaobjects[metaobj.id] = JSON.parse(newValue);
+			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
+			   });
 	}, MetaObject);
 	this.reditor = this.createGridEditor(g_metamodel.metarelations, 'MetaRelationships', function(metaobj){
 		console.log(metaobj.id);
-		self.createJsonWindow(g_metamodel.metarelations, metaobj.id);
+		self.createJsonWindow(g_metamodel.metarelations[metaobj.id], function(field, newValue, oldValue, opt) {
+			   g_metamodel.metarelations[metaobj.id] = JSON.parse(newValue);
+			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
+			   });
 		/*
 		 Ext.Msg.prompt('編集','プロパティ',function(btn,text){
 			 if(btn != 'cancel') {
@@ -454,7 +463,10 @@ function MetaJSONEditor(metadiagram) {
 	}, MetaRelation);
 	this.peditor = this.createGridEditor(g_metamodel.metaproperties, 'MetaProperties', function(metaprop){
 		console.log(metaprop.id);
-		self.createJsonWindow(g_metamodel.metaproperties, metaprop.id);
+		self.createJsonWindow(g_metamodel.metaproperties[metaprop.id], function(field, newValue, oldValue, opt) {
+			   g_metamodel.metaproperties[metaprop.id] = JSON.parse(newValue);
+			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
+			   });
 	}, MetaProperty);
 	var tabpanel = Ext.create('Ext.tab.Panel', {
 		title: 'メタモデル',
@@ -489,20 +501,21 @@ MetaJSONEditor.prototype.onActivate = function() {
 	current_editor = this;
 }
 
-MetaJSONEditor.prototype.createJsonWindow = function(metaelements, id) {
+MetaJSONEditor.prototype.createJsonWindow = function(metaelement, fn) {
 	var self = this;
 	var textarea = Ext.create('Ext.form.field.TextArea', {
 		title: 'json',
 		autoScroll: true,
 		width: 480,
 		height: 240,
- 		   value: JSON.stringify(metaelements[id]),
+ 		   value: JSON.stringify(metaelement),
  		   listeners: {
  			   change: {
- 				   fn: function(field, newValue, oldValue, opt) {
- 					   metaelements[id] = JSON.parse(newValue);
+ 				   fn: fn/*function(field, newValue, oldValue, opt) {
+ 					   g_metamodel.metaproperties[id] = JSON.parse(newValue);
  					   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
- 				   }
+ 					   console.log(JSON.stringify(g_metamodel));
+ 				   }*/
  			   }
  		   }
     });

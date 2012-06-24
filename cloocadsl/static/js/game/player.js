@@ -22,7 +22,7 @@ Player.prototype.step = function() {
 		var g =image.data[(Math.floor(self.x) + 640 * Math.floor(self.y)) * 4 + 1];
 		var b =image.data[(Math.floor(self.x) + 640 * Math.floor(self.y)) * 4 + 2];
 		var a =image.data[(Math.floor(self.x) + 640 * Math.floor(self.y)) * 4 + 3];
-//		if(self.id == 1) console.log('color:' + r);
+		if(self.id == 1) console.log('color:' + r +','+ g +','+ b);
 		if(r < 5 && g < 5 && b < 5) {
 			if(self.prev_light_state != 0) {
 				self.prev_light_state = 0;

@@ -83,6 +83,27 @@ def getMyResults(connect, user, game_type):
     cur.close()
     return myresults
 
+def getMyResultsSummary(connect, user, game_type):
+    myresults = {}
+    myresults['challenge'] = {}
+    myresults['recv'] = []
+    cur = connect.cursor()
+    cur.execute('SELECT user_id2,COUNT(cnt) FROM ResultInfo WHERE user_id1 = %s AND game_type=%s GROUP BY user_id2;', (user['id'], game_type))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        myresults['challenge'][rows[i][0]] = {}
+        myresults['challenge'][rows[i][0]]['win'] = int(rows[i][1])
+    cur.execute('SELECT user_id2, COUNT(*) FROM ResultInfo WHERE user_id1 = %s AND game_type=%s AND result = 1 GROUP BY user_id2;', (user['id'], game_type))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        myresults['challenge'][rows[i][0]]['lost'] = int(rows[i][1])
+    cur.execute('SELECT user_id2, COUNT(*) FROM ResultInfo WHERE user_id1 = %s AND game_type=%s AND result = 2 GROUP BY user_id2;', (user['id'], game_type))
+    rows = cur.fetchall()
+    for i in range(len(rows)):
+        myresults['challenge'][rows[i][0]]['draw'] = int(rows[i][1])
+    cur.close()
+    return myresults
+
 def insertBattleResult(connect, game_type, user, counter_user, result):
     cur = connect.cursor()
     cur.execute('SELECT cnt FROM ResultInfo WHERE user_id1 = %s AND user_id2 = %s AND game_type=%s ORDER BY cnt DESC LIMIT 1;', (user['id'], counter_user, game_type))

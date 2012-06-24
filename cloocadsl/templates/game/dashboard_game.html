@@ -63,16 +63,20 @@
 				load_myresults(function(data){
 		            $("#myresult-challenge").empty();
 		            $("#myresult-recv").empty();
-		        	for(var i=0;i < data.challenge.length;i++) {
-		        		var result_html = '';
-		        		if(data.challenge[i].result == 0) {
-		        			result_html = '勝利';
-		        		}else if(data.challenge[i].result == 1) {
-		        			result_html = '負け';
-		        		}else if(data.challenge[i].result == 2) {
-		        			result_html = '引き分け';
+		        	for(var key in data.challenge) {
+		        		var win=0;
+		        		var lost=0;
+		        		var draw=0;
+		        		if(data.challenge[key].win != undefined) {
+		        			win = data.challenge[key].win;
 		        		}
-		        		$("#myresult-challenge").append('<p>' + data.challenge[i].count + '回目:' + data.challenge[i].counter_id + ':' + result_html + '</p>');
+		        		if(data.challenge[key].lost != undefined) {
+		        			lost = data.challenge[key].lost;
+		        		}
+		        		if(data.challenge[key].draw != undefined) {
+		        			draw = data.challenge[key].draw;
+		        		}
+		        		$("#myresult-challenge").append('<p>' + key + 'さん:' + win + '勝' +lost + '敗' + draw + '引き分け</p>');
 		        	}
 		        	for(var i=0;i < data.recv.length;i++) {
 		        		var result_html = '';
