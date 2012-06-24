@@ -27,6 +27,11 @@ from shinshu import compile_server
 
 app = Flask(__name__)
 
+@app.route('/google7677d88379699889.html')
+def google():
+    return render_template('google7677d88379699889.html')
+
+
 @app.route('/')
 @app.route('/index')
 def index():
