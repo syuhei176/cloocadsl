@@ -74,6 +74,7 @@ def update_to_version(user, pid, version):
     cur.close()
 #    connect.close()
     newModel = UpdateServiceJSON.LoadRevision(rep_id, version)
+    checkmodel(newModel)
     model_json = json.dumps(newModel)
 #    model_json = json.dumps(merge(newModel, oldModel))
 #    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)

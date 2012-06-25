@@ -68,7 +68,7 @@ DiagramEditor.prototype.changeCanvasWidth = function(w) {
 DiagramEditor.prototype.changeCanvasHeight = function(h) {
 	this.height = Number(h);
 	var a8 = document.getElementById('canvas_'+this.key);
-	a8.width = this.height;
+	a8.height = this.height;
 }
 
 DiagramEditor.prototype.draw = function() {

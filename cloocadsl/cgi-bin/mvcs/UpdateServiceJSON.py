@@ -147,20 +147,21 @@ def calLatestVersion(rows):
 def LoadObjectEntities():
     objects = {}
     cur = connect.cursor()
-    cur.execute('SELECT id,version FROM object WHERE model_id=%s AND version<=%s;', (g_model_id, g_version))
+    cur.execute('SELECT id FROM object WHERE model_id=%s;', (g_model_id))
     rows = cur.fetchall()
-    idmap = {}
+    ids = []
     for i in range(len(rows)):
-        if not idmap.has_key(str(rows[i][0])):
-            idmap[str(rows[i][0])] = []
-        idmap[str(rows[i][0])].append(rows[i][1])
+        ids.append(int(rows[i][0]))
     xml = ''
-    for id in idmap.keys():
-        idmap[id].sort()
-        idmap[id].reverse()
-        latest_version = idmap[id][0]
-        cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties,w,h,z FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
+    for id in ids:
+        #idmap[id].sort()
+        #idmap[id].reverse()
+        #latest_version = idmap[id][0]
+        #cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties,w,h,z FROM object WHERE model_id=%s AND id=%s AND version=%s;', (g_model_id, int(id), latest_version))
+        cur.execute('SELECT id,meta_id,x,y,diagram,version,ver_type,properties,w,h,z FROM object WHERE model_id=%s AND id=%s AND version<=%s ORDER BY version DESC LIMIT 1;', (g_model_id, int(id), g_version, ))
         obj_rows = cur.fetchall()
+        if len(obj_rows) == 0:
+            continue
         ver_type = int(obj_rows[0][6])
         if not ver_type == 2:
             object = {}
