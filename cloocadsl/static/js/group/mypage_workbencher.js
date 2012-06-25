@@ -322,9 +322,6 @@ Ext.define('SampleTool', {
                   ],
             listeners: {
                 selectionchange: function(model, records) {
-                    if (records[0]) {
-                        this.up('form').getForm().loadRecord(records[0]);
-                    }
                 }
             }
         });

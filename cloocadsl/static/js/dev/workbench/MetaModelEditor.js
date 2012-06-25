@@ -5,7 +5,7 @@
  * cb1
  * MetaMetaElement
  */
-MetaJSONEditor.prototype.createGridEditor = function(datas, title, cb1, MetaMetaElement) {
+MetaJSONEditor.prototype.createGridEditor = function(datas, title, cb1, cb_add) {
 	var self = this;
 	/*
 	 * datasは辞書型、配列に変換する。
@@ -44,7 +44,7 @@ MetaJSONEditor.prototype.createGridEditor = function(datas, title, cb1, MetaMeta
                   text:'追加',
                   iconCls:'add',
                   handler:function(btn){
-                	  var new_element = new MetaMetaElement();
+                	  var new_element = cb_add();
                 	  datas[new_element.id] = new_element;
                       var data = {
                           id: new_element.id,name: new_element.name
@@ -438,14 +438,22 @@ function MetaJSONEditor(metadiagram) {
 			   g_metamodel.metadiagrams[d.id] = JSON.parse(newValue);
 			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
 			   });
-	}, MetaDiagram);
+	}, function(){
+		var new_elem = new MetaDiagram();
+		g_metamodel.metadiagrams[new_elem.id] = new_elem;
+		return new_elem;
+	});
 	this.oeditor = this.createGridEditor(g_metamodel.metaobjects, 'MetaObjects', function(metaobj){
 		console.log(metaobj.id);
 		self.createJsonWindow(g_metamodel.metaobjects[metaobj.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metaobjects[metaobj.id] = JSON.parse(newValue);
 			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
 			   });
-	}, MetaObject);
+	}, function(){
+		var new_elem = new MetaObject();
+		g_metamodel.metaobjects[new_elem.id] = new_elem;
+		return new_elem;
+	});
 	this.reditor = this.createGridEditor(g_metamodel.metarelations, 'MetaRelationships', function(metaobj){
 		console.log(metaobj.id);
 		self.createJsonWindow(g_metamodel.metarelations[metaobj.id], function(field, newValue, oldValue, opt) {
@@ -460,14 +468,22 @@ function MetaJSONEditor(metadiagram) {
 			 }
 		 },null,true,JSON.stringify(metaobj));
 		 */
-	}, MetaRelation);
+	}, function(){
+		var new_elem = new MetaRelation();
+		g_metamodel.metarelations[new_elem.id] = new_elem;
+		return new_elem;
+	});
 	this.peditor = this.createGridEditor(g_metamodel.metaproperties, 'MetaProperties', function(metaprop){
 		console.log(metaprop.id);
 		self.createJsonWindow(g_metamodel.metaproperties[metaprop.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metaproperties[metaprop.id] = JSON.parse(newValue);
 			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
 			   });
-	}, MetaProperty);
+	}, function(){
+		var new_elem = new MetaProperty();
+		g_metamodel.metaproperties[new_elem.id] = new_elem;
+		return new_elem;
+	});
 	var tabpanel = Ext.create('Ext.tab.Panel', {
 		title: 'メタモデル',
 		tabPosition: 'bottom',

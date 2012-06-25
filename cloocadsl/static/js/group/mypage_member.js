@@ -106,6 +106,15 @@ Ext.define('Tool', {
                     if (records[0]) {
                         this.up('form').getForm().loadRecord(records[0]);
                     }
+                },
+                itemdblclick: {
+                	fn : function(rmodel,record,item,index,options){
+                        if (record) {
+                            this.up('form').getForm().loadRecord(record);
+//                            var record = grid.getSelectionModel().getSelection()[0];
+                	    	window.open('/editor/'+record.get('id'));
+                        }
+                	}
                 }
             }
         });
@@ -317,13 +326,6 @@ Ext.define('Tool', {
             },{
                 fieldLabel: 'ツール',
                 name: 'meta_id'
-            }, {
-            	xtype: 'button',
-            	text: '編集',
-        	    handler: function() {
-                    var record = grid.getSelectionModel().getSelection()[0];
-        	    	window.open('/editor/'+record.get('id'));
-        	    }
             }]
         }],
     });

@@ -17,11 +17,15 @@ def getMyProjects(connect, user, space_key):
     rows = cur.fetchall()
     projects = []
     cur.close()
+    tools = getGroupTools(connect, user, space_key)
     for i in range(len(rows)):
         project = {}
         project['id'] = rows[i][0]
         project['name'] = rows[i][1]
         project['meta_id'] = rows[i][2]
+        for tool in tools:
+            if tool['id'] == project['meta_id']:
+                project['tool_name'] = tool['name']
         projects.append(project)
     return projects
 
