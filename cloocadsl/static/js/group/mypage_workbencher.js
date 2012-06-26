@@ -1,20 +1,12 @@
 Ext.require('Ext.tab.*');
-Ext.define('Project', {
-    extend: 'Ext.data.Model',
-    fields: [
-        {name: 'id', type: 'int'},
-        {name: 'name',  type: 'string'},
-        {name: 'tool_id', type: 'int'},
-        {name: 'tool_name', type: 'string'}
-    ]
-});
 
 Ext.define('Tool', {
     extend: 'Ext.data.Model',
     fields: [
         {name: 'id', type: 'int'},
         {name: 'name',  type: 'string'},
-        {name: 'visibillity',  type: 'string'}
+        {name: 'visibillity',  type: 'string'},
+        {name: 'version',  type: 'int'}
     ]
 });
 
@@ -23,7 +15,8 @@ Ext.define('SampleTool', {
     fields: [
         {name: 'id', type: 'int'},
         {name: 'name',  type: 'string'},
-        {name: 'owner',  type: 'string'}
+        {name: 'owner',  type: 'string'},
+        {name: 'version',  type: 'int'}
     ]
 });
 
@@ -63,6 +56,11 @@ Ext.define('SampleTool', {
                     width    : 75,
                     sortable : true,
                     dataIndex: 'visibillity'
+                },{
+                    text   : 'バージョン',
+                    width    : 75,
+                    sortable : true,
+                    dataIndex: 'version'
                 }
             ],
            	tbar:[

@@ -762,11 +762,13 @@ function PropertyPanel(){}
 PropertyPanel.Decomposition = function(dc, meta_ele, ele) {
 	var data = [];
 	for(var d in g_model.diagrams) {
-		console.log(g_model.diagrams[d].id);
-		data.push(g_model.diagrams[d]);
+		var prop = g_model.diagrams[d].properties[0];
+		dname = g_model.properties[prop.children[0]].value;
+		console.log(dname);
+		data.push({id:g_model.diagrams[d].id, name:dname});
 	}
 	var states = Ext.create('Ext.data.Store', {
-	    fields: ['id'],
+	    fields: ['id','name'],
 	    data : data
 	});
 	var prop_tab = {
@@ -777,7 +779,7 @@ PropertyPanel.Decomposition = function(dc, meta_ele, ele) {
 	  	        	   xtype: 'combobox',
 	  	        	   store: states,
 	  	        	    queryMode: 'local',
-	  	        	    displayField: 'id',
+	  	        	    displayField: 'name',
 	  	        	    valueField: 'id',
   	        		   value: ele.diagram,
   	        		   listeners: {

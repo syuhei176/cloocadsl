@@ -5,7 +5,8 @@ Ext.define('User', {
     fields: [
         {name: 'id', type: 'int'},
         {name: 'username',  type: 'string'},
-        {name: 'role',  type: 'int'}
+        {name: 'role',  type: 'int'},
+        {name: 'role_name',  type: 'string'}
     ]
 });
 
@@ -46,7 +47,7 @@ function create_group_users_tab() {
                 text   : '役割',
                 width    : 120,
                 sortable : true,
-                dataIndex: 'role'
+                dataIndex: 'role_name',
             }
         ],
        	tbar:[

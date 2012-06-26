@@ -287,7 +287,7 @@ def parse_object_JSON(dict, metaobject_dict):
     diagram_id = dict['diagram']
     if not diagram_id == None:
         diagram = g_model_dict['diagrams'][str(diagram_id)]
-        meta_diagram = g_metamodel_dict['metadiagrams'][diagram['meta_id']]
+        meta_diagram = g_metamodel_dict['metadiagrams'][str(diagram['meta_id'])]
         setattr(klass, meta_diagram['name'], parse_diagram_JSON(diagram,meta_diagram))
     setattr(klass, 'id', id)
     setattr(klass, 'meta_id', meta_id)

@@ -26,12 +26,13 @@ def getMyProjects(connect, user, space_key):
         for tool in tools:
             if tool['id'] == project['meta_id']:
                 project['tool_name'] = tool['name']
+                project['tool_version'] = tool['version']
         projects.append(project)
     return projects
 
 def getGroupTools(connect, user, space_key):
     cur = connect.cursor()
-    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,space_key FROM MetaModelInfo WHERE MetaModelInfo.space_key=%s AND MetaModelInfo.visibillity=1',(space_key, ))
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,version,space_key FROM MetaModelInfo WHERE MetaModelInfo.space_key=%s AND MetaModelInfo.visibillity=1',(space_key, ))
     rows = cur.fetchall()
     cur.close()
     metamodels = []
@@ -40,12 +41,13 @@ def getGroupTools(connect, user, space_key):
         metamodel['id'] = rows[i][0]
         metamodel['name'] = (rows[i][1]).decode('utf-8')
         metamodel['visibillity'] = rows[i][3]
+        metamodel['version'] = rows[i][4]
         metamodels.append(metamodel)
     return metamodels
 
 def getMyTools(connect, user, space_key):
     cur = connect.cursor()
-    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,space_key FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s AND MetaModelInfo.space_key=%s;',(user['id'], space_key, ))
+    cur.execute('SELECT MetaModelInfo.id AS id,name,xml,visibillity,version,space_key FROM MetaModelInfo INNER JOIN hasMetaModel ON MetaModelInfo.id = hasMetaModel.metamodel_id AND hasMetaModel.user_id=%s AND MetaModelInfo.space_key=%s;',(user['id'], space_key, ))
     rows = cur.fetchall()
     cur.close()
     metamodels = []
@@ -54,6 +56,7 @@ def getMyTools(connect, user, space_key):
         metamodel['id'] = rows[i][0]
         metamodel['name'] = (rows[i][1]).decode('utf-8')
         metamodel['visibillity'] = rows[i][3]
+        metamodel['version'] = rows[i][4]
         metamodels.append(metamodel)
     return metamodels
 
@@ -153,6 +156,7 @@ def updateMetaModel(connect, user, metamodel_id, name, visibillity, space_key):
 manage member
 """
 def getGroupMember(connect, user, space_key, type):
+    role_names = ['owner','workbencher','member']
     cur = connect.cursor()
     if type == 0:
         cur.execute('SELECT id,username,role FROM UserInfo WHERE space_key=%s;',(space_key, ))
@@ -172,6 +176,7 @@ def getGroupMember(connect, user, space_key, type):
         member['id'] = int(rows[i][0])
         member['username'] = rows[i][1]
         member['role'] = rows[i][2]
+        member['role_name'] = role_names[int(member['role'])]
         members.append(member)
     return members
 

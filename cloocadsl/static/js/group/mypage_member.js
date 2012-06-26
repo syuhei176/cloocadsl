@@ -5,7 +5,8 @@ Ext.define('Project', {
         {name: 'id', type: 'int'},
         {name: 'name',  type: 'string'},
         {name: 'tool_id', type: 'int'},
-        {name: 'tool_name', type: 'string'}
+        {name: 'tool_name', type: 'string'},
+        {name: 'tool_version', type: 'int'}
     ]
 });
 
@@ -58,12 +59,16 @@ Ext.define('Tool', {
                     flex: 1,
                     sortable : true,
                     dataIndex: 'name'
-                },
-                {
+                },{
                     text   : 'ツール',
                     width    : 120,
                     sortable : true,
                     dataIndex: 'tool_name'
+                },{
+                    text   : 'ツールのバージョン',
+                    width    : 100,
+                    sortable : true,
+                    dataIndex: 'tool_version'
                 }
             ],
            	tbar:[

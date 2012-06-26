@@ -27,7 +27,7 @@ def commit(rep_id, model_json, comment):
     global connect
     connect = MySQLdb.connect(db=config.REP_DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
     cur = connect.cursor()
-    cur.execute('LOCK TABLES Repository WRITE,object WRITE,model WRITE,diagram WRITE,relationship WRITE,property WRITE,has_object WRITE,has_relationship WRITE,has_property WRITE,comment WRITE;')
+    cur.execute('LOCK TABLES Repository WRITE,object WRITE,model WRITE,diagram WRITE,relationship WRITE,property WRITE,comment WRITE;')
     cur.execute('SELECT id,model_id,head_version FROM Repository WHERE id=%s;', (rep_id))
     rows = cur.fetchall()
     if len(rows) == 0:
