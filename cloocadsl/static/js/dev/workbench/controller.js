@@ -7,6 +7,8 @@ function saveMetaModel(id, fn) {
 	$.post('/wb/save', { id : id, xml : xml }, fn, "json");
 }
 
+
+
 /**
  * Save MetaModel
  * グローバル変数g_metamodelの内容をサーバに保存する。

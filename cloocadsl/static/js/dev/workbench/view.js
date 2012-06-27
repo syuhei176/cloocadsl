@@ -402,11 +402,12 @@ function WellcomeMessageEditor() {
 
 WellcomeMessageEditor.prototype.save = function() {
 	var self = this;
-	saveAll(g_metaproject.id, function(data){
-		if(data) {
-			self.editor.setTitle('welcomemessage');
-		}
-	});
+	$.post('/welsave', { id : g_metaproject.id, welcome_message:g_metaproject.welcome_message },
+			function(data) {
+				if(data) {
+					self.editor.setTitle('welcomemessage');
+				}
+			}, "json");
 }
 
 WellcomeMessageEditor.prototype.getPanel = function() {

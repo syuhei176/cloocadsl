@@ -140,7 +140,13 @@ def login_view(group_key):
         if 'space_key' in session['user']:
             if session['user']['space_key'] == group_key:
                 return redirect('/g/'+group_key+'/mypage')
-    return render_template('/group/login.html', group_key=group_key)
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    result = RegisterService._is_exist_space(connect, group_key)
+    connect.close()
+    if result:
+        return render_template('/group/login.html', group_key=group_key)
+    else:
+        return render_template('/group/group_not_found.html')
 
 """
 id:16
@@ -187,7 +193,6 @@ visibillity editor,wb
 
 @app.route('/g/<group_key>/mypage')
 def group_dashboard(group_key):
-    
     if 'user' in session:
         if session['user']['space_key'] == group_key:
             if session['user']['role'] == 0:
@@ -926,27 +931,13 @@ def preview_save():
 
 
 
-@app.route('/metamodel-save', methods=['POST'])
+
+@app.route('/welsave', methods=['POST'])
 def metamodel_save():
-    if not 'user' in session:
-        return 'false'
-    if not 'id' in request.form:
-        return 'false'
-    id = request.form['id']
-    if 'name' in request.form and 'xml' in request.form and 'visibillity' in request.form:
-        return json.dumps(MetaModelService.saveAll(session['user'],
+    if 'user' in session:
+        return json.dumps(WorkbenchService.saveWelCome(session['user'],
                                                    request.form['id'],
-                                                   request.form['name'],
-                                                   request.form['xml'],
-                                                   request.form['visibillity'],
                                                    request.form['welcome_message']))
-#                                                   request.form['targets']))
-    if 'name' in request.form:
-        pass
-    if 'xml' in request.form:
-        pass
-    if 'visibillity' in request.form:
-        pass
     return 'false'
     
 

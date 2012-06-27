@@ -116,3 +116,13 @@ def payment(connect, space_key, months):
     contract_deadline = d + datetime.timedelta(months=months)
     cur.execute('UPDATE SpaceInfo SET state=%s,contract_deadline=%s WHERE space_key=%s;', (2, d.strftime("%Y-%m-%d"), space_key))
     cur.close()
+
+def _is_exist_space(connect, space_key):
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM SpaceInfo WHERE space_key=%s;', (space_key))
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        return False
+    cur.close()
+    return True

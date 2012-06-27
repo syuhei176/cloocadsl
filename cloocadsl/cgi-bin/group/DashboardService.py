@@ -194,7 +194,7 @@ def addUser(connect, user, space_key, username, password):
     cur = connect.cursor()
     cur.execute('SELECT COUNT(*) FROM UserInfo WHERE space_key=%s;', (space_key, ))
     user_count = cur.fetchone()[0]
-    if user_count >= 5:
+    if user_count >= 5 and user['group']['plan'] == 'free':
         cur.close()
         return False
     cur.execute('SELECT username FROM UserInfo WHERE username = %s AND space_key=%s;', (username, space_key, ))

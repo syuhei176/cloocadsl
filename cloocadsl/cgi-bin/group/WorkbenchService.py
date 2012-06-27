@@ -28,7 +28,10 @@ def loadMetaModel(connect, user, pid):
     project['xml'] = rows[0][2].decode('utf_8')
     project['config'] = rows[0][3]
     project['visibillity'] = int(rows[0][4])
-    project['welcome_message'] = rows[0][5].decode('utf_8')
+    if rows[0][5] == None:
+        project['welcome_message'] = ''
+    else:
+        project['welcome_message'] = rows[0][5].decode('utf_8')
     project['space_key'] = rows[0][6]
     return project
 
@@ -57,6 +60,21 @@ def saveConfig(user, pid, conf):
         return None
     cur = connect.cursor()
     affect_row_count = cur.execute('UPDATE MetaModelInfo SET config=%s WHERE id = %s;',(conf.encode('utf_8'), pid, ))
+    connect.commit()
+    cur.close()
+    connect.close()
+    return True
+
+def saveWelCome(user, pid, welcome_message):
+    connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+    cur = connect.cursor()
+    cur.execute('SELECT * FROM hasMetaModel WHERE user_id=%s AND metamodel_id=%s;',(user['id'], pid, ))
+    has_rows = cur.fetchall()
+    cur.close()
+    if len(has_rows) == 0:
+        return None
+    cur = connect.cursor()
+    affect_row_count = cur.execute('UPDATE MetaModelInfo SET welcome_message=%s WHERE id = %s;',(welcome_message.encode('utf_8'), pid, ))
     connect.commit()
     cur.close()
     connect.close()
