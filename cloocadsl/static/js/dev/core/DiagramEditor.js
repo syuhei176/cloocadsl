@@ -40,7 +40,7 @@ function DiagramEditor(name, key, diagram) {
 			title: name,
 			autoScroll: true,
 			html : '<canvas id="canvas_'+this.key+'" width='+this.width+' height='+this.height+'></canvas>',
-			closable: 'true'
+			closable: g_editor_option.tab_closable
 		});
 	this.canvas = $('#canvas_'+this.key);
 }
@@ -696,7 +696,9 @@ DiagramEditor.prototype.fireSelectRelationship = function(selected) {
 
 /**
  * createPropertyPanel
- * プロパティパネルを作成する
+ * メタ要素により入力UIを作成する、入力値はは要素に代入される、プロパティパネルを作成する
+ * Input  meta_ele:メタ要素,ele:要素
+ * Output プロパティパネルの表示
  * @param meta_ele
  * @param ele
  */
@@ -751,6 +753,7 @@ DiagramEditor.prototype.createPropertyPanel = function(meta_ele, ele) {
 }
 
 /**
+ * キャンバスを画像にして開く
  * @param type:"png" or "jpg"
  */
 DiagramEditor.prototype.getImage = function(type) {
@@ -965,6 +968,11 @@ PropertyPanel.CollectionString = function(dc, meta_prop, prop, ele, meta_ele) {
 	    return grid4;
 }
 
+/**
+ * オブジェクトの幅と高さを、内部のプロパティの文字列の長さ等から計算する。
+ * Input:obj
+ * Output:obj.width,obj.height
+ */
 function calObjHeight(obj) {
 	if(obj.bound == undefined) return;
 	if(g_metamodel.metaobjects[obj.meta_id].resizable == true) return;
@@ -975,7 +983,16 @@ function calObjHeight(obj) {
 		for(var k=0;k < plist.children.length;k++) {
 			h++;
 			var prop = g_model.properties[plist.children[k]];
-			if(prop.value != undefined && w < StrLen(prop.value)) w = StrLen(prop.value);
+			var meta_prop = g_metamodel.metaproperties[prop.meta_id];
+			var disp_text = prop.value;
+			if(meta_prop.widget == MetaProperty.FIXED_LIST) {
+				for(var index=0;index < meta_prop.exfield.length;index++) {
+					if(prop.value == meta_prop.exfield[index].value) {
+						disp_text = meta_prop.exfield[index].disp;
+					}
+				}
+			}
+			if(disp_text != undefined && w < StrLen(disp_text)) w = StrLen(disp_text);
 		}
 	}
 	obj.bound.height = h * 20 + 10;
@@ -983,6 +1000,9 @@ function calObjHeight(obj) {
 	if(obj.bound.height < 12) obj.bound.height = 42;
 }
 
+/*
+ * 点線を引く
+ */
 function draw_dot_line(canvas, col, p1, p2) {
 	var len = Math.sqrt(Point2D.distanceSq(p1, p2));
 	var dx = (p2.x - p1.x) / len;
@@ -1001,6 +1021,9 @@ function draw_dot_line(canvas, col, p1, p2) {
 	}
 }
 
+/**
+ * オブジェクトを表示する
+ */
 DiagramEditor.prototype.draw_object = function(obj) {
 	if(obj.ve.ver_type == 'delete') return;
 	var col = '#000';
@@ -1179,6 +1202,9 @@ DiagramEditor.prototype.draw_object = function(obj) {
 	}
 }
 
+/**
+ * リレーションシップを表示する
+ */
 DiagramEditor.prototype.draw_relationship = function(rel) {
 	var meta_ele = g_metamodel.metarelations[rel.meta_id];
 	var col = '#000';
@@ -1283,6 +1309,10 @@ DiagramEditor.prototype.draw_relationship = function(rel) {
 	}
 }
 
+/**
+ * Input  d:方向,bound:四角形
+ * Output dとboundが重なる点を返す
+ */
 DiagramEditor.prototype.getConnectionPoint = function(d, bound) {
 	if(d.intersectsLine(bound.x, bound.y, bound.x+bound.width, bound.y)) {
 		return d.getConnect(new Line2D(bound.x, bound.y, bound.x+bound.width, bound.y));

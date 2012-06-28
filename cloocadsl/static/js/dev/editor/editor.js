@@ -12,11 +12,13 @@ var g_project_id = 0;
  * @param project
  * @param is_preview
  */
-function init_clooca(project, is_preview) {
+function init_clooca(project, is_preview, option) {
+	g_editor_option = option;
 	current_editor = null;
 	g_project_id = project.id;
 	g_projectinfo = project;
 	_is_preview = is_preview;
+	/*
 	new Ext.Viewport({
 		layout:'border',
 		items:[
@@ -32,7 +34,7 @@ function init_clooca(project, is_preview) {
 		    	   id:'menupanel',
 		    	   margins:'0 3 0 3',
 		    	   region:'north',
-		    	   items: [/*create_menu()*/]
+		    	   items: []
 		       }),
 		       new Ext.Panel({
 		    	   id:'propertypanel',
@@ -74,8 +76,15 @@ function init_clooca(project, is_preview) {
 		       }),
 		       ]
 	});
+	*/
 	readProject(project);
 	Ext.getCmp('menupanel').add(create_menu());
+	Ext.getCmp('centerpanel').add(create_tabs());
+	if(g_editor_option.diagram_open) {
+		for(var key in g_model.diagrams) {
+			open_diagram(g_model.diagrams[key], g_model.diagrams[key].id);
+		}
+	}
 	window.onbeforeunload = function(){
 		return "このページから移動しますか？ データは保存されません。"; 
 	}
@@ -341,18 +350,31 @@ function onShinshuItemClick(item){
 	}
 }
 
-function createModelExplorer() {
-	var open_diagram = function(diagram,dname,id){
-		var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
-		var editor;
-		if(meta_diagram.seq == true) {
-	    	editor = new SequenceEditor(dname, id, diagram);
-		}else{
-	    	editor = new DiagramEditor(dname, id, diagram);
+function open_diagram(diagram,id,dname){
+	var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
+	var editor;
+	var title = dname;
+	if(title == undefined) {
+		if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
+			var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
+			var prop = null;
+			for(var j=0;j<diagram.properties.length;j++) {
+				if(diagram.properties[j].meta_id == name_id) {
+					prop = diagram.properties[j];
+				}
+			}
+			title = g_model.properties[prop.children[0]].value;
 		}
-		editortabpanel.add(editor, id);
 	}
-	
+	if(meta_diagram.seq == true) {
+    	editor = new SequenceEditor(title, id, diagram);
+	}else{
+    	editor = new DiagramEditor(title, id, diagram);
+	}
+	editortabpanel.add(editor, id);
+}
+
+function createModelExplorer() {
 	var diagrams = [];
 	for(var key in g_model.diagrams) {
 //		console.log("createModelExplorer "+key);
@@ -399,7 +421,7 @@ function createModelExplorer() {
 	modelExplorer.on('itemdblclick',function(view, record, item, index, event) {
 		if(record.data.text != 'root') {
 			var diagram = g_model.diagrams[record.data.id];
-			open_diagram(diagram, record.data.text, record.data.id);
+			open_diagram(diagram, record.data.id, record.data.text);
 		}
     });
 	var mnuContext = new Ext.menu.Menu({

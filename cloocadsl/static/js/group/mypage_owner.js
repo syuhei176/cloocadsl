@@ -190,6 +190,7 @@ function create_adduser_window() {
     	    	xtype: 'textfield',
     	    	name: 'password',
     	    	value: '',
+    	    	inputType: 'password'
     	    }],
     	    buttons: [{
     	    	xtype: 'button',

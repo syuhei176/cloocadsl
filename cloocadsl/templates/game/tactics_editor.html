@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>clooca game - バトル画面</title>
+		<title>clooca game - 戦略エディタ</title>
 		<link href="/static/css/game/style.css" rel="stylesheet">
 		<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
 		<script src="/static/js/jquery-1.7.1.min.js"></script>
@@ -12,28 +12,9 @@
 		<script src="/static/js/game/GameEnvironment.js"></script>
 		<script src="/static/js/game/StateMachine.js"></script>
 		<script src="/static/js/game/player.js"></script>
-			<style>
-	#default-selectable .ui-selecting { background: #FECA40; }
-	#default-selectable .ui-selected { background: #F39814; color: white; }
-	#default-selectable { list-style-type: none; margin: 0; padding: 0; width: 90%; }
-	#default-selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
-	#online-selectable .ui-selecting { background: #FECA40; }
-	#online-selectable .ui-selected { background: #F39814; color: white; }
-	#online-selectable { list-style-type: none; margin: 0; padding: 0; width: 90%; }
-	#online-selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
-	</style>
 		<script type="text/javascript">
 			$(function(){
 				g_game_type = '{{game_type}}';
-				load_mycharacters(function(data){
-					g_mycharacters = data;
-		            $("#mycharacter-selectable").empty();
-		        	for(var i=0;i < data.length;i++) {
-		                $('#mycharacter-selectable').append('<li class="ui-widget-content">'+data[i].name+'</li>');
-		        	}
-				},function(){
-					
-				});
 				load_characters(function(data){
 					g_characters = data;
 		            $("#online-selectable").empty();
@@ -115,35 +96,24 @@
 				clear_display();
 				game_env.step();
 			}
-		</script>
-	</head>
+			function test_start() {
+				load_mycharacters(function(data){
+					g_mycharacters = data;
+					for(var i=0;i < g_mycharacters.length;i++) {
+						if(g_mycharacters[i].id == {{pid}}) {
+							var tactics = JSON.parse(g_mycharacters[i].tactics);
+							var stm_data = {event_num:4, matrix:[-1, -1,-1,-1, -1,-1, 2, 3, -1,-1, 3,-1, -1,-1,-1, 2], states:[{action:"stop",value:"0"},{action:"forward",value:"0"}, {action:"right",value:"0"}, {action:"left",value:"0"}]};
+							game_env = new GameEnvironment(tactics, stm_data, true);
+							setInterval(game_main, 80);
+							break;
+						}
+					}
+				},function(){
+					
+				});
+			}
+		</script>	</head>
 	<body>
-	<div id="dialog" title="相手を選ぶ" width="300">
-	<div id="tabs">
-	<ul>
-		<li><a href="#tabs-1">オンライン上の相手</a></li>
-		<li><a href="#tabs-2">その他</a></li>
-	</ul>
-	<div id="tabs-1">
-		<ol id="online-selectable">
-			<li class="ui-widget-content">相手①</li>
-			<li class="ui-widget-content">相手②</li>
-			<li class="ui-widget-content">相手③</li>
-		</ol>
-	</div>
-	<div id="tabs-2">
-		<ol id="dufault-selectable">
-			<li class="ui-widget-content">相手①</li>
-			<li class="ui-widget-content">相手②</li>
-			<li class="ui-widget-content">相手③</li>
-		</ol>
-	</div>
-	</div>
-	</div> <!-- dialog -->
-	<div id="mycharacter-dialog" title="自分のキャラを選ぶ" width="300" style="display : none;">
-	<ol id="mycharacter-selectable">
-	</ol>
-	</div> <!-- dialog -->
 	<div id="wrapper">
 		<div id="header">
 			<div id="menu">
@@ -155,6 +125,8 @@
 		</div>
 		<div id="main">
 			<div id="content">
+			<iframe src="/tactics-editor-frame/{{pid}}" width=640 height=540></iframe>
+			<a href="javascript:test_start()">START</a>
 			<canvas id="canvas" width="640" height="640"></canvas>
 			</div>
 		</div>

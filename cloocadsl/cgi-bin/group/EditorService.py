@@ -57,12 +57,12 @@ def saveProject(user, pid, xml):
     #    connect.close()
     #    return None
     cur = connect.cursor()
-    cur.execute('SELECT last_editor_id,xml FROM ProjectInfo WHERE id=%s;',(pid, ))
-    rows = cur.fetchall()
-    if len(rows) == 0:
-        cur.close()
-        connect.close()
-        return None
+    #cur.execute('SELECT last_editor_id,xml FROM ProjectInfo WHERE id=%s;',(pid, ))
+    #rows = cur.fetchall()
+    #if len(rows) == 0:
+    #    cur.close()
+    #    connect.close()
+    #    return None
     result_json = xml
     updated = False
     """

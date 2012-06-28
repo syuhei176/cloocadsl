@@ -1,5 +1,5 @@
 
-function GameEnvironment(stm_data1, stm_data2) {
+function GameEnvironment(stm_data1, stm_data2, _is_preview) {
 	this.player1 = new Player(1, 164, 480, -90, new StateMachine(stm_data1));
 	this.player2 = new Player(2, 640 - 164, 60, 90, new StateMachine(stm_data2));
 	this.player1.stm.sendEvent(1);
@@ -13,7 +13,8 @@ function GameEnvironment(stm_data1, stm_data2) {
 	this.pointitems.push(new PointItem(640 - 100, 320));
 	this.pointitems.push(new PointItem(100, 320));
 	this.phase = 1;
-	this.timer_count = 300;
+	this.timer_count = 60;
+	this._is_preview = _is_preview;
 	var self = this;
 	var timeover_cb = function() {
 		self.timer_count--;
@@ -26,17 +27,21 @@ function GameEnvironment(stm_data1, stm_data2) {
 }
 
 GameEnvironment.prototype.battle_finish = function() {
-	var result = 0;
-	if(this.player1.point > this.player2.point) {
-		result = 0;
-	}else if(this.player1.point < this.player2.point) {
-		result = 1;
-	}else{
-		result = 2;
-	}
-	battle_result('',g_selected_enemy.user_id, result, function(data){
+	if(_is_preview) {
 		alert('終了');
-	});
+	}else{
+		var result = 0;
+		if(this.player1.point > this.player2.point) {
+			result = 0;
+		}else if(this.player1.point < this.player2.point) {
+			result = 1;
+		}else{
+			result = 2;
+		}
+		battle_result('',g_selected_enemy.user_id, result, function(data){
+			alert('終了');
+		});
+	}
 }
 
 GameEnvironment.prototype.step = function() {

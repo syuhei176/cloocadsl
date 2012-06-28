@@ -386,6 +386,27 @@ def deletem():
 """
 id:30
 """
+@app.route('/tactics-editor/<pid>')
+def tactics_editor(pid):
+    if 'user' in session:
+        return render_template('/game/tactics_editor.html', pid=pid)
+    else:
+        return redirect(url_for('login_view'))
+        
+@app.route('/tactics-editor-frame/<pid>')
+def tactics_editor_frame(pid):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = ProjectService.loadProject(connect, session['user'], pid)
+        connect.close()
+        if not result == None:
+            return render_template('/game/tactics_editor_frame.html', userinfo=json.dumps(session['user']), project=json.dumps(result))
+    else:
+        return redirect(url_for('login_view'))
+    return render_template('request_deny.html')
+
+
+
 @app.route('/editor/<pid>')
 def editor(pid):
     if 'user' in session:

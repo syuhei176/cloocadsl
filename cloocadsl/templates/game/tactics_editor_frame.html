@@ -36,13 +36,14 @@
     
     <script>
     <!--
-    $(function(){
+    
+    function init() {
     	initall();
     	g_userinfo = {{userinfo|safe}};
     	init_layout();
-    	var option = {modelexplorer_hidden:true, diagram_open:false, tab_closable:true};
+    	var option = {modelexplorer_hidden:true, diagram_open:true, tab_closable:false};
     	init_clooca({{project|safe}}, false, option);
-    });
+    }
     
     function init_layout() {
     	new Ext.Viewport({
@@ -102,6 +103,7 @@
     		       }),
     		       ]
     	});
+    	Ext.getCmp('modelexplorer').hide();
     	}
     -->
     </script>
@@ -112,7 +114,7 @@
   <!-- you can leave the body empty if you want  -->
   <!-- to create a completely dynamic UI.        -->
   <!--                                           -->
-  <body onContextmenu="return false">
+  <body onContextmenu="return false" onload="init()">
       <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
     
