@@ -2,7 +2,6 @@ function Player(id, x, y, direction, stm) {
 	this.id = id;
 	this.x = x;
 	this.y = y;
-	this.stm = null;
 	this.motor_r_pwr = 0;
 	this.motor_l_pwr = 0;
 	this.direction = direction;
@@ -22,7 +21,7 @@ Player.prototype.step = function() {
 		var g =image.data[(Math.floor(self.x) + 640 * Math.floor(self.y)) * 4 + 1];
 		var b =image.data[(Math.floor(self.x) + 640 * Math.floor(self.y)) * 4 + 2];
 		var a =image.data[(Math.floor(self.x) + 640 * Math.floor(self.y)) * 4 + 3];
-		if(self.id == 1) console.log('color:' + r +','+ g +','+ b);
+//		if(self.id == 1) console.log('color:' + r +','+ g +','+ b);
 		if(r < 5 && g < 5 && b < 5) {
 			if(self.prev_light_state != 0) {
 				self.prev_light_state = 0;
@@ -36,7 +35,7 @@ Player.prototype.step = function() {
 			}
 		}
 	});
-	//
+	console.log(this.stm);
 	this.stm.execute(this);
 	if(this.motor_r_pwr > this.motor_l_pwr) {
 		this.direction -= 4;

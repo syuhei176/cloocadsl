@@ -1,35 +1,275 @@
-.clooca_wrapper{
-	width:700px;
+p, pre {
+	margin: 1em 0
+}
+
+h2, .h2 {
+	font-size: 32px;
+	line-height: 1;
+	margin: 0.333em 0
+}
+h3, .h3 {
+	font-size: 24px;
+	margin: 0 0 0 0
+}
+h4, .h4 {
+	font-size: 12px;
+	margin: 0 0 0 0
+}
+a {
+	color: #59c54a;
+	text-decoration: none;
+	font-weight: 600
+}
+a:hover, a:active {
+	color: #43a735
+}
+a:focus {
+	outline: thin dotted
+}
+a:hover, a:active {
+	outline: 0
+}
+
+label {
+	display: block;
+}
+
+#wrapper{
+	width:880px;
 	margin-left:auto;
 	margin-right:auto;
 	background-color:#fff;
 }
 body {
+	color: #455860;
 	font-size:13px;
 	font-weight: normal;
 	line-height: 1.5;
 	font-family: Arial,'Liberation Sans',FreeSans,sans-serif; 
-	background-color:#999;
+	background-color:#fff;
 }
-.clooca_header{
-	height: 42px;
+#header{
+	position: relative;
+	height: 22px;
 	margin-bottom:12px;
 	padding:10px;0px;10px;0px;
 	vertical-align:text-top;
+    background-color: #40b7f7;
 }
-.clooca_logo{
-	width: 380px;
+#header .logo{
+	width: 140px;
 	float: left;
 	display: inline;
 	vertical-align: baseline;
 }
-.clooca_login{
-	width: 300px;
+
+
+#finder-wrapper{
+	width: 200px;
+	float: left;
+}
+
+#menu-wrapper{
+	width: 200px;
+	float: left;
+}
+
+#menu{
+	display: inline;
+	vertical-align: baseline;
+	clear: both;
+	margin: 0;
+	padding: 0;
+}
+
+#menu li{
+    float: left;
+    width: 80px;
+    list-style: none;	
+}
+
+#menu a {
+	display: block;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #40b7f7;
+    color: #f0f0f0;
+    text-decoration: none;
+}
+
+#menu a:hover {
+	background-color: #60d7f7;
+	color: #f0f0f0;
+}
+
+#header .login{
+	position: relative;
+	right: 20px;
+	width: 200px;
 	float: left;
 	display: inline;
 	vertical-align: baseline;
 	text-align: right;
+	color: #ffffff;
 }
+
+#header .myhome{
+	position: relative;
+	right: 20px;
+	width: 100px;
+	float: left;
+	display: inline;
+	vertical-align: baseline;
+	text-align: center;
+	color: #ffffff;
+}
+
+#header .myhome a{
+	height: 32px;
+	color: #f0f0f0;
+	display: block;
+	text-decoration: none;
+}
+
+#header .myhome a:hover{
+	background-color: #60d7f7;
+}
+
+
+#header a{
+	display: block;
+	text-decoration: none;
+}
+
+#main{
+overflow: hidden;
+}
+
+#content-left{
+float:left;
+width: 160px;
+margin-left: 10px;
+margin-right: 10px;
+}
+
+
+#content{
+float:left;
+width: 600px;
+position:relative;
+}
+
+
+#content-right{
+	float:left;
+	width: 60px;
+	position:relative;
+	right: 2px;
+}
+
+
+#left-menu-wrapper{
+	width: 160px;
+	float: left;
+    border-right: 1px #d0d0d0 solid;     /* ògê¸ÇÃëïè¸ */
+}
+
+#left-menu{
+	display: inline;
+	vertical-align: baseline;
+	clear: both;
+	margin: 0;
+	padding: 0;
+}
+
+#left-menu li{
+    width: 160px;
+    list-style: none;
+}
+
+#left-menu li ul li{
+	display: inline;
+	vertical-align: baseline;
+	clear: both;
+	padding-start: 20px;
+}
+
+
+#left-menu a {
+	display: block;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #ffffff;
+    color: #000000;
+    text-decoration: none;
+    
+    border-radius: 12px;         /* CSS3 */
+    -moz-border-radius: 12px;    /* Firefox */
+    -webkit-border-radius: 12px; /* Safari,Chrome */
+    
+}
+
+#left-menu a:hover {
+	background-color: #f0f0f0;
+    color: #000000;
+}
+
+#left-menu .left-menu-selected {
+	background-color: #d0d0d0;
+}
+
+#latest-feed {
+	width: 320px;
+}
+
+#latest-feed-item {
+	width: 300px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    color: #0f0f0f;
+    text-decoration: none;
+    border-radius: 12px;         /* CSS3 */
+    -moz-border-radius: 12px;    /* Firefox */
+    -webkit-border-radius: 12px; /* Safari,Chrome */
+    border: 3px #d0d0d0 solid;     /* ògê¸ÇÃëïè¸ */
+}
+
+#latest-info {
+	width: 320px;
+}
+
+#latest-info-item {
+	width: 300px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f0f0a0;
+    color: #0f0f0f;
+    text-decoration: none;
+    border-radius: 12px;         /* CSS3 */
+    -moz-border-radius: 12px;    /* Firefox */
+    -webkit-border-radius: 12px; /* Safari,Chrome */
+    border: 3px #d0d0d0 solid;     /* ògê¸ÇÃëïè¸ */
+}
+
+
+
 .clooca_second_header{
 height: 35px;
 margin-bottom:12px;
@@ -37,15 +277,7 @@ padding:10px;0px;10px;0px;
 vertical-align:text-top;
 }
 
-.clooca_main{
-overflow: hidden;
-}
-.clooca_left_content{
-float:left;
-width: 120px;
-margin-left: 10px;
-margin-right: 10px;
-}
+
 
 #clooca_left_nav {
 	border-right: 1px solid #6DAEE1;
@@ -95,6 +327,43 @@ width: 240px;
 	padding-right: 10px;
 }
 
-.clooca_footer{
-text-align: center;
+#footer{
+	color: #ffffff;
+	background-color: #455860;
+	text-align: center;
+}
+
+/*
+
+*/
+
+.controll-label {
+	float: left;
+	width: 120px;
+	text-align: right;
+	padding-right: 10px;
+}
+
+.button-type1 {
+	background-color: #0074CC;
+	color: #ffffff;
+    border-radius: 4px;         /* CSS3 */
+    -moz-border-radius: 4px;    /* Firefox */
+    -webkit-border-radius: 4px; /* Safari,Chrome */
+}
+
+.button-type2 {
+	display: inline-block;
+	color: white;
+	background-color: #59C54A;
+	border: 0;
+	font-size:16px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.button-type2:hover {
+	background-color: #69D55A;
 }

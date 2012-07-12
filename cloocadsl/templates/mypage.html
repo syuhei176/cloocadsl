@@ -1,0 +1,117 @@
+<!DOCTYPE  html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>clooca mypage</title>
+		
+		<!-- CSS -->
+		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+    	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+    	<script src="/static/js/jquery-1.7.1.min.js"></script>
+	    <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+	    <script>
+	    <!--
+	    $(function(){
+		 	$("#updateForm").submit(function(event) {
+
+			    /* stop form from submitting normally */
+			    event.preventDefault(); 
+			        
+			    /* get some values from elements on the page: */
+			    var $form = $( this ),
+			    	fullname = $form.find( 'input[name="fullname"]' ).val(),
+			        password = $form.find( 'input[name="password"]' ).val(),
+			        confirm = $form.find( 'input[name="password_confirm"]' ).val(),
+			        url = $form.attr( 'action' );
+			    
+			    if(password == '') {
+			    	//名前のみ変更
+				    $.post( url, { fullname: fullname },
+						      function( data ) {
+						    	if(data != null) {
+						    		window.location.reload();
+						    	}else{
+						    		
+						    	}
+						      }, "json");
+			    }else{
+			    	if(password == confirm) {
+			    		//パスワード変更
+					    $.post( url, { fullname: fullname, password: password },
+							      function( data ) {
+							    	if(data != null) {
+							    		window.location.reload();
+							    	}else{
+							    	}
+							      }, "json");
+			    	}else{
+			    		//パスワードが一致していない
+			    		
+			    	}
+			    }
+			});
+	    });
+		  -->
+	    </script>
+	</head>
+	
+	<body class="home">
+		<!-- WRAPPER -->
+		<div id="wrapper">
+			<div id="header">
+				<div class="logo">
+					<a href="/">clooca</a>
+				</div>
+				<div id="menu-wrapper">
+					<ul id="menu">
+					<li><a href="#">アイコン１</a></li>
+					<li><a href="#">アイコン１</a></li>
+			    	</ul>
+			    </div>
+				<div class="login">
+				syuhei176@gmail.com
+				</div>
+			</div>
+			<div id="main">
+				<div id="content-left">
+				<div id="left-menu-wrapper">
+					<ul id="left-menu">
+					<li><a href="#">マーケット</a></li>
+					<li><a href="#">マイプロジェクト</a></li>
+					<li><a href="#">マイツール</a></li>
+					<li><a href="#">マイツール</a></li>
+					<li><a href="#">グループ</a></li>
+			    	</ul>
+			    </div>
+				<div id="left-menu-wrapper">
+					<h3>グループ</h3>
+					<ul id="left-menu">
+					<li><a href="#">グループ１</a></li>
+					<li><a href="#">グループ２</a></li>
+			    	</ul>
+			    </div>
+				</div>
+			<div id="content">
+			<div id="update-form-container">
+			<form id="updateForm" action="/update-userinfo">
+			<fieldset>
+			<div><label class="controll-label" for="fullname">名前</label><div><input type="text" name="fullname" value="{{user['fullname']}}"/></div></div>
+			<div><label class="controll-label" for="password">新しいパスワード</label><div><input type="password" name="password" /><span>（パスワードを変更する場合のみ）</span></div></div>
+			<div><label class="controll-label" for="password_confirm">確認</label><div><input type="password" name="password_confirm" /><span>（パスワードを変更する場合のみ）</span></div></div>
+			<input class="button-type1" type="submit" value="変更" />
+			</fieldset>
+			</form>
+			</div>
+			</div>
+				<div id="content-right">
+				right
+				</div>
+			</div>
+			<div id="footer">
+			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.
+			</div>
+		</div>
+		<!-- ENDS WRAPPER -->
+	</body>
+</html>

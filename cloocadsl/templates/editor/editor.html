@@ -1,0 +1,124 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
+<html>
+  <head>
+	<meta name="gwt:property" content="locale=ja_JP">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
+    <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+    <link href="/static/resources/css/ext-all-access.css" rel="stylesheet">
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+    <script src="/static/js/jcanvas.min.js"></script>
+    <script src="/static/js/ext-all.js"></script>
+    <script src="/static/js/json2.js"></script>
+    <script src="/static/js/editor.clooca.js"></script>
+    <div id="script-div"></div>
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>clooca editor</title>
+    
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    
+    <script>
+    <!--
+    $(function(){
+    	
+    });
+    -->
+    </script>
+    <style>
+    
+    </style>
+  </head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body onContextmenu="return false">
+      <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+		<div id="wrapper">
+			<div id="header">
+				<div class="logo">
+					<a href="#">clooca</a>
+				</div>
+				<div id="menu-wrapper">
+					<ul id="menu">
+					<li><a href="#">アイコン１</a></li>
+					<li><a href="#">アイコン2</a></li>
+					<li><a href="#">アイコン3</a></li>
+					<li><a href="#">アイコン4</a></li>
+					<li><a href="#">アイコン5</a></li>
+			    	</ul>
+			    </div>
+				<div class="login">
+				<a href="/mypage">syuhei176@gmail.com</a>
+				</div>
+				<div class="myhome">
+				<a href="/">ホーム</a>
+				</div>
+			</div>
+			<div id="main">
+				<div id="content-left">
+				<div id="left-menu-wrapper">
+					<ul id="left-menu">
+					<li><a id="market">マーケット</a></li>
+			    	</ul>
+					<h4>ダッシュボード</h4>
+					<ul id="left-menu">
+					<li><a id="myproject">マイプロジェクト</a></li>
+					<li><a id="mytool">マイツール</a>
+						<ul>
+						<li><a id="mytool-available">使用可能なツール</a></li>
+						<li><a id="mytool-developping">開発中のツール</a></li>
+				    	</ul>
+					</li>
+			    	</ul>
+			    </div>
+				<div id="left-menu-wrapper">
+					<h4>グループ</h4>
+					<ul id="left-menu">
+					<li><a href="#">グループ１</a></li>
+					<li><a href="#">グループ２</a></li>
+			    	</ul>
+			    </div>
+				</div>
+			<div id="content">
+			</div>
+				<div id="content-right">
+				right
+				</div>
+			</div>
+			<div id="footer">
+			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.
+			</div>
+		</div>
+		<!-- ENDS WRAPPER -->
+  </body>
+</html>

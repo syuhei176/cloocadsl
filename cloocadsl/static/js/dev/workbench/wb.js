@@ -360,6 +360,7 @@ function del_template(fname, target) {
 function createTemplateExplorer() {
 	Ext.getCmp('modelexplorer').removeAll();
 	var paths = [];
+	if(g_wbconfig.targets == undefined) g_wbconfig.targets = [];
 	for(var i=0;i < g_wbconfig.targets.length;i++) {
 		paths.push({text: g_wbconfig.targets[i].name, children:[]});
 	}

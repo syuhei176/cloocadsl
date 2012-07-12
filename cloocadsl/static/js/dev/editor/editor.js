@@ -6,7 +6,6 @@ Ext.require([
     'Ext.layout.container.Table'
 ]);
 
-var g_project_id = 0;
 /**
  * 
  * @param project
@@ -82,7 +81,7 @@ function init_clooca(project, is_preview, option) {
 	Ext.getCmp('centerpanel').add(create_tabs());
 	if(g_editor_option.diagram_open) {
 		for(var key in g_model.diagrams) {
-			open_diagram(g_model.diagrams[key], g_model.diagrams[key].id);
+			g_modelExplorer.open_diagram(g_model.diagrams[key], g_model.diagrams[key].id);
 		}
 	}
 	window.onbeforeunload = function(){
@@ -109,6 +108,11 @@ function create_menu() {
             iconCls: 'add16',
             menu: [
                    {
+                	   id: 'open',
+                	   text: '開く',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
                 	   id: 'delete',
                 	   text: '削除',
                 	   iconCls: 'add16',
@@ -255,7 +259,9 @@ function create_menu() {
 }
 
 function onItemClick(item){
-	if(item.id == 'exit') {
+	if(item.id == 'open') {
+    	g_modelExplorer.open_selected_diagram();
+	}else if(item.id == 'exit') {
 		window.opener="dummy";
 		window.open("about:blank","_self").close();
 	}else if(item.id == 'save') {
@@ -350,31 +356,9 @@ function onShinshuItemClick(item){
 	}
 }
 
-function open_diagram(diagram,id,dname){
-	var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
-	var editor;
-	var title = dname;
-	if(title == undefined) {
-		if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
-			var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
-			var prop = null;
-			for(var j=0;j<diagram.properties.length;j++) {
-				if(diagram.properties[j].meta_id == name_id) {
-					prop = diagram.properties[j];
-				}
-			}
-			title = g_model.properties[prop.children[0]].value;
-		}
-	}
-	if(meta_diagram.seq == true) {
-    	editor = new SequenceEditor(title, id, diagram);
-	}else{
-    	editor = new DiagramEditor(title, id, diagram);
-	}
-	editortabpanel.add(editor, id);
-}
-
-function createModelExplorer() {
+function ModelExplorer() {
+	var self = this;
+	this.selected_diagram = null;
 	var diagrams = [];
 	for(var key in g_model.diagrams) {
 //		console.log("createModelExplorer "+key);
@@ -421,7 +405,7 @@ function createModelExplorer() {
 	modelExplorer.on('itemdblclick',function(view, record, item, index, event) {
 		if(record.data.text != 'root') {
 			var diagram = g_model.diagrams[record.data.id];
-			open_diagram(diagram, record.data.id, record.data.text);
+			self.open_diagram(diagram, record.data.id, record.data.text);
 		}
     });
 	var mnuContext = new Ext.menu.Menu({
@@ -453,6 +437,7 @@ function createModelExplorer() {
 	});
 
 	modelExplorer.on('itemmousedown',function(view, record, item, index, event) {
+		self.selected_diagram = g_model.diagrams[record.data.id];
 		if(event.button == 2) {
 			mnuContext.showAt(event.getX(), event.getY());
 			selected_diagram_id = record.data.id;
@@ -467,239 +452,39 @@ function createModelExplorer() {
 		    width: 200,
 		    height: 200
 	});
-	return modelExplorer;
+	this.panel = modelExplorer;
 }
 
-function checkoutview() {
-	$.post('/mvcs/group_rep_list', {},
-			function(data) {
-				if(data) {
-					console.log('id\tname\thead_version');
-					for(var i=0;i < data.length;i++) {
-						console.log(data[i].id + '\t' + data[i].name + '\t' + data[i].head_version);
-					}
-					 var selModel = Ext.create('Ext.selection.RowModel', {
-						 mode: 'SINGLE',
-					        listeners: {
-					            selectionchange: function(sm, selections) {
-					                for(var i=0;i < selections.length;i++) {
-					                	console.log(i + '=' + selections[i].get('id'));
-					                }
-					            }
-					        }
-					    });
-					var win = Ext.create('Ext.window.Window', {
-					    title: 'Checkout',
-					    height: 200,
-					    width: 400,
-					    layout: 'fit',
-					    items: {
-					        xtype: 'grid',
-					        border: false,
-					        columns: [{text: "name", dataIndex: 'name'},{text: "head version", dataIndex: 'head_version'}],
-					        store: Ext.create('Ext.data.Store', {data:data,fields:['id','name','head_version']}),
-						    selModel: selModel,
-						    dockedItems: [{
-					            xtype: 'toolbar',
-					            dock: 'bottom',
-					            ui: 'footer',
-					            layout: {
-					                pack: 'center'
-					            },
-					            items: []
-					        }, {
-					            xtype: 'toolbar',
-					            items: [{
-					                text:'Checkout',
-					                tooltip:'checkout',
-					                iconCls:'add',
-					                handler : function() {
-					                	console.log(''+selModel.getSelection()[0].get('id'));
-					                	if(window.confirm('チェックアウトします。よろしいですか？')) {
-						                	checkout(selModel.getSelection()[0].get('id'), function(){win.hide();});
-					                	}
-					                }
-					            }]
-					        }]
-					     }
-					}).show();
-				}
-			}, "json");
+ModelExplorer.prototype.open_diagram = function(diagram,id,dname){
+	return this.panel;	
 }
 
-function import_to_rep_view() {
-	$.post('/mvcs/group_rep_list', {},
-			function(data) {
-				if(data) {
-					console.log('id\tname\thead_version');
-					for(var i=0;i < data.length;i++) {
-						console.log(data[i].id + '\t' + data[i].name + '\t' + data[i].head_version);
-					}
-					 var selModel = Ext.create('Ext.selection.RowModel', {
-						 mode: 'SINGLE',
-					        listeners: {
-					            selectionchange: function(sm, selections) {
-					                for(var i=0;i < selections.length;i++) {
-					                	console.log(i + '=' + selections[i].get('id'));
-					                }
-					            }
-					        }
-					    });
-					var win = Ext.create('Ext.window.Window', {
-					    title: 'Import',
-					    height: 200,
-					    width: 400,
-					    layout: 'fit',
-					    items: {
-					        xtype: 'grid',
-					        border: false,
-					        columns: [{text: "name", dataIndex: 'name'},{text: "head version", dataIndex: 'head_version'}],
-					        store: Ext.create('Ext.data.Store', {data:data,fields:['id','name','head_version']}),
-						    selModel: selModel,
-						    dockedItems: [{
-					            xtype: 'toolbar',
-					            dock: 'bottom',
-					            ui: 'footer',
-					            layout: {
-					                pack: 'center'
-					            },
-					            items: []
-					        }, {
-					            xtype: 'toolbar',
-					            items: [{
-					                text:'Import',
-					                tooltip:'import',
-					                iconCls:'add',
-					                handler : function() {
-					                	console.log(''+selModel.getSelection()[0].get('id'));
-					                	if(window.confirm('リポジトリにインポートします。よろしいですか？')) {
-						                	import_to_rep(selModel.getSelection()[0].get('id'), function() {
-						                		win.hide();
-						                	});
-					                	}
-					                }
-					            }]
-					        }]
-					     }
-					}).show();
-				}
-			}, "json");
+ModelExplorer.prototype.open_selected_diagram = function(){
+	this.open_diagram(this.selected_diagram,this.selected_diagram.id)
 }
 
-function delete_rep_view() {
-	$.post('/mvcs/group_rep_list', {group_id : g_projectinfo.group.id},
-			function(data) {
-				if(data) {
-					console.log('id\tname\thead_version');
-					for(var i=0;i < data.length;i++) {
-						console.log(data[i].id + '\t' + data[i].name + '\t' + data[i].head_version);
-					}
-					 var selModel = Ext.create('Ext.selection.RowModel', {
-						 mode: 'SINGLE',
-					        listeners: {
-					            selectionchange: function(sm, selections) {
-					                for(var i=0;i < selections.length;i++) {
-					                	console.log(i + '=' + selections[i].get('id'));
-					                }
-					            }
-					        }
-					    });
-					var win = Ext.create('Ext.window.Window', {
-					    title: 'Delete',
-					    height: 200,
-					    width: 400,
-					    layout: 'fit',
-					    items: {
-					        xtype: 'grid',
-					        border: false,
-					        columns: [{text: "name", dataIndex: 'name'},{text: "head version", dataIndex: 'head_version'}],
-					        store: Ext.create('Ext.data.Store', {data:data,fields:['id','name','head_version']}),
-						    selModel: selModel,
-						    dockedItems: [{
-					            xtype: 'toolbar',
-					            dock: 'bottom',
-					            ui: 'footer',
-					            layout: {
-					                pack: 'center'
-					            },
-					            items: []
-					        }, {
-					            xtype: 'toolbar',
-					            items: [{
-					                text:'Delete',
-					                tooltip:'delete',
-					                iconCls:'add',
-					                handler : function() {
-					                	console.log(''+selModel.getSelection()[0].get('id'));
-					                	if(window.confirm('リポジトリ「'+selModel.getSelection()[0].get('name')+'」を削除します。')) {
-						                	delete_rep(selModel.getSelection()[0].get('id'), function() {
-						                		win.hide();
-						                	});
-					                	}
-					                }
-					            }]
-					        }]
-					     }
-					}).show();
+ModelExplorer.prototype.open_diagram = function(diagram,id,dname){
+	var meta_diagram = g_metamodel.metadiagrams[diagram.meta_id];
+	var editor;
+	var title = dname;
+	if(title == undefined) {
+		if(meta_diagram.instance_name != null && meta_diagram.instance_name != undefined) {
+			var name_id = g_metamodel.metaproperties[meta_diagram.properties[meta_diagram.instance_name]].id;
+			var prop = null;
+			for(var j=0;j<diagram.properties.length;j++) {
+				if(diagram.properties[j].meta_id == name_id) {
+					prop = diagram.properties[j];
 				}
-			}, "json");
-}
-
-function update_to_ver_view() {
-	$.post('/mvcs/ver_list', {pid : g_projectinfo.id},
-			function(data) {
-				if(data) {
-					console.log('id\tversion\tcomment');
-					for(var i=0;i < data.length;i++) {
-						console.log(data[i].id + '\t' + data[i].version + '\t' + data[i].content);
-					}
-					 var selModel = Ext.create('Ext.selection.RowModel', {
-						 mode: 'SINGLE',
-					        listeners: {
-					            selectionchange: function(sm, selections) {
-					                for(var i=0;i < selections.length;i++) {
-					                	console.log(i + '=' + selections[i].get('version'));
-					                }
-					            }
-					        }
-					    });
-					var win = Ext.create('Ext.window.Window', {
-					    title: 'update to previous version',
-					    height: 200,
-					    width: 400,
-					    layout: 'fit',
-					    items: {
-					        xtype: 'grid',
-					        border: false,
-					        columns: [{text: "version", dataIndex: 'version'},{text: "comment", dataIndex: 'content', width: 160}],
-					        store: Ext.create('Ext.data.Store', {data:data,fields:['version','content']}),
-						    selModel: selModel,
-						    dockedItems: [{
-					            xtype: 'toolbar',
-					            dock: 'bottom',
-					            ui: 'footer',
-					            layout: {
-					                pack: 'center'
-					            },
-					            items: []
-					        }, {
-					            xtype: 'toolbar',
-					            items: [{
-					                text:'update',
-					                tooltip:'update',
-					                iconCls:'add',
-					                handler : function() {
-					                	console.log(''+selModel.getSelection()[0].get('version'));
-					                	update_to_ver(selModel.getSelection()[0].get('version'), function() {
-					                		win.hide();
-					                	});
-					                }
-					            }]
-					        }]
-					     }
-					}).show();
-				}
-			}, "json");
+			}
+			title = g_model.properties[prop.children[0]].value;
+		}
+	}
+	if(meta_diagram.seq == true) {
+    	editor = new SequenceEditor(title, id, diagram);
+	}else{
+    	editor = new DiagramEditor(title, id, diagram);
+	}
+	editortabpanel.add(editor, id);
 }
 
 function show_setting_diagram_name_window(meta_id, cb) {
@@ -718,7 +503,7 @@ function show_setting_diagram_name_window(meta_id, cb) {
 				g_model.properties[prop.children[0]].value = text;
 			}
 			if(cb != null) cb(d);
-        	createModelExplorer();
+        	g_modelExplorer = new ModelExplorer();
         	win.hide();
 		 }
 	 },null,true,'');
@@ -788,7 +573,7 @@ function change_diagram_name_view(diagram) {
 				var dc = new DiagramController(diagram);
 				dc.updateProperty(g_model.properties[prop.children[0]], text, diagram);
 			}
-        	createModelExplorer();
+        	g_modelExplorer = new ModelExplorer();
 		 }
 	 },null,false,'');
 }

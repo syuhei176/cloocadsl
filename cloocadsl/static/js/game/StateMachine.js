@@ -12,6 +12,7 @@ StateMachine.prototype.sendEvent = function(event) {
 }
 
 StateMachine.prototype.execute = function(action_obj) {
+	console.log("f"+this.event_queue.length);
 	if(this.event_queue.length == 0) return false;
 	while(this.event_queue.length > 0) {
 		var event = this.event_queue.shift();

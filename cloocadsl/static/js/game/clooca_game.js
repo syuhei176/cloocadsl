@@ -1,8 +1,8 @@
 function load_mycharacters(success_cb, error_cb) {
     $.ajax({
         type: "GET",
-        url: "/mycharacters",
-        data: {game_type:g_game_type},
+        url: "/mycharacters/"+g_game_type,
+        data: {},
         dataType: 'json',
         success: function(data, dataType) { /** Ajax通信が成功した場合に呼び出される */
         	success_cb(data);

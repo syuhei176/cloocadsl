@@ -27,7 +27,7 @@ function GameEnvironment(stm_data1, stm_data2, _is_preview) {
 }
 
 GameEnvironment.prototype.battle_finish = function() {
-	if(_is_preview) {
+	if(this._is_preview) {
 		alert('終了');
 	}else{
 		var result = 0;
@@ -45,6 +45,7 @@ GameEnvironment.prototype.battle_finish = function() {
 }
 
 GameEnvironment.prototype.step = function() {
+	this.init_canvas();
 	if(this.phase == 1) {
 		this.player1.step();
 		this.player2.step();
@@ -81,7 +82,40 @@ GameEnvironment.prototype.step = function() {
 	this.draw();
 }
 
+GameEnvironment.prototype.init_canvas = function() {
+	$("canvas").drawRect({
+		fillStyle: "#fff",
+		  x: 0, y: 0,
+		  width: 640,
+		  height: 640,
+		  fromCenter: false
+		});
+	$("canvas").drawRect({
+		strokeStyle: "#000",
+		strokeWidth: 20,
+		  x: 48, y: 48,
+		  width: 640 - 96,
+		  height: 640 - 96,
+		  fromCenter: false
+		});
+	$("canvas").drawArc({
+		  strokeStyle: "black",
+			strokeWidth: 16,
+		  x: 320, y: 320,
+		  radius: 152
+		});
+	$("canvas").drawPolygon({
+		  fillStyle: "blue",
+			strokeWidth: 8,
+		  x: 320, y: 320,
+		  radius: 40,
+		  sides: 5
+		});
+}
+
+
 GameEnvironment.prototype.draw = function() {
+		
 	$("canvas").drawPolygon({
 		strokeStyle: "#0f0",
 		strokeWidth: 8,

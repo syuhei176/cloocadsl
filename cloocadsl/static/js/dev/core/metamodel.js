@@ -13,6 +13,16 @@ function MetaModel(id, name, metadiagram) {
 	this.tools = {};
 }
 
+function Package() {
+	this.nestedPackage = -1;
+	this.nestingPackage = -1;
+}
+
+function Generalization() {
+	this.general = -1;
+	this.specific = -1;
+}
+
 function MetaDiagram(id, name) {
 	this.id = metadiagram_IdGenerator.getNewId();
 	this.name = 'MetaDiagram'+this.id;
@@ -26,6 +36,7 @@ function MetaObject(id, name) {
 	this.classname = 'MetaObject';
 	this.id = metaobject_IdGenerator.getNewId();
 	this.name = 'MetaObject'+this.id;
+	this.generalization = null;
 	this.properties = new Array();	//propertyへの参照
 	this.abstractable = false;
 	this.graphic = null;

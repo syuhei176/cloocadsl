@@ -26,6 +26,7 @@ function initall() {
 	                 'dev/core/metamodel.js',
 	                 'dev/core/model.js',
 	                 'dev/core/EditorTabPanel.js',
+	                 'dev/editor/mvcs.js',
 	                 'dev/editor/controller.js',
 	                 'dev/editor/editor.js',
 	                 'dev/editor/view.js']);

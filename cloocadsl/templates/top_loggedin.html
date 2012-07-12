@@ -1,0 +1,141 @@
+<!DOCTYPE  html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>clooca</title>
+		
+		<!-- CSS -->
+		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+    	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+    	<script src="/static/js/jquery-1.7.1.min.js"></script>
+	    <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+	    
+	    <script>
+	    $(function(){
+	    	$('#market').click(function(){
+	    		$.get("/market", function(data){
+	    			$('#left-menu li a').each(function(){
+	    				$(this).removeClass('left-menu-selected');
+	    			});
+	    			$('#content').html(data);
+	    			$('#market').addClass('left-menu-selected');
+	    		});
+	    	});
+	    	$('#myproject').click(function(){
+	    		$.get("/project", function(data){
+	    			$('#left-menu li a').each(function(){
+	    				$(this).removeClass('left-menu-selected');
+	    			});
+	    			$('#content').html(data);
+	    			$('#myproject').addClass('left-menu-selected');
+	    		});
+	    	});
+	    	$('#mytool').click(function(){
+	    		$.get("/mytool", function(data){
+	    			$('#left-menu li a').each(function(){
+	    				$(this).removeClass('left-menu-selected');
+	    			});
+	    			$('#content').html(data);
+	    			$('#mytool').addClass('left-menu-selected');
+	    		});
+	    	});
+	    	$('#mytool-available').click(function(){
+	    		$.get("/mytool/available", function(data){
+	    			$('#left-menu li a').each(function(){
+	    				$(this).removeClass('left-menu-selected');
+	    			});
+	    			$('#content').html(data);
+	    			$('#mytool-available').addClass('left-menu-selected');
+	    		});
+	    	});
+	    	
+	    	$('#mytool-developping').click(function(){
+	    		$.get("/mytool/developping", function(data){
+	    			$('#left-menu li a').each(function(){
+	    				$(this).removeClass('left-menu-selected');
+	    			});
+	    			$('#content').html(data);
+	    			$('#mytool-developping').addClass('left-menu-selected');
+	    		});
+	    	});
+    		$.get("/home", function(data){
+    			$('#content').html(data);
+    		});
+    		
+    		
+	    	$('#finder').click(function(){
+	    		if($('#sesarch-text').val() != '') {
+		    		$.get("/finditems/"+$('#sesarch-text').val(), function(data){
+		    			$('#content').html(data);
+		    		});
+	    		}
+	    	});
+
+	    });
+	    </script>
+	    
+	</head>
+	
+	<body class="home">
+		<!-- WRAPPER -->
+		<div id="wrapper">
+			<div id="header">
+				<div class="logo">
+					<a href="#">clooca</a>
+				</div>
+				<div id="finder-wrapper">
+					<input id="sesarch-text" type="text" />
+					<input id="finder" type="submit" value="検索" />
+			    </div>
+				<div id="menu-wrapper">
+					<ul id="menu">
+					<li><a href="#">アイコン１</a></li>
+					<li><a href="#">アイコン2</a></li>
+			    	</ul>
+			    </div>
+				<div class="login">
+				<a href="/mypage">{{email}}</a>
+				</div>
+				<div class="myhome">
+				<a href="/">ホーム</a>
+				</div>
+			</div>
+			<div id="main">
+				<div id="content-left">
+				<div id="left-menu-wrapper">
+					<ul id="left-menu">
+					<li><a id="market">マーケット</a></li>
+			    	</ul>
+					<h4>ダッシュボード</h4>
+					<ul id="left-menu">
+					<li><a id="myproject">マイプロジェクト</a></li>
+					<li><a id="mytool">マイツール</a>
+						<ul>
+						<li><a id="mytool-available">使用可能なツール</a></li>
+						<li><a id="mytool-developping">開発中のツール</a></li>
+				    	</ul>
+					</li>
+			    	</ul>
+			    </div>
+				<div id="left-menu-wrapper">
+					<h4>グループ</h4>
+					<ul id="left-menu">
+					<li><a href="#">グループ１</a></li>
+					<li><a href="#">グループ２</a></li>
+			    	</ul>
+			    </div>
+				</div>
+			<div id="content">
+			</div>
+				<div id="content-right">
+				right
+				</div>
+			</div>
+			<div id="footer">
+			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.
+			</div>
+		</div>
+		<!-- ENDS WRAPPER -->
+	</body>
+</html>

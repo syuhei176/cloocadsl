@@ -18,7 +18,7 @@ from game import ProjectService
 from game import MetaModelService
 from core import CoreService
 from core import UserService
-from core import ModelCompiler
+from game import ModelCompiler
 from core import FileService
 from core import GroupService
 from core import TemplateService
@@ -200,11 +200,11 @@ def mypage():
             return render_template('mypage_wb.html', user=json.dumps(session['user']))
     return redirect(url_for('login_view'))
 
-@app.route('/mycharacters', methods=['GET'])
-def mycharacters():
+@app.route('/mycharacters/<game_type>', methods=['GET'])
+def mycharacters(game_type):
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        myprojects = DashboardService.getMyCharacters(connect, session['user'])
+        myprojects = DashboardService.getMyCharacters(connect, session['user'], game_type)
         connect.close()
         return json.dumps(myprojects)
     return 'false'
@@ -389,7 +389,10 @@ id:30
 @app.route('/tactics-editor/<pid>')
 def tactics_editor(pid):
     if 'user' in session:
-        return render_template('/game/tactics_editor.html', pid=pid)
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = DashboardService.getMyCharacter(connect, session['user'], pid)
+        connect.close()
+        return render_template('/game/tactics_editor.html', pid=pid, game_type=result['game_type'])
     else:
         return redirect(url_for('login_view'))
         
@@ -1134,7 +1137,7 @@ def tool_top(tid,pid):
 
 with app.test_request_context():
     print url_for('index')
-    print url_for('static', filename='index.html')
+    print url_for('login')
 
 #sercret key
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
@@ -1147,4 +1150,4 @@ if not app.debug:
     app.logger.addHandler(file_handler)
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=5001)

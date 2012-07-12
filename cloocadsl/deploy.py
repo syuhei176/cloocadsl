@@ -110,6 +110,12 @@ def deploy_group_edition(scp):
     scp.sendline('mput %s' % '*.py')
     scp.readline()
     print scp.readline()
+
+    cd(scp, '../core')
+    scp.expect('sftp>')
+    scp.sendline('mput %s' % '*.py')
+    scp.readline()
+    print scp.readline()
     
     cd(scp, '../../templates/group')
     scp.expect('sftp>')

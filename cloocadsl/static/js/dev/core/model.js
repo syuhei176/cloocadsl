@@ -19,7 +19,7 @@ function Model() {
 
 function Diagram(meta_id) {
 	this.user_id = g_userinfo.id;
-	this.id = diagram_IdGenerator.getNewId() + this.user_id * 10000;
+	this.id = diagram_IdGenerator.getNewId();
 	this.project_id = g_projectinfo.id;
 	this.meta_id = meta_id;
 	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
@@ -33,7 +33,7 @@ function Diagram(meta_id) {
 function Object(meta_id) {
 	this.meta_id = meta_id;
 	this.user_id = g_userinfo.id;
-	this.id = object_IdGenerator.getNewId() + this.user_id * 10000;
+	this.id = object_IdGenerator.getNewId();
 	this.project_id = g_projectinfo.id;
 	this.bound = new Rectangle2D(50, 50, 50, 50);
 	this.properties = new Array();	//*注意：PropertyListのリストです、Propertyのリストじゃない
@@ -49,7 +49,7 @@ function ObjectForDiagram() {
 function Relationship(meta_id) {
 	this.meta_id = meta_id;
 	this.user_id = g_userinfo.id;
-	this.id = object_IdGenerator.getNewId() + this.user_id * 10000;
+	this.id = object_IdGenerator.getNewId();
 	this.project_id = g_projectinfo.id;
 	this.src = null;
 	this.dest = null;
@@ -71,7 +71,7 @@ function PropertyList() {
 
 function Property() {
 	this.user_id = g_userinfo.id;
-	this.id = property_IdGenerator.getNewId() + this.user_id * 10000;
+	this.id = property_IdGenerator.getNewId();
 	this.project_id = g_projectinfo.id;
 //	this.values = new Array();
 	this.meta_id = null;
@@ -96,26 +96,6 @@ MetaModelController.getMetaObject = function(metadiagram, id) {
 
 MetaModelController.getMetaRelation = function(metadiagram, id) {
 	return g_metamodel.metarelations[id];
-}
-
-function create_sample() {
-	d = new Diagram();
-	obj1 = new Object();
-	obj1.id = 1;
-	obj1.x = 50;
-	d.objects.push(obj1);
-	
-	obj2 = new Object();
-	obj2.id = 2;
-	obj2.x = 50;
-	d.objects.push(obj2);
-	
-	rel = new Relationship();
-	rel.id = 2;
-	rel.src = obj1;
-	rel.dest = obj2;
-	d.relationships.push(rel);
-	return d;
 }
 
 function IdGenerator() {

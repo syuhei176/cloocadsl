@@ -17,11 +17,13 @@ from group import WorkbenchService
 from group import EditorService
 from group import ModelCompiler
 from group import TemplateService
+
 from core import CoreService
 from core import UserService
 from core import MetaModelService
 from core import ProjectService
 from core import GroupService
+
 from mvcs import CommitService
 from mvcs import UpdateServiceJSON
 from mvcs import RepositoryService
