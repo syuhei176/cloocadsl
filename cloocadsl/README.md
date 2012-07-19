@@ -42,5 +42,5 @@ http://mysql-python.sourceforge.net/
     DB_PASSWD = ''
     
 ##実行
-1.'python clooca.py'で実行
-2.http://127.0.0.1:5000/ にアクセス
+1.`python main.py`で実行  
+2.http://127.0.0.1:5000/ にアクセス  
