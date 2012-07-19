@@ -475,14 +475,14 @@ m2=1</panel_attributes>
     <coordinates>
       <x>1550</x>
       <y>600</y>
-      <w>140</w>
+      <w>170</w>
       <h>130</h>
     </coordinates>
     <panel_attributes>&lt;&lt;json&gt;&gt;
 package
 --
 package_name:string
-full_path:string
+package_uri:string
 name:string
 version:int
 content:json</panel_attributes>
@@ -1107,13 +1107,13 @@ m2=1 replaying
     <coordinates>
       <x>1590</x>
       <y>610</y>
-      <w>190</w>
+      <w>200</w>
       <h>160</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
 m1=0..1
 m2=0..*</panel_attributes>
-    <additional_attributes>100;30;170;30;170;140;30;140;30;120</additional_attributes>
+    <additional_attributes>130;30;180;30;180;140;30;140;30;120</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
