@@ -26,6 +26,7 @@ http://mysql-python.sourceforge.net/
 #実行方法
 ##前準備
 1.データベースにテーブル情報をインポートする
+    
     > mysql -u root 
     mysql> CREATE DATABASE l_clooca;
     mysql> exit
@@ -33,11 +34,13 @@ http://mysql-python.sourceforge.net/
     > mysql -u root --default-character-set=utf8 l_clooca < l_clooca.sql
 
 2.config.pyをデータベースにあわせて設定
+    
     DB_NAME = 'l_clooca'
     DB_HOST = 'localhost'
     DB_PORT = 3306
     DB_USER = 'root'
     DB_PASSWD = ''
+    
 ##実行
 1.'python clooca.py'で実行
 2.http://127.0.0.1:5000/ にアクセス
