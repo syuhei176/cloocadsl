@@ -36,6 +36,20 @@
 .project-date {
 }
 </style>
+<script type="text/javascript">
+<!--
+$(function(){
+	$('div#project-info').click(function(){
+		$(this).find('input').each(function(){
+			if($(this).val() != '編集開始') {
+				var user_id = $(this).val();
+				window.location.href = '/profile/' + user_id;
+			}
+		});
+	});
+})
+//-->
+</script>
 <div class="project-info-wrapper">
 <div class="project-info">
 	<div id="project-name">プロジェクト１</div>

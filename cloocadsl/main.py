@@ -27,7 +27,7 @@ id:1
 @app.route('/')
 def index():
     if 'user' in session:
-        return render_template('top_loggedin.html', email=session['user']['email'])
+        return render_template('top_loggedin.html', user=session['user'])
     return render_template('top_not_loggedin.html')
 
 """
@@ -74,11 +74,37 @@ def mytool():
 def mytool_mode(mode):
     if 'user' in session:
         if mode == 'available':
-            return render_template('tool/tool_top.html')
+            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+            result = clooca.repository.tool.getMyReadableTools(connect, session['user'])
+            connect.close()
+            return render_template('tool/tool_top.html', tools=result)
         elif mode == 'developping':
-            return render_template('tool/tool_top.html')
+            connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+            result = clooca.repository.tool.getMyWritableTools(connect, session['user'])
+            connect.close()
+            return render_template('tool/tool_top.html', tools=result)
     return redirect(url_for('index'))
 
+"""
+新規ツール作成
+"""
+@app.route('/tool/create-view')
+def tool_create_view():
+    if 'user' in session:
+        return render_template('tool/create_tool.html')
+    return redirect(url_for('index'))
+
+"""
+ツール情報のページ
+"""
+@app.route('/tool/info-view/<tool_key>')
+def tool_info_view(tool_key):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.repository.tool.getToolInfo(connect, session['user'], tool_key)
+        connect.close()
+        return render_template('tool/tool_page.html', tool=result)
+    return redirect(url_for('index'))
 
 """
 ログイン画面
@@ -109,10 +135,25 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
+"""
+マイページ
+"""
 @app.route('/mypage')
 def mypage():
     if 'user' in session:
         return render_template('mypage.html', user=session['user'])
+    return redirect(url_for('login'))
+
+"""
+プロフィールページ
+"""
+@app.route('/profile/<id>')
+def profile(id):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.sns.friend.getUserProfile(connect, session['user'], id)
+        connect.close()
+        return render_template('profile.html', user=session['user'], profile=result)
     return redirect(url_for('login'))
 
 @app.route('/update-userinfo', methods=['POST'])
@@ -127,12 +168,18 @@ def update_userinfo():
         return json.dumps(result)
     return 'false'
 
+"""
+editor
+"""
 @app.route('/edit/<project_key>')
 def edit(project_key):
     if 'user' in session:
         return render_template('editor/editor.html')
     return redirect(url_for('login'))
 
+"""
+tool
+"""
 @app.route('/wb/<tool_key>')
 def wb(tool_key):
     if 'user' in session:
@@ -142,35 +189,97 @@ def wb(tool_key):
         return render_template('workbench.html', tool=json.dumps(result))
     return redirect(url_for('login'))
 
+@app.route('/tool/create', methods=['POST'])
+def tool_create():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.repository.tool.create(connect, session['user'], request.form['tool_key'], request.form['tool_name'])
+        connect.close()
+        return json.dumps(result)
+    return 'false'
+
+@app.route('/tool/delete', methods=['POST'])
+def tool_delete():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.repository.tool.delete(connect, session['user'], request.form['tool_key'])
+        connect.close()
+        return json.dumps(result)
+    return 'false'
+
 """
 SNS
 """
 
+
 """
 id:50
 """
-@app.route('/finditems/<token>')
-def finditems(token):
+@app.route('/search/<token>')
+def search_view(token):
+    if 'user' in session:
+        return render_template('/sns/search_result.html', user=session['user'], token=token)
+    return render_template('login.html')
+
+"""
+id:50
+"""
+@app.route('/finditems/<filter>/<token>')
+def finditems(filter, token):
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = clooca.sns.friend.findItem(connect, session['user'], token, 5)
+        if filter == 'all':
+            result = clooca.sns.friend.findItem(connect, session['user'], token, 0, 5)
+        elif filter == 'user':
+            result = clooca.sns.friend.findItem(connect, session['user'], token, 0, 5)
+        elif filter == 'group':
+            result = []
+        elif filter == 'project':
+            result = []
+        elif filter == 'tool':
+            result = []
         connect.close()
-        return render_template('search_result.html', items=result)
+        return render_template('/sns/search_result_inner.html', items=result)
     return render_template('login.html')
 
 """
 id:51
 
 """
-@app.route('/requestedfriends')
-def requestedfriends():
+@app.route('/sns/reqs')
+def friend_requests():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         result = clooca.sns.friend.getRequestedList(connect, session['user'], 5)
         connect.close()
-        return render_template('search_result.html', items=result)
+        return render_template('/sns/friend_requests.html', items=result)
     return render_template('login.html')
 
+"""
+id:52
+友達リクエスト申請
+"""
+@app.route('/sns/request', methods=['POST'])
+def sns_request():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.sns.friend.requestFriend(connect, session['user'], request.form['requested_user_id'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+"""
+id:53
+友達リクエスト承認
+"""
+@app.route('/sns/accept', methods=['POST'])
+def sns_accept():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.sns.friend.acceptFriend(connect, session['user'], request.form['requesting_user_id'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
 
 with app.test_request_context():
     print url_for('index')

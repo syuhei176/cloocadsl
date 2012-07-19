@@ -36,3 +36,4 @@ def changePassword(connect, user, password):
 """
 def changePasswordConfirm(connect, user):
     pass
+

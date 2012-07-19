@@ -2,9 +2,10 @@
 
 """
 """
-def findItem(connect, user, token, num):
+def findItem(connect, user, token, start, num):
     cur = connect.cursor()
-    cur.execute('SELECT user_id,email,fullname FROM account_info WHERE fullname like %s LIMIT %s;', (token.encode('utf-8') + '%', num, ))
+    cur.execute('SELECT user_id,email,fullname FROM account_info WHERE fullname like %s LIMIT %s,%s;', (token.encode('utf-8') + '%', start, num, ))
+    #cur.execute('SELECT user_id,email,fullname,account_relationship.is_friend,account_relationship.is_friend_pre FROM account_info RIGHT JOIN account_relationship ON account_info.user_id = account_relationship.src AND account_relationship.dest=%s AND fullname like %s LIMIT %s;', (user['id'], token.encode('utf-8') + '%', num, ))
     rows = cur.fetchall()
     cur.close()
     users = []
@@ -14,6 +15,8 @@ def findItem(connect, user, token, num):
         user['email'] = rows[i][1]
         user['fullname'] = rows[i][2].decode('utf-8')
         user['name'] = rows[i][2].decode('utf-8')
+        #user['is_friend'] = rows[i][3]
+        #user['is_friend_pre'] = rows[i][4]
         users.append(user)
     return users
 
@@ -37,6 +40,7 @@ def requestFriend(connect, user, requested_user_id):
         cur.execute('INSERT INTO account_relationship (is_friend,is_friend_pre,src,dest) VALUES(%s,%s,%s,%s);',(0, 1, user['id'], requested_user_id, ))
         connect.commit()
     cur.close()
+    return True
 
 """
 """
@@ -84,3 +88,20 @@ def getFriendList(connect, user, num):
         user['name'] = rows[i][2].decode('utf-8')
         users.append(user)
     return users
+
+def getUserProfile(connect, user, user_id):
+    cur = connect.cursor()
+    cur.execute('SELECT user_id,email,password,registration_date,fullname FROM account_info WHERE user_id = %s;', (user_id, ))
+    rows = cur.fetchall()
+    if len(rows) == 0:
+        cur.close()
+        return None
+    user = {}
+    user['id'] = rows[0][0]
+    user['email'] = rows[0][1]
+    user['password'] = '********'
+    user['registration_date'] = rows[0][3]
+    user['fullname'] = rows[0][4].decode('utf-8')
+    cur.close()
+    return user
+

@@ -36,10 +36,31 @@
 .project-date {
 }
 </style>
-<div class="project-info-wrapper">
+<script>
+$(function(){
+	$('input#friend-request').click(function(){
+		$(this).parent().find('input').each(function(){
+			if($(this).val() != '友達申請') {
+				var user_id = $(this).val();
+				$.post("/sns/accept",
+						{requested_user_id : user_id},
+						function(data){
+					
+				});
+			}
+		});
+	});
+})
+</script>
+<div id="users-wrapper" class="project-info-wrapper">
 {% for item in items %}
-<div class="project-info">
-	<div id="project-name">{{item.name}}</div>
+<div id="user-info" class="project-info">
+	<div class="project-name">{{item.name}}</div>
+	<input type="hidden" name="user_id" value="{{item.id}}" />
+	<input id="friend-request" type="button" value="許可" />
 </div>
 {% endfor %}
 </div>
+<form>
+	<input type="hidden" name="user_id" value="" />
+</form>

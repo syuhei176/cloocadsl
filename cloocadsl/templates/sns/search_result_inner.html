@@ -1,0 +1,74 @@
+<style>
+.project-info-wrapper {
+	width: 320px;
+	height: 90%;
+	overflow: auto;
+}
+.project-info {
+	width: 300px;
+	height: 60px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f0f0a0;
+    color: #0f0f0f;
+    text-decoration: none;
+    border: 3px #d0d0d0 solid;     /* 枠線の装飾 */
+
+}
+.project-info:hover {
+    background-color: #0f0f4f;
+    color: #f0f0f0;
+    text-decoration: none;
+    border: 3px #d0d0d0 solid;     /* 枠線の装飾 */
+
+}
+.project-name {
+}
+.project-version {
+}
+.project-owner {
+}
+.project-date {
+}
+</style>
+<script>
+$(function(){
+	$('div#user-info').click(function(){
+		$(this).find('input').each(function(){
+			if($(this).val() != '友達申請') {
+				var user_id = $(this).val();
+				window.location.href = '/profile/' + user_id;
+			}
+		});
+	});
+	$('input#friend-request').click(function(){
+		$(this).parent().find('input').each(function(){
+			if($(this).val() != '友達申請') {
+				var user_id = $(this).val();
+				$.post("/sns/request",
+						{requested_user_id : user_id},
+						function(data){
+					
+				});
+			}
+		});
+	});
+})
+</script>
+<div id="users-wrapper" class="project-info-wrapper">
+{% for item in items %}
+<div id="user-info" class="project-info">
+	<div class="project-name">{{item.name}}</div>
+	<input type="hidden" name="user_id" value="{{item.id}}" />
+	<input id="friend-request" type="button" value="友達申請" />
+</div>
+{% endfor %}
+</div>
+<form>
+	<input type="hidden" name="user_id" value="" />
+</form>

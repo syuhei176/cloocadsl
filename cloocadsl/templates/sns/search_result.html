@@ -1,0 +1,112 @@
+<!DOCTYPE  html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>clooca 検索</title>
+		
+		<!-- CSS -->
+		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+    	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+    	<script src="/static/js/jquery-1.7.1.min.js"></script>
+	    <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+	    
+	    <script>
+	    $(function(){
+	    	$('#filter-all').click(function(){
+	    		window.location.hash = 'all';
+	    	});
+	    	$('#filter-user').click(function(){
+	    		window.location.hash = 'user';
+	    	});
+	    	$('#filter-group').click(function(){
+	    		window.location.hash = 'group';
+	    	});
+	    	$('#filter-project').click(function(){
+	    		window.location.hash = 'project';
+	    	});
+	    	$('#filter-tool').click(function(){
+	    		window.location.hash = 'tool';
+	    	});
+	    	
+	    	loadbyhash();
+    		$.get("/finditems/all/{{token}}", function(data){
+    			$('#content').html(data);
+    		});
+	    	
+	    	$('#finder').click(function(){
+	    		if($('#sesarch-text').val() != '') {
+	    			window.location.href = '/search/' + $('#sesarch-text').val();
+	    		}
+	    	});
+
+	    	$(window).bind('hashchange', function() {
+	    		loadbyhash();
+	    	});
+	    	
+	    	function loadbyhash() {
+    			$('#left-menu li a').each(function(){
+    				$(this).removeClass('left-menu-selected');
+    			});
+	    		var hash = window.location.hash.substring(1);
+	    		
+	    		$.get("/finditems/"+hash+"/{{token}}", function(data){
+	    			$('#content').html(data);
+	    		});
+
+	    	}
+	    });
+	    </script>
+	    
+	</head>
+	
+	<body class="home">
+		<!-- WRAPPER -->
+		<div id="wrapper">
+			<div id="header">
+				<div class="logo">
+					<a href="/#home">clooca</a>
+				</div>
+				<div id="finder-wrapper">
+					<input id="sesarch-text" type="text" />
+					<input id="finder" type="submit" value="検索" />
+			    </div>
+				<div id="menu-wrapper">
+					<ul id="menu">
+					<li><a href="#">アイコン１</a></li>
+					<li><a href="#">アイコン2</a></li>
+			    	</ul>
+			    </div>
+				<div class="login">
+				<a href="/mypage">{{user['email']}}</a>
+				</div>
+				<div class="myhome">
+				<a href="/#home">ホーム</a>
+				</div>
+			</div>
+			<div id="main">
+				<div id="content-left">
+				<div id="left-menu-wrapper">
+					<h4>検索フィルタ</h4>
+					<ul id="left-menu">
+					<li><a id="filter-all">すべて</a></li>
+					<li><a id="filter-user">ユーザ</a></li>
+					<li><a id="filter-group">グループ</a></li>
+					<li><a id="filter-project">プロジェクト</a></li>
+					<li><a id="filter-tool">ツール</a></li>
+			    	</ul>
+			    </div>
+				</div>
+			<div id="content">
+			</div>
+				<div id="content-right">
+				right
+				</div>
+			</div>
+			<div id="footer">
+			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.
+			</div>
+		</div>
+		<!-- ENDS WRAPPER -->
+	</body>
+</html>

@@ -20,16 +20,11 @@
 	    			});
 	    			$('#content').html(data);
 	    			$('#market').addClass('left-menu-selected');
+	    			window.location.hash = 'market';
 	    		});
 	    	});
 	    	$('#myproject').click(function(){
-	    		$.get("/project", function(data){
-	    			$('#left-menu li a').each(function(){
-	    				$(this).removeClass('left-menu-selected');
-	    			});
-	    			$('#content').html(data);
-	    			$('#myproject').addClass('left-menu-selected');
-	    		});
+    			window.location.hash = 'projects';
 	    	});
 	    	$('#mytool').click(function(){
 	    		$.get("/mytool", function(data){
@@ -41,37 +36,63 @@
 	    		});
 	    	});
 	    	$('#mytool-available').click(function(){
-	    		$.get("/mytool/available", function(data){
-	    			$('#left-menu li a').each(function(){
-	    				$(this).removeClass('left-menu-selected');
-	    			});
-	    			$('#content').html(data);
-	    			$('#mytool-available').addClass('left-menu-selected');
-	    		});
+    			window.location.hash = 'available-tools';
 	    	});
 	    	
 	    	$('#mytool-developping').click(function(){
-	    		$.get("/mytool/developping", function(data){
-	    			$('#left-menu li a').each(function(){
-	    				$(this).removeClass('left-menu-selected');
-	    			});
-	    			$('#content').html(data);
-	    			$('#mytool-developping').addClass('left-menu-selected');
-	    		});
+    			window.location.hash = 'developping-tools';
 	    	});
-    		$.get("/home", function(data){
-    			$('#content').html(data);
-    		});
-    		
-    		
+	    	
+	    	loadbyhash();
+	    	
 	    	$('#finder').click(function(){
 	    		if($('#sesarch-text').val() != '') {
-		    		$.get("/finditems/"+$('#sesarch-text').val(), function(data){
-		    			$('#content').html(data);
-		    		});
+	    			window.location.href = '/search/' + $('#sesarch-text').val();
 	    		}
 	    	});
 
+	    	$(window).bind('hashchange', function() {
+	    		loadbyhash();
+	    	});
+	    	
+	    	function loadbyhash() {
+    			$('#left-menu li a').each(function(){
+    				$(this).removeClass('left-menu-selected');
+    			});
+	    		var hash = window.location.hash;
+	    		if(hash == '#home') {
+		    		$.get("/home", function(data){
+		    			$('#content').html(data);
+		    		});
+	    		}else if(hash == '#market'){
+		    		$.get("/market", function(data){
+		    			$('#content').html(data);
+		    			$('#market').addClass('left-menu-selected');
+		    		});
+	    		}else if(hash == '#projects'){
+		    		$.get("/project", function(data){
+		    			$('#content').html(data);
+		    			$('#myproject').addClass('left-menu-selected');
+		    		});
+	    		}else if(hash == '#available-tools'){
+		    		$.get("/mytool/available", function(data){
+		    			$('#content').html(data);
+		    			$('#mytool-available').addClass('left-menu-selected');
+		    		});
+	    		}else if(hash == '#developping-tools'){
+		    		$.get("/mytool/developping", function(data){
+		    			$('#content').html(data);
+		    			$('#mytool-developping').addClass('left-menu-selected');
+		    		});
+	    		}else if(hash == '#create-tool'){
+		    		$.get("/tool/create-view", function(data){
+		    			$('#content').html(data);
+		    			$('#mytool-developping').addClass('left-menu-selected');
+		    		});
+	    		}else if(hash == '#groups'){
+	    			
+	    		}
+	    	}
 	    });
 	    </script>
 	    
@@ -82,11 +103,11 @@
 		<div id="wrapper">
 			<div id="header">
 				<div class="logo">
-					<a href="#">clooca</a>
+					<a href="/#home">clooca</a>
 				</div>
 				<div id="finder-wrapper">
 					<input id="sesarch-text" type="text" />
-					<input id="finder" type="submit" value="検索" />
+					<input id="finder" type="submit" value="検索" class="button-type1" style="width:64px;" />
 			    </div>
 				<div id="menu-wrapper">
 					<ul id="menu">
@@ -95,10 +116,10 @@
 			    	</ul>
 			    </div>
 				<div class="login">
-				<a href="/mypage">{{email}}</a>
+				<a href="/mypage">{{user['email']}}</a>
 				</div>
 				<div class="myhome">
-				<a href="/">ホーム</a>
+				<a href="/#home">ホーム</a>
 				</div>
 			</div>
 			<div id="main">

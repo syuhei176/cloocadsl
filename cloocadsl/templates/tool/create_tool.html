@@ -43,25 +43,23 @@
 <script>
 <!-- 
 $(function() {
-	$('div#tool-info').click(function(){
-		$(this).find('input').each(function(){
-			var tool_key = $(this).val();
-			window.location.href = '/tool/info-view/' + tool_key;
-		});
-	});
 	$('#create-tool').click(function(){
-		window.location.href = "/#create-tool"
+		$.post("/tool/create",
+				{tool_key : $('#tool-key').val(), tool_name : $('#tool-name').val()},
+				function(data){
+			
+		});
+		window.alert($('#tool-name').val());
+		return false;
 	});
 })
 -->
 </script>
 <div class="project-info-wrapper">
-<div id="create-tool" class="create-tool">新規作成</div>
-{% for tool in tools %}
-<div id="tool-info" class="project-info">
-	<div class="project-name">{{tool.name}}</div>
-	version:{{tool.head_version}}
-	<input type="hidden" name="tool_key" value="{{tool.tool_key}}" />
-</div>
-{% endfor %}
+<form>
+<div>ツールキー<input id="tool-key" type="text" name="tool-key" /></div>
+<div>ツール名<input id="tool-name" type="text" name="tool-name" /></div>
+<div>公開します<input id="tool-vis" type="checkbox" name="vis" /></div>
+<div></div><input id="create-tool" type="submit" value="新規作成" class="button-type1" style="width:240px;"/>
+</form>
 </div>

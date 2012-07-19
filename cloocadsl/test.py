@@ -3,34 +3,31 @@ import os
 import clooca
 import unittest
 import tempfile
+import config
 
 """
-test_admin1
-test_admin2
-test_user1
-test_user2
-test_group1 member(test_admin1, test_admin2, test_user1)
-test_group2 member(test_admin2, test_user2)
-test_metamodel1 belong test_admin1　公開
-test_metamodel2 belong test_admin1　非公開
-test_project1 belong test_user1
-test_project2 belong test_user2
-
-テストケース
-test_user1がtest_group1にてtest_metamodel1をメタモデルとしたプロジェクトを作成できる。
-test_user1がtest_group1にてプロジェクトを削除できる
-test_user2がtest_metamodel1をメタモデルとしたプロジェクトを作成できない。
-test_user2がtest_project1を開けないし、削除できない
-test_user1がtest_group1にてtest_metamodel2をメタモデルとしたプロジェクトを作成できない。
-test_admin1がtest_group1にてtest_metamodel2をメタモデルとしたプロジェクトを作成できる。
 """
 class cloocaTestCase(unittest.TestCase):
-
+    
+    def init_db(self):
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        cur = connect.cursor()
+        password = 'universe'
+        cur.execute('INSERT INTO account_info (email,password,registration_date,fullname) VALUES(%s,%s,%s,%s);',(Util.myencode('test1@clooca.com'), md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), '山下'))
+        cur.execute('INSERT INTO account_info (email,password,registration_date,fullname) VALUES(%s,%s,%s,%s);',(Util.myencode('test2@clooca.com'), md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), '山口'))
+        cur.execute('INSERT INTO account_info (email,password,registration_date,fullname) VALUES(%s,%s,%s,%s);',(Util.myencode('test3@clooca.com'), md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), '山中'))
+        cur.execute('INSERT INTO account_info (email,password,registration_date,fullname) VALUES(%s,%s,%s,%s);',(Util.myencode('test4@clooca.com'), md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), '山岡'))
+        cur.execute('INSERT INTO account_info (email,password,registration_date,fullname) VALUES(%s,%s,%s,%s);',(Util.myencode('test5@clooca.com'), md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), '山本'))
+        cur.execute('INSERT INTO account_info (email,password,registration_date,fullname) VALUES(%s,%s,%s,%s);',(Util.myencode('test6@clooca.com'), md5.new(password).hexdigest(), d.strftime("%Y-%m-%d"), '山根'))
+        connect.commit()
+        cur.close()
+        connect.close()
+        
     def setUp(self):
         self.db_fd, clooca.app.config['DATABASE'] = tempfile.mkstemp()
         clooca.app.config['TESTING'] = True
         self.app = clooca.app.test_client()
-#        clooca.init_db()
+        self.init_db()
 
     def tearDown(self):
         os.close(self.db_fd)

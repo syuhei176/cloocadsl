@@ -16,12 +16,12 @@ h4, .h4 {
 	margin: 0 0 0 0
 }
 a {
-	color: #59c54a;
+	color: #FFFFFF;
 	text-decoration: none;
 	font-weight: 600
 }
 a:hover, a:active {
-	color: #43a735
+	color: #DFDFDF;
 }
 a:focus {
 	outline: thin dotted
@@ -54,7 +54,7 @@ body {
 	margin-bottom:12px;
 	padding:10px;0px;10px;0px;
 	vertical-align:text-top;
-    background-color: #40b7f7;
+    background-color: #43a735;
 }
 #header .logo{
 	width: 140px;
@@ -95,13 +95,13 @@ body {
     text-align: center;
     font-size: 16px;
     font-weight: bold;
-    background-color: #40b7f7;
+    background-color: #43a735;
     color: #f0f0f0;
     text-decoration: none;
 }
 
 #menu a:hover {
-	background-color: #60d7f7;
+	background-color: #63c755;
 	color: #f0f0f0;
 }
 
@@ -135,7 +135,7 @@ body {
 }
 
 #header .myhome a:hover{
-	background-color: #60d7f7;
+	background-color: #63c755;
 }
 
 
@@ -345,11 +345,22 @@ width: 240px;
 }
 
 .button-type1 {
-	background-color: #0074CC;
-	color: #ffffff;
+	display: inline-block;
+	color: white;
+	background-color: #0074cc;
+	border: 0;
+	font-size:16px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
     border-radius: 4px;         /* CSS3 */
     -moz-border-radius: 4px;    /* Firefox */
     -webkit-border-radius: 4px; /* Safari,Chrome */
+}
+
+.button-type1:hover {
+	background-color: #2094ec;
 }
 
 .button-type2 {

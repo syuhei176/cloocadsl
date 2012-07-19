@@ -43,10 +43,10 @@
 <script>
 <!-- 
 $(function() {
-	$('div#tool-info').click(function(){
+	$('div#user-info').click(function(){
 		$(this).find('input').each(function(){
-			var tool_key = $(this).val();
-			window.location.href = '/tool/info-view/' + tool_key;
+			var user_id = $(this).val();
+			window.location.href = '/wb/' + user_id;
 		});
 	});
 	$('#create-tool').click(function(){
@@ -56,12 +56,10 @@ $(function() {
 -->
 </script>
 <div class="project-info-wrapper">
-<div id="create-tool" class="create-tool">新規作成</div>
-{% for tool in tools %}
-<div id="tool-info" class="project-info">
+<div id="user-info" class="project-info">
 	<div class="project-name">{{tool.name}}</div>
 	version:{{tool.head_version}}
+	作成日:{{tool.created_date}}
 	<input type="hidden" name="tool_key" value="{{tool.tool_key}}" />
 </div>
-{% endfor %}
 </div>

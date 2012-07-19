@@ -61,7 +61,7 @@
 		<div id="wrapper">
 			<div id="header">
 				<div class="logo">
-					<a href="/#home">clooca</a>
+					<a href="/">clooca</a>
 				</div>
 				<div id="menu-wrapper">
 					<ul id="menu">
@@ -75,21 +75,26 @@
 			</div>
 			<div id="main">
 				<div id="content-left">
+				<div id="left-menu-wrapper">
+					<ul id="left-menu">
+					<li><a href="#">マーケット</a></li>
+					<li><a href="#">マイプロジェクト</a></li>
+					<li><a href="#">マイツール</a></li>
+					<li><a href="#">マイツール</a></li>
+					<li><a href="#">グループ</a></li>
+			    	</ul>
+			    </div>
+				<div id="left-menu-wrapper">
+					<h3>グループ</h3>
+					<ul id="left-menu">
+					<li><a href="#">グループ１</a></li>
+					<li><a href="#">グループ２</a></li>
+			    	</ul>
+			    </div>
 				</div>
 			<div id="content">
-			<div id="update-form-container">
-			<form id="updateForm" action="/update-userinfo">
-			<fieldset>
-			<div><label class="controll-label" for="fullname">名前</label><div><input type="text" name="fullname" value="{{user['fullname']}}"/></div></div>
-			<div><label class="controll-label" for="password">新しいパスワード</label><div><input type="password" name="password" /><span>（パスワードを変更する場合のみ）</span></div></div>
-			<div><label class="controll-label" for="password_confirm">確認</label><div><input type="password" name="password_confirm" /><span>（パスワードを変更する場合のみ）</span></div></div>
-			<input class="button-type1" type="submit" value="変更" />
-			</fieldset>
-			</form>
-			</div>
-			<div>
-			関連プロジェクト
-			</div>
+			{{profile['fullname']}}
+			{{profile['registration_date']}}
 			</div>
 				<div id="content-right">
 				right
