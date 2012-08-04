@@ -318,56 +318,6 @@ TempConfigEditor.prototype.onActivate = function() {
 	current_editor = this;
 }
 
-function TemplateEditor(template) {
-	this.template = template;
-	this.resource = template;
-	var self = this;
-	var style = '"width:'+(Ext.getCmp('centerpanel').getWidth() - 40)+'px;height:'+(Ext.getCmp('centerpanel').getHeight())+'px;"'
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-		  	   title: template.name,
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [{html: '<textarea id="templatetextarea_'+template.name+'" style='+style+'>'+template.content+'</textarea>'}],
-		  	 		closable: 'true'
-	});
-}
-
-TemplateEditor.prototype.save = function() {
-	var self = this;
-	Ext.MessageBox.show({title: 'Please wait',msg: 'Loading...',progressText: 'Initializing...',width:300,progress:true,closable:false,animEl: 'mb6'});
-	this.template.content = this.template.content.replace(/\t/g, "  ");
-	$.post('/template/save', { id : g_metaproject.id, fname : this.template.name , target : this.template.path, content : this.template.content},
-			function(data) {
-				if(data) {
-					self.panel.setTitle(self.template.name);
-				}
-				Ext.MessageBox.hide();
-			}, "json");
-}
-
-TemplateEditor.prototype.getPanel = function() {
-	return this.panel;
-}
-
-TemplateEditor.prototype.Initialize = function() {
-	var self = this;
-	var textarea = document.getElementById('templatetextarea_'+this.template.name);
-	textarea.parentNode.style.backgroundColor = '#EEC';
-	textarea.parentNode.style.color = '#000';
-	var myCodeMirror = CodeMirror.fromTextArea(textarea, {lineNumbers:true, onChange:function(editor, arg) {
-			 self.template.content = editor.getValue();
-				 self.panel.setTitle(self.template.name + '*');
-			   }});
-}
-
-TemplateEditor.prototype.onActivate = function() {
-	current_editor = this;
-	current_resource = this.resource;
-}
-
 function WellcomeMessageEditor() {
 	this.resource = g_metaproject.welcome_message;
 	var self = this;

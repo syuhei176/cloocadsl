@@ -385,21 +385,24 @@ function createMetaElementGrid(l_elements, fn, selected) {
 
 }
 
-
-function MetaJSONEditor(metadiagram) {
-	this.resource = g_metamodel;
+function MetaJSONEditor(key, name, metaDataController) {
+	this.key = key;
+	this.title = name;
+	this.metaDataController = metaDataController;
 	var self = this;
 	this.jsoneditor = Ext.create('Ext.form.field.TextArea', {
-		title: 'json',
+		title: this.title,
 		autoScroll: true,
 		width: Ext.getCmp('centerpanel').getWidth(),
 		height: Ext.getCmp('centerpanel').getHeight(),
- 		   value: JSON.stringify(g_metamodel),
+ 		   value: JSON.stringify(this.metaDataController.getPackage(this.key).content),
  		   listeners: {
  			   change: {
  				   fn: function(field, newValue, oldValue, opt) {
- 					  g_metamodel = JSON.parse(newValue);
- 						self.editor.setTitle('メタモデル*')
+ 						p = self.metaDataController.getPackage(self.key);
+ 						p.content = JSON.parse(newValue);
+ 						p.modified_after_commit = true;
+ 						self.editor.setTitle(self.title + '*');
  				   }
  			   }
  		   }
@@ -433,6 +436,7 @@ function MetaJSONEditor(metadiagram) {
 		  	 		closable: false
 	});
 	*/
+	/*
 	this.deditor = this.createGridEditor(g_metamodel.metadiagrams, 'MetaDiagram', function(d){
 		self.createJsonWindow(g_metamodel.metadiagrams[d.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metadiagrams[d.id] = JSON.parse(newValue);
@@ -443,18 +447,19 @@ function MetaJSONEditor(metadiagram) {
 		g_metamodel.metadiagrams[new_elem.id] = new_elem;
 		return new_elem;
 	});
-	this.oeditor = this.createGridEditor(g_metamodel.metaobjects, 'MetaObjects', function(metaobj){
+	*/
+	this.oeditor = this.createGridEditor(this.metaDataController.getPackage(this.key).classes, 'MetaObjects', function(metaobj){
 		console.log(metaobj.id);
 		self.createJsonWindow(g_metamodel.metaobjects[metaobj.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metaobjects[metaobj.id] = JSON.parse(newValue);
 			   self.jsoneditor.setValue(JSON.stringify(g_metamodel));
 			   });
 	}, function(){
-		var new_elem = new MetaObject();
-		g_metamodel.metaobjects[new_elem.id] = new_elem;
+		var new_elem = new MetaModel.Class();
+		self.metaDataController.getPackage(self.key).classes[new_elem.id] = new_elem;
 		return new_elem;
 	});
-	this.reditor = this.createGridEditor(g_metamodel.metarelations, 'MetaRelationships', function(metaobj){
+	this.reditor = this.createGridEditor(this.metaDataController.getPackage(this.key).associations, 'MetaRelationships', function(metaobj){
 		console.log(metaobj.id);
 		self.createJsonWindow(g_metamodel.metarelations[metaobj.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metarelations[metaobj.id] = JSON.parse(newValue);
@@ -469,10 +474,11 @@ function MetaJSONEditor(metadiagram) {
 		 },null,true,JSON.stringify(metaobj));
 		 */
 	}, function(){
-		var new_elem = new MetaRelation();
-		g_metamodel.metarelations[new_elem.id] = new_elem;
+		var new_elem = new MetaAssociation();
+		self.metaDataController.getPackage(self.key).asociations[new_elem.id] = new_elem;
 		return new_elem;
 	});
+	/*
 	this.peditor = this.createGridEditor(g_metamodel.metaproperties, 'MetaProperties', function(metaprop){
 		console.log(metaprop.id);
 		self.createJsonWindow(g_metamodel.metaproperties[metaprop.id], function(field, newValue, oldValue, opt) {
@@ -484,13 +490,14 @@ function MetaJSONEditor(metadiagram) {
 		g_metamodel.metaproperties[new_elem.id] = new_elem;
 		return new_elem;
 	});
+	*/
 	var tabpanel = Ext.create('Ext.tab.Panel', {
-		title: 'メタモデル',
+		title: name,
 		tabPosition: 'bottom',
         defaults :{
             bodyPadding: 6
         },
-	    items: [this.deditor, this.oeditor, this.reditor, this.peditor, this.jsoneditor],
+	    items: [this.oeditor, this.reditor, this.jsoneditor],
 	    closable: 'true'
 	});
 
@@ -498,12 +505,7 @@ function MetaJSONEditor(metadiagram) {
 }
 
 MetaJSONEditor.prototype.save = function() {
-	var self = this;
-	saveMetaModel(g_metaproject.id, function(data){
-		if(data) {
-			self.editor.setTitle('JSONEditor');
-		}
-	});
+	this.metaDataController.save();
 }
 
 MetaJSONEditor.prototype.getPanel = function() {
