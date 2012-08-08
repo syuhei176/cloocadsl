@@ -6,8 +6,9 @@ import re
 import sys
 import datetime
 import config
-import random
-
+import json
+from clooca.lang import CloocaResponse
+from toolimpl import commitImpl,updateImpl
 
 def fetchFromDB():
     connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
@@ -82,6 +83,21 @@ def create(connect, user, tool_key, tool_name):
     cur.close()
     return True
 
+simple_dsl_struct = '''
+{nestingPackages:"",importedPackages:""}
+'''
+simple_dsl_package = '''
+{nestingPackages:"",importedPackages:""}
+'''
+
+def create_simple_DSL(connect):
+    cur.execute('INSERT INTO meta_structure (tool_uri,version,content) VALUES(%s,%s,%s);',(tool_key, 1, simple_dsl))
+    cur.execute('INSERT INTO meta_package (tool_uri,name,version,content,lang_type) VALUES(%s,%s,%s,%s,%s);',(tool_key, 'default', 1, simple_dsl_package, 'dsl', ))
+    connect.commit()
+
+def create_simple_DSML(connect):
+    cur.execute('INSERT INTO tool_info (tool_uri,name,created_date,head_version,owner_id) VALUES(%s,%s,%s,%s,%s);',(tool_key, tool_name.encode('utf-8'), d.strftime("%Y-%m-%d"), 1, user['id']))
+    
 """
 ワークスペースからツールデータを読み込む
 ワークスペースが存在する場合は読み込み
@@ -90,14 +106,15 @@ def create(connect, user, tool_key, tool_name):
 def load_from_ws(connect, user, tool_key):
     cur = connect.cursor()
     #cur.execute('SELECT metamodel,notation,wellcome_message FROM tool_workspace WHERE tool_uri = %s AND user_id = %s;', (tool_key, user['id'],))
-    cur.execute('SELECT metamodel FROM tool_workspace WHERE tool_uri = %s AND user_id = %s;', (tool_key, user['id'],))
+    cur.execute('SELECT tool_uri, metamodel FROM tool_workspace WHERE tool_uri = %s AND user_id = %s;', (tool_key, user['id'],))
     rows = cur.fetchall()
     cur.close()
     if len(rows) == 0:
         tool = checkout(connect, user, tool_key)
         return tool
     tool = {}
-    tool['metamodel'] = rows[0][0]
+    tool['tool_key'] = rows[0][0]
+    tool['metamodel'] = rows[0][1].decode('utf-8')
     #tool['notaion'] = rows[0][1]
     #tool['wellcome_message'] = rows[0][2]
     return tool
@@ -123,9 +140,12 @@ def checkout(connect, user, tool_key):
 
 """
 """
-def save_to_ws(connect, user, tool_key, metamodel):
+def save_to_ws(connect, user, tool_key, metamodel=None, notation=None):
     cur = connect.cursor()
-    num_of_affected_row = cur.execute('UPDATE tool_workspace SET metamodel=%s WHERE tool_uri=%s AND user_id=%s;', (metamodel, tool_key, user['id'], ))
+    if not metamodel == None:
+        num_of_affected_row = cur.execute('UPDATE tool_workspace SET metamodel=%s WHERE tool_uri=%s AND user_id=%s;', (metamodel.encode('utf-8'), tool_key, user['id'], ))
+    if not notation == None:
+        num_of_affected_row = cur.execute('UPDATE tool_workspace SET notation=%s WHERE tool_uri=%s AND user_id=%s;', (notation.encode('utf-8'), tool_key, user['id'], ))
     connect.commit()
     cur.close()
     return num_of_affected_row != 0
@@ -156,24 +176,101 @@ def delete(connect, user, tool_key):
     return True
 
 """
+@return: アクセス権なし:0,読み込み専用:1,書き込み権限あり:2
 """
-def commit(tool_key):
-    cur.execute('SELECT COUNT(*) FROM has_tool WHERE user_id=%s AND tool_uri=%s;', (user['id'], tool_key, ))
-    has_tool_count = cur.fetchone()[0]
-    if has_tool_count == 0:
-        cur.close()
-        return None
-    return True
+def GetToolAccessInfo(connect, user, tool_key):
+    result = 0
+    cur = connect.cursor()
+    cur.execute('SELECT permission FROM user_has_tool WHERE user_id=%s AND tool_uri=%s;', (user['id'], tool_key, ))
+    row = cur.fetchone()
+    cur.close()
+    if len(row) == 0:
+        #アクセス権がない
+        result = 0
+        return result
+    permission = int(row[0])
+    return permission + 1
+
+"""
+commit
+@return: 
+"""
+def commit(connect, user, tool_key, comment):
+    """
+    アクセス権の確認
+    """
+    access_ret = GetToolAccessInfo(connect, user, tool_key)
+    if access_ret == 0:
+        #権限なし
+        return 0
+    if access_ret == 1:
+        #書き込み権限なし
+        return 1
+    """
+    バージョンの確認
+    """
+    cur = connect.cursor()
+    cur.execute('SELECT current_version,metamodel FROM tool_workspace WHERE user_id=%s AND tool_uri=%s;', (user['id'], tool_key, ))
+    row = cur.fetchone()
+    workspace_version = int(row[0])
+    metamodel_json = row[1].decode('utf-8')
+    cur.execute('SELECT head_version FROM tool_info WHERE tool_uri=%s;', (tool_key, ))
+    rep_version = int(cur.fetchone()[0])
+    cur.close()
+    if workspace_version == rep_version:
+        metamodel = json.loads(metamodel_json)
+        result = commitImpl.commit_impl(connect, user, metamodel, tool_key, rep_version + 1, comment)
+        if result == 5:
+            result = updateImpl.update_impl(connect, user, tool_key, rep_version + 1)
+    else:
+        #ワークスペースとリポジトリのバージョンが一致していない
+        result = 2
+    return result
 
 """
 """
-def update(tool_key):
-    return True
+def update(connect, user, tool_key):
+    resp = CloocaResponse()
+    """
+    アクセス権の確認
+    """
+    access_ret = GetToolAccessInfo(connect, user, tool_key)
+    if access_ret == 0:
+        #権限なし
+        resp.code = 0
+        return resp
+    cur = connect.cursor()
+    cur.execute('SELECT head_version FROM tool_info WHERE tool_uri=%s;', (tool_key, ))
+    rep_version = int(cur.fetchone()[0])
+    cur.close()
+    resp.success = True
+    resp.code = 1
+    resp.content = updateImpl.update_impl(connect, user, tool_key, rep_version)
+    return resp
 
 """
 """
-def update_to(tool_key, version):
-    return True
+def update_to_ver(connect, user, tool_key, version):
+    resp = CloocaResponse()
+    """
+    アクセス権の確認
+    """
+    access_ret = GetToolAccessInfo(connect, user, tool_key)
+    if access_ret == 0:
+        #権限なし
+        resp.code = 0
+        return resp
+    cur = connect.cursor()
+    cur.execute('SELECT head_version FROM tool_info WHERE tool_uri=%s;', (tool_key, ))
+    rep_version = int(cur.fetchone()[0])
+    cur.close()
+    if version <= rep_version:
+        resp.success = True
+        resp.code = 1
+        resp.content = updateImpl.update_impl(connect, user, tool_key, version)
+    else:
+        resp.code = 2
+    return resp
 
 """
 """

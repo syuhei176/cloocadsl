@@ -8,8 +8,21 @@
 		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
 		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
     	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
-    	<script src="/static/js/jquery-1.7.1.min.js"></script>
-	    <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+    	<style>
+    	.slideshow {
+    	margine 32px 32px 32px 32px;
+    	width: 600px;
+    	height: 500px;
+    	background-image: url("/static/images/m31.jpeg")
+    	}
+    	#register-form-container {
+    	position:absolute;
+    	top: 200px;
+    	left: 400px;
+    	}
+    	</style>
+    	<script src="/static/js/lib/jquery-1.7.1.min.js"></script>
+	    <script src="/static/js/lib/jquery-ui-1.8.18.custom.min.js"></script>
 	    <script>
 	    <!--
 	    $(function(){
@@ -68,13 +81,36 @@
 				</div>
 			</div>
 			<div id="main">
-			<div id="register-form-container">
-			<form id="registerForm" action="register-to">
-			<div>メールアドレス<input type="text" name="email"/></div>
-			<input type="submit" value="新規登録" class="button-type2" style="width:200px;" />
-			</form>
-			</div>
-			</div>
+			<section class="wrapper">
+      		<div class='slideshow' id='slideStandard'>
+				<div id="register-form-container">
+				<form id="registerForm" action="register-to">
+				<div>メールアドレス<input type="text" name="email"/></div>
+				<input type="submit" value="新規登録" class="button-type2" style="width:200px;" />
+				</form>
+				</div>
+        	</div>
+      		</section>
+      		      <section class='wrapper features'>
+        <h1 class='big'>clooca gameはこういうもんですよー。</h1>
+        <div class='semantic third'>
+          <img alt='' class='retina' src='../public/img/feature_01.png' />
+          <h3>Entry</h3>
+          <p>まずはアカウント登録から。光の早さで終わるよー。簡単だよーっと。</p>
+        </div>
+        <div class='encoded third'>
+          <img alt='' class='retina' src='../public/img/feature_02.png' />
+          <h3>Design</h3>
+          <p>モデル書くだけ。とか適当なキャッチコピーをつらつらと</p>
+        </div>
+        <div class='lightweight third'>
+          <img alt='' class='retina' src='../public/img/feature_03.png' />
+          <h3>Fight!</h3>
+          <p>コーディングとかないよー。お絵かきしたらいきなりバトルだよーっと</p>
+        </div>
+      </section>
+      開発者登録
+				</div>
 			<div id="footer">
 			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.
 			</div>

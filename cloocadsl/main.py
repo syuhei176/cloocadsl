@@ -1,4 +1,9 @@
 # coding: utf-8
+
+__author__ = "Hiya Syuhei <syuhei176@gmail.com>"
+__status__ = "demo"
+__version__ = "0.1"
+__date__    = "19 07 2012"
 """
 """
 
@@ -16,9 +21,16 @@ from clooca.account import LoginService
 from clooca.account import UserService
 import clooca.repository.tool
 import clooca.sns.friend
+import clooca.workbench.wb
 app = Flask(__name__)
 
 #トップページ
+
+"""
+条件
+内容
+返り値
+"""
 
 """
 id:1
@@ -103,7 +115,7 @@ def tool_info_view(tool_key):
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         result = clooca.repository.tool.getToolInfo(connect, session['user'], tool_key)
         connect.close()
-        return render_template('tool/tool_page.html', tool=result)
+        return render_template('top_loggedin.html', user=session['user'], mode='toolinfo', tool=result)
     return redirect(url_for('index'))
 
 """
@@ -180,14 +192,6 @@ def edit(project_key):
 """
 tool
 """
-@app.route('/wb/<tool_key>')
-def wb(tool_key):
-    if 'user' in session:
-        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = clooca.repository.tool.load_from_ws(connect, session['user'], tool_key)
-        connect.close()
-        return render_template('workbench.html', tool=json.dumps(result))
-    return redirect(url_for('login'))
 
 @app.route('/tool/create', methods=['POST'])
 def tool_create():
@@ -279,6 +283,99 @@ def sns_accept():
         result = clooca.sns.friend.acceptFriend(connect, session['user'], request.form['requesting_user_id'])
         connect.close()
         return json.dumps(result)
+    return 'null'
+
+@app.route('/test/editor')
+def test_editor():
+    return render_template('/test/editor.html')
+
+@app.route('/test/wb')
+def test_wb():
+    return render_template('/test/wb.html')
+
+@app.route('/wb/<tool_key>')
+def wb(tool_key):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.repository.tool.load_from_ws(connect, session['user'], tool_key)
+        connect.close()
+        return render_template('test/wb.html', toolinfo=result)
+    return redirect(url_for('login'))
+
+@app.route('/wb-api/get-metastructure', methods=['POST'])
+def wb_get_metastructure():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.sns.friend.acceptFriend(connect, session['user'], request.form['requesting_user_id'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+@app.route('/wb-api/save', methods=['POST'])
+def wb_save():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.repository.tool.save_to_ws(connect, session['user'], request.form['toolkey'], metamodel=request.form['content'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+@app.route('/wb-api/save-notation', methods=['POST'])
+def wb_save_notation():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.repository.tool.save_to_ws(connect, session['user'], request.form['toolkey'], notation=request.form['content'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+"""
+wb/template
+"""
+
+@app.route('/wb-api/templates/<toolkey>', methods=['GET'])
+def wb_template(toolkey):
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.workbench.wb.get_templates(connect, session['user'], toolkey)
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+@app.route('/wb-api/create-template', methods=['POST'])
+def wb_create_template():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.workbench.wb.create_template(connect, session['user'], request.form['toolkey'], request.form['name'], request.form['package_uri'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+@app.route('/wb-api/save-template', methods=['POST'])
+def wb_save_template():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.workbench.wb.save_template(connect, session['user'], request.form['toolkey'], request.form['name'], request.form['package_uri'], request.form['content'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+@app.route('/wb-api/commit', methods=['POST'])
+def wb_commit():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.repository.tool.commit(connect, session['user'], request.form['toolkey'], request.form['comment'])
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+@app.route('/wb-api/update', methods=['POST'])
+def wb_update():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        clooca_resp = clooca.repository.tool.update(connect, session['user'], request.form['toolkey'])
+        connect.close()
+        return clooca_resp.dumps()
     return 'null'
 
 with app.test_request_context():

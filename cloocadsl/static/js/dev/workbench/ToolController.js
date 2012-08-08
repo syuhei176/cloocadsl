@@ -4,22 +4,25 @@
  * @returns
  */
 function ToolController() {
-	this.tools = {};
+	var tools = {};
+	return {
+		getlist : function() {
+			return tools;
+		},
+		add : function(key, n) {
+			tools[key] = n;
+		},
+		del : function(key) {
+			delete tools[key];
+		},
+		get : function(key) {
+			return tools[key];
+		}
+	}
 }
 
-ToolController.prototype.getList = function() {
-	return [];
-}
-
-
-ToolController.prototype.addTool = function(key, t) {
-	this.tools[key] = t;
-}
-
-ToolController.prototype.updateTool = function(key, t) {
-	this.tools[key] = t;
-}
-
-ToolController.prototype.delTool = function(key) {
-	delete tools[key];
+function Tool(name, uri, attr_name) {
+	this.name = name;
+	this.uri = uri;
+	this.attr_name = attr_name;
 }

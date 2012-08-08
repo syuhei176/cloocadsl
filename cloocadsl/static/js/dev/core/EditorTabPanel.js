@@ -33,8 +33,6 @@ EditorTabPanel.prototype.update = function() {
 	}
 }
 
-
-
 EditorTabPanel.prototype.getPanel = function() {
 	return this.tabpanel;
 }
@@ -64,6 +62,11 @@ EditorTabPanel.prototype.add = function(editor, key) {
 	tab.on('activate', function(){
 		self.current_editor = editor;
 		editor.onActivate();
+		
+	});
+	tab.on('deactivate', function(){
+		editor.onDeactivate();
+		
 	});
 	tab.on('close', function(){
 //		self.current_editor = null;

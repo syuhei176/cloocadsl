@@ -61,8 +61,8 @@ EasyExplorer.prototype.refresh = function() {
 		self.open();
     });
 	this.init_contextmenu();
-	Ext.getCmp('package-explorer-dev').removeAll();
-	Ext.getCmp('package-explorer-dev').add(this.panel);
+	Ext.getCmp('easy-explorer').removeAll();
+	Ext.getCmp('easy-explorer').add(this.panel);
 }
 
 EasyExplorer.prototype.create = function() {

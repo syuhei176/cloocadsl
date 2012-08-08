@@ -13,7 +13,8 @@ h3, .h3 {
 }
 h4, .h4 {
 	font-size: 12px;
-	margin: 0 0 0 0
+	margin: 0 0 0 0;
+	padding-top: 10px;
 }
 a {
 	color: #FFFFFF;
@@ -52,7 +53,7 @@ body {
 	position: relative;
 	height: 22px;
 	margin-bottom:12px;
-	padding:10px;0px;10px;0px;
+	padding: 10px 0px 10px 0px;
 	vertical-align:text-top;
     background-color: #43a735;
 }
@@ -70,7 +71,7 @@ body {
 }
 
 #menu-wrapper{
-	width: 200px;
+	width: 160px;
 	float: left;
 }
 
@@ -155,7 +156,6 @@ margin-left: 10px;
 margin-right: 10px;
 }
 
-
 #content{
 float:left;
 width: 600px;
@@ -165,19 +165,19 @@ position:relative;
 
 #content-right{
 	float:left;
-	width: 60px;
+	width: 80px;
 	position:relative;
 	right: 2px;
 }
 
 
-#left-menu-wrapper{
+.left-menu-wrapper{
 	width: 160px;
 	float: left;
     border-right: 1px #d0d0d0 solid;     /* ògê¸ÇÃëïè¸ */
 }
 
-#left-menu{
+.left-menu{
 	display: inline;
 	vertical-align: baseline;
 	clear: both;
@@ -185,20 +185,19 @@ position:relative;
 	padding: 0;
 }
 
-#left-menu li{
+.left-menu li{
     width: 160px;
     list-style: none;
 }
 
-#left-menu li ul li{
+.left-menu li ul li{
 	display: inline;
 	vertical-align: baseline;
 	clear: both;
 	padding-start: 20px;
 }
 
-
-#left-menu a {
+.left-menu a {
 	display: block;
     padding-top: 1px;
     padding-bottom: 1px;
@@ -215,12 +214,12 @@ position:relative;
     
 }
 
-#left-menu a:hover {
+.left-menu a:hover {
 	background-color: #f0f0f0;
     color: #000000;
 }
 
-#left-menu .left-menu-selected {
+.left-menu .left-menu-selected {
 	background-color: #d0d0d0;
 }
 

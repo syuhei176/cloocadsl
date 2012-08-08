@@ -36,7 +36,7 @@ def Login(email, password):
 
 def GetUserFromDB(connect, email):
     cur = connect.cursor()
-    cur.execute('SELECT user_id,email,password,registration_date,fullname FROM account_info WHERE email = %s;', (email, ))
+    cur.execute('SELECT user_id,email,password,registration_date,fullname,is_developper FROM account_info WHERE email = %s;', (email, ))
     rows = cur.fetchall()
     if len(rows) == 0:
         cur.close()
@@ -47,5 +47,6 @@ def GetUserFromDB(connect, email):
     user['password'] = rows[0][2]
     user['registration_date'] = rows[0][3]
     user['fullname'] = rows[0][4].decode('utf-8')
+    user['is_developper'] = rows[0][5]
     cur.close()
     return user

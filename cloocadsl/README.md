@@ -44,3 +44,8 @@ http://mysql-python.sourceforge.net/
 ##実行
 1.`python main.py`で実行  
 2.http://127.0.0.1:5000/ にアクセス  
+
+
+#ドキュメント
+ドキュメントは/other/doc以下に置いている
+拡張子uxfファイルは、UMLet（http://www.umlet.com/）で開く。

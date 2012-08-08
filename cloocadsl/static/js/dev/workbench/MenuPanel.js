@@ -103,9 +103,9 @@ function MenuPanel(wb) {
 		}else if(item.id == 'vcs-update') {
 			self.wb.vcs.update();
 		}else if(item.id == 'quick-preview') {
-			var pm = new PreviewManager();
-			PreviewManager.init();
-			PreviewManager.run();
+			var pm = new PreviewManager(self.wb);
+			pm.init();
+			pm.run();
 		}
 	}
 	/*

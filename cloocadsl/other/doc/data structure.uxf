@@ -35,7 +35,8 @@ password
 fullname
 last_login_date:Date
 registration_date:Date
-updated_date:Date</panel_attributes>
+updated_date:Date
+is_developper:Boolean</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -115,7 +116,7 @@ m2=1
       <w>250</w>
       <h>70</h>
     </coordinates>
-    <panel_attributes>lt=-&gt;
+    <panel_attributes>lt=&lt;-
 m1=1
 m2=0..*
 &gt;
@@ -160,8 +161,8 @@ m2=0..*
       <h>70</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
-m1=0..1
-m2=0..*
+m1=0..*
+m2=1
 &gt;
 
 </panel_attributes>
@@ -176,7 +177,7 @@ m2=0..*
       <h>50</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-m1=0..1
+m1=1
 m2=0..*</panel_attributes>
     <additional_attributes>30;30;170;30</additional_attributes>
   </element>
@@ -190,7 +191,7 @@ m2=0..*</panel_attributes>
     </coordinates>
     <panel_attributes>workspace
 --
-model:json
+content:json
 checkout_date:Date
 version:int</panel_attributes>
     <additional_attributes/>
@@ -259,7 +260,7 @@ favorite:int</panel_attributes>
       <h>80</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-m1=0..*
+m1=1
 m2=0..1</panel_attributes>
     <additional_attributes>30;60;500;60;500;30</additional_attributes>
   </element>
@@ -272,7 +273,7 @@ m2=0..1</panel_attributes>
       <h>50</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-m1=0..*
+m1=1
 m2=0..1
 </panel_attributes>
     <additional_attributes>30;30;340;30</additional_attributes>
@@ -423,7 +424,7 @@ m2=1
       <w>210</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>metamodel
+    <panel_attributes>meta_structure
 --
 
 version:int
@@ -475,15 +476,14 @@ m2=1</panel_attributes>
     <coordinates>
       <x>1550</x>
       <y>600</y>
-      <w>170</w>
+      <w>260</w>
       <h>130</h>
     </coordinates>
     <panel_attributes>&lt;&lt;json&gt;&gt;
-package
+metapackage
 --
-package_name:string
 package_uri:string
-name:string
+lang_type:LanguageType(DSML|DSL)
 version:int
 content:json</panel_attributes>
     <additional_attributes/>
@@ -494,15 +494,16 @@ content:json</panel_attributes>
       <x>650</x>
       <y>880</y>
       <w>180</w>
-      <h>110</h>
+      <h>130</h>
     </coordinates>
     <panel_attributes>tool_workspace
 --
-metamodel:json
+structure:json
 notaion:json
 wellcome_message:text
 tutorial:text
-checkout_date:Date</panel_attributes>
+checkout_date:Date
+current_version:int</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -721,7 +722,7 @@ getProject(version:int)</panel_attributes>
       <h>50</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
-m1=0..1
+m1=1
 m2=0..*</panel_attributes>
     <additional_attributes>30;30;170;30</additional_attributes>
   </element>
@@ -734,8 +735,8 @@ m2=0..*</panel_attributes>
       <h>70</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
-m1=0..1
-m2=0..*
+m1=0..*
+m2=1
 &gt;
 
 </panel_attributes>
@@ -778,7 +779,7 @@ price:int</panel_attributes>
       <w>250</w>
       <h>70</h>
     </coordinates>
-    <panel_attributes>lt=-&gt;
+    <panel_attributes>lt=&lt;-
 m1=1
 m2=0..*
 &gt;
@@ -1107,13 +1108,13 @@ m2=1 replaying
     <coordinates>
       <x>1590</x>
       <y>610</y>
-      <w>200</w>
-      <h>160</h>
+      <w>300</w>
+      <h>170</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
 m1=0..1
 m2=0..*</panel_attributes>
-    <additional_attributes>130;30;180;30;180;140;30;140;30;120</additional_attributes>
+    <additional_attributes>220;30;280;30;280;150;30;150;30;120</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
@@ -1132,14 +1133,14 @@ m2=1</panel_attributes>
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>1400</x>
-      <y>700</y>
+      <y>680</y>
       <w>170</w>
-      <h>60</h>
+      <h>80</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 m1=0..*
 m2=1</panel_attributes>
-    <additional_attributes>30;40;150;30</additional_attributes>
+    <additional_attributes>30;60;150;30</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Class</type>
@@ -1186,15 +1187,18 @@ m2=1</panel_attributes>
     <additional_attributes>30;100;140;30</additional_attributes>
   </element>
   <element>
-    <type>com.umlet.element.Note</type>
+    <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>1710</x>
-      <y>810</y>
-      <w>140</w>
-      <h>70</h>
+      <x>940</x>
+      <y>490</y>
+      <w>152</w>
+      <h>80</h>
     </coordinates>
-    <panel_attributes>Note..
-bg=blue</panel_attributes>
-    <additional_attributes/>
+    <panel_attributes>lt=-&gt;
+m1=1 sample_project_id
+m2=1
+
+</panel_attributes>
+    <additional_attributes>30;60;130;30</additional_attributes>
   </element>
 </diagram>

@@ -395,11 +395,11 @@ function MetaJSONEditor(key, name, metaDataController) {
 		autoScroll: true,
 		width: Ext.getCmp('centerpanel').getWidth(),
 		height: Ext.getCmp('centerpanel').getHeight(),
- 		   value: JSON.stringify(this.metaDataController.getPackage(this.key).content),
+ 		   value: JSON.stringify(this.metaDataController.get(this.key).content),
  		   listeners: {
  			   change: {
  				   fn: function(field, newValue, oldValue, opt) {
- 						p = self.metaDataController.getPackage(self.key);
+ 						p = self.metaDataController.get(self.key);
  						p.content = JSON.parse(newValue);
  						p.modified_after_commit = true;
  						self.editor.setTitle(self.title + '*');
@@ -448,7 +448,7 @@ function MetaJSONEditor(key, name, metaDataController) {
 		return new_elem;
 	});
 	*/
-	this.oeditor = this.createGridEditor(this.metaDataController.getPackage(this.key).classes, 'MetaObjects', function(metaobj){
+	this.oeditor = this.createGridEditor(this.metaDataController.get(this.key).classes, 'MetaObjects', function(metaobj){
 		console.log(metaobj.id);
 		self.createJsonWindow(g_metamodel.metaobjects[metaobj.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metaobjects[metaobj.id] = JSON.parse(newValue);
@@ -456,10 +456,10 @@ function MetaJSONEditor(key, name, metaDataController) {
 			   });
 	}, function(){
 		var new_elem = new MetaModel.Class();
-		self.metaDataController.getPackage(self.key).classes[new_elem.id] = new_elem;
+		self.metaDataController.get(self.key).classes[new_elem.id] = new_elem;
 		return new_elem;
 	});
-	this.reditor = this.createGridEditor(this.metaDataController.getPackage(this.key).associations, 'MetaRelationships', function(metaobj){
+	this.reditor = this.createGridEditor(this.metaDataController.get(this.key).associations, 'MetaRelationships', function(metaobj){
 		console.log(metaobj.id);
 		self.createJsonWindow(g_metamodel.metarelations[metaobj.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metarelations[metaobj.id] = JSON.parse(newValue);
@@ -475,7 +475,7 @@ function MetaJSONEditor(key, name, metaDataController) {
 		 */
 	}, function(){
 		var new_elem = new MetaAssociation();
-		self.metaDataController.getPackage(self.key).asociations[new_elem.id] = new_elem;
+		self.metaDataController.get(self.key).asociations[new_elem.id] = new_elem;
 		return new_elem;
 	});
 	/*
@@ -516,7 +516,11 @@ MetaJSONEditor.prototype.Initialize = function() {
 }
 
 MetaJSONEditor.prototype.onActivate = function() {
-	current_editor = this;
+	
+}
+
+MetaJSONEditor.prototype.onDeactivate = function() {
+	
 }
 
 MetaJSONEditor.prototype.createJsonWindow = function(metaelement, fn) {

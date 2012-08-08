@@ -19,14 +19,14 @@ MetaPackageExplorer.prototype.refresh = function() {
 	 */
 	function create_package_tree(packages, parent_uri) {
 		var packages_tree = [];
-		for(var i=0;i < packages.length;i++) {
+		for(var key in packages) {
 			var nestings = null;
-			var current_uri = parent_uri + '.' + packages[i].name;
-			if(packages[i].nestingPackages) {
-				nestings = create_package_tree(packages[i].nestingPackages, current_uri);
-				packages_tree.push({text: packages[i].name, icon: '/static/images/editor/root_leaf.gif', children: nestings, uri:current_uri});
+			var current_uri = parent_uri + '.' + packages[key].name;
+			if(packages[key].nestingPackages) {
+				nestings = create_package_tree(packages[key].nestingPackages, current_uri);
+				packages_tree.push({text: packages[key].name, icon: '/static/images/editor/root_leaf.gif', children: nestings, uri:current_uri});
 			}else{
-				packages_tree.push({text: packages[i].name, leaf: true, icon: '/static/images/editor/root_leaf.gif', uri:current_uri});
+				packages_tree.push({text: packages[key].name, leaf: true, icon: '/static/images/editor/root_leaf.gif', uri:current_uri});
 			}
 		}
 		return packages_tree;
@@ -129,7 +129,7 @@ MetaPackageExplorer.prototype.open = function() {
 	選択されているパッケージがDSLかDSMLかを判断して
 	EditorTabPanelにタブを追加する
 	*/
-	var p = this.metaDataController.getPackage(this.selectedPackage);
+	var p = this.metaDataController.get(this.selectedPackage);
 	var key = p.uri + '.' + p.name;
 	if(p.lang_type == 'dsl') {
 		var dsleditor = new DSLEditor(key, p.name, this.metaDataController);

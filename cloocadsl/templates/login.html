@@ -8,8 +8,8 @@
 		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
 		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
     	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
-    	<script src="/static/js/jquery-1.7.1.min.js"></script>
-	    <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+    	<script src="/static/js/lib/jquery-1.7.1.min.js"></script>
+	    <script src="/static/js/lib/jquery-ui-1.8.18.custom.min.js"></script>
 	    <script>
 	    <!--
 	    $(function(){
@@ -54,25 +54,21 @@
 				<div class="logo">
 					<a href="#">clooca</a>
 				</div>
-				<div id="menu-wrapper">
-					<ul id="menu">
-					<li><a href="#">アイコン１</a></li>
-					<li><a href="#">アイコン１</a></li>
-			    	</ul>
-			    </div>
 				<div class="login">
 				syuhei176@gmail.com
 				</div>
 			</div>
-			<div id="content">
-			<div id="login-form-container">
-			<form id="loginForm" action="/login-to">
-			<div>ユーザ名：<input type="text" name="email" /></div>
-			<div>パスワード：<input type="password" name="password" /></div>
-			<div>ログイン状態を維持する：<input type="checkbox" name="permanent" value="permanent"/></div>
-			<input type="submit" value="ログイン" class="button-type2" style="width:200px;" />
-			</form>
-			</div>
+			<div id="main">
+				<div id="content">
+				<div id="login-form-container">
+					<form id="loginForm" action="/login-to">
+					<div>ユーザ名：<input type="text" name="email" /></div>
+					<div>パスワード：<input type="password" name="password" /></div>
+					<div>ログイン状態を維持する：<input type="checkbox" name="permanent" value="permanent"/></div>
+					<input type="submit" value="ログイン" class="button-type2" style="width:200px;" />
+					</form>
+				</div>
+				</div>
 			</div>
 			<div id="footer">
 			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.

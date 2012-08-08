@@ -8,91 +8,120 @@
 		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
 		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
     	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
-    	<script src="/static/js/jquery-1.7.1.min.js"></script>
-	    <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
+    	<script src="/static/js/lib/jquery-1.7.1.min.js"></script>
+	    <script src="/static/js/lib/jquery-ui-1.8.18.custom.min.js"></script>
 	    
 	    <script>
 	    $(function(){
+			{% if mode == 'toolinfo': %}
+			/*
+			 * ツール情報モード
+			 */
+	    	$('#edit-button').click(function(){
+	    		window.open('/wb/{{tool.tool_key}}');
+	    	});
 	    	$('#market').click(function(){
-	    		$.get("/market", function(data){
-	    			$('#left-menu li a').each(function(){
-	    				$(this).removeClass('left-menu-selected');
-	    			});
-	    			$('#content').html(data);
-	    			$('#market').addClass('left-menu-selected');
-	    			window.location.hash = 'market';
-	    		});
+    			window.location.href = '/#market';
 	    	});
 	    	$('#myproject').click(function(){
-    			window.location.hash = 'projects';
+    			window.location.href = '/#projects';
 	    	});
 	    	$('#mytool').click(function(){
-	    		$.get("/mytool", function(data){
-	    			$('#left-menu li a').each(function(){
-	    				$(this).removeClass('left-menu-selected');
-	    			});
-	    			$('#content').html(data);
-	    			$('#mytool').addClass('left-menu-selected');
-	    		});
 	    	});
 	    	$('#mytool-available').click(function(){
-    			window.location.hash = 'available-tools';
+    			window.location.href = '/#available-tools';
 	    	});
-	    	
 	    	$('#mytool-developping').click(function(){
-    			window.location.hash = 'developping-tools';
+    			window.location.href = '/#developping-tools';
 	    	});
-	    	
-	    	loadbyhash();
-	    	
-	    	$('#finder').click(function(){
-	    		if($('#sesarch-text').val() != '') {
-	    			window.location.href = '/search/' + $('#sesarch-text').val();
-	    		}
-	    	});
-
-	    	$(window).bind('hashchange', function() {
-	    		loadbyhash();
-	    	});
-	    	
-	    	function loadbyhash() {
-    			$('#left-menu li a').each(function(){
-    				$(this).removeClass('left-menu-selected');
-    			});
-	    		var hash = window.location.hash;
-	    		if(hash == '#home') {
-		    		$.get("/home", function(data){
-		    			$('#content').html(data);
-		    		});
-	    		}else if(hash == '#market'){
+			{% else: %}
+			/*
+			 * 通常モード
+			 */
+			homemode();
+			{% endif %}
+			function homemode() {
+		    	$('#market').click(function(){
 		    		$.get("/market", function(data){
+		    			$('.left-menu li a').each(function(){
+		    				$(this).removeClass('left-menu-selected');
+		    			});
 		    			$('#content').html(data);
 		    			$('#market').addClass('left-menu-selected');
+		    			window.location.hash = 'market';
 		    		});
-	    		}else if(hash == '#projects'){
-		    		$.get("/project", function(data){
+		    	});
+		    	$('#myproject').click(function(){
+	    			window.location.hash = 'projects';
+		    	});
+		    	$('#mytool').click(function(){
+		    		$.get("/mytool", function(data){
+		    			$('.left-menu li a').each(function(){
+		    				$(this).removeClass('left-menu-selected');
+		    			});
 		    			$('#content').html(data);
-		    			$('#myproject').addClass('left-menu-selected');
+		    			$('#mytool').addClass('left-menu-selected');
 		    		});
-	    		}else if(hash == '#available-tools'){
-		    		$.get("/mytool/available", function(data){
-		    			$('#content').html(data);
-		    			$('#mytool-available').addClass('left-menu-selected');
-		    		});
-	    		}else if(hash == '#developping-tools'){
-		    		$.get("/mytool/developping", function(data){
-		    			$('#content').html(data);
-		    			$('#mytool-developping').addClass('left-menu-selected');
-		    		});
-	    		}else if(hash == '#create-tool'){
-		    		$.get("/tool/create-view", function(data){
-		    			$('#content').html(data);
-		    			$('#mytool-developping').addClass('left-menu-selected');
-		    		});
-	    		}else if(hash == '#groups'){
-	    			
-	    		}
-	    	}
+		    	});
+		    	$('#mytool-available').click(function(){
+	    			window.location.hash = 'available-tools';
+		    	});
+		    	
+		    	$('#mytool-developping').click(function(){
+	    			window.location.hash = 'developping-tools';
+		    	});
+		    	
+		    	loadbyhash();
+		    	
+		    	$('#finder').click(function(){
+		    		if($('#sesarch-text').val() != '') {
+		    			window.location.href = '/search/' + $('#sesarch-text').val();
+		    		}
+		    	});
+
+		    	$(window).bind('hashchange', function() {
+		    		loadbyhash();
+		    	});
+		    	
+		    	function loadbyhash() {
+	    			$('.left-menu li a').each(function(){
+	    				$(this).removeClass('left-menu-selected');
+	    			});
+		    		var hash = window.location.hash;
+		    		if(hash == '#home') {
+			    		$.get("/home", function(data){
+			    			$('#content').html(data);
+			    		});
+		    		}else if(hash == '#market'){
+			    		$.get("/market", function(data){
+			    			$('#content').html(data);
+			    			$('#market').addClass('left-menu-selected');
+			    		});
+		    		}else if(hash == '#projects'){
+			    		$.get("/project", function(data){
+			    			$('#content').html(data);
+			    			$('#myproject').addClass('left-menu-selected');
+			    		});
+		    		}else if(hash == '#available-tools'){
+			    		$.get("/mytool/available", function(data){
+			    			$('#content').html(data);
+			    			$('#mytool-available').addClass('left-menu-selected');
+			    		});
+		    		}else if(hash == '#developping-tools'){
+			    		$.get("/mytool/developping", function(data){
+			    			$('#content').html(data);
+			    			$('#mytool-developping').addClass('left-menu-selected');
+			    		});
+		    		}else if(hash == '#create-tool'){
+			    		$.get("/tool/create-view", function(data){
+			    			$('#content').html(data);
+			    			$('#mytool-developping').addClass('left-menu-selected');
+			    		});
+		    		}else if(hash == '#groups'){
+		    			
+		    		}
+		    	}
+			}
 	    });
 	    </script>
 	    
@@ -107,12 +136,12 @@
 				</div>
 				<div id="finder-wrapper">
 					<input id="sesarch-text" type="text" />
-					<input id="finder" type="submit" value="検索" class="button-type1" style="width:64px;" />
+					<input id="finder" type="submit" value="検索" class="button-type1" style="width:40px;" />
 			    </div>
 				<div id="menu-wrapper">
 					<ul id="menu">
-					<li><a href="#">アイコン１</a></li>
-					<li><a href="#">アイコン2</a></li>
+					<li><a href="#">新規TODO</a></li>
+					<li><a href="#">リクエスト</a></li>
 			    	</ul>
 			    </div>
 				<div class="login">
@@ -124,33 +153,49 @@
 			</div>
 			<div id="main">
 				<div id="content-left">
-				<div id="left-menu-wrapper">
-					<ul id="left-menu">
+				<div class="left-menu-wrapper">
+					<ul class="left-menu">
 					<li><a id="market">マーケット</a></li>
 			    	</ul>
 					<h4>ダッシュボード</h4>
-					<ul id="left-menu">
+					<ul class="left-menu">
 					<li><a id="myproject">マイプロジェクト</a></li>
 					<li><a id="mytool">マイツール</a>
 						<ul>
 						<li><a id="mytool-available">使用可能なツール</a></li>
+						{% if user.is_developper: %}
 						<li><a id="mytool-developping">開発中のツール</a></li>
+						{% endif %}
 				    	</ul>
 					</li>
 			    	</ul>
 			    </div>
-				<div id="left-menu-wrapper">
+				<div class="left-menu-wrapper">
 					<h4>グループ</h4>
-					<ul id="left-menu">
+					<ul class="left-menu">
 					<li><a href="#">グループ１</a></li>
 					<li><a href="#">グループ２</a></li>
 			    	</ul>
 			    </div>
 				</div>
 			<div id="content">
+						{% if mode == 'toolinfo': %}
+						<div class="project-info-wrapper">
+						<div id="user-info" class="project-info">
+							<div class="project-name">{{tool.name}}</div>
+							version:{{tool.head_version}}
+							作成日:{{tool.created_date}}
+							<input type="hidden" name="tool_key" value="{{tool.tool_key}}" />
+							<input id="edit-button" type="button" value="編集" class="button-type1" style="width:48px;" />
+						</div>
+						</div>
+						{% endif %}
 			</div>
 				<div id="content-right">
-				right
+				<!-- もしdevelopperでなければ -->
+				{% if not user.is_developper: %}
+				開発者登録
+				{% endif %}
 				</div>
 			</div>
 			<div id="footer">

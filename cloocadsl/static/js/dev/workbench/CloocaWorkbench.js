@@ -15,7 +15,7 @@ function CloocaWorkbench(option) {
 	this.metaDatacontroller.load();
 	this.metaPackageExplorer = new MetaPackageExplorer(this.metaDatacontroller, this);
 	
-	this.metaPackageExplorer_dev = new MetaPackageExplorer_dev(this.metaDatacontroller, this);
+	this.easyExplorer_dev = new EasyExplorer(this.metaDatacontroller, this);
 	
 	this.templateController = new TemplateController();
 	this.templateExplorer = new TemplateExplorer(this.templateController, this);
@@ -85,8 +85,12 @@ CloocaWorkbench.prototype.init_layout = function() {
     		    	   title:'Notation Explorer',
     		    	   html:' '
 		    	   },{
-    		    	   id:'package-explorer-dev',
-    		    	   title:'Package Explorer(開発版)',
+    		    	   id:'tool-explorer',
+    		    	   title:'Tool Explorer',
+    		    	   html:' '
+		    	   },{
+    		    	   id:'easy-explorer',
+    		    	   title:'clooca Workbench',
     		    	   html:' '
 		    	   }]
 		       }),

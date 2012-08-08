@@ -5,7 +5,7 @@ function DSLEditor(key, name, metaDataController) {
 		id: 'dsleditor-'+this.key,
 		title: name,
 		autoScroll: true,
-		html : '<textarea id="dsleditor-textarea-'+this.key+'" style="font-size:32pt;">' + this.metaDataController.getPackage(this.key).content + '</textarea>',
+		html : '<textarea id="dsleditor-textarea-'+this.key+'" style="font-size:32pt;">' + this.metaDataController.get(this.key).content + '</textarea>',
 		closable: true
 	});
 }
@@ -34,5 +34,9 @@ DSLEditor.prototype.Initialize = function() {
 }
 
 DSLEditor.prototype.onActivate = function() {
+	
+}
+
+DSLEditor.prototype.onDeactivate = function() {
 	
 }
