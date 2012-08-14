@@ -378,6 +378,15 @@ def wb_update():
         return clooca_resp.dumps()
     return 'null'
 
+@app.route('/robots.txt')
+def robots():
+    return '''
+    User-agent: *
+    Disallow: /
+    '''
+
+
+
 with app.test_request_context():
     print url_for('index')
 

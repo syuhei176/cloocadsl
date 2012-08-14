@@ -2,11 +2,13 @@
     5  sudo apt-get install mysql-server
     6  mysql -u root -p
     8  sudo apt-get install libmysqlclient15-dev
-    9  tar zxvf MySQL-python-1.2.3.tar.gz
+    apt-get python2.7-dev
+    9  tar zxvf MySQL-python-1.2.3.tar.gz  ->　easy_install MySQL-python
    10  cd MySQL-python-1.2.3/
    11  python setup.py build
    12  python
    13  cd ../
+    apt-get install libmysqlclient16-dev
    16  sudo sh setuptools-0.6c11-py2.6.egg 
    17  cd MySQL-python-1.2.3/
    18  python setup.py build

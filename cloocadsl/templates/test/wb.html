@@ -1,0 +1,169 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
+<html>
+  <head>
+	<meta name="gwt:property" content="locale=ja_JP">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+    <link href="/static/resources/css/ext-all-access.css" rel="stylesheet">
+    <script src="/static/js/lib/jquery-1.7.1.min.js"></script>
+    <!-- <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script> -->
+    <script src="/static/js/lib/jcanvas.min.js"></script>
+    <script src="/static/js/lib/ext-all.js"></script>
+    <script src="/static/js/lib/json2.js"></script>
+    <script src="/static/js/dev/workbench/CloocaWorkbench.js"></script>
+    <script src="/static/js/dev/workbench/MenuPanel.js"></script>
+    <script src="/static/js/dev/workbench/SouthTabPanel.js"></script>
+    <script src="/static/js/dev/workbench/dsl_editor.js"></script>
+    <script src="/static/js/dev/workbench/MetaPackageExplorer.js"></script>
+    <script src="/static/js/dev/workbench/TemplateExplorer.js"></script>
+    <script src="/static/js/dev/workbench/NotationExplorer.js"></script>
+    <script src="/static/js/dev/workbench/NotationController.js"></script>
+    <script src="/static/js/dev/workbench/MetaModelEditor.js"></script>
+    <script src="/static/js/dev/workbench/TemplateEditor.js"></script>
+    <script src="/static/js/dev/workbench/TemplateController.js"></script>
+    <script src="/static/js/dev/workbench/ToolExplorer.js"></script>
+    <script src="/static/js/dev/workbench/ToolController.js"></script>
+    <script src="/static/js/dev/workbench/EasyExplorer.js"></script>
+    <script src="/static/js/dev/workbench/vcs_interface.js"></script>
+    <script src="/static/js/dev/workbench/PreviewManager.js"></script>
+    <script src="/static/js/dev/workbench/GraphiticalMetaModelEditor.js"></script>
+    <script src="/static/js/dev/workbench/SampleGenerator.js"></script>
+    <script src="/static/js/dev/core/IdGenerator.js"></script>
+    <script src="/static/js/dev/core/metastructure.js"></script>
+    <script src="/static/js/dev/core/EditorTabPanel.js"></script>
+    <script src="/static/js/dev/core/MetaDataController.js"></script>
+    <script src="/static/js/dev/core/DiagramEditor.js"></script>
+    <script src="/static/js/dev/core/math2d.js"></script>
+    <script src="/static/js/dev/core/ModelController.js"></script>
+    <script src="/static/js/dev/core/Model.js"></script>
+    <script src="/static/js/lang/ja_JP.js"></script>
+    <script src="/static/js/editor.clooca.js"></script>
+    <div id="script-div"></div>
+    
+    <!-- for Code Mirror-->
+    <script src="/static/js/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="/static/css/codemirror.css">
+    <script src="/static/js/dev/workbench/dsl.js"></script>
+    <script src="/static/js/dev/workbench/mako.js"></script>
+    
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>clooca workbench</title>
+    
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    
+    <script>
+    <!--
+    $(function(){
+    	/*
+    	initall();
+    	g_userinfo = {{userinfo|safe}};
+    	*/
+    	g_toolinfo = {toolkey: '{{toolinfo.tool_key}}', structure: {{toolinfo.metamodel|safe}}};
+    	g_wb = new CloocaWorkbench({});
+    	/*
+    	var option = {modelexplorer_hidden:true, diagram_open:false, tab_closable:true};
+    	init_clooca({{project|safe}}, false, option);
+    	*/
+    });
+    
+    function init_layout() {
+    	new Ext.Viewport({
+    		layout:'border',
+    		items:[
+    		       new Ext.Panel({
+    		    	   id: 'centerpanel',
+    		    	   html:'',
+    		    	   width:'100px',
+    		    	   region:'center',
+    		    	   layout: 'fit',
+    		    	   items : []
+    		       }),
+    		       new Ext.Panel({
+    		    	   id:'menupanel',
+    		    	   margins:'0 3 0 3',
+    		    	   region:'north',
+    		    	   items: []
+    		       }),
+    		       new Ext.Panel({
+    		    	   id:'status-panel',
+    		    	   html:'',
+    		    	   margins:'3 3 3 3',
+    		    	   region:'south',
+    		    	   collapsible:true,
+    		    	   split:true,
+    		    	   items : []
+    		    	   }),
+    		       new Ext.Panel({
+    		     	   id:'east-panel',
+    		    	   html:'toolbuttons'
+    		       }),
+    		       new Ext.Panel({
+    		    	   id:'west-panel',
+    		    	   html:' ',
+    		    	   margins:'0 0 0 3',
+    		    	   region:'west',
+    		    	   width: 220,
+    		    	   height: 300,
+    		    	   collapsible:true,
+    		    	   split:true,
+    		    	   layout:'accordion',
+    		    	   defaults: {
+    		    	        bodyStyle: 'padding:15px'
+    		    	   },
+    		    	   layoutConfig: {
+    		    	        titleCollapse: false,
+    		    	        animate: true,
+    		    	        activeOnTop: true
+    		    	   },
+    		    	   items: [{
+        		    	   id:'package-explorer',
+        		    	   title:'Package Explorer',
+        		    	   html:' '
+    		    	   },{
+        		    	   id:'template-explorer',
+        		    	   title:'Template Explorer',
+        		    	   html:' '
+    		    	   }]
+    		       }),
+    		       ]
+    	});
+    	}
+    -->
+    </script>
+  </head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body onContextmenu="return false">
+      <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+  
+  </body>
+</html>

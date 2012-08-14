@@ -1,0 +1,136 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
+<html>
+  <head>
+	<meta name="gwt:property" content="locale=ja_JP">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+    <link href="/static/resources/css/ext-all-access.css" rel="stylesheet">
+    <script src="/static/js/lib/jquery-1.7.1.min.js"></script>
+    <!-- <script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script> -->
+    <script src="/static/js/lib/jcanvas.min.js"></script>
+    <script src="/static/js/lib/ext-all.js"></script>
+    <script src="/static/js/lib/json2.js"></script>
+    <script src="/static/js/editor.clooca.js"></script>
+    <script src="/static/js/dev/editor/CloocaEditor.js"></script>
+    <script src="/static/js/dev/editor/MenuPanel.js"></script>
+    <script src="/static/js/dev/core/metastructure.js"></script>
+    <script src="/static/js/dev/core/EditorTabPanel.js"></script>
+    <script src="/static/js/dev/core/MetaDataController.js"></script>
+    <div id="script-div"></div>
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>clooca editor</title>
+    
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    
+    <script>
+    <!--
+    $(function(){
+    	/*
+    	initall();
+    	g_userinfo = {{userinfo|safe}};
+    	init_layout();
+    	var option = {modelexplorer_hidden:true, diagram_open:false, tab_closable:true};
+    	init_clooca({{project|safe}}, false, option);
+    	*/
+    	cloocaEditor = new CloocaEditor({});
+    });
+    
+    function init_layout() {
+    	new Ext.Viewport({
+    		layout:'border',
+    		items:[
+    		       new Ext.Panel({
+    		    	   id: 'centerpanel',
+    		    	   html:'',
+    		    	   width:'100px',
+    		    	   region:'center',
+    		    	   layout: 'fit',
+    		    	   items : []
+    		       }),
+    		       new Ext.Panel({
+    		    	   id:'menupanel',
+    		    	   margins:'0 3 0 3',
+    		    	   region:'north',
+    		    	   items: []
+    		       }),
+    		       new Ext.Panel({
+    		    	   id:'propertypanel',
+    		    	   title: 'property',
+    		    	   html:'',
+    		    	   margins:'3 3 3 3',
+    		    	   region:'south',
+    		    	   collapsible:true,
+    		    	   split:true,
+    		    	   items : []
+    		    	   }),
+    		       new Ext.Panel({
+    		     	   id:'toolpanel',
+    		    	   title:'Tool',
+    		    	   html:'toolbuttons',
+    		    	   margins:'0 3 0 3',
+    		    	   region:'east',
+    		    	   collapsible:true,
+    		    	   split:true,
+	    		       layout: {
+	    		    	    type: 'vbox',
+	    		    	    align : 'stretch',
+	    		    	    pack  : 'start'
+	    		    	},
+	    		    	items: [
+	    		    	    {html:'panel 1', flex:1},
+	    		    	    {html:'panel 3', flex:2}
+	    		    	]
+    		       }),
+    		       new Ext.Panel({
+    		    	   id:'modelexplorer',
+    		    	   title:'Model Explorer',
+    		    	   html:' ',
+    		    	   margins:'0 0 0 3',
+    		    	   region:'west',
+    		    	   collapsible:true,
+    		    	   split:true,
+    		    	   items: []
+    		       }),
+    		       ]
+    	});
+    	}
+    -->
+    </script>
+  </head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body onContextmenu="return false">
+      <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+  
+  </body>
+</html>

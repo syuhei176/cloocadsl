@@ -106,10 +106,10 @@ m2=1 package_uri</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>570</x>
+      <x>540</x>
       <y>700</y>
-      <w>120</w>
-      <h>70</h>
+      <w>200</w>
+      <h>90</h>
     </coordinates>
     <panel_attributes>class
 --
@@ -119,8 +119,8 @@ name:string</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>800</x>
-      <y>900</y>
+      <x>820</x>
+      <y>890</y>
       <w>170</w>
       <h>140</h>
     </coordinates>
@@ -136,9 +136,9 @@ default_value:string</panel_attributes>
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>550</x>
-      <y>900</y>
-      <w>170</w>
+      <x>510</x>
+      <y>910</y>
+      <w>230</w>
       <h>120</h>
     </coordinates>
     <panel_attributes>association
@@ -156,26 +156,26 @@ upper:int
     <coordinates>
       <x>310</x>
       <y>620</y>
-      <w>280</w>
+      <w>250</w>
       <h>130</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;
 m1=0..* classes
 m2=0..1</panel_attributes>
-    <additional_attributes>260;110;30;30</additional_attributes>
+    <additional_attributes>230;110;30;30</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>660</x>
-      <y>720</y>
-      <w>242</w>
-      <h>200</h>
+      <x>710</x>
+      <y>730</y>
+      <w>214</w>
+      <h>180</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
 m1=0..1
 m2=0..* properties</panel_attributes>
-    <additional_attributes>30;30;210;180</additional_attributes>
+    <additional_attributes>30;30;180;160</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Class</type>
@@ -218,7 +218,7 @@ m2=1</panel_attributes>
     <type>com.umlet.element.Class</type>
     <coordinates>
       <x>870</x>
-      <y>640</y>
+      <y>710</y>
       <w>120</w>
       <h>40</h>
     </coordinates>
@@ -228,13 +228,13 @@ m2=1</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>650</x>
-      <y>630</y>
-      <w>240</w>
-      <h>90</h>
+      <x>710</x>
+      <y>700</y>
+      <w>180</w>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>220;30;30;70</additional_attributes>
+    <additional_attributes>160;30;30;30</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Relation</type>
@@ -255,12 +255,12 @@ m2=nesting 0..1</panel_attributes>
       <x>310</x>
       <y>530</y>
       <w>630</w>
-      <h>130</h>
+      <h>200</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=0..*
 m2=0..1</panel_attributes>
-    <additional_attributes>610;110;610;30;30;30</additional_attributes>
+    <additional_attributes>610;180;610;30;30;30</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Class</type>
@@ -429,15 +429,15 @@ m2=1</panel_attributes>
   <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
-      <x>560</x>
-      <y>740</y>
+      <x>620</x>
+      <y>760</y>
       <w>134</w>
-      <h>180</h>
+      <h>170</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;
 m1=0..* associations
 m2=0..1</panel_attributes>
-    <additional_attributes>70;160;70;30</additional_attributes>
+    <additional_attributes>70;150;70;30</additional_attributes>
   </element>
   <element>
     <type>com.umlet.element.Package</type>
@@ -462,5 +462,18 @@ m2=0..1</panel_attributes>
 m1=0..*
 m2=0..1</panel_attributes>
     <additional_attributes>510;30;30;450</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>530</x>
+      <y>760</y>
+      <w>64</w>
+      <h>170</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=1 type</panel_attributes>
+    <additional_attributes>40;150;40;30</additional_attributes>
   </element>
 </diagram>
