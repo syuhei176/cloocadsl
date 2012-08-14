@@ -65,8 +65,7 @@ EditorTabPanel.prototype.add = function(editor, key) {
 		
 	});
 	tab.on('deactivate', function(){
-		editor.onDeactivate();
-		
+		if(editor.onDeactivate) editor.onDeactivate();
 	});
 	tab.on('close', function(){
 //		self.current_editor = null;

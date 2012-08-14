@@ -8,7 +8,9 @@ PreviewManager.prototype.init = function() {
 	 * モデルコントローラを用意
 	 * ダイアグラムを指定
 	 */
-	var modelController = new ModelController();
+	var controllers = SampleGenerator.createSTMSample();
+	var modelController = new ModelController(controllers.metaModelController);
+	/*
 	var metaModelController = new MetaDataController();
 	metaModelController.sampleSTM();
 	var notationController = new NotationController();
@@ -23,11 +25,11 @@ PreviewManager.prototype.init = function() {
 	var toolController = new ToolController();
 	toolController.add('State', new Tool('State', g_toolinfo.toolkey + '.stm.State', 'states'));
 	toolController.add('Transition', new Tool('Transition', g_toolinfo.toolkey + '.stm.Transition'));
-	
-	var EModel = metaModelController.get(g_toolinfo.toolkey + '.stm.StateDiagram');
+	*/
+	var EModel = controllers.metaModelController.get('sample.stm.StateDiagram');
 	modelController.addPackage('root', 'test');
-	var InstanceOfStateDiagram = modelController.addClass('root.test', EModel, notationController.get(g_toolinfo.toolkey + '.stm.StateDiagram'));
-	var deditor = new DiagramEditor('preview','preview', InstanceOfStateDiagram, modelController, metaModelController, notationController, toolController, this.wb);
+	var InstanceOfStateDiagram = modelController.newClass('root.test', EModel, controllers.notationController.get('sample.stm.StateDiagram'));
+	var deditor = new DiagramEditor('preview','preview', InstanceOfStateDiagram, modelController, controllers.metaModelController, controllers.notationController, controllers.toolController, this.wb);
 	this.wb.editorTabPanel.add(deditor, 'preview');
 }
 

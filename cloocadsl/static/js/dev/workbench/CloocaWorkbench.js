@@ -9,7 +9,7 @@ function CloocaWorkbench(option) {
 	this.init_layout();
 	this.menupanel = new MenuPanel(this);
 	this.menupanel.setAvailabledRedo(false);
-	this.statuspanel = new StatusPanel(this);
+	this.statuspanel = new SouthTabPanel(this);
 	
 	this.metaDatacontroller = new MetaDataController();
 	this.metaDatacontroller.load();
@@ -45,9 +45,10 @@ CloocaWorkbench.prototype.init_layout = function() {
 		    	   items: []
 		       }),
 		       new Ext.Panel({
-		    	   id:'status-panel',
+		    	   id:'south-panel',
 		    	   margins:'0 3 0 3',
 		    	   region:'south',
+		    	   split:true,
 		    	   items: []
 		    	   }),
 		       new Ext.Panel({
@@ -59,7 +60,7 @@ CloocaWorkbench.prototype.init_layout = function() {
 		    	   html:' ',
 		    	   margins:'0 0 0 3',
 		    	   region:'west',
-		    	   width: 220,
+		    	   width: 240,
 		    	   height: 300,
 		    	   collapsible:true,
 		    	   split:true,

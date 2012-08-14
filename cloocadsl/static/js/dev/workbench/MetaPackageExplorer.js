@@ -1,7 +1,8 @@
 function MetaPackageExplorer(metaDataController, wb) {
 	this.metaDataController = metaDataController;
 	this.wb = wb;
-	this.selectedPackage = null;
+	this.selected = null;
+	this.selected_item = null;
 	this.refresh()
 }
 
@@ -20,14 +21,21 @@ MetaPackageExplorer.prototype.refresh = function() {
 	function create_package_tree(packages, parent_uri) {
 		var packages_tree = [];
 		for(var key in packages) {
-			var nestings = null;
-			var current_uri = parent_uri + '.' + packages[key].name;
-			if(packages[key].nestingPackages) {
-				nestings = create_package_tree(packages[key].nestingPackages, current_uri);
-				packages_tree.push({text: packages[key].name, icon: '/static/images/editor/root_leaf.gif', children: nestings, uri:current_uri});
-			}else{
-				packages_tree.push({text: packages[key].name, leaf: true, icon: '/static/images/editor/root_leaf.gif', uri:current_uri});
+			packages_tree.push(create_package_tree_part(packages[key]));
+		}
+		
+		function create_package_tree_part(pkg) {
+			var packages_tree = [];
+			var package_uri = pkg.parent_uri + '.' + pkg.name;
+			var current_uri = package_uri
+			for(var key in pkg.nestingPackages) {
+				packages_tree.push(create_package_tree_part(pkg.nestingPackages[key]));
 			}
+			for(var key in pkg.content.classes) {
+				current_uri += '.' + pkg.content.classes[key].name;
+				packages_tree.push({text: pkg.content.classes[key].name, leaf: true, icon: '/static/images/editor/Class.gif', uri:current_uri});
+			}
+			return {text: pkg.name, icon: '/static/images/editor/root_leaf.gif', children: packages_tree, uri:package_uri};
 		}
 		return packages_tree;
 	}
@@ -43,11 +51,17 @@ MetaPackageExplorer.prototype.refresh = function() {
 	    }
 	});
 	this.panel = Ext.create('Ext.tree.Panel', {
-/*	    title: 'Package Explorer',
-	    width: 220,*/
+		width: 320,
 	    height: 240,
 	    store: store,
-	    rootVisible: false
+	    rootVisible: false,
+        viewConfig: {                         
+            plugins: { 
+                ptype: 'treeviewdragdrop', 
+                ddGroup: 'fff',
+                appendOnly: true
+            }
+          }
 	});
 	this.panel.on('itemdblclick',function(view, record, item, index, event) {
 		if(record.data.leaf) {
@@ -64,9 +78,9 @@ MetaPackageExplorer.prototype.refresh = function() {
 	Ext.getCmp('package-explorer').add(this.panel);
 }
 
-MetaPackageExplorer.prototype.create = function() {
+MetaPackageExplorer.prototype.create_package = function() {
 	var self = this;
-	var defaultParentPackage = this.selectedPackage;
+	var defaultParentPackage = this.selected;
 	/*
 	 * パッケージの新規作成ダイアログを表示する
 	 */
@@ -124,18 +138,61 @@ MetaPackageExplorer.prototype.create = function() {
 	win.show();
 }
 
+MetaPackageExplorer.prototype.create_class = function() {
+	var self = this;
+	var defaultParentPackage = this.selected;
+	
+	/*
+	 * パッケージの新規作成ダイアログを表示する
+	 */
+	var win = Ext.create('Ext.window.Window', {
+	    title: 'パッケージ作成',
+	    height: 200,
+	    width: 400,
+	    layout: 'fit',
+	    items: {
+	        xtype: 'panel',
+	        layout: 'vbox',
+	        items: [{
+	        	name: 'parent',
+	        	xtype: 'textfield',
+	        	fieldLabel: '親パッケージ',
+	        	value: defaultParentPackage
+	        },{
+	        	name: 'name',
+	        	xtype: 'textfield',
+	        	fieldLabel: '名前',
+	        	value: ''
+	        },{
+	        	xtype: 'button',
+	        	text: 'OK',
+	        	handler: function(okbutton) {
+	        		var parent = okbutton.up().down('textfield[name="parent"]').value;
+	        		var name = okbutton.up().down('textfield[name="name"]').value;
+	        		self.metaDataController.addClass(parent, name);
+	        		self.refresh();
+	        		win.hide();
+	        	}
+	        }]
+	    }
+	});
+	win.show();
+}
+
+
 MetaPackageExplorer.prototype.open = function() {
 	/*
 	選択されているパッケージがDSLかDSMLかを判断して
 	EditorTabPanelにタブを追加する
 	*/
-	var p = this.metaDataController.get(this.selectedPackage);
-	var key = p.uri + '.' + p.name;
+	var p = this.selected_item;
+	var key = p.parent_uri + '.' + p.name;
 	if(p.lang_type == 'dsl') {
 		var dsleditor = new DSLEditor(key, p.name, this.metaDataController);
 		this.wb.editorTabPanel.add(dsleditor, key);
 	}else{
-		var dsleditor = new MetaJSONEditor(key, p.name, this.metaDataController);
+		key = key.split(".").join("-"); 
+		var dsleditor = new GraphiticalMetaModelEditor(key, p.name, p, this.metaDataController, this.wb);
 		this.wb.editorTabPanel.add(dsleditor, key);
 	}
 }
@@ -153,10 +210,10 @@ MetaPackageExplorer.prototype.del = function() {
 	*/
     Ext.Msg.confirm( 
             'パッケージの削除', 
-            self.selectedPackage+'を削除しますよ？', 
+            self.selected+'を削除しますよ？', 
             function(btn){ 
                 if(btn == 'yes'){ 
-                    self.metaDataController.delPackage(self.selectedPackage);
+                    self.metaDataController.delPackage(self.selected);
                 	self.refresh();
                 } 
                 if(btn == 'no'){ 
@@ -173,39 +230,63 @@ MetaPackageExplorer.prototype.init_contextmenu = function() {
 	/*
 	 * 右クリックメニューの設定
 	 */
-	var mnuContext = new Ext.menu.Menu({
+	var mnuContext_package = new Ext.menu.Menu({
 	    items: [{
 	        id: 'create',
-	        text: '新規作成'
+	        text: '新規作成',
+	        menu: [{
+		        id: 'create-package',
+		        text: 'パッケージ作成',
+		        handler: function(){self.create_package();}
+	        },{
+		        id: 'create-class',
+		        text: 'クラス作成',
+		        handler: function(){self.create_class();}
+	        }]
 	    },{
 	        id: 'delete',
-	        text: '削除'
+	        text: '削除',
+	        handler: function(){self.del();}
+	    },{
+	        id: 'refresh',
+	        text: '更新',
+	        handler: function(){self.refresh();}
 	    }],
-	    listeners: {
-        click: function(menu, item) {
-            switch (item.id) {
-                case 'create':
-                	self.create();
-                    break;
-                case 'delete':
-                	self.del();
-                    break;
-            }
-        }
-	    }
+	    listeners: {click: function(menu, item) {}}
+	});
+	var mnuContext_class = new Ext.menu.Menu({
+	    items: [{
+	        id: 'create',
+	        text: '新規作成',
+	        menu: [{
+		        id: 'create-asso',
+		        text: '関連作成',
+		        handler: function(){self.create_package();}
+	        },{
+		        id: 'create-prop',
+		        text: 'プロパティ作成',
+		        handler: function(){self.create_class();}
+	        }]
+	    },{
+	        id: 'delete',
+	        text: '削除',
+	        handler: function(){self.del();}
+	    }],
+	    listeners: {click: function(menu, item) {}}
 	});
 	this.panel.on('itemmousedown',function(view, record, item, index, event) {
-		self.selectedPackage = record.data.uri;
+		self.selected = record.data.uri;
+		self.selected_item = self.metaDataController.get(self.selected);
 		if(event.button == 2) {
-			if(record.data.root) {
-				mnuContext.showAt(event.getX(), event.getY());
-			}else if(record.data.leaf != true){
-				mnuContext.showAt(event.getX(), event.getY());
+			if(self.selected_item.meta == 'C') {
+				mnuContext_class.showAt(event.getX(), event.getY());
+			}else if(self.selected_item.meta == 'A') {
+				//nothing to do
+			}else if(self.selected_item.meta == 'P') {
+				//nothing to do
 			}else{
-				mnuContext.showAt(event.getX(), event.getY());
+				mnuContext_package.showAt(event.getX(), event.getY());
 			}
-			selected_item = record.data;
-			console.log(selected_item.id+','+selected_item.text+','+index);
 		}
     });
 }

@@ -122,6 +122,7 @@ DiagramEditor.prototype.onActivate = function() {
 
 DiagramEditor.prototype.onDeactivate = function() {
 	this.tool_palet.hide();
+	this.tool_palet = null;
 }
 
 /**
@@ -145,7 +146,9 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 					this.updateObject(this.selected[i],Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
 				}
 			}else{
-				this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+				this.selected.n_props.x += this.drag_move.x-this.drag_move_prev.x;
+				this.selected.n_props.y += this.drag_move.y-this.drag_move_prev.y;
+//				this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
 			}
 			this.draw()
 		}
@@ -176,8 +179,9 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele, notation) {
 	//this.diagramがヒント
 	//ダイアグラムをヒントにしてノードの追加
-	var klass = this.modelController.addClass('root.test', meta_ele, notation);
+	var klass = this.modelController.newClass('root.test', meta_ele, notation);
 	//オブジェクトの参照元の解決（＊上の関数内でやる可能性もあり）
+	/*
 	candidacy = [this.diagram];
 	var contFeature_array = notation.containmentFeature.split('.');
 	var property_name = contFeature_array.pop();
@@ -190,9 +194,12 @@ DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele, notation) {
 		}
 	}
 	//・referの解決
+	*/
+	this.modelController.makeRelationship(klass, this.diagram, notation.containmentFeature);
+	this.modelController.makeRelationship(this.diagram, klass, notation.containmentFeature);
 	//位置の設定
-	klass.properties.x = x;
-	klass.properties.y = y;
+	klass.n_props.x = x;
+	klass.n_props.y = y;
 	console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
 }
 
@@ -200,12 +207,17 @@ DiagramEditor.prototype.addConnection = function(src, dest, meta_ele, notation) 
 	console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」コネクションを追加');
 	//srcとdestがヒント
 	//srcとdestをヒントにしてコネクションの追加
+	this.modelController.makeRelationship(edge, this.diagram);
+	this.modelController.makeRelationship(edge, src);
+	this.modelController.makeRelationship(edge, dest);
+	/*
 	var klass = this.modelController.newClass('root.test', meta_ele, notation);
 	//オブジェクトの参照元の解決（＊上の関数内でやる可能性もあり）
 	//・containmentの解決
 	this.klass.properties[src].push(klass.id);
 	notation.containmentFeature
 	//・referの解決
+	
 	notation.sourceFeature
 	notation.targetFeature
 	this.klass.properties['src'].push(klass.id);
@@ -213,11 +225,13 @@ DiagramEditor.prototype.addConnection = function(src, dest, meta_ele, notation) 
 	//位置の設定
 	klass.properties.x = x;
 	klass.properties.y = y;
+	*/
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
 	if(this.tool == null) {
-		
+		this.dragMode = DiagramEditor.DRAG_MOVE;
+		this.selected = this.findNode(x, y);
 	}else{
 		var meta_ele = this.metaDataController.get(this.tool.uri);
 		var notation = this.notationController.get(this.tool.uri);
@@ -297,29 +311,31 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	this.dragMode = DiagramEditor.DRAG_NONE;
 }
 
-DiagramEditor.prototype.click = function() {
-	
+DiagramEditor.prototype.findNode = function(x, y) {
+	var nodes = this.modelController.getRelatedClasses(this.diagram, {});
+	for(var i=0;i < nodes.length;i++) {
+		if(nodes[i].n_props.x < x && x < nodes[i].n_props.x + 32) {
+			if(nodes[i].n_props.y < y && y < nodes[i].n_props.y + 32) {
+				return nodes[i];
+			}
+		}
+	}
 }
-
 
 DiagramEditor.prototype.draw = function() {
 //	this.canvas = $('#canvas-'+this.key);
 	this.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: this.width,height: this.height, fromCenter: false});
-	for(var key in this.diagram.properties) {
-		var property = this.diagram.properties[key];
-		for(var j=0;j < property.length;j++) {
-			var node_id = property[j];
-			var node = this.modelController.get('root.test.' + node_id);
-			var notation = this.notationController.get(node.meta_uri);
-			if(notation != undefined) {
-				if(notation.shape == 'rect') {
-					this.canvas.drawRect({
-						strokeStyle: "#000",
-						x: node.properties.x, y: node.properties.y,
-						width: 32, height: 32,
-						fromCenter: false}
-					);
-				}
+	var nodes = this.modelController.getRelatedClasses(this.diagram, {});
+	for(var i=0;i < nodes.length;i++) {
+		var notation = this.notationController.get(nodes[i].meta_uri);
+		if(notation != undefined && notation.gtype == 'node') {
+			if(notation.shape == 'rect') {
+				this.canvas.drawRect({
+					strokeStyle: "#000",
+					x: nodes[i].n_props.x, y: nodes[i].n_props.y,
+					width: 32, height: 32,
+					fromCenter: false}
+				);
 			}
 		}
 	}
@@ -329,11 +345,22 @@ DiagramEditor.prototype.createButton = function() {
 	var self = this;
 	if(this.tool_palet == undefined || this.tool_palet == null) {
 		items = [];
+		items.push({
+	    	xtype : 'button',
+	    	text : 'SELECT',
+		    enableToggle: true,
+		    toggleGroup: 'tools',
+	    	handler :function(btn){
+	    		self.tool = null;
+	    	}
+		});
 		for(var key in this.toolController.getlist()) {
 			var tool = this.toolController.getlist()[key];
 			var item = {
 			    	xtype : 'button',
 			    	text : tool.name,
+				    enableToggle: true,
+				    toggleGroup: 'tools',
 			    	key : key,
 			    	handler :function(btn){
 			    		console.log('test '+btn.key);

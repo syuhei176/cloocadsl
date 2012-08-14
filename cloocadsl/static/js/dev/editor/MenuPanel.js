@@ -1,26 +1,26 @@
 function MenuPanel(wb) {
 	var self = this;
 	this.wb = wb;
-	var constant_string = new Lang();
 	this.panel = {
         tbar: [{
         	id: 'tool-name',
         	html: 'サンプルツール'
         },'-',{
-            text: constant_string.file,
+            text: 'ファイル',
             iconCls: 'add16',
             menu: [
                    {
-                	   text: constant_string.create,
+                	   text: '新規作成',
                 	   iconCls: 'add16',
-                	   menu: [{
+                	   menu: [
+                	       {
 	                	       id: 'create-package',
-	                    	   text: constant_string.create_package,
+	                    	   text: 'パッケージ',
 	                    	   iconCls: 'add16',
 	                    	   handler : onItemClick
                     	   },{
 	                	       id: 'create-template',
-                        	   text: constant_string.create_template,
+                        	   text: 'テンプレート',
                         	   iconCls: 'add16',
                         	   handler : onItemClick
                     	   }]
@@ -40,11 +40,6 @@ function MenuPanel(wb) {
                 	   text: 'バージョン管理',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
-                   },{
-                	   id: 'vcs-update',
-                	   text: '更新',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
                    }
                    ],
         	handler : onItemClick
@@ -54,14 +49,47 @@ function MenuPanel(wb) {
             menu: [
                    {
                 	   id: 'preview',
-                	   text: 'プレビュー',
+                	   text: 'プレビュー（未実装）',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   id: 'check-syntax',
-                	   text: 'シンタックス',
+                	   id: 'metajson',
+                	   text: 'メタモデル',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
+                   },{
+                	   id: 'welcome_editor',
+                	   text: 'ウェルカムメッセージ',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   },{
+                	   id: 'config',
+                	   text: 'コンフィグ',
+                	   iconCls: 'add16',
+                	   handler : onItemClick
+                   }
+                   ]
+        },{
+            text: 'テンプレート',
+            iconCls: 'add16',
+            menu: [
+                   {
+                	   id: 'new',
+                	   text: '新規作成',
+                	   iconCls: 'add16',
+                	   handler : onTempItemClick
+                   },
+                   {
+                	   id: 'import',
+                	   text: 'インポート',
+                	   iconCls: 'add16',
+                	   handler : onTempItemClick
+                   },
+                   {
+                	   id: 'export',
+                	   text: 'エクスポート',
+                	   iconCls: 'add16',
+                	   handler : onTempItemClick
                    }
                    ]
         },'-',{
@@ -98,14 +126,6 @@ function MenuPanel(wb) {
 			self.wb.templateExplorer.create();
 		}else if(item.id == 'quick-save') {
 			self.wb.editorTabPanel.current_editor.save();
-		}else if(item.id == 'quick-commit') {
-			self.wb.vcs.commit();
-		}else if(item.id == 'vcs-update') {
-			self.wb.vcs.update();
-		}else if(item.id == 'quick-preview') {
-			var pm = new PreviewManager(self.wb);
-			pm.init();
-			pm.run();
 		}
 	}
 	/*

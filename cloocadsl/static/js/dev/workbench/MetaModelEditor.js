@@ -408,35 +408,6 @@ function MetaJSONEditor(key, name, metaDataController) {
  		   }
     });
 	/*
-	this.jsoneditor = Ext.create('Ext.panel.Panel',
-		{
-		  	   title: 'json',
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [
-		  	           {
-		  	        	   xtype: 'textarea',
-		  	        	   autoScroll: true,
-	  	        		   width: Ext.getCmp('centerpanel').getWidth(),
-	  	        		   height: Ext.getCmp('centerpanel').getHeight(),
-		  	        		   value: JSON.stringify(g_metamodel),
-		  	        		   listeners: {
-		  	        			   change: {
-		  	        				   fn: function(field, newValue, oldValue, opt) {
-		  	        						g_metamodel = JSON.parse(newValue);
-		  	        						editor.setTitle('JSONEditor*')
-		  	        						console.log('change');
-		  	        				   }
-		  	        			   }
-		  	        		   }
-		  	           }
-		  	           ],
-		  	 		closable: false
-	});
-	*/
-	/*
 	this.deditor = this.createGridEditor(g_metamodel.metadiagrams, 'MetaDiagram', function(d){
 		self.createJsonWindow(g_metamodel.metadiagrams[d.id], function(field, newValue, oldValue, opt) {
 			   g_metamodel.metadiagrams[d.id] = JSON.parse(newValue);
@@ -549,4 +520,104 @@ MetaJSONEditor.prototype.createJsonWindow = function(metaelement, fn) {
 	    items: [textarea]
 	});
 	win.show()
+}
+
+function MetaModelEditor(key, name, metaDataController) {
+	this.key = key;
+	this.title = name;
+	this.metaDataController = metaDataController;
+	var self = this;
+	/*
+	this.jsoneditor = Ext.create('Ext.form.field.TextArea', {
+		title: this.title,
+		autoScroll: true,
+		width: Ext.getCmp('centerpanel').getWidth(),
+		height: Ext.getCmp('centerpanel').getHeight(),
+ 		   value: JSON.stringify(this.metaDataController.get(this.key).content),
+ 		   listeners: {
+ 			   change: {
+ 				   fn: function(field, newValue, oldValue, opt) {
+ 						p = self.metaDataController.get(self.key);
+ 						p.content = JSON.parse(newValue);
+ 						p.modified_after_commit = true;
+ 						self.editor.setTitle(self.title + '*');
+ 				   }
+ 			   }
+ 		   }
+    });
+    */
+	var jsoneditor = new MetaModelEditor.JsonEditor(this.key, this.metaDataController);
+	var treeeditor = new MetaModelEditor.TreeEditor(this.key, this.metaDataController);
+	var tabpanel = Ext.create('Ext.tab.Panel', {
+		title: name,
+		tabPosition: 'bottom',
+        defaults :{
+            bodyPadding: 6
+        },
+	    items: [treeeditor.getPanel(), jsoneditor.getPanel()],
+	    closable: 'true'
+	});
+
+	this.editor = tabpanel;
+}
+
+MetaModelEditor.prototype.save = function() {this.metaDataController.save();}
+
+MetaModelEditor.prototype.getPanel = function() {return this.editor;}
+
+MetaModelEditor.prototype.Initialize = function() {}
+
+MetaModelEditor.prototype.onActivate = function() {}
+
+MetaModelEditor.TreeEditor = function(k, mmc) {
+	var key = k;
+	var metaModelController = mmc;
+	var store = Ext.create('Ext.data.TreeStore', {
+        fields: ['text',{name:'uri',type:'string'}],
+	    root: {
+	        expanded: true,
+	        children: [
+	            { text: g_toolinfo.toolkey, expanded: true, children: [], root:true , uri:g_toolinfo.toolkey}
+	        ]
+	    }
+	});
+	var panel = Ext.create('Ext.tree.Panel', {
+				title: 'tree editor',
+			    height: 240,
+			    store: store,
+			    rootVisible: false
+			});
+	return {
+		getPanel : function() {
+			return panel;
+		}
+	}
+}
+
+MetaModelEditor.JsonEditor = function(k, mmc) {
+	var key = k;
+	var metaModelController = mmc;
+	var panel = Ext.create('Ext.form.field.TextArea', {
+		title: this.title,
+		autoScroll: true,
+		width: Ext.getCmp('centerpanel').getWidth(),
+		height: Ext.getCmp('centerpanel').getHeight(),
+ 		   value: JSON.stringify(metaModelController.get(key).content),
+ 		   listeners: {
+ 			   change: {
+ 				   fn: function(field, newValue, oldValue, opt) {
+ 						p = self.metaDataController.get(self.key);
+ 						p.content = JSON.parse(newValue);
+ 						p.modified_after_commit = true;
+ 						self.editor.setTitle(self.title + '*');
+ 				   }
+ 			   }
+ 		   }
+    });
+	return {
+		getPanel : function() {
+			return panel;
+		}
+	}
+	
 }

@@ -21,8 +21,7 @@ function ToolController() {
 	}
 }
 
-function Tool(name, uri, attr_name) {
+function Tool(name, uri) {
 	this.name = name;
 	this.uri = uri;
-	this.attr_name = attr_name;
 }

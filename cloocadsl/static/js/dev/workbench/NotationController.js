@@ -40,19 +40,19 @@ function NotationController() {
  * '->>>>' : 線＋矢印
  * '-)' : 線＋矢印
  */
-function GraphicNotation(graph_element_type, shape) {
+function GraphicNotation(option) {
 	this.target_uri = null;
-	if(graph_element_type == undefined) {
+	if(option.gtype == undefined) {
 		this.graph_element_type = 'node';
 	}else{
-		this.graph_element_type = graph_element_type;
+		this.graph_element_type = option.gtype;
 	}
 	switch(this.graph_element_type) {
 	case 'node':
-		if(shape == undefined) {
+		if(option.shape == undefined) {
 			this.shape = 'rect';
 		}else{
-			this.shape = shape;
+			this.shape = option.shape;
 		}
 		this.userdefined_shape = {};
 		this.containmentFeature = null;
@@ -68,7 +68,7 @@ function GraphicNotation(graph_element_type, shape) {
 	case 'label':
 		break;
 	}
-
+	this.gtype = this.graph_element_type;
 	//containmentFeature
 	//sourceFeature
 	//targetFeature
