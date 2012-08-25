@@ -5,20 +5,21 @@ function TemplateEditor(templateController, template) {
 	this.resource = template;
 	var self = this;
 	var style = '"width:'+(Ext.getCmp('centerpanel').getWidth() - 40)+'px;height:'+(Ext.getCmp('centerpanel').getHeight())+'px;"'
-	this.panel = Ext.create('Ext.panel.Panel',
-		{
-		  	   title: template.name,
-		  	   layout: {
-		  		   type: 'hbox',
-		  		   align: 'center'
-		  	   },
-		  	   items: [{html: '<textarea id="templatetextarea_'+template.name+'" style='+style+'>'+template.content+'</textarea>'}],
-		  	 		closable: 'true'
+	this.panel = Ext.create('Ext.panel.Panel',{
+		title: template.name,
+		layout : 'fit',
+		width : 480,
+		height : Ext.getCmp('centerpanel').getHeight() - 120,
+		html: '<textarea id="templatetextarea_'+template.name+'" style='+style+'>'+template.content+'</textarea>',
+		autoScroll: true,
+		closable: true
 	});
+	/*
 	this.templateController.setChangeNotification(this.template.name, function(newValue) {
 		var textarea = document.getElementById('templatetextarea_'+self.template.name);
 		textarea.value = newValue;
 	});
+	*/
 }
 
 TemplateEditor.prototype.save = function() {
@@ -37,6 +38,8 @@ TemplateEditor.prototype.Initialize = function() {
 	var myCodeMirror = CodeMirror.fromTextArea(textarea, { mode : 'mako', lineNumbers:true, onChange:function(editor, arg) {
 			 self.template.content = editor.getValue();
 			 self.panel.setTitle(self.template.name + '*');
+			 self.template.modify = true;
+			 self.templateController.fireEventChange(self.template.name, self.template.content);
 			 }
 	});
 }

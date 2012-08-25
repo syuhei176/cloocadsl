@@ -18,6 +18,7 @@ ModelController.prototype.getModel = function() {
 }
 
 /**
+ * contain
  * @param uri : 
  * @param klass : 
  */

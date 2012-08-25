@@ -4,7 +4,9 @@
  */
 function TemplateController() {
 	this.templates = [];
-	this.listeners = [];
+	this.listeners = {
+			change : []
+	}
 }
 
 /**
@@ -25,9 +27,19 @@ TemplateController.prototype.save = function(name, package_uri, content) {
 	$.post('/wb-api/save-template', { toolkey : g_toolinfo.toolkey, name : name, package_uri : package_uri, content : content },
 			function(data) {
 				if(data) {
+					this.templates[i].modify = false;
 				}
 			}, "json");	
 }
+
+TemplateController.prototype.saveModified = function() {
+	for(var i=0;i < this.templates.length;i++) {
+		if(this.templates[i].modify) {
+			this.save(this.templates[i].name, this.templates[i].package_uri, this.templates[i].content);
+		}
+	}
+}
+
 
 /**
  * 
@@ -64,6 +76,22 @@ TemplateController.prototype.update = function(key) {
  * 
  */
 TemplateController.prototype.getTemplates = function() {
+}
+
+/**
+ * 
+ */
+TemplateController.prototype.on = function(event, cb) {
+	this.listeners[event].push(cb);
+}
+
+/**
+ * 
+ */
+TemplateController.prototype.fireEventChange = function(name, newValue) {
+	for(var i=0;i < this.listeners['change'].length;i++) {
+		this.listeners['change'][i](name, newValue);
+	}
 }
 
 /**

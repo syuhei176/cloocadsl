@@ -7,9 +7,11 @@ function ModelExplorer(modelController, editor, ctool) {
 	this.panel = Ext.create('Ext.tree.Panel', {
 		store : Ext.create('Ext.data.TreeStore', {fields: ['text',{name:'uri',type:'string'}]}),
 	    width: 220,
-	    height: 240,
+//	    height: 240,
+	    anchor : '100% 100%',
 	    rootVisible: false,
-	    autoScroll: true
+	    autoScroll: true,
+	    scroll : 'vertical'
 	});
 	this.panel.on('itemdblclick',function(view, record, item, index, event) {
 		if(record.data.leaf) {
@@ -17,6 +19,7 @@ function ModelExplorer(modelController, editor, ctool) {
 		self.open();
     });
 	this.init_contextmenu();
+//	this.panel.render('model-explorer');
 	Ext.getCmp('model-explorer').removeAll();
 	Ext.getCmp('model-explorer').add(this.panel);
 	this.refresh();

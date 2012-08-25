@@ -4,9 +4,24 @@
  * @returns
  */
 function CloocaWorkbench(option) {
+	/*
+	 * jarty カスタマイズ 
+	 */
+	Jarty.Function.file = function(runtime, option) {
+		runtime.write("/* start file "+option.name + " */");
+	}
+	Jarty.Function.fileClose = function(runtime) {
+		runtime.write("/* end file */");
+	}
+	/*
+	 * end of jarty カスタマイズ 
+	 */
+
 	this.option = option;
 	this.editorTabPanel = new EditorTabPanel();
 	this.editorTabPanel_preview = new EditorTabPanel();
+	this.editorTabPanel_template = new EditorTabPanel();
+	this.editorTabPanel_template_preview = new EditorTabPanel();
 	this.init_layout();
 	this.menupanel = new MenuPanel(this);
 	this.menupanel.setAvailabledRedo(false);
@@ -16,17 +31,23 @@ function CloocaWorkbench(option) {
 	this.metaDatacontroller.load();
 	this.metaPackageExplorer = new MetaPackageExplorer(this.metaDatacontroller, this);
 	
-	this.easyExplorer_dev = new EasyExplorer(this.metaDatacontroller, this);
 	
 	this.templateController = new TemplateController();
 	this.templateExplorer = new TemplateExplorer(this.templateController, this);
 	
+	/*
+	this.easyExplorer_dev = new EasyExplorer(this.metaDatacontroller, this);
 	this.notationController = new NotationController();
 	this.notationExplorer = new NotationExplorer(this.notationController, this);
+	*/
 	
 	this.vcs = new VersionControllSystem(this);
 	
 	var self = this;
+	
+	/*
+	 * メタモデルが更新されるたびに呼ばれる
+	 */
 	this.metaDatacontroller.addChangeListener(function(){
 		//preview
 		var toolCompiler = new ToolCompiler(self.metaDatacontroller.getMetaModel());
@@ -38,105 +59,105 @@ function CloocaWorkbench(option) {
 	toolCompiler.Compile();
 	this.modelController = new ModelController(toolCompiler.getCompiledTool());
 	this.modelExplorer = new ModelExplorer(this.modelController, this, toolCompiler.getCompiledTool());
+	
+	this.templateController.on('change', function(name, newValue){
+		self.modelCompile(newValue);
+	});
+
+}
+
+CloocaWorkbench.prototype.modelCompile = function(template) {
+	var model = this.modelController.getModel();
+	var result = (Jarty.eval(template, copy(model)));
+	Ext.getCmp('template-preview').removeAll();
+	Ext.getCmp('template-preview').add({
+		title : 'preview',
+		html : result
+	});
+	function copy(a) {
+	    var F = function(){};
+	    F.prototype = a;
+	    return new F;
+	}
 }
 
 CloocaWorkbench.prototype.init_layout = function() {
 	new Ext.Viewport({
 		layout:'border',
-		items:[
-		       new Ext.Panel({
-		    	   id: 'centerpanel',
-		    	   html:'',
-		    	   width:'100px',
+		items:[{	//north
+			id:'menupanel',
+			margins:'0 3 0 3',
+			region:'north'
+				},{	//center(accordion)
+		    	   id:'centerpanel',
 		    	   region:'center',
-		    	   /*
-		    	   layout: 'fit',
-		    	   items : [this.editorTabPanel.getPanel()]
-		    	   */
-		    	   autoScroll : true,
-		    	   layout:'accordion',
-		    	   defaults: {
-		    	        bodyStyle: 'padding:15px'
-		    	   },
-		    	   layoutConfig: {
-		    	        titleCollapse: false,
-		    	        animate: true,
-		    	        activeOnTop: true
-		    	   },
-		    	   items: [{
-    		    	   title:'Package Explorer',
-    		    	   html:' ',
-    		    	   layout : 'hbox',
-    		    	   items : [
-    		    		   this.editorTabPanel.getPanel(),
-    		    		   {
-    		    			   id : 'model-explorer',
-    		    			   title : 'ModelExplorer'
-    		    		   },
-    		    		   this.editorTabPanel_preview.getPanel()
-    		    	   ]
-		    	   },{
-    		    	   title:'Template Explorer',
-    		    	   html:' '
-		    	   }]
-		       }),
-		       new Ext.Panel({
-		    	   id:'menupanel',
-		    	   margins:'0 3 0 3',
-		    	   region:'north',
-		    	   items: []
-		       }),
-		       new Ext.Panel({
+		    	   layout : 'accordion',
+		    	   items : [{	//metamodel(border)
+		    		   		title : 'MetaModel',
+		    		   		layout : 'border',
+		    		   		defaults: {
+		    		   		    collapsible: true,
+		    		   		    split: true,
+		    		   		    bodyStyle: 'padding:15px'
+		    		   		},
+		    		   		items : [{	//metamodel explorer
+		     		    	   id:'package-explorer',
+		    		    	   title:'Package Explorer',
+		    		   			region:'west',
+		    		   		    margins: '5 0 0 0',cmargins: '5 5 0 0',
+	    		   			    width: 120,minSize: 100,maxSize: 140
+		    		   		},{			//metamodel editor
+		    		   			region:'center',
+		    		   		    collapsible: false,
+		    		   		    split: false,
+	    		   			    items : [this.editorTabPanel.getPanel()]
+		    		   		},{			//metamodel preview
+		    		   			region:'east',
+		    		   		    margins: '5 0 0 0',cmargins: '5 5 0 0',
+	    		   			    width: 300,minSize: 200,maxSize: 350,
+                                layout: 'hbox',
+                                items : [
+			    		    		   {
+			    		    			   id : 'model-explorer',
+			    		    			   title : 'ModelExplorer'
+			    		    		   },
+			    		    		   this.editorTabPanel_preview.getPanel()
+			    		    	   ]
+		    		   		}]
+				    	   },{	//template(border)
+				    		   title : 'Template',
+				    		   layout : 'border',
+				    		   items : [{	//explorer
+			    		    	   id:'template-explorer',
+				    			   region:'west',
+			    		    	   title:'Template Explorer',
+			    		   		    collapsible: true,
+			    		   		    split: true
+				    		   },{			//editor
+				    			   region:'center',
+			    		    	   layout : 'hbox',
+			    		    	   items : [this.editorTabPanel_template.getPanel()]
+				    		   },{			//preview
+				    			   region:'east',
+			    		   		    collapsible: true,
+			    		   		    split: true,
+				    			   xtype : 'tabpanel',
+	    		    			   id : 'template-preview',
+	    		    			   width : 320,
+	    		    				tabPosition: 'top',
+	    		    		        defaults :{
+	    		    		            bodyPadding: 6,
+	    		    		            closable: false,
+	    		    		        },
+	    		    			    items: []
+				    		   }]
+				    	   }]
+		       },{	//south
 		    	   id:'south-panel',
-		    	   margins:'0 3 0 3',
 		    	   region:'south',
-		    	   split:true,
-		    	   items: []
-		    	   }),
-		       new Ext.Panel({
-		     	   id:'east-panel',
-		    	   html:'toolbuttons'
-		       }),
-		       new Ext.Panel({
-		    	   id:'west-panel',
-		    	   html:' ',
-		    	   margins:'0 0 0 3',
-		    	   region:'west',
-		    	   width: 280,
-		    	   height: 300,
-		    	   collapsible:true,
-		    	   split:true,
-		    	   layout:'accordion',
-		    	   defaults: {
-		    	        bodyStyle: 'padding:15px'
-		    	   },
-		    	   layoutConfig: {
-		    	        titleCollapse: false,
-		    	        animate: true,
-		    	        activeOnTop: true
-		    	   },
-		    	   items: [{
-    		    	   id:'package-explorer',
-    		    	   title:'Package Explorer',
-    		    	   html:' '
-		    	   },{
-    		    	   id:'template-explorer',
-    		    	   title:'Template Explorer',
-    		    	   html:' '
-		    	   },{
-    		    	   id:'notation-explorer',
-    		    	   title:'Notation Explorer',
-    		    	   html:' '
-		    	   },{
-    		    	   id:'tool-explorer',
-    		    	   title:'Tool Explorer',
-    		    	   html:' '
-		    	   },{
-    		    	   id:'easy-explorer',
-    		    	   title:'clooca Workbench',
-    		    	   html:' '
-		    	   }]
-		       }),
-		       ]
+		    	   margins:'0 3 0 3',
+		    	   split:true
+		       }]
 	});
 }
+

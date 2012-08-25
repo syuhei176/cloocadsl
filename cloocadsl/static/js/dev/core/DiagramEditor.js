@@ -179,9 +179,24 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
  */
 DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele) {
 	//Structureの設定
+	if(this.metaDiagram.checkContain(meta_ele)) {
+		console.log(this.diagram._sys_uri);
+		var instance = this.modelController.add(this.diagram._sys_uri, meta_ele);
+		this.diagram._sys_d[instance._sys_uri] = {
+				uri : instance._sys_uri,
+				x : x,
+				y : y,
+				w : 80,
+				h : 50,
+				child : {}
+		};
+		console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
+		return;
+	}
+	/*
 	for(var key in this.metaDiagram.associations) {
 		var asso = this.metaDiagram.associations[key];
-		if(asso.type == meta_ele.id && asso.feature == 'contain') {
+		if((asso.type == meta_ele.id || asso.type == meta_ele.superClass.id) && asso.feature == 'contain') {
 			console.log(this.diagram._sys_uri);
 			var instance = this.modelController.add(this.diagram._sys_uri, meta_ele);
 			this.diagram._sys_d[instance._sys_uri] = {
@@ -196,6 +211,7 @@ DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele) {
 			return;
 		}
 	}
+	*/
 }
 
 DiagramEditor.prototype.addNodePattern2 = function(x, y, meta_ele, parent) {
@@ -381,6 +397,9 @@ DiagramEditor.prototype.draw = function() {
 			  x1: this.drag_start.x, y1: this.drag_start.y,
 			  x2: this.drag_move.x, y2: this.drag_move.y
 			});
+	}
+	function drawNode() {
+		
 	}
 }
 

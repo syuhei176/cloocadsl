@@ -17,6 +17,9 @@ ToolCompiler.prototype.Compile = function() {
 		if(!this.ctool.classes[key].name) {
 			this.ctool.classes[key].name = key;
 		}
+		if(this.ctool.classes[key].superClass) {
+			this.ctool.classes[key].superClass = this.ctool.classes[this.ctool.classes[key].superClass];
+		}
 	}
 	function parsePackage(p) {
 		if(p.content) {
@@ -76,7 +79,7 @@ CompiledTool.prototype.getContainableClasses = function(klass) {
 CompiledTool.prototype.getSubClasses = function(klass) {
 	var klasses = [];
 	for(var key in this.classes) {
-		if(klass.id == this.classes[key].superClass) {
+		if(klass.id == this.classes[key].superClass.id) {
 			klasses.push(this.classes[key]);
 		}
 	}
@@ -156,10 +159,35 @@ CompiledTool.Class.prototype.getInstance = function() {
 	return instance;
 }
 
+/**
+ * checkContain
+ */
+CompiledTool.Class.prototype.checkContain = function(klass) {
+	for(var key in this.associations) {
+		if(this.associations[key].containment) {
+			if(this.associations[key].type == klass.id) {
+				return true;
+			}
+			if(klass.superClass) {
+				if(this.associations[key].type == klass.superClass.id) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/**
+ * getContains
+ */
 CompiledTool.Class.prototype.getAssociation = function(klass) {
 	for(var key in this.associations) {
-		if(this.associations[key].type == klass.id) {
-			return this.associations[key];
+		if(this.associations[key].containment) {
+			if(this.associations[key].type == klass.id || 
+					this.associations[key].type == klass.superClass.id) {
+				return this.associations[key];
+			}
 		}
 	}
 	return null;

@@ -5,10 +5,11 @@ function DSLEditor(key, name, metaDataController) {
 	this.panel = Ext.create('Ext.panel.Panel', {
 		id: 'dsleditor-'+this.key,
 		title: name,
+		layout : 'fit',
 		width : 480,
-		height : Ext.getCmp('centerpanel').getHeight() - 32,
-		autoScroll: true,
+		height : Ext.getCmp('centerpanel').getHeight() - 120,
 		html : '<textarea id="dsleditor-textarea-'+this.key+'" style="font-size:32pt;">' + this.metaDataController.get(this.key).content + '</textarea>',
+		autoScroll: true,
 		closable: true
 	});
 }

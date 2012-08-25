@@ -97,7 +97,11 @@ function MenuPanel(wb) {
 		}else if(item.id == 'create-template') {
 			self.wb.templateExplorer.create();
 		}else if(item.id == 'quick-save') {
+			self.wb.metaDatacontroller.save();
+			//editorTabPanel_template
 			self.wb.editorTabPanel.current_editor.save();
+			
+			self.wb.templateController.saveModified()
 		}else if(item.id == 'quick-commit') {
 			 Ext.Msg.prompt('コミットします。','コメントを書いてください。',function(btn,text){
 				 if(btn != 'cancel') {

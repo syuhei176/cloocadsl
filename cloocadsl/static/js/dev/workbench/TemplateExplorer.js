@@ -119,7 +119,7 @@ TemplateExplorer.prototype.open = function() {
 	EditorTabPanelにタブを追加する
 	*/
 	var dsleditor = new TemplateEditor(this.templateController, this.selectedTemplate);
-	this.wb.editorTabPanel.add(dsleditor, this.selectedTemplate.name);
+	this.wb.editorTabPanel_template.add(dsleditor, this.selectedTemplate.name);
 }
 
 TemplateExplorer.prototype.resetting_option = function() {
