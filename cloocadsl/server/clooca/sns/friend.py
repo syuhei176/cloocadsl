@@ -46,13 +46,15 @@ def requestFriend(connect, user, requested_user_id):
 """
 def acceptFriend(connect, user, requesting_user_id):
     cur = connect.cursor()
-    cur.execute('SELECT is_friend_pre FROM account_relationship WHERE src=%s AND dest=%s;', (user['id'], requested_user_id, ))
-    rows = cur.fetchall()
-    if len(rows) != 0:
-        if rows[0][0] == 1:
-            num_of_affected_row = cur.execute('UPDATE account_relationship SET is_friend=%s,is_friend_pre=%s WHERE src=%s AND dest=%s;', (1, 0, user['id'], requested_user_id, ))
+    cur.execute('SELECT is_friend_pre,is_friend FROM account_relationship WHERE dest=%s AND src=%s;', (user['id'], requesting_user_id, ))
+    row = cur.fetchone()
+    if not row == None:
+        if int(row[0]) == 1:
+            num_of_affected_row = cur.execute('UPDATE account_relationship SET is_friend=%s,is_friend_pre=%s WHERE dest=%s AND src=%s;', (1, 0, user['id'], requesting_user_id, ))
             connect.commit()
+            return num_of_affected_row == 1
     cur.close()
+    return False
 
 """
 友達リクエストのリスト

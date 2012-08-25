@@ -2,6 +2,7 @@ function TemplateExplorer(templateController, wb) {
 	this.templateController = templateController;
 	this.wb = wb;
 	this.selectedTemplate = null;
+	this.panel = null;
 	this.refresh()
 }
 
@@ -17,21 +18,6 @@ TemplateExplorer.prototype.refresh = function() {
 	/*
 	 * テンプレートを読み込みツリー状に表示する
 	 */
-	function create_package_tree(packages, parent_uri) {
-		var packages_tree = [];
-		for(var i=0;i < packages.length;i++) {
-			var nestings = null;
-			var current_uri = parent_uri + '.' + packages[i].name;
-			if(packages[i].nestingPackages) {
-				nestings = create_package_tree(packages[i].nestingPackages, current_uri);
-				packages_tree.push({text: packages[i].name, icon: '/static/images/editor/root_leaf.gif', children: nestings, uri:current_uri});
-			}else{
-				packages_tree.push({text: packages[i].name, leaf: true, icon: '/static/images/editor/root_leaf.gif', uri:current_uri});
-			}
-		}
-		return packages_tree;
-	}
-	//var packages_tree = create_package_tree(packages, g_toolinfo.toolkey);
 	
 	var store = Ext.create('Ext.data.TreeStore', {
         fields: ['text',{name:'name',type:'string'},{name:'package_uri',type:'string'},{name:'content',type:'string'}],

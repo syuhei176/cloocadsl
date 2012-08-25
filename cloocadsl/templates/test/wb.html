@@ -24,6 +24,7 @@
     <script src="/static/js/dev/workbench/MenuPanel.js"></script>
     <script src="/static/js/dev/workbench/SouthTabPanel.js"></script>
     <script src="/static/js/dev/workbench/dsl_editor.js"></script>
+    <script src="/static/js/dev/workbench/dsmleditor.js"></script>
     <script src="/static/js/dev/workbench/MetaPackageExplorer.js"></script>
     <script src="/static/js/dev/workbench/TemplateExplorer.js"></script>
     <script src="/static/js/dev/workbench/NotationExplorer.js"></script>
@@ -38,6 +39,8 @@
     <script src="/static/js/dev/workbench/PreviewManager.js"></script>
     <script src="/static/js/dev/workbench/GraphiticalMetaModelEditor.js"></script>
     <script src="/static/js/dev/workbench/SampleGenerator.js"></script>
+    <script src="/static/js/dev/editor/ModelExplorer.js"></script>
+    <script src="/static/js/dev/editor/ToolCompiler.js"></script>
     <script src="/static/js/dev/core/IdGenerator.js"></script>
     <script src="/static/js/dev/core/metastructure.js"></script>
     <script src="/static/js/dev/core/EditorTabPanel.js"></script>
@@ -46,6 +49,7 @@
     <script src="/static/js/dev/core/math2d.js"></script>
     <script src="/static/js/dev/core/ModelController.js"></script>
     <script src="/static/js/dev/core/Model.js"></script>
+    <script src="/static/js/dev/workbench/dsl_parser.js"></script>
     <script src="/static/js/lang/ja_JP.js"></script>
     <script src="/static/js/editor.clooca.js"></script>
     <div id="script-div"></div>
@@ -74,7 +78,7 @@
     	initall();
     	g_userinfo = {{userinfo|safe}};
     	*/
-    	g_toolinfo = {toolkey: '{{toolinfo.tool_key}}', structure: {{toolinfo.metamodel|safe}}};
+    	g_toolinfo = {toolkey: '{{toolinfo.tool_key}}', current_version: {{toolinfo.current_version}}, structure: {{toolinfo.metamodel|safe}}};
     	g_wb = new CloocaWorkbench({});
     	/*
     	var option = {modelexplorer_hidden:true, diagram_open:false, tab_closable:true};

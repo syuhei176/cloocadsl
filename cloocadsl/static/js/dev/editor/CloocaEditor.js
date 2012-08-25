@@ -9,6 +9,7 @@ function CloocaEditor(option) {
 	this.init_layout();
 	this.menupanel = new MenuPanel(this);
 	this.menupanel.setAvailabledRedo(false);
+	this.modelExplorer = new ModelExplorer();
 }
 
 CloocaEditor.prototype.init_layout = function() {
@@ -58,7 +59,7 @@ CloocaEditor.prototype.init_layout = function() {
     		    	]
 		       }),
 		       new Ext.Panel({
-		    	   id:'modelexplorer',
+		    	   id:'model-explorer',
 		    	   title:'Model Explorer',
 		    	   html:' ',
 		    	   margins:'0 0 0 3',

@@ -1,7 +1,7 @@
 function NotationExplorer(notationController, wb) {
 	this.notationController = notationController;
 	this.wb = wb;
-	this.selectedNotation = null;
+	this.selected = null;
 	this.refresh()
 }
 
@@ -13,32 +13,32 @@ NotationExplorer.prototype.refresh = function() {
 	/*
 	 * メタデータコントローラからデータ取得
 	 */
-	var notation_members = this.notationController.getlist();
+	var notation_members = this.notationController.getRoot();
 	/*
 	 * パッケージを読み込みツリー状に表示する
 	 */
-	function create_package_tree(packages, parent_uri) {
+	function create_package_tree(notations, parent_uri) {
 		var packages_tree = [];
-		for(var i=0;i < packages.length;i++) {
+		for(var key in notations) {
 			var nestings = null;
-			var current_uri = parent_uri + '.' + packages[i].name;
-			if(packages[i].nestingPackages) {
-				nestings = create_package_tree(packages[i].nestingPackages, current_uri);
-				packages_tree.push({text: packages[i].name, icon: '/static/images/editor/root_leaf.gif', children: nestings, uri:current_uri});
+			var current_uri = parent_uri + '.' + key;
+			if(notations[key].children) {
+				nestings = create_package_tree(notations[key].children, current_uri);
+				packages_tree.push({text: key, icon: '/static/images/editor/root_leaf.gif', children: nestings, uri:current_uri});
 			}else{
-				packages_tree.push({text: packages[i].name, leaf: true, icon: '/static/images/editor/root_leaf.gif', uri:current_uri});
+				packages_tree.push({text: key, leaf: true, icon: '/static/images/editor/root_leaf.gif', uri:current_uri});
 			}
 		}
 		return packages_tree;
 	}
-	var packages_tree = create_package_tree(notation_members, g_toolinfo.toolkey);
+	var packages_tree = create_package_tree(notation_members.children, 'notation');
 	
 	var store = Ext.create('Ext.data.TreeStore', {
         fields: ['text',{name:'uri',type:'string'}],
 	    root: {
 	        expanded: true,
 	        children: [
-	            { text: g_toolinfo.toolkey, expanded: true, children: packages_tree, root:true , uri:g_toolinfo.toolkey}
+	            { text: 'notation', expanded: true, children: packages_tree, root:true , uri:'notation'}
 	        ]
 	    }
 	});
@@ -64,9 +64,23 @@ NotationExplorer.prototype.refresh = function() {
 	Ext.getCmp('notation-explorer').add(this.panel);
 }
 
-NotationExplorer.prototype.create = function() {
+NotationExplorer.prototype.create = function(root) {
 	var self = this;
-	var defaultTargetPackage = this.selectedPackage;
+	/*
+	 * TODO : パッケージのuriリストを取得
+	var defaultTargetPackage;
+	*/
+	var classes = this.wb.metaDatacontroller.getClassList();
+	var data = [];
+	for(var i=0;i < classes.length;i++) {
+		data.push({disp : classes[i].name, type : classes[i].parent_uri + '.' + classes[i].name});
+	}
+	var classes_states = Ext.create('Ext.data.Store', {
+	    fields: ['disp','type'],
+	    data : data
+	});
+	
+	var parentNotationURI = this.selected;
 	/*
 	 * パッケージの新規作成ダイアログを表示する
 	 */
@@ -74,9 +88,9 @@ NotationExplorer.prototype.create = function() {
 	    fields: ['disp','type'],
 	    data : [
 	        {"disp":"ダイアグラム","type":"diagram"},
-	        {"disp":"GUI","type":"gui"},
-	        {"disp":"グラフィック","type":"graphic"},
-	        {"disp":"ウィジェット","type":"wiget"}
+	        {"disp":"ノード","type":"node"},
+	        {"disp":"コネクション","type":"connection"},
+	        {"disp":"ラベル","type":"label"}
 	    ]
 	});
 	
@@ -89,10 +103,19 @@ NotationExplorer.prototype.create = function() {
 	        xtype: 'panel',
 	        layout: 'vbox',
 	        items: [{
-	        	name: 'target',
+	        	name: 'parent',
 	        	xtype: 'textfield',
+	        	fieldLabel: '親',
+	        	value: parentNotationURI
+	        },{
+	        	name: 'target',
+	        	xtype: 'combo',
+		        store: classes_states,
+		        queryMode: 'local',
+		        displayField: 'disp',
+		        valueField: 'type',
+			    value: '',
 	        	fieldLabel: '対象要素',
-	        	value: defaultTargetPackage
 	        },{
 	        	name: 'type',
 	        	xtype: 'combo',
@@ -103,20 +126,28 @@ NotationExplorer.prototype.create = function() {
 			    value: 'graphic',
 	        	fieldLabel: '言語タイプ',
 	        },{
-	        	name: 'option',
+	        	name: 'name',
 	        	xtype: 'textfield',
-	        	fieldLabel: 'オプション',
+	        	fieldLabel: '名前',
 	        	value: ''
 	        },{
 	        	xtype: 'button',
 	        	text: 'OK',
 	        	handler: function(okbutton) {
 	        		console.log(okbutton.up().down('textfield[name="name"]'));
-//	        		console.log(a.up().down('#name').value);
 	        		var parent = okbutton.up().down('textfield[name="parent"]').value;
-	        		var name = okbutton.up().down('textfield[name="name"]').value;
+	        		var target = okbutton.up().down('combo[name="target"]').value;
 	        		var type = okbutton.up().down('combo[name="type"]').value;
-	        		self.notationController.add();
+	        		var name = okbutton.up().down('textfield[name="name"]').value;
+	        		var dn = new DiagramNotation({
+	        			gtype: type,
+	        			target_uri: target
+	        			});
+	        		if(root == 0) {
+		        		self.notationController.addRoot(name, dn);
+	        		}else{
+		        		self.notationController.addChild(parent, name, dn);
+	        		}
 	        		self.refresh();
 	        		win.hide();
 	        	}
@@ -131,15 +162,9 @@ NotationExplorer.prototype.open = function() {
 	選択されているパッケージがDSLかDSMLかを判断して
 	EditorTabPanelにタブを追加する
 	*/
-	var p = this.metaDataController.getPackage(this.selectedPackage);
-	var key = p.uri + '.' + p.name;
-	if(p.lang_type == 'dsl') {
-		var dsleditor = new DSLEditor(key, p.name, this.metaDataController);
-		this.wb.editorTabPanel.add(dsleditor, key);
-	}else{
-		var dsleditor = new MetaJSONEditor(key, p.name, this.metaDataController);
-		this.wb.editorTabPanel.add(dsleditor, key);
-	}
+	var notation = this.notationController.get(this.selected);
+	var dsleditor = new NotationEditor(this.selected, this.selected, this.notationController);
+	this.wb.editorTabPanel.add(dsleditor, key);
 }
 
 NotationExplorer.prototype.resetting_option = function() {
@@ -158,7 +183,7 @@ NotationExplorer.prototype.del = function() {
             self.selectedPackage+'を削除しますよ？', 
             function(btn){ 
                 if(btn == 'yes'){ 
-                    self.metaDataController.delPackage(self.selectedPackage);
+                    self.NotationController.del(self.selected);
                 	self.refresh();
                 } 
                 if(btn == 'no'){ 
@@ -175,39 +200,57 @@ NotationExplorer.prototype.init_contextmenu = function() {
 	/*
 	 * 右クリックメニューの設定
 	 */
+	var mnuContextRoot = new Ext.menu.Menu({
+	    items: [{
+	        id: 'create',
+	        text: '新規作成',
+	        handler: function(){self.create(0);}
+	    },{
+	        id: 'delete',
+	        text: '削除',
+	        handler: function(){self.del();}
+	    }]
+	});
 	var mnuContext = new Ext.menu.Menu({
 	    items: [{
 	        id: 'create',
-	        text: '新規作成'
+	        text: '子を新規作成',
+	        handler: function(){self.create(1);}
 	    },{
 	        id: 'delete',
-	        text: '削除'
-	    }],
-	    listeners: {
-        click: function(menu, item) {
-            switch (item.id) {
-                case 'create':
-                	self.create();
-                    break;
-                case 'delete':
-                	self.del();
-                    break;
-            }
-        }
-	    }
+	        text: '削除',
+	        handler: function(){self.del();}
+	    }]
 	});
-	this.panel.on('itemmousedown',function(view, record, item, index, event) {
-		self.selectedPackage = record.data.uri;
+ 	this.panel.on('itemmousedown',function(view, record, item, index, event) {
+		self.selected = record.data.uri;
+		console.log(self.selected);
 		if(event.button == 2) {
 			if(record.data.root) {
-				mnuContext.showAt(event.getX(), event.getY());
-			}else if(record.data.leaf != true){
-				mnuContext.showAt(event.getX(), event.getY());
+				mnuContextRoot.showAt(event.getX(), event.getY());
 			}else{
 				mnuContext.showAt(event.getX(), event.getY());
 			}
-			selected_item = record.data;
-			console.log(selected_item.id+','+selected_item.text+','+index);
 		}
+		createPropertyArea();
     });
+ 	function createPropertyArea() {
+ 		var props = [];
+ 		for(var key in self.notationController.getPropertyKeys(self.selected)) {
+ 	 		props.push({
+ 	 	        	name: key,
+ 	 	        	xtype: 'textfield',
+ 	 	        	fieldLabel: key,
+ 	 	        	value: self.notationController.getProperty(self.selected, key),
+ 	 	        	listeners : {
+ 	 	        		change : {
+ 	 	        			fn : function(textField, newValue) {
+ 	 	        				self.notationController.setProperty(self.selected, key, newValue);
+ 	 	        			}
+ 	 	        		}
+ 	 	        	}
+ 	 			});
+ 		}
+ 		self.wb.statuspanel.setPropertyPanel(props);
+ 	}
 }

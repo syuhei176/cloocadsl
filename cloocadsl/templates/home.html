@@ -1,4 +1,7 @@
-				<div id="latest-feed">
+<div id="latest-feed">
+{% for feed in feeds %}
+<div id="latest-feed-item">{{feed.content}}</div>
+{% endfor %}
 				<div id="latest-feed-item">グループ〇〇にコメントがつきました。</div>
 				<div id="latest-feed-item">あなたのツールにコメントがつきました</div>
 				<div id="latest-feed-item">プロジェクト××が更新されました。</div>

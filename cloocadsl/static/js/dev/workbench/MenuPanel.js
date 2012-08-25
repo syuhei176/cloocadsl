@@ -99,7 +99,11 @@ function MenuPanel(wb) {
 		}else if(item.id == 'quick-save') {
 			self.wb.editorTabPanel.current_editor.save();
 		}else if(item.id == 'quick-commit') {
-			self.wb.vcs.commit();
+			 Ext.Msg.prompt('コミットします。','コメントを書いてください。',function(btn,text){
+				 if(btn != 'cancel') {
+						self.wb.vcs.commit(text);
+				 }
+			 },null,true,'');
 		}else if(item.id == 'vcs-update') {
 			self.wb.vcs.update();
 		}else if(item.id == 'quick-preview') {

@@ -45,7 +45,7 @@
 $(function() {
 	$('#create-tool').click(function(){
 		$.post("/tool/create",
-				{tool_key : $('#tool-key').val(), tool_name : $('#tool-name').val()},
+				{tool_key : $('#tool-key').val(), tool_name : $('#tool-name').val(), vis:$('#tool-vis').val() },
 				function(data){
 			
 		});
@@ -59,7 +59,7 @@ $(function() {
 <form>
 <div>ツールキー<input id="tool-key" type="text" name="tool-key" /></div>
 <div>ツール名<input id="tool-name" type="text" name="tool-name" /></div>
-<div>公開します<input id="tool-vis" type="checkbox" name="vis" /></div>
+<div>公開します<input id="tool-vis" type="checkbox" name="tool-vis" value="true" /></div>
 <div></div><input id="create-tool" type="submit" value="新規作成" class="button-type1" style="width:240px;"/>
 </form>
 </div>

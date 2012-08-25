@@ -16,11 +16,12 @@ function SouthTabPanel(wb) {
 			id: 'property-panel',
 			xtype: 'panel',
 			title: 'Property',
-			height: 180,
+			/*
 			layout: {
 				type: 'vbox',
 				align: 'left'
 			},
+			*/
 			items: []
 	});
 	
@@ -31,7 +32,7 @@ function SouthTabPanel(wb) {
             bodyPadding: 6,
     	    closable: true
         },
-	    items: [error_panel, property_panel],
+	    items: [property_panel, error_panel],
 	    closable: false
 	});
 	
@@ -43,10 +44,12 @@ function SouthTabPanel(wb) {
 		getPanel : function() {
 			return tabpanel;
 		},
-		setPropertyPanel : function(p) {
+		setPropertyPanel : function(props) {
 			var property_panel = Ext.getCmp('property-panel');
 			property_panel.removeAll();
-			property_panel.add(p);
+			for(var i=0;i < props.length;i++) {
+				property_panel.add(props[i]);
+			}
 		}
 	}
 }

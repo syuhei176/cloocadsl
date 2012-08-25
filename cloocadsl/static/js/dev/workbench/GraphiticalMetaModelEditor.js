@@ -102,14 +102,12 @@ GraphiticalMetaModelEditor.prototype.Initialize = function() {
 			var rect = e.target.getBoundingClientRect();
 			mouseX = e.clientX - rect.left;
 			mouseY = e.clientY - rect.top;
-			console.log('move');
 			self.ActionMove(mouseX, mouseY)
 		});
 		this.canvas.mousedown(function(e){
 			var rect = e.target.getBoundingClientRect();
 			mouseX = e.clientX - rect.left;
 			mouseY = e.clientY - rect.top;
-			console.log('down');
 			if(e.button == 2) {
 				mnuContext.showAt(e.clientX, e.clientY);
 			}else{
@@ -121,7 +119,6 @@ GraphiticalMetaModelEditor.prototype.Initialize = function() {
 			var rect = e.target.getBoundingClientRect();
 			mouseX = e.clientX - rect.left;
 			mouseY = e.clientY - rect.top;
-			console.log('up');
 			self.ActionUp(mouseX, mouseY)
 			self.draw();
 		});
@@ -218,7 +215,11 @@ GraphiticalMetaModelEditor.prototype.ActionDown = function(x, y) {
 		this.pkg.content.gmme[added.name] = {};
 		this.pkg.content.gmme[added.name].x = x;
 		this.pkg.content.gmme[added.name].y = y;
+		this.pkg.content.gmme[added.name].w = 80;
+		this.pkg.content.gmme[added.name].h = 50;
 //		this.select_button.toggle(true, false);
+	}else if(this.tool == 'Association'){
+		this.dragMode = GraphiticalMetaModelEditor.DRAG_RUBBERBAND;
 	}else if(this.tool.classname == 'MetaRelation'){
 		this.dragMode = GraphiticalMetaModelEditor.DRAG_RUBBERBAND;
 	}
@@ -230,8 +231,10 @@ GraphiticalMetaModelEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.x = x;
 	this.drag_end.y = y;
 	if(this.dragMode == GraphiticalMetaModelEditor.DRAG_RUBBERBAND) {
-		this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
-		this.select_button.toggle(true);
+		var src = this.findNode(this.drag_start.x,this.drag_start.y);
+		var dest = this.findNode(this.drag_end.x,this.drag_end.y);
+		this.addAssociation(src, dest);
+//		this.select_button.toggle(true);
 	}else if(this.dragMode == GraphiticalMetaModelEditor.DRAG_POINT) {
 		if(this.selected instanceof Array == false) {
 			this.movePoint(this.selected, this.drag_start, this.drag_end);
@@ -244,6 +247,8 @@ GraphiticalMetaModelEditor.prototype.ActionUp = function(x, y) {
 			this.pkg.content.gmme[added.name] = {};
 			this.pkg.content.gmme[added.name].x = x;
 			this.pkg.content.gmme[added.name].y = y;
+			this.pkg.content.gmme[added.name].w = 80;
+			this.pkg.content.gmme[added.name].h = 50;
 		}
 	}
 	this.dragMode = GraphiticalMetaModelEditor.DRAG_NONE;
@@ -254,8 +259,10 @@ GraphiticalMetaModelEditor.prototype.findNode = function(x, y) {
 		if(!this.pkg.content.gmme.hasOwnProperty(key)) continue;
 		var pkg_x = this.pkg.content.gmme[key].x;
 		var pkg_y = this.pkg.content.gmme[key].y;
-		if(pkg_x < x && x < pkg_x + 32) {
-			if(pkg_y < y && y < pkg_y + 32) {
+		var pkg_w = this.pkg.content.gmme[key].w;
+		var pkg_h = this.pkg.content.gmme[key].h;
+		if(pkg_x < x && x < pkg_x +pkg_w) {
+			if(pkg_y < y && y < pkg_y + pkg_h) {
 				return this.pkg.nestingPackages[key];
 			}
 		}
@@ -264,8 +271,10 @@ GraphiticalMetaModelEditor.prototype.findNode = function(x, y) {
 		if(!this.pkg.content.gmme.hasOwnProperty(key)) continue;
 		var pkg_x = this.pkg.content.gmme[key].x;
 		var pkg_y = this.pkg.content.gmme[key].y;
-		if(pkg_x < x && x < pkg_x + 32) {
-			if(pkg_y < y && y < pkg_y + 32) {
+		var pkg_w = this.pkg.content.gmme[key].w;
+		var pkg_h = this.pkg.content.gmme[key].h;
+		if(pkg_x < x && x < pkg_x +pkg_w) {
+			if(pkg_y < y && y < pkg_y + pkg_h) {
 				return this.pkg.content.classes[key];
 			}
 		}
@@ -273,69 +282,111 @@ GraphiticalMetaModelEditor.prototype.findNode = function(x, y) {
 	return null;
 }
 
+GraphiticalMetaModelEditor.prototype.addAssociation = function(src, dest) {
+	var asso = this.metaModelController.addAssociation(src.parent_uri + '.' + src.name, 'UnNamedAssociation');
+	asso.etype = dest.parent_uri + '.' + dest.name;
+}
+
 GraphiticalMetaModelEditor.prototype.draw = function() {
 	this.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: this.width,height: this.height, fromCenter: false});
 	for(var key in this.pkg.nestingPackages) {
 		if(!this.pkg.content.gmme.hasOwnProperty(key)) continue;
+		var col = "#000";
+		if(this.selected == this.pkg.nestingPackages[key]) {
+			col = "#00F";
+		}
 		var x = this.pkg.content.gmme[key].x;
 		var y = this.pkg.content.gmme[key].y;
+		var w = this.pkg.content.gmme[key].w;
+		var h = this.pkg.content.gmme[key].h;
 		this.canvas.drawRect({
-			strokeStyle: "#000",
+			strokeStyle: col,
+			fillStyle: '#fff',
 			x: x, y: y,
-			width: 32, height: 32,
+			width: w, height: h,
 			fromCenter: false}
 		);
+		this.canvas.drawText({
+			  fillStyle: "#000",
+			  x: x, y: y,
+			  text: this.pkg.nestingPackages[key].name,
+			  align: "center",
+			  baseline: "middle",
+			  font: "16px 'ＭＳ ゴシック'"
+			});
 	}
 	for(var key in this.pkg.content.classes) {
 		if(!this.pkg.content.gmme.hasOwnProperty(key)) continue;
+		var col = "#000";
+		if(this.selected == this.pkg.content.classes[key]) {
+			col = "#00F";
+		}
 		var x = this.pkg.content.gmme[key].x;
 		var y = this.pkg.content.gmme[key].y;
+		var w = this.pkg.content.gmme[key].w;
+		var h = this.pkg.content.gmme[key].h;
 		this.canvas.drawRect({
-			strokeStyle: "#000",
+			strokeStyle: col,
+			fillStyle: '#fff',
 			x: x, y: y,
-			width: 32, height: 32,
+			width: w, height: h,
 			fromCenter: false}
 		);
+		this.canvas.drawText({
+			  fillStyle: "#000",
+			  x: x, y: y + 20,
+			  text: this.pkg.content.classes[key].name,
+			  align: "center",
+			  baseline: "middle",
+			  font: "16px 'ＭＳ ゴシック'"
+			});
+		for(var akey in this.pkg.content.classes[key].associations) {
+			var asso = this.pkg.content.classes[key].associations[akey];
+			var targetName = asso.etype.split('.').pop();
+			var target_x = this.pkg.content.gmme[targetName].x;
+			var target_y = this.pkg.content.gmme[targetName].y;
+			this.canvas.drawLine({
+				  strokeStyle: "#777",
+				  strokeWidth: 2,
+				  strokeCap: "round",
+				  strokeJoin: "miter",
+				  x1: x, y1: y,
+				  x2: target_x, y2: target_y
+				});
+		}
+	}
+	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+		this.canvas.drawLine({
+			  strokeStyle: "#777",
+			  strokeWidth: 2,
+			  strokeCap: "round",
+			  strokeJoin: "miter",
+			  x1: this.drag_start.x, y1: this.drag_start.y,
+			  x2: this.drag_move.x, y2: this.drag_move.y
+			});
 	}
 }
 
 GraphiticalMetaModelEditor.prototype.createPropertyArea = function() {
 	var self = this;
+	var props = [];
+	props[0] = {
+        	name: 'name',
+        	xtype: 'textfield',
+        	fieldLabel: 'name',
+        	value: this.selected.name,
+        	listeners : {
+        		change : {
+        			fn : function(textField, newValue) {
+        				self.metaModelController.rename(self.selected.parent_uri + '.' + self.selected.name, newValue);
+        			}
+        		}
+        	}
+		};
 	if(this.selected.meta == 'C') {
-		this.wb.statuspanel.setPropertyPanel(Ext.create('Ext.tab.Panel', {
-	        xtype: 'panel',
-	        layout: 'vbox',
-	        items: [{
-	        	name: 'name',
-	        	xtype: 'textfield',
-	        	fieldLabel: 'name',
-	        	value: this.selected.name,
-	        	listeners : {
-	        		change : {
-	        			fn : function(textField, newValue) {
-	        				self.metaModelController.rename(self.selected.parent_uri + '.' + self.selected.name, newValue);
-	        			}
-	        		}
-	        	}
-	        }]}));
 	}else{
-		this.wb.statuspanel.setPropertyPanel(Ext.create('Ext.tab.Panel', {
-	        xtype: 'panel',
-	        layout: 'vbox',
-	        items: [{
-	        	name: 'name',
-	        	xtype: 'textfield',
-	        	fieldLabel: 'name',
-	        	value: this.selected.name,
-	        	listeners : {
-	        		change : {
-	        			fn : function(textField, newValue) {
-	        				self.metaModelController.rename(self.selected.parent_uri + '.' + self.selected.name, newValue);
-	        			}
-	        		}
-	        	}
-	        }]}));
 	}
+	this.wb.statuspanel.setPropertyPanel(props);
 }
 
 GraphiticalMetaModelEditor.prototype.createButton = function() {
@@ -346,18 +397,18 @@ GraphiticalMetaModelEditor.prototype.createButton = function() {
 		items.push(basetool({text : 'SELECT',handler :function(btn){self.tool = null;}}));
 		items.push(basetool({text : 'Package',handler :function(btn){self.tool = 'Package';}}));
 		items.push(basetool({text : 'Class',handler :function(btn){self.tool = 'Class';}}));
-		items.push(basetool({text : 'Association',handler :function(btn){self.tool = null;}}));
-		items.push(basetool({text : 'Property',handler :function(btn){self.tool = null;}}));
+		items.push(basetool({text : 'Association',handler :function(btn){self.tool = 'Association';}}));
+		items.push(basetool({text : 'Property',handler :function(btn){self.tool = 'Property';}}));
 		this.tool_palet = Ext.create('Ext.window.Window', {
 		    title: 'ツールパレット',
-		    height: 320,
-		    width: 100,
+		    height: 240,
+		    width: 80,
 		    layout: 'vbox',
 		    closable: false,
 		    items: items
 		});
 	}
-	this.tool_palet.show();
+	this.tool_palet.showAt(720,120);
 }
 
 GraphiticalMetaModelEditor.prototype.deleteFromDiagram = function() {

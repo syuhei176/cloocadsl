@@ -5,19 +5,17 @@ model_idgen = new IdGenerator();
  * @returns
  */
 function Model() {
-	this.id = model_idgen.getNewId();
-	this.current_version = 1;
-	//Diagramの実態
-	this.nestingPackages = {}
+	this._sys_id = model_idgen.getNewId();
+	this._sys_current_version = 1;
 }
 
 Model.Package = function(name) {
 	this.meta = 'P';
 	this.id = model_idgen.getNewId();
 	this.name = name;
-	this.nestingPackages = {}
-	this.classes = {}
-//	this.associations = {}
+	this.nestingPackages = {};
+	this.classes = {};
+	this.editors = {};
 }
 
 Model.Class = function(meta_uri) {

@@ -12,6 +12,10 @@ MetaDataController.prototype.addChangeListener = function(l) {
 	this.changelisteners.push(l);
 }
 
+MetaDataController.prototype.getMetaModel = function() {
+	return this.meta_structure;
+}
+
 MetaDataController.prototype.reset = function(s) {
 	this.meta_structure = s;
 }
@@ -22,23 +26,23 @@ MetaDataController.prototype.reset = function(s) {
 MetaDataController.prototype.load = function() {
 	if(g_toolinfo.structure != null) {
 		this.meta_structure = g_toolinfo.structure;
+		/*
+		this.meta_structure = new MetaStructure(g_toolinfo.toolkey);
+
+		parse(this.meta_structure);
+		function parse(p) {
+			if(p.content) {
+				//パッケージのとき
+				p.__proto__ = new MetaStructure.Package();
+			}
+			for(var key in p.nestingPackages) {
+				parse(p.nestingPackages[key]);
+			}
+		}
+		*/
 	}else{
 		this.meta_structure = new MetaStructure(g_toolinfo.toolkey);
 	}
-	/*
-	var self = this;
-	$.post('/wb/get-metastructure', { id : toolid },
-			function(data) {
-				if(data) {
-					console.log('loaded json string = '+data);
-					if(data == null || data.length < 3) {
-						self.meta_structure = new MetaStructure();
-					}else{
-						self.meta_structure = JSON.parse(data);
-					}
-				}
-			}, "json");
-	*/
 }
 
 /**
@@ -58,11 +62,49 @@ MetaDataController.prototype.save = function() {
  * リスト取得
  */
 
+MetaDataController.prototype.update = function(uri, attr, value) {
+	var p = this.get(uri);
+	p.content[attr] = value;
+	p.op = 'update';
+	for(var i=0;i < this.changelisteners.length;i++) {
+		this.changelisteners[i](this, p);
+	}
+}
+
+
 /**
  * 
  */
 MetaDataController.prototype.getPackages = function() {
 	return this.meta_structure.nestingPackages;
+}
+
+MetaDataController.prototype.getPackageList = function() {
+	var packages = [];
+	search_package(this.meta_structure);
+	packages.shift();
+	function search_package(p) {
+		packages.push(p);
+		for(key in p.nestingPackages) {
+			search_package(p.nestingPackages[key]);
+		}
+	}
+}
+
+MetaDataController.prototype.getClassList = function() {
+	var classes = [];
+	search_package(this.meta_structure);
+	function search_package(p) {
+		if(p.content && p.content.classes) {
+			for(var key in p.content.classes) {
+				classes.push(p.content.classes[key]);
+			}
+		}
+		for(key in p.nestingPackages) {
+			search_package(p.nestingPackages[key]);
+		}
+	}
+	return classes;
 }
 
 /*
@@ -129,18 +171,37 @@ MetaDataController.prototype.get = function(uri) {
 	}
 }
 
+MetaDataController.prototype.executeCommand = function(cmd) {
+	this.cmdHistory.push(cmd);
+	if(cmd instanceof addCommand) {
+		
+	}
+}
+
 MetaDataController.prototype.rename = function(uri, newName) {
 	var src = this.get(uri);
 	var uri_array = uri.split('.');
 	uri_array.pop();
 	var parent = this.get(uri_array.join('.'));
 	if(src.meta == 'C') {
-		if(parent.content.classes.hasOwnProperty(newName)) {
+		if(parent.content.classes.hasOwnProperty(newName) || newName == '') {
 			//変更後の名前が既に存在
 			return;
 		}
 		parent.content.classes[newName] = src;
 		delete parent.content.classes[src.name];
+		//参照もとも変更
+		//src.name -> newName
+		for(var key in parent.content.classes) {
+			for(var akey in parent.content.classes[key].associations) {
+				var asso = parent.content.classes[key].associations[akey];
+				if(src.name == asso.etype.split('.').pop()) {
+					asso.etype = asso.etype.replace(src.name, newName);
+				}
+			}
+		}
+	}else if(src.meta == 'A'){
+		
 	}else{
 		if(parent.nestingPackages.hasOwnProperty(newName)) {
 			//変更後の名前が既に存在
@@ -150,7 +211,7 @@ MetaDataController.prototype.rename = function(uri, newName) {
 		delete parent.nestingPackages[src.name];
 	}
 	console.log(this.meta_structure);
-	//TODO : gmmeを変えないと
+	//gmmeも変更
 	parent.content.gmme[newName] = parent.content.gmme[src.name];
 	delete parent.content.gmme[src.name];
 	src.name = newName;
@@ -173,6 +234,8 @@ MetaDataController.prototype.addPackage = function(uri, name, type, no) {
 			newPackage = new MetaStructure.Package(name, uri, type, {});
 			parentPackage.nestingPackages[name] = newPackage;
 		}
+		this.check_modified_flg(uri);
+		newPackage.op = 'add';
 	}
 	return newPackage;
 }
@@ -186,9 +249,13 @@ MetaDataController.prototype.delPackage = function(uri) {
 	var n = uri.lastIndexOf('.');
 	var package_name = uri.substring(n + 1);
 	var parent_name = uri.substring(0, n);
-	console.log(package_name + ':' + parent_name);
 	var parent = this.get(parent_name);
-	delete parent.nestingPackages[package_name];
+	if(parent.nestingPackages[package_name].op == 'add') {
+		console.log(package_name + ':' + parent_name);
+		delete parent.nestingPackages[package_name];
+	}else{
+		parent.nestingPackages[package_name].op = 'del';
+	}
 }
 
 /**
@@ -199,8 +266,14 @@ MetaDataController.prototype.updatePackage = function(uri) {
 }
 
 MetaDataController.prototype.check_modified_flg = function(uri) {
-	this.getPackage(uri).modified_after_commit = true;
+//	this.get(uri).modified_after_commit = true;
+	this.get(uri).op = 'update'
 }
+
+MetaDataController.prototype.setOP_updated = function(p) {
+	p.op = 'update'
+}
+
 
 MetaDataController.prototype.addClass = function(uri, name, no) {
 	var parentPackage = this.get(uri);
@@ -215,15 +288,27 @@ MetaDataController.prototype.addClass = function(uri, name, no) {
 			newClass = new MetaStructure.Class(name, parentPackage.parent_uri + '.' + parentPackage.name);
 			parentPackage.content.classes[name] = newClass
 		}
+		this.check_modified_flg(uri);
 	}
 	return newClass;
 }
 
-MetaDataController.prototype.addAssociation = function(uri, name) {
+MetaDataController.prototype.addAssociation = function(uri, name, no) {
 	var parentClass = this.get(uri);
+	var newAsso = null;
 	if(parentClass != null) {
-		parentClass.associations[name] = new MetaStructure.Association(name, uri);
+		if(parentClass.associations.hasOwnProperty(name)) {
+			//同じ名前がある場合
+			if(no == undefined) no = 0;
+			no++;
+			newAsso = this.addAssociation(uri, name + '_' + no, no);
+		}else{
+			newAsso = new MetaStructure.Association(name, uri);
+			parentClass.associations[name] = newAsso
+		}
+		this.check_modified_flg(parentClass.parent_uri);
 	}
+	return newAsso;
 }
 
 MetaDataController.prototype.addProperty = function(uri, name) {

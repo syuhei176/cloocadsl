@@ -51,7 +51,7 @@ is_developper:Boolean</panel_attributes>
 --
 version:Int
 date:Date
-content:tinytext</panel_attributes>
+message_id:message</panel_attributes>
     <additional_attributes/>
   </element>
   <element>

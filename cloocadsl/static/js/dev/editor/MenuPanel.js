@@ -131,7 +131,7 @@ function MenuPanel(wb) {
 	/*
 	 * 積極的にレンダリングする
 	 */
-	Ext.getCmp('menupanel').add(this.panel);
+	Ext.getCmp('ed-menupanel').add(this.panel);
 }
 
 MenuPanel.prototype.getPanel = function() {

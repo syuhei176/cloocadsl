@@ -1,5 +1,5 @@
-function MetaPackageExplorer(metaDataController, wb) {
-	this.metaDataController = metaDataController;
+function ModelExplorer(modelController, wb) {
+	this.modelController = modelController;
 	this.wb = wb;
 	this.selected = null;
 	this.selected_item = null;
@@ -10,7 +10,7 @@ function MetaPackageExplorer(metaDataController, wb) {
 /**
  * レンダリング
  */
-MetaPackageExplorer.prototype.refresh = function() {
+ModelExplorer.prototype.refresh = function() {
 	var self = this;
 	/*
 	 * メタデータコントローラからデータ取得
@@ -98,7 +98,7 @@ MetaPackageExplorer.prototype.refresh = function() {
 	Ext.getCmp('package-explorer').add(this.panel);
 }
 
-MetaPackageExplorer.prototype.create_package = function() {
+ModelExplorer.prototype.create_package = function() {
 	var self = this;
 	var defaultParentPackage = this.selected;
 	/*
@@ -158,7 +158,7 @@ MetaPackageExplorer.prototype.create_package = function() {
 	win.show();
 }
 
-MetaPackageExplorer.prototype.create_class = function() {
+ModelExplorer.prototype.create_class = function() {
 	var self = this;
 	var defaultParentPackage = this.selected;
 	
@@ -200,7 +200,7 @@ MetaPackageExplorer.prototype.create_class = function() {
 }
 
 
-MetaPackageExplorer.prototype.open = function() {
+ModelExplorer.prototype.open = function() {
 	/*
 	選択されているパッケージがDSLかDSMLかを判断して
 	EditorTabPanelにタブを追加する
@@ -219,20 +219,19 @@ MetaPackageExplorer.prototype.open = function() {
 			this.wb.editorTabPanel.add(dsleditor, key);
 		}else{
 			key = key.split(".").join("-"); 
-			var dsml_editor = new DSMLEditor(key, p.name, p, this.metaDataController);
-			//var dsleditor = new GraphiticalMetaModelEditor(key, p.name, p, this.metaDataController, this.wb);
-			this.wb.editorTabPanel.add(dsml_editor, key);
+			var dsleditor = new GraphiticalMetaModelEditor(key, p.name, p, this.metaDataController, this.wb);
+			this.wb.editorTabPanel.add(dsleditor, key);
 		}
 	}
 }
 
-MetaPackageExplorer.prototype.resetting_option = function() {
+ModelExplorer.prototype.resetting_option = function() {
 	/*
 	 * 選択されているパッケージの設定を変更するダイアログを表示する
 	*/
 }
 
-MetaPackageExplorer.prototype.del = function() {
+ModelExplorer.prototype.del = function() {
 	var self = this;
 	/*
 	 * 選択されているパッケージを削除する
@@ -254,7 +253,7 @@ MetaPackageExplorer.prototype.del = function() {
 /*
  * private function
  */
-MetaPackageExplorer.prototype.init_contextmenu = function() {
+ModelExplorer.prototype.init_contextmenu = function() {
 	var self = this;
 	/*
 	 * 右クリックメニューの設定
@@ -320,6 +319,6 @@ MetaPackageExplorer.prototype.init_contextmenu = function() {
     });
 }
 
-MetaPackageExplorer.prototype.change = function() {
+ModelExplorer.prototype.change = function() {
 	this.panel.getStore().getAt().set('text','>');
 }

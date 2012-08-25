@@ -21,35 +21,22 @@ def fetchFromDB():
 """
 def getMyWritableTools(connect, user):
     cur = connect.cursor()
-    cur.execute('SELECT id,tool_info.tool_uri,name,head_version,owner_id FROM tool_info INNER JOIN user_has_tool ON user_has_tool.tool_uri = tool_info.tool_uri AND user_has_tool.user_id = %s AND user_has_tool.permission = 1;', (user['id'], ))
+    cur.execute('SELECT id,tool_info.tool_uri,name,head_version,owner_id FROM tool_info INNER JOIN user_has_tool ON user_has_tool.tool_uri = tool_info.tool_uri AND user_has_tool.user_id = %s AND user_has_tool.permission = 1 ORDER BY tool_info.updated_date DESC;', (user['id'], ))
     rows = cur.fetchall()
     cur.close()
-    tools = []
-    for i in range(len(rows)):
-        tool = {}
-        tool['id'] = rows[i][0]
-        tool['tool_key'] = rows[i][1]
-        tool['name'] = rows[i][2].decode('utf-8')
-        tool['head_version'] = rows[i][3]
-        tool['owner_id'] = rows[i][4]
-        tools.append(tool)
-    return tools
+    return reduce(lambda a,b: [{'id':b[0],
+                               'tool_key':b[1],
+                               'name':b[2].decode('utf-8'),
+                               'head_version':b[3],
+                               'owner_id':b[4],
+                               }] + a, rows, [])
 
 def getMyReadableTools(connect, user):
     cur = connect.cursor()
     cur.execute('SELECT id,tool_info.tool_uri,name,head_version,owner_id FROM tool_info INNER JOIN user_has_tool ON user_has_tool.tool_uri = tool_info.tool_uri AND user_has_tool.user_id = %s;', (user['id'], ))
     rows = cur.fetchall()
     cur.close()
-    tools = []
-    for i in range(len(rows)):
-        tool = {}
-        tool['id'] = rows[i][0]
-        tool['tool_key'] = rows[i][1]
-        tool['name'] = rows[i][2].decode('utf-8')
-        tool['head_version'] = rows[i][3]
-        tool['owner_id'] = rows[i][4]
-        tools.append(tool)
-    return tools
+    return reduce(lambda a,b: [{'id':b[0],'tool_key':b[1],'name':b[2].decode('utf-8'),'head_version':b[3],'owner_id':b[4],}] + a, rows, [])
 
 def getToolInfo(connect, user, tool_key):
     cur = connect.cursor()
@@ -68,7 +55,7 @@ def getToolInfo(connect, user, tool_key):
 """
 ツールの作成
 """
-def create(connect, user, tool_key, tool_name):
+def create(connect, user, tool_key, tool_name, vis):
     cur = connect.cursor()
     cur.execute('SELECT COUNT(*) FROM tool_info WHERE tool_uri=%s;', (tool_key, ))
     tool_count = cur.fetchone()[0]
@@ -76,7 +63,11 @@ def create(connect, user, tool_key, tool_name):
         cur.close()
         return False
     d = datetime.datetime.today()
-    cur.execute('INSERT INTO tool_info (tool_uri,name,created_date,head_version,owner_id) VALUES(%s,%s,%s,%s,%s);',(tool_key, tool_name.encode('utf-8'), d.strftime("%Y-%m-%d"), 1, user['id']))
+    if vis == 'true':
+        visibillity = 1
+    else:
+        visibillity = 0
+    cur.execute('INSERT INTO tool_info (tool_uri,name,created_date,head_version,owner_id,visibillity) VALUES(%s,%s,%s,%s,%s,%s);',(tool_key, tool_name.encode('utf-8'), d.strftime("%Y-%m-%d"), 1, user['id'], visibillity))
     tool_id = cur.lastrowid
     cur.execute('INSERT INTO user_has_tool (user_id,tool_uri,permission,is_bought) VALUES(%s,%s,%s,%s);',(user['id'], tool_key, 1, 0))
     connect.commit()
@@ -106,7 +97,7 @@ def create_simple_DSML(connect):
 def load_from_ws(connect, user, tool_key):
     cur = connect.cursor()
     #cur.execute('SELECT metamodel,notation,wellcome_message FROM tool_workspace WHERE tool_uri = %s AND user_id = %s;', (tool_key, user['id'],))
-    cur.execute('SELECT tool_uri, metamodel FROM tool_workspace WHERE tool_uri = %s AND user_id = %s;', (tool_key, user['id'],))
+    cur.execute('SELECT tool_uri, metamodel,current_version FROM tool_workspace WHERE tool_uri = %s AND user_id = %s;', (tool_key, user['id'],))
     rows = cur.fetchall()
     cur.close()
     if len(rows) == 0:
@@ -117,6 +108,7 @@ def load_from_ws(connect, user, tool_key):
     tool['metamodel'] = rows[0][1].decode('utf-8')
     #tool['notaion'] = rows[0][1]
     #tool['wellcome_message'] = rows[0][2]
+    tool['current_version'] = rows[0][2]
     return tool
 
 """
@@ -126,16 +118,27 @@ def checkout(connect, user, tool_key):
     cur = connect.cursor()
     cur.execute('SELECT COUNT(*) FROM user_has_tool WHERE user_id=%s AND tool_uri=%s;', (user['id'], tool_key, ))
     has_tool_count = cur.fetchone()[0]
+    cur.execute('SELECT name,head_version,visibillity FROM tool_info WHERE tool_uri = %s;', (tool_key, ))
+    row = cur.fetchone()
+    toolname = row[0]
+    rep_version = int(row[1])
+    visibillity = int(row[2])
     if has_tool_count == 0:
-        cur.close()
-        return None
-    cur.execute('SELECT name FROM tool_info WHERE tool_uri = %s;', (tool_key, ))
-    rows = cur.fetchall()
+        if visibillity == 0:
+            cur.close()
+            return None
+        else:
+            cur.execute('INSERT INTO user_has_tool (user_id,tool_uri,permission,is_bought) VALUES(%s,%s,%s,%s);',(user['id'], tool_key, 1, 0))
+            connect.commit()
     d = datetime.datetime.today()
     cur.execute('INSERT INTO tool_workspace (user_id,tool_uri,checkout_date) VALUES(%s,%s,%s);',(user['id'], tool_key, d.strftime("%Y-%m-%d"), ))
-    cur.execute('UPDATE tool_workspace SET metamodel=%s WHERE tool_uri=%s AND user_id=%s;', ('', tool_key, user['id'], ))
+    result = updateImpl.update_impl(connect, user, tool_key, rep_version, False)
+    #cur.execute('UPDATE tool_workspace SET metamodel=%s WHERE tool_uri=%s AND user_id=%s;', (result['metamodel'], tool_key, user['id'], ))
     connect.commit()
     cur.close()
+    tool['tool_key'] = tool_key
+    tool['toolname'] = toolname
+    tool['metamodel'] = result['metamodel']
     return tool
 
 """
@@ -221,7 +224,7 @@ def commit(connect, user, tool_key, comment):
         metamodel = json.loads(metamodel_json)
         result = commitImpl.commit_impl(connect, user, metamodel, tool_key, rep_version + 1, comment)
         if result == 5:
-            result = updateImpl.update_impl(connect, user, tool_key, rep_version + 1)
+            result = updateImpl.update_impl(connect, user, tool_key, rep_version + 1, False)
     else:
         #ワークスペースとリポジトリのバージョンが一致していない
         result = 2
@@ -245,7 +248,7 @@ def update(connect, user, tool_key):
     cur.close()
     resp.success = True
     resp.code = 1
-    resp.content = updateImpl.update_impl(connect, user, tool_key, rep_version)
+    resp.content = updateImpl.update_impl(connect, user, tool_key, rep_version, True)
     return resp
 
 """

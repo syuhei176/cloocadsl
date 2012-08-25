@@ -21,6 +21,7 @@ from clooca.account import LoginService
 from clooca.account import UserService
 import clooca.repository.tool
 import clooca.sns.friend
+import clooca.sns.message
 import clooca.workbench.wb
 app = Flask(__name__)
 
@@ -48,7 +49,10 @@ id:2
 @app.route('/home')
 def home():
     if 'user' in session:
-        return render_template('home.html')
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        feeds = clooca.sns.message.homeFeed(connect, session['user'], 5)
+        connect.close()
+        return render_template('home.html', feeds=feeds)
     return redirect(url_for('index'))
 
 """
@@ -114,8 +118,10 @@ def tool_info_view(tool_key):
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         result = clooca.repository.tool.getToolInfo(connect, session['user'], tool_key)
+        messages = clooca.sns.message.toolFeed(connect, session['user'], tool_key, 5)
+        commits = clooca.sns.message.toolCommit(connect, session['user'], tool_key, 5)
         connect.close()
-        return render_template('top_loggedin.html', user=session['user'], mode='toolinfo', tool=result)
+        return render_template('top_loggedin.html', user=session['user'], mode='toolinfo', tool=result, messages=messages, commits=commits)
     return redirect(url_for('index'))
 
 """
@@ -197,7 +203,7 @@ tool
 def tool_create():
     if 'user' in session:
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
-        result = clooca.repository.tool.create(connect, session['user'], request.form['tool_key'], request.form['tool_name'])
+        result = clooca.repository.tool.create(connect, session['user'], request.form['tool_key'], request.form['tool_name'], request.form['vis'])
         connect.close()
         return json.dumps(result)
     return 'false'
@@ -214,7 +220,6 @@ def tool_delete():
 """
 SNS
 """
-
 
 """
 id:50
@@ -259,6 +264,15 @@ def friend_requests():
         return render_template('/sns/friend_requests.html', items=result)
     return render_template('login.html')
 
+@app.route('/sns/friends')
+def friends():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.sns.friend.getFriendList(connect, session['user'], 5)
+        connect.close()
+        return render_template('/sns/friend_requests.html', items=result)
+    return render_template('login.html')
+
 """
 id:52
 友達リクエスト申請
@@ -285,6 +299,18 @@ def sns_accept():
         return json.dumps(result)
     return 'null'
 
+@app.route('/sns/myfeed', methods=['GET'])
+def sns_myfeed():
+    if 'user' in session:
+        connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
+        result = clooca.sns.message.myFeed(connect, session['user'], 5)
+        connect.close()
+        return json.dumps(result)
+    return 'null'
+
+"""
+test
+"""
 @app.route('/test/editor')
 def test_editor():
     return render_template('/test/editor.html')

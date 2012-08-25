@@ -45,7 +45,7 @@ MetaStructure.Class = function(name, parent_uri) {
 	this.parent_uri = parent_uri;
 	this.properties = {};
 	this.associations = {};
-	this.generalization = [];
+	this.generalization = null;
 	this.superClass = '';
 	this.notation = '';
 }

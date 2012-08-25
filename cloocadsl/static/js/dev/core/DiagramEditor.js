@@ -8,18 +8,20 @@
  * @param toolController : ツール定義へのインターフェイス
  * @returns
  */
-function DiagramEditor(key, name, diagram, modelController, metamodelController, notationController, toolController, wb) {
+function DiagramEditor(key, name, diagram, modelController, ctool, wb) {
+	console.log(this);
 	var self = this;
 	this.name = name;
 	this.key = key;
 	this.diagram = diagram;
+	//ダイアグラム情報
+	if(!this.diagram.hasOwnProperty('_sys_d')) {
+		this.diagram._sys_d = {};
+	}
 	this.modelController = modelController;
 	this.wb = wb;
-	this.metaDataController = metamodelController;
-	this.notationController = notationController;
-	this.toolController = toolController;
-	console.log('DiagramEditor::' + this.diagram.meta_uri);
-	this.diagram_metaclass = this.metaDataController.get(this.diagram.meta_uri);
+	this.ctool = ctool;
+	this.metaDiagram = this.ctool.getClass(this.diagram._sys_meta);
 	this.tool = null;
 	this.drag_start = new Point2D();
 	this.drag_move_prev = new Point2D();
@@ -146,9 +148,8 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 					this.updateObject(this.selected[i],Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
 				}
 			}else{
-				this.selected.n_props.x += this.drag_move.x-this.drag_move_prev.x;
-				this.selected.n_props.y += this.drag_move.y-this.drag_move_prev.y;
-//				this.updateObject(this.selected,Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+				this.diagram._sys_d[this.selected._sys_uri].x += this.drag_move.x-this.drag_move_prev.x;
+				this.diagram._sys_d[this.selected._sys_uri].y += this.drag_move.y-this.drag_move_prev.y;
 			}
 			this.draw()
 		}
@@ -176,108 +177,90 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 /**
  * 
  */
-DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele, notation) {
-	//this.diagramがヒント
-	//ダイアグラムをヒントにしてノードの追加
-	var klass = this.modelController.newClass('root.test', meta_ele, notation);
-	//オブジェクトの参照元の解決（＊上の関数内でやる可能性もあり）
-	/*
-	candidacy = [this.diagram];
-	var contFeature_array = notation.containmentFeature.split('.');
-	var property_name = contFeature_array.pop();
-	var contFeature = contFeature_array.join('.');
-	//containmentの解決
-	for(var i=0;i < candidacy.length;i++) {
-		if(candidacy[i].meta_uri == contFeature) {
-			console.log(property_name);
-			candidacy[i].properties[property_name].push(klass.id);
+DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele) {
+	//Structureの設定
+	for(var key in this.metaDiagram.associations) {
+		var asso = this.metaDiagram.associations[key];
+		if(asso.type == meta_ele.id && asso.feature == 'contain') {
+			console.log(this.diagram._sys_uri);
+			var instance = this.modelController.add(this.diagram._sys_uri, meta_ele);
+			this.diagram._sys_d[instance._sys_uri] = {
+					uri : instance._sys_uri,
+					x : x,
+					y : y,
+					w : 80,
+					h : 50,
+					child : {}
+			};
+			console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
+			return;
 		}
 	}
-	//・referの解決
-	*/
-	this.modelController.makeRelationship(klass, this.diagram, notation.containmentFeature);
-	this.modelController.makeRelationship(this.diagram, klass, notation.containmentFeature);
-	//位置の設定
-	klass.n_props.x = x;
-	klass.n_props.y = y;
-	console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
 }
 
-DiagramEditor.prototype.addConnection = function(src, dest, meta_ele, notation) {
-	console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」コネクションを追加');
-	//srcとdestがヒント
-	//srcとdestをヒントにしてコネクションの追加
-	this.modelController.makeRelationship(edge, this.diagram);
-	this.modelController.makeRelationship(edge, src);
-	this.modelController.makeRelationship(edge, dest);
+DiagramEditor.prototype.addNodePattern2 = function(x, y, meta_ele, parent) {
+	//Structureの設定
+	var metaParent = this.ctool.getClass(parent._sys_meta);
+	for(var key in metaParent.associations) {
+		var asso = metaParent.associations[key];
+		if(asso.type == meta_ele.id && asso.feature == 'child') {
+			var instance = this.modelController.add(parent._sys_uri, meta_ele);
+			this.diagram._sys_d[parent._sys_uri].child[instance._sys_uri] = {
+					uri : instance._sys_uri,
+					x : x - this.diagram._sys_d[parent._sys_uri].x,
+					y : y - this.diagram._sys_d[parent._sys_uri].y,
+					w : 60,
+					h : 40
+			};
+			this.diagram._sys_d[parent._sys_uri].w = x + 70 - this.diagram._sys_d[parent._sys_uri].x;
+			this.diagram._sys_d[parent._sys_uri].h = y + 50 - this.diagram._sys_d[parent._sys_uri].y;
+			console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
+			return;
+		}
+	}
+}
+
+
+DiagramEditor.prototype.addConnection = function(src, dest, meta_ele) {
 	/*
-	var klass = this.modelController.newClass('root.test', meta_ele, notation);
-	//オブジェクトの参照元の解決（＊上の関数内でやる可能性もあり）
-	//・containmentの解決
-	this.klass.properties[src].push(klass.id);
-	notation.containmentFeature
-	//・referの解決
-	
-	notation.sourceFeature
-	notation.targetFeature
-	this.klass.properties['src'].push(klass.id);
-	this.klass.properties['dest'].push(klass.id);
-	//位置の設定
-	klass.properties.x = x;
-	klass.properties.y = y;
+	console.log('(' + src + ',' + dest + ')に「'+meta_ele.name+'」コネクションを追加');
+	var edge = this.modelController.newClass(this.base_uri, meta_ele, notation);
+	//どれを使うかはコンパイル時に決まる
+	//this.modelController.makeRelationship(this.diagram, notation.containmentFeature, edge);
+	this.modelController.makeRelationship(src, notation.containmentFeature, edge);
+	this.modelController.makeRelationship(edge, notation.sourceFeature, src);
+	this.modelController.makeRelationship(edge, notation.targetFeature, dest);
 	*/
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
+	console.log(this);
 	if(this.tool == null) {
 		this.dragMode = DiagramEditor.DRAG_MOVE;
 		this.selected = this.findNode(x, y);
+		this.createPropertyArea();
 	}else{
-		var meta_ele = this.metaDataController.get(this.tool.uri);
-		var notation = this.notationController.get(this.tool.uri);
-		console.log(notation);
-		if(notation.graph_element_type == 'node') {
-			this.addNodePattern1(x, y, meta_ele, notation);
-		}else if(notation.type == 'connection') {
-			//コネクションの追加
-			this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
-		}
-		/*
-		if(meta_ele.meta == 'C') {
-			//クラスの追加
-			var klass = this.modelController.newClass('root.test', meta_ele, this.notationController.get(this.tool.uri));
-			klass.properties.x = x;
-			klass.properties.y = y;
-			this.diagram.properties[this.tool.attr_name].push(klass);
-//			this.modelController.addClass('root.test', meta_ele);
-		}else if(meta_ele.meta == 'A') {
-		}
-		*/
-		console.log(this.modelController.model);
-	}
-	/*
-	if(this.tool == null) {
-		if(this.clicknode(Number(x), Number(y))) {
-			if(this.dragMode != DiagramEditor.DRAG_RESIZE) this.dragMode = DiagramEditor.DRAG_MOVE;
-		}else if(this.clickedge(x, y)) {
-//			this.dragMode = DiagramEditor.DRAG_POINT;
+		var metaClass = this.ctool.getClass(this.tool.id);
+		var parent = this.findNode(x, y);
+		if(parent) {
+			if(metaClass.gtype == 'node') {
+				//子ノード追加
+				this.addNodePattern2(x, y, metaClass, parent);
+			}else if(metaClass.gtype == 'connection') {
+				//コネクションの追加
+				this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
+			}
 		}else{
-			this.dragMode = DiagramEditor.DRAG_RANGE;
-			this.selected = null;
+			if(metaClass.gtype == 'node') {
+				//ノード追加
+				this.addNodePattern1(x, y, metaClass);
+			}else if(metaClass.gtype == 'connection') {
+				//コネクションの追加
+				this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
+			}
 		}
-	}else if(this.tool.classname == 'MetaObject'){
-		this.diagramController.addObject(x, y, this.tool.id);
-		this.select_button.toggle(true, false);
-	}else if(this.tool.classname == 'MetaRelation'){
-		this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
-	}else{
-		console.log('click tool='+this.metaDataController.get(this.tool.uri).name);
-		
-		this.modelController.addClass('root.test', this.metaDataController.get(this.tool.uri))
-		
-		console.log(this.modelController.model);
+		console.log(this.modelController.getModel());
 	}
-	*/
 	this.drag_start.x = x;
 	this.drag_start.y = y;
 	this.draw();
@@ -287,18 +270,11 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.x = x;
 	this.drag_end.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
-		var meta_ele = this.metaDataController.get(this.tool.uri);
-		var assoc = this.modelController.newAssociation('root.test', meta_ele, this.notationController.get(this.tool.uri));
+		var src = this.findNode(this.drag_start.x, this.drag_start.y);
+		var target = this.findNode(this.drag_end.x, this.drag_end.y);
+		var meta_ele = this.ctool.getClass(this.too.id);
+		this.addConnection(src, target, meta_ele);
 		/*
-		this.drag_start
-		this.drag_end
-		this.notationController.get(this.tool.uri)
-		*/
-		assoc.properties.m1 = x;
-		assoc.properties.m2 = y;
-		this.diagram.properties[this.tool.attr_name].push(klass.id);
-		/*
-		this.diagramController.addRelationship(this.drag_start, this.drag_end, this.tool.id);
 		this.select_button.toggle(true);
 		*/
 	}else if(this.dragMode == DiagramEditor.DRAG_POINT) {
@@ -312,33 +288,124 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 }
 
 DiagramEditor.prototype.findNode = function(x, y) {
-	var nodes = this.modelController.getRelatedClasses(this.diagram, {});
-	for(var i=0;i < nodes.length;i++) {
-		if(nodes[i].n_props.x < x && x < nodes[i].n_props.x + 32) {
-			if(nodes[i].n_props.y < y && y < nodes[i].n_props.y + 32) {
-				return nodes[i];
+	for(var key in this.diagram._sys_d) {
+		var node = this.diagram._sys_d[key];
+		if(node.x < x && x < node.x + node.w) {
+			if(node.y < y && y < node.y + node.h) {
+				for(var ckey in this.diagram._sys_d[key].child) {
+					var child = this.diagram._sys_d[key].child[ckey];
+					if(node.x + child.x < x && x < node.x + child.x + child.w) {
+						if(node.y + child.y < y && y < node.y + child.y + child.h) {
+							return this.modelController.get(ckey);
+						}
+					}
+				}
+				return this.modelController.get(key);
 			}
 		}
 	}
+	return null;
 }
 
 DiagramEditor.prototype.draw = function() {
-//	this.canvas = $('#canvas-'+this.key);
 	this.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: this.width,height: this.height, fromCenter: false});
-	var nodes = this.modelController.getRelatedClasses(this.diagram, {});
-	for(var i=0;i < nodes.length;i++) {
-		var notation = this.notationController.get(nodes[i].meta_uri);
-		if(notation != undefined && notation.gtype == 'node') {
-			if(notation.shape == 'rect') {
+	for(var key in this.diagram._sys_d) {
+		var elem = this.modelController.get(key);
+		var metaClass = this.ctool.getClass(elem._sys_meta);
+		//containment feature
+		//diagram infomation
+		if(metaClass.shape == 'rect') {
+			var col = "#000";
+			if(this.selected && key == this.selected.id) {
+				col = "#00f";
+			}
+			this.canvas.drawRect({
+				strokeStyle: col,
+				fillStyle: "#fff",
+				x: this.diagram._sys_d[key].x, y: this.diagram._sys_d[key].y,
+				width: this.diagram._sys_d[key].w, height: this.diagram._sys_d[key].h,
+				fromCenter: false}
+			);
+			/*
+			for(var i=0;i < notation.labels.length;i++) {
+				var prop = this.modelController.get(this.base_uri + '.' + key).props[notation.labels[i]];
+				if(prop instanceof Array) {
+					
+				}else{
+					this.canvas.drawText({
+						  fillStyle: "#000",
+						  x: this.arino.nodes[key].x, y: this.arino.nodes[key].y,
+						  text: prop,
+						  align: "center",
+						  baseline: "middle",
+						  font: "16px 'ＭＳ ゴシック'"
+						});
+				}
+			}
+			*/
+			for(var ckey in this.diagram._sys_d[key].child) {
+				var child = this.diagram._sys_d[key].child[ckey];
 				this.canvas.drawRect({
-					strokeStyle: "#000",
-					x: nodes[i].n_props.x, y: nodes[i].n_props.y,
-					width: 32, height: 32,
+					strokeStyle: col,
+					fillStyle: "#fff",
+					x: this.diagram._sys_d[key].x + child.x, y: this.diagram._sys_d[key].y + child.y,
+					width: child.w, height: child.h,
 					fromCenter: false}
 				);
 			}
 		}
 	}
+	/*
+	for(var key in this.arino.connections) {
+		var notation = this.notationController.get(this.arino.connections[key].meta_uri);
+		var elem = this.modelController.get(this.base_uri + '.' + key);
+		var src_id = elem.a_props[notation.sourceFeature.split('.').pop()];
+		var target_id = elem.a_props[notation.targetFeature.split('.').pop()];
+		console.log(notation.sourceFeature.split('.').pop());
+		this.canvas.drawLine({
+			  strokeStyle: "#777",
+			  strokeWidth: 2,
+			  strokeCap: "round",
+			  strokeJoin: "miter",
+			  x1: this.arino.nodes[src_id].x, y1: this.arino.nodes[src_id].y,
+			  x2: this.arino.nodes[target_id].x, y2: this.arino.nodes[target_id].y
+			});
+	}
+	*/
+	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
+		this.canvas.drawLine({
+			  strokeStyle: "#777",
+			  strokeWidth: 2,
+			  strokeCap: "round",
+			  strokeJoin: "miter",
+			  x1: this.drag_start.x, y1: this.drag_start.y,
+			  x2: this.drag_move.x, y2: this.drag_move.y
+			});
+	}
+}
+
+DiagramEditor.prototype.createPropertyArea = function() {
+	if(this.selected == null) return;
+	var self = this;
+	var props = [];
+	var metaElem = this.metaDataController.get(this.selected.meta_uri);
+	for(var key in metaElem.properties) {
+		props.push({
+	        	name: key,
+	        	xtype: 'textfield',
+	        	fieldLabel: key,
+	        	value: this.selected.props[key],
+	        	listeners : {
+	        		change : {
+	        			fn : function(textField, newValue) {
+	        				console.log(textField.name);
+	        				self.modelController.get(self.base_uri + '.' + self.selected.id).props[key] = newValue;
+	        			}
+	        		}
+	        	}
+			});
+	}
+	this.wb.statuspanel.setPropertyPanel(props);
 }
 
 DiagramEditor.prototype.createButton = function() {
@@ -354,17 +421,17 @@ DiagramEditor.prototype.createButton = function() {
 	    		self.tool = null;
 	    	}
 		});
-		for(var key in this.toolController.getlist()) {
-			var tool = this.toolController.getlist()[key];
+		var tools = this.metaDiagram.toolpalet;
+		for(var i=0;i < tools.length;i++) {
 			var item = {
 			    	xtype : 'button',
-			    	text : tool.name,
+			    	text : tools[i].name,
 				    enableToggle: true,
 				    toggleGroup: 'tools',
-			    	key : key,
+			    	key : i,
 			    	handler :function(btn){
 			    		console.log('test '+btn.key);
-			    		self.tool = self.toolController.getlist()[btn.key];
+			    		self.tool = self.metaDiagram.toolpalet[btn.key];
 			    	}
 			};
 			items.push(item);
@@ -383,11 +450,21 @@ DiagramEditor.prototype.createButton = function() {
 
 
 
-
 /*
  * private
  */
-
+DiagramEditor.prototype.deleteSelected = function() {
+	if(this.selected) {
+		//図から削除
+		delete this.arino.nodes[this.selected.id];
+		//モデルから削除
+		this.modelController.delClass(this.base_uri + '.' + this.selected.id);
+		//選択解除
+		this.selected = null;
+		return true;
+	}
+	return false;
+}
 
 DiagramEditor.prototype.getMenuContext = function() {
 	var self = this;

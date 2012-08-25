@@ -6,6 +6,7 @@
 function CloocaWorkbench(option) {
 	this.option = option;
 	this.editorTabPanel = new EditorTabPanel();
+	this.editorTabPanel_preview = new EditorTabPanel();
 	this.init_layout();
 	this.menupanel = new MenuPanel(this);
 	this.menupanel.setAvailabledRedo(false);
@@ -24,6 +25,19 @@ function CloocaWorkbench(option) {
 	this.notationExplorer = new NotationExplorer(this.notationController, this);
 	
 	this.vcs = new VersionControllSystem(this);
+	
+	var self = this;
+	this.metaDatacontroller.addChangeListener(function(){
+		//preview
+		var toolCompiler = new ToolCompiler(self.metaDatacontroller.getMetaModel());
+		toolCompiler.Compile();
+		self.modelController.setCtool(toolCompiler.getCompiledTool());
+		self.modelExplorer = new ModelExplorer(self.modelController, null, toolCompiler.getCompiledTool());
+	});
+	var toolCompiler = new ToolCompiler(self.metaDatacontroller.getMetaModel());
+	toolCompiler.Compile();
+	this.modelController = new ModelController(toolCompiler.getCompiledTool());
+	this.modelExplorer = new ModelExplorer(this.modelController, this, toolCompiler.getCompiledTool());
 }
 
 CloocaWorkbench.prototype.init_layout = function() {
@@ -35,8 +49,36 @@ CloocaWorkbench.prototype.init_layout = function() {
 		    	   html:'',
 		    	   width:'100px',
 		    	   region:'center',
+		    	   /*
 		    	   layout: 'fit',
 		    	   items : [this.editorTabPanel.getPanel()]
+		    	   */
+		    	   autoScroll : true,
+		    	   layout:'accordion',
+		    	   defaults: {
+		    	        bodyStyle: 'padding:15px'
+		    	   },
+		    	   layoutConfig: {
+		    	        titleCollapse: false,
+		    	        animate: true,
+		    	        activeOnTop: true
+		    	   },
+		    	   items: [{
+    		    	   title:'Package Explorer',
+    		    	   html:' ',
+    		    	   layout : 'hbox',
+    		    	   items : [
+    		    		   this.editorTabPanel.getPanel(),
+    		    		   {
+    		    			   id : 'model-explorer',
+    		    			   title : 'ModelExplorer'
+    		    		   },
+    		    		   this.editorTabPanel_preview.getPanel()
+    		    	   ]
+		    	   },{
+    		    	   title:'Template Explorer',
+    		    	   html:' '
+		    	   }]
 		       }),
 		       new Ext.Panel({
 		    	   id:'menupanel',
@@ -60,7 +102,7 @@ CloocaWorkbench.prototype.init_layout = function() {
 		    	   html:' ',
 		    	   margins:'0 0 0 3',
 		    	   region:'west',
-		    	   width: 240,
+		    	   width: 280,
 		    	   height: 300,
 		    	   collapsible:true,
 		    	   split:true,
