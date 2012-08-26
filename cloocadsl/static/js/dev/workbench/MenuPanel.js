@@ -84,11 +84,6 @@ function MenuPanel(wb) {
             text: 'コミット',
             iconCls: 'add16',
         	handler : onItemClick
-        },{
-            id: 'quick-preview',
-            text: 'プレビュー',
-            iconCls: 'add16',
-        	handler : onItemClick
         }]
     };
 	function　onItemClick(item) {
@@ -110,10 +105,6 @@ function MenuPanel(wb) {
 			 },null,true,'');
 		}else if(item.id == 'vcs-update') {
 			self.wb.vcs.update();
-		}else if(item.id == 'quick-preview') {
-			var pm = new PreviewManager(self.wb);
-			pm.init();
-			pm.run();
 		}
 	}
 	/*

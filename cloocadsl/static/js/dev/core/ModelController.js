@@ -18,31 +18,53 @@ ModelController.prototype.getModel = function() {
 }
 
 /**
+ * elemにklassのインスタンスを追加する
+ * @param parent
+ * @param klass
+ */
+ModelController.prototype.addInstance = function(parent, klass) {
+	var parentMetaClass = this.ctool.getClass(parent._sys_meta);
+	var asso = parentMetaClass.getContainAssociation(klass);
+	if(!asso) return;
+	var instance = klass.getInstance();
+	if(asso.upper == 1) {
+		parent[asso.name] = instance;
+		instance._sys_uri = parent._sys_uri+'.'+asso.name;
+	}else{
+		parent[asso.name][instance._sys_name] = instance;
+		instance._sys_uri = parent._sys_uri + '.' + asso.name + '.' + instance._sys_name;
+	}
+	return instance;
+}
+
+/**
+ * @param src : インスタンス
+ * @param dest : インスタンス
+ * @param asso : 関連
+ */
+ModelController.prototype.addRelationship = function(src, dest, asso) {
+	/*
+	var srcMetaClass = this.ctool.getClass(src._sys_meta);
+	var destMetaClass = this.ctool.getClass(dest._sys_meta);
+	var assos = srcMetaClass.Association(destMetaClass);
+	for(var i=0;i < assos.length;i++) {
+		assos[i]
+	}
+	*/
+	if(asso.upper == 1) {
+		src[asso.name] = dest;
+	}else{
+		src[asso.name][dest._sys_name] = dest;
+	}
+}
+
+/**
  * contain
  * @param uri : 
  * @param klass : 
  */
 ModelController.prototype.add = function(uri, klass) {
-	var parent = this.get(uri);
-	var parentMetaClass = this.ctool.getClass(parent._sys_meta);
-	var asso = parentMetaClass.getAssociation(klass);
-	var instance = klass.getInstance();
-	
-	//instance._sys_name = 'a';
-	/*
-	var instance = {
-			_sys_name:'a',
-			_sys_meta:klass.id,
-			_sys_uri:uri+'.'+'a'};
-	*/
-	if(asso.upper == 1) {
-		parent[asso.name] = instance;
-		instance._sys_uri = uri+'.'+asso.name;
-	}else{
-		this.get(uri)[asso.name][instance._sys_name] = instance;
-		instance._sys_uri = uri + '.' + asso.name + '.' + instance._sys_name;
-	}
-	return instance;
+	return this.addInstance(this.get(uri), klass);
 }
 
 ModelController.prototype.rename = function(uri, newName) {

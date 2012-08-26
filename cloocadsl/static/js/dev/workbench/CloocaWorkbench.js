@@ -98,31 +98,36 @@ CloocaWorkbench.prototype.init_layout = function() {
 		    		   		defaults: {
 		    		   		    collapsible: true,
 		    		   		    split: true,
-		    		   		    bodyStyle: 'padding:15px'
+		    		   		    bodyStyle: 'padding:1px'
 		    		   		},
 		    		   		items : [{	//metamodel explorer
 		     		    	   id:'package-explorer',
 		    		    	   title:'Package Explorer',
 		    		   			region:'west',
 		    		   		    margins: '5 0 0 0',cmargins: '5 5 0 0',
-	    		   			    width: 120,minSize: 100,maxSize: 140
+	    		   			    width: 200,minSize: 100,maxSize: 220
 		    		   		},{			//metamodel editor
 		    		   			region:'center',
 		    		   		    collapsible: false,
 		    		   		    split: false,
 	    		   			    items : [this.editorTabPanel.getPanel()]
 		    		   		},{			//metamodel preview
+		    		   			title : 'Preview',
 		    		   			region:'east',
 		    		   		    margins: '5 0 0 0',cmargins: '5 5 0 0',
-	    		   			    width: 300,minSize: 200,maxSize: 350,
-                                layout: 'hbox',
-                                items : [
+	    		   			    width: 400,minSize: 200,maxSize: 600,
+                                autoScroll : true,
+                                scroll : 'horizontal',
+                                items : [{
+                                	width: 800,
+                                    layout: 'hbox',
+                                	items : [
 			    		    		   {
 			    		    			   id : 'model-explorer',
 			    		    			   title : 'ModelExplorer'
 			    		    		   },
-			    		    		   this.editorTabPanel_preview.getPanel()
-			    		    	   ]
+			    		    		   this.editorTabPanel_preview.getPanel()]
+                                }]
 		    		   		}]
 				    	   },{	//template(border)
 				    		   title : 'Template',
@@ -132,12 +137,14 @@ CloocaWorkbench.prototype.init_layout = function() {
 				    			   region:'west',
 			    		    	   title:'Template Explorer',
 			    		   		    collapsible: true,
-			    		   		    split: true
+			    		   		    split: true,
+			    		   		    width : 240,
 				    		   },{			//editor
 				    			   region:'center',
 			    		    	   layout : 'hbox',
 			    		    	   items : [this.editorTabPanel_template.getPanel()]
 				    		   },{			//preview
+				    			   title : 'Preview',
 				    			   region:'east',
 			    		   		    collapsible: true,
 			    		   		    split: true,

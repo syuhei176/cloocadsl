@@ -71,8 +71,7 @@ ModelExplorer.prototype.refresh = function() {
 	    }
 	});
 	this.panel = Ext.create('Ext.tree.Panel', {
-		width: 320,
-	    height: 240,
+	    height: 300,
 	    store: store,
 	    rootVisible: false,
         viewConfig: {                         

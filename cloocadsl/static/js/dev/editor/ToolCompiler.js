@@ -162,6 +162,7 @@ CompiledTool.Class.prototype.getInstance = function() {
 /**
  * checkContain
  */
+/*
 CompiledTool.Class.prototype.checkContain = function(klass) {
 	for(var key in this.associations) {
 		if(this.associations[key].containment) {
@@ -177,10 +178,12 @@ CompiledTool.Class.prototype.checkContain = function(klass) {
 	}
 	return false;
 }
+*/
 
 /**
  * getContains
  */
+/*
 CompiledTool.Class.prototype.getAssociation = function(klass) {
 	for(var key in this.associations) {
 		if(this.associations[key].containment) {
@@ -192,6 +195,44 @@ CompiledTool.Class.prototype.getAssociation = function(klass) {
 	}
 	return null;
 }
+*/
+
+CompiledTool.Class.prototype.getContainAssociation = function(klass) {
+	var assos = [];
+	for(var key in this.associations) {
+		for(var k = klass;k != null;k = k.superClass) {
+			if(this.associations[key].type == k.id) {
+				if(this.associations[key].containment) {
+					return this.associations[key];
+				}
+			}
+		}
+	}
+	if(this.superClass) {
+		return this.superClass.getAssociations(klass);
+	}
+	return null;
+}
+
+/**
+ * @param klass
+ * @param option
+ */
+CompiledTool.Class.prototype.getAssociations = function(klass, option) {
+	var assos = [];
+	for(var key in this.associations) {
+		for(var k = klass;k != null;k = k.superClass) {
+			if(this.associations[key].type == k.id) {
+				assos.push(this.associations[key]);
+			}
+		}
+	}
+	if(this.superClass) {
+		assos = assos.concat(this.superClass.getAssociations(klass));
+	}
+	return assos;
+}
+
 
 CompiledTool.Class.prototype.getName = function() {
 	return this.name;

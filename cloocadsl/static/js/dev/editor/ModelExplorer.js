@@ -6,9 +6,8 @@ function ModelExplorer(modelController, editor, ctool) {
 	this.ctool = ctool;
 	this.panel = Ext.create('Ext.tree.Panel', {
 		store : Ext.create('Ext.data.TreeStore', {fields: ['text',{name:'uri',type:'string'}]}),
-	    width: 220,
-//	    height: 240,
-	    anchor : '100% 100%',
+		width: 240,
+	    height: 320,
 	    rootVisible: false,
 	    autoScroll: true,
 	    scroll : 'vertical'
@@ -97,7 +96,7 @@ ModelExplorer.prototype.create = function(klass) {
 	        	handler: function(okbutton) {
 	        		var name = okbutton.up().down('textfield[name="name"]').value;
 	        		var newInstance = self.modelController.add(self.selected, klass);
-	        		self.modelController.rename(newInstance._sys_uri, name);
+//	        		self.modelController.rename(newInstance._sys_uri, name);
 	        		self.refresh();
 	        		win.hide();
 	        	}

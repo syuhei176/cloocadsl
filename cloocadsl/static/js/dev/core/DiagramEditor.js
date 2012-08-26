@@ -179,9 +179,10 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
  */
 DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele) {
 	//Structureの設定
-	if(this.metaDiagram.checkContain(meta_ele)) {
+	var asso = this.metaDiagram.getContainAssociation(meta_ele);
+	if(asso && asso.feature == 'contain') {
 		console.log(this.diagram._sys_uri);
-		var instance = this.modelController.add(this.diagram._sys_uri, meta_ele);
+		var instance = this.modelController.addInstance(this.diagram, meta_ele);
 		this.diagram._sys_d[instance._sys_uri] = {
 				uri : instance._sys_uri,
 				x : x,
@@ -193,60 +194,77 @@ DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele) {
 		console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
 		return;
 	}
-	/*
-	for(var key in this.metaDiagram.associations) {
-		var asso = this.metaDiagram.associations[key];
-		if((asso.type == meta_ele.id || asso.type == meta_ele.superClass.id) && asso.feature == 'contain') {
-			console.log(this.diagram._sys_uri);
-			var instance = this.modelController.add(this.diagram._sys_uri, meta_ele);
-			this.diagram._sys_d[instance._sys_uri] = {
-					uri : instance._sys_uri,
-					x : x,
-					y : y,
-					w : 80,
-					h : 50,
-					child : {}
-			};
-			console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
-			return;
-		}
-	}
-	*/
 }
 
 DiagramEditor.prototype.addNodePattern2 = function(x, y, meta_ele, parent) {
 	//Structureの設定
 	var metaParent = this.ctool.getClass(parent._sys_meta);
-	for(var key in metaParent.associations) {
-		var asso = metaParent.associations[key];
-		if(asso.type == meta_ele.id && asso.feature == 'child') {
-			var instance = this.modelController.add(parent._sys_uri, meta_ele);
-			this.diagram._sys_d[parent._sys_uri].child[instance._sys_uri] = {
-					uri : instance._sys_uri,
-					x : x - this.diagram._sys_d[parent._sys_uri].x,
-					y : y - this.diagram._sys_d[parent._sys_uri].y,
-					w : 60,
-					h : 40
-			};
-			this.diagram._sys_d[parent._sys_uri].w = x + 70 - this.diagram._sys_d[parent._sys_uri].x;
-			this.diagram._sys_d[parent._sys_uri].h = y + 50 - this.diagram._sys_d[parent._sys_uri].y;
-			console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
-			return;
-		}
+	var asso = metaParent.getContainAssociation(meta_ele);
+	if(asso && asso.feature == 'child') {
+		var instance = this.modelController.addInstance(parent, meta_ele);
+		this.diagram._sys_d[parent._sys_uri].child[instance._sys_uri] = {
+				uri : instance._sys_uri,
+				x : x - this.diagram._sys_d[parent._sys_uri].x,
+				y : y - this.diagram._sys_d[parent._sys_uri].y,
+				w : 60,
+				h : 40
+		};
+		this.diagram._sys_d[parent._sys_uri].w = x + 70 - this.diagram._sys_d[parent._sys_uri].x;
+		this.diagram._sys_d[parent._sys_uri].h = y + 50 - this.diagram._sys_d[parent._sys_uri].y;
+		console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
+		return;
 	}
 }
 
-
 DiagramEditor.prototype.addConnection = function(src, dest, meta_ele) {
-	/*
 	console.log('(' + src + ',' + dest + ')に「'+meta_ele.name+'」コネクションを追加');
-	var edge = this.modelController.newClass(this.base_uri, meta_ele, notation);
-	//どれを使うかはコンパイル時に決まる
-	//this.modelController.makeRelationship(this.diagram, notation.containmentFeature, edge);
-	this.modelController.makeRelationship(src, notation.containmentFeature, edge);
-	this.modelController.makeRelationship(edge, notation.sourceFeature, src);
-	this.modelController.makeRelationship(edge, notation.targetFeature, dest);
-	*/
+	//Structureの設定
+	var srcMeta = this.ctool.getClass(src._sys_meta);
+	var destMeta = this.ctool.getClass(dest._sys_meta);
+	var instance = null;
+	/*
+	 * contain
+	 */
+	var casso = this.srcMeta.getContainAssociation(meta_ele);
+	if(casso && casso.feature == 'contain') {
+		//pattern 1
+		instance = this.modelController.add(src._sys_uri, meta_ele);
+	}else{
+		casso = this.metaDiagram.getContainAssociation(meta_ele);
+		if(casso && casso.feature == 'contain') {
+			//pattern 2
+			instance = this.modelController.addInstance(this.diagram, meta_ele);
+		}else{
+			//no pattern
+			return;
+		}
+	}
+	
+	/*
+	 * src
+	 */
+	var srcAsso = meta_ele.getAssociations(srcMeta);
+	for(var i=0;i < srcAsso.length;i++) {
+		if(srcAsso[i].feature == 'source') {
+			this.modelController.addRelationship(src, instance, srcAsso[i]);
+		}
+	}
+	
+	/*
+	 * dest
+	 */
+	var destAsso = meta_ele.getAssociations(destMeta);
+	for(var i=0;i < destAsso.length;i++) {
+		if(destAsso[i].feature == 'target') {
+			this.modelController.addRelationship(dest, instance, destAsso[i]);
+		}
+	}
+	
+	this.diagram._sys_d[instance._sys_uri] = {
+			uri : instance._sys_uri,
+			gtype : 'connection',
+			points : []
+	};
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
