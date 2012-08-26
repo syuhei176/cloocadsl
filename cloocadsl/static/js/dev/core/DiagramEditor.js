@@ -148,8 +148,8 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 					this.updateObject(this.selected[i],Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
 				}
 			}else{
-				this.diagram._sys_d[this.selected._sys_uri].x += this.drag_move.x-this.drag_move_prev.x;
-				this.diagram._sys_d[this.selected._sys_uri].y += this.drag_move.y-this.drag_move_prev.y;
+				this.selected.x += this.drag_move.x-this.drag_move_prev.x;
+				this.selected.y += this.drag_move.y-this.drag_move_prev.y;
 			}
 			this.draw()
 		}
@@ -196,21 +196,22 @@ DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele) {
 	}
 }
 
-DiagramEditor.prototype.addNodePattern2 = function(x, y, meta_ele, parent) {
+DiagramEditor.prototype.addNodePattern2 = function(x, y, meta_ele, parent, parent_sys_d) {
 	//Structureの設定
 	var metaParent = this.ctool.getClass(parent._sys_meta);
 	var asso = metaParent.getContainAssociation(meta_ele);
 	if(asso && asso.feature == 'child') {
 		var instance = this.modelController.addInstance(parent, meta_ele);
-		this.diagram._sys_d[parent._sys_uri].child[instance._sys_uri] = {
+		parent_sys_d.child[instance._sys_uri] = {
 				uri : instance._sys_uri,
-				x : x - this.diagram._sys_d[parent._sys_uri].x,
-				y : y - this.diagram._sys_d[parent._sys_uri].y,
+				x : x - parent_sys_d.x,
+				y : y - parent_sys_d.y,
 				w : 60,
-				h : 40
+				h : 40,
+				child : {}
 		};
-		this.diagram._sys_d[parent._sys_uri].w = x + 70 - this.diagram._sys_d[parent._sys_uri].x;
-		this.diagram._sys_d[parent._sys_uri].h = y + 50 - this.diagram._sys_d[parent._sys_uri].y;
+		parent_sys_d.w = x + 70 - parent_sys_d.x;
+		parent_sys_d.h = y + 50 - parent_sys_d.y;
 		console.log('(' + x + ',' + y + ')に「'+meta_ele.name+'」ノードを追加');
 		return;
 	}
@@ -271,15 +272,16 @@ DiagramEditor.prototype.ActionDown = function(x, y) {
 	console.log(this);
 	if(this.tool == null) {
 		this.dragMode = DiagramEditor.DRAG_MOVE;
-		this.selected = this.findNode(x, y);
+		this.selected = this.find(x, y);
 		this.createPropertyArea();
 	}else{
 		var metaClass = this.ctool.getClass(this.tool.id);
-		var parent = this.findNode(x, y);
-		if(parent) {
+		var parent_sys_d = this.find(x, y);
+		if(parent_sys_d) {
+			var parent = this.modelController.get(parent_sys_d.uri);
 			if(metaClass.gtype == 'node') {
 				//子ノード追加
-				this.addNodePattern2(x, y, metaClass, parent);
+				this.addNodePattern2(x, y, metaClass, parent, parent_sys_d);
 			}else if(metaClass.gtype == 'connection') {
 				//コネクションの追加
 				this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
@@ -304,8 +306,8 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	this.drag_end.x = x;
 	this.drag_end.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
-		var src = this.findNode(this.drag_start.x, this.drag_start.y);
-		var target = this.findNode(this.drag_end.x, this.drag_end.y);
+		var src = this.modelController.get(this.find(this.drag_start.x, this.drag_start.y).uri);
+		var target = this.modelController.get(this.find(this.drag_end.x, this.drag_end.y).uri);
 		var meta_ele = this.ctool.getClass(this.too.id);
 		this.addConnection(src, target, meta_ele);
 		/*
@@ -321,27 +323,46 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	this.dragMode = DiagramEditor.DRAG_NONE;
 }
 
-DiagramEditor.prototype.findNode = function(x, y) {
-	for(var key in this.diagram._sys_d) {
-		var node = this.diagram._sys_d[key];
-		if(node.x < x && x < node.x + node.w) {
-			if(node.y < y && y < node.y + node.h) {
-				for(var ckey in this.diagram._sys_d[key].child) {
-					var child = this.diagram._sys_d[key].child[ckey];
-					if(node.x + child.x < x && x < node.x + child.x + child.w) {
-						if(node.y + child.y < y && y < node.y + child.y + child.h) {
-							return this.modelController.get(ckey);
-						}
-					}
+DiagramEditor.prototype.find = function(x, y) {
+	var self = this;
+	return findNode();
+	function findNode() {
+		for(var key in self.diagram._sys_d) {
+			var node = self.diagram._sys_d[key];
+			if(node.x < x && x < node.x + node.w) {
+				if(node.y < y && y < node.y + node.h) {
+					var result = findChild(node);
+					if(result) return result;
+					return node;
 				}
-				return this.modelController.get(key);
 			}
 		}
+		return null;
+		function findChild(node) {
+			for(var ckey in node.child) {
+				var child = node.child[ckey];
+				if(node.x + child.x < x && x < node.x + child.x + child.w) {
+					if(node.y + child.y < y && y < node.y + child.y + child.h) {
+						var result = findChild(child);
+						if(result) return result;
+						return child;
+					}
+				}
+			}
+			return null;
+		}
+	}
+	function findConnection() {
+		
+	}
+	function findProperty() {
+		
 	}
 	return null;
 }
 
 DiagramEditor.prototype.draw = function() {
+	var self = this;
 	this.canvas.drawRect({fillStyle: "#fff",x: 0, y: 0,width: this.width,height: this.height, fromCenter: false});
 	for(var key in this.diagram._sys_d) {
 		var elem = this.modelController.get(key);
@@ -360,6 +381,7 @@ DiagramEditor.prototype.draw = function() {
 				width: this.diagram._sys_d[key].w, height: this.diagram._sys_d[key].h,
 				fromCenter: false}
 			);
+			drawChild(this.diagram._sys_d[key]);
 			/*
 			for(var i=0;i < notation.labels.length;i++) {
 				var prop = this.modelController.get(this.base_uri + '.' + key).props[notation.labels[i]];
@@ -377,16 +399,6 @@ DiagramEditor.prototype.draw = function() {
 				}
 			}
 			*/
-			for(var ckey in this.diagram._sys_d[key].child) {
-				var child = this.diagram._sys_d[key].child[ckey];
-				this.canvas.drawRect({
-					strokeStyle: col,
-					fillStyle: "#fff",
-					x: this.diagram._sys_d[key].x + child.x, y: this.diagram._sys_d[key].y + child.y,
-					width: child.w, height: child.h,
-					fromCenter: false}
-				);
-			}
 		}
 	}
 	/*
@@ -416,8 +428,18 @@ DiagramEditor.prototype.draw = function() {
 			  x2: this.drag_move.x, y2: this.drag_move.y
 			});
 	}
-	function drawNode() {
-		
+	function drawChild(node) {
+		for(var ckey in node.child) {
+			var child = node.child[ckey];
+			self.canvas.drawRect({
+				strokeStyle: col,
+				fillStyle: "#fff",
+				x: node.x + child.x, y: node.y + child.y,
+				width: child.w, height: child.h,
+				fromCenter: false}
+			);
+			drawChild(child);
+		}
 	}
 }
 
