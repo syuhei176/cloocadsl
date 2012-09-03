@@ -43,8 +43,8 @@ $(function(){
 	$('input#friend-request').click(function(){
 		$(this).parent().find('input').each(function(){
 			if($(this).val() != '許可') {
-				var user_id = $(this).val();
-				var requesting_user_id = {{user.id}};
+				var user_id = {{user.id}};
+				var requesting_user_id = $(this).val();
 				console.log(requesting_user_id+"|"+user_id);
 				$.post("/sns/accept",
 						{requesting_user_id : user_id},
