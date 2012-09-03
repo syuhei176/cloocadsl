@@ -40,14 +40,20 @@ ModelController.prototype.getModel = function() {
 ModelController.prototype.getCompiledModel = function() {
 	var self = this;
 	return compile(copy(this.model));
+	/*
+	 * elemをコンパイルしてオブジェクトを返す。
+	 */
 	function compile(elem) {
 		var copy_dest = null;
 		if(elem instanceof Object) {
+			//オブジェクトだった場合
 			copy_dest = {};
 		}else{
+			//オブジェクトでない場合
 			if(typeof(elem) == 'string') {
 				var entity = self.get(elem);
 				if(entity) {
+					//参照uriの場合
 					return compile(entity);
 				}
 			}

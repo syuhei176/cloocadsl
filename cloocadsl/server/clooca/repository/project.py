@@ -129,26 +129,32 @@ def delete(connect, user, project_id):
     if not permission == 2:
         return False
     cur = connect.cursor()
-    cur.execute('DELETE FROM project_info WHERE project_key=%s;', (project_key, ))
+    cur.execute('DELETE FROM project_info WHERE project_id=%s;', (project_id, ))
     connect.commit()
     cur.close()
     return True
 
-"""
-"""
-def commit(project_id):
+def commit(connect, user, project_id):
+    """
+    """
     resp = CloocaResponse(0, '', False)
     permission = getProjectAccessInfo(connect, user, project_id)
     if not permission == 2:
         return resp
     resp.code = 1
+    cur = connect.cursor()
+    current_version, model, checkout_date = getProjectWSFromDB(connect, user, project_id)
+    head_version = getProjectInfoFromDB(connect, project_id)
+    if current_version == head_version:
+        resp.code = 1
+    else:
+        resp.code = 2
     return resp
 
-
-"""
-"""
 def update(project_key):
-    #update head version
+    """
+    update head version
+    """
     return True
 
 """
@@ -177,3 +183,25 @@ def getProjectAccessInfo(connect, user, project_id):
         return result
     permission = int(row[0])
     return permission + 1
+
+def getProjectInfoFromDB(connect, project_id):
+    cur = connect.cursor()
+    cur.execute('SELECT head_version FROM project_info WHERE id=%s;', (project_id, ))
+    row = cur.fetchone()
+    if row == None:
+        return None
+    head_version = row[0]
+    cur.close()
+    return (head_version)
+
+def getProjectWSFromDB(connect, user, project_id):
+    cur = connect.cursor()
+    cur.execute('SELECT current_version,model,checkout_date FROM project_workspace WHERE user_id=%s AND project_id=%s;', (user['id'], project_id, ))
+    row = cur.fetchone()
+    if row == None:
+        return None
+    current_version = row[0]
+    model = row[1]
+    checkout_date = row[2]
+    cur.close()
+    return (current_version, model, checkout_date)

@@ -59,6 +59,12 @@ function MenuPanel(wb) {
 						if(data) {
 						}
 					}, "json");
+		}else if(item.id == 'quick-commit') {
+			$.post('/ed-api/commit', { project_id : g_project.id},
+					function(data) {
+						if(data) {
+						}
+					}, "json");
 		}
 	}
 	/*
