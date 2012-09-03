@@ -10,6 +10,7 @@ import json
 from clooca.lang import CloocaResponse
 from toolimpl import commitImpl,updateImpl
 import tool
+from clooca.util import jsonlib
 
 def getMyWritableProjects(connect, user, toolkey):
     """
@@ -177,8 +178,15 @@ def update(connect, user, project_id):
         resp.code = 0
         return resp
     content = row[0]
-    #merge model and content
-    merged_model = content
+    
+    cur.execute('SELECT content FROM model WHERE version=%s AND project_id=%s',(head_version-1, project_id))
+    row = cur.fetchone()
+    if row == None:
+        merged_model = content
+    else:
+        #merge model and content
+        merged_model = jsonlib.merge(json.loads(content), json.loads(model), json.loads(row[0]))
+        merged_model = json.dumps(merged_model)
     num_of_affected_row = cur.execute('UPDATE project_workspace SET model=%s,current_version=%s WHERE project_id=%s AND user_id=%s;', (merged_model, head_version, project_id, user['id'], ))
     connect.commit()
     cur.close()
@@ -205,7 +213,7 @@ def getProjectAccessInfo(connect, user, project_id):
     cur.execute('SELECT permission FROM user_has_project WHERE user_id=%s AND project_id=%s;', (user['id'], project_id, ))
     row = cur.fetchone()
     cur.close()
-    if len(row) == 0:
+    if row == None:
         #アクセス権がない
         result = 0
         return result
