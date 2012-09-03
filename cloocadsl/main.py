@@ -264,6 +264,22 @@ def ed_commit():
         return result.dumps()
     return redirect(url_for('login'))
 
+@app.route('/ed-api/update', methods=['POST'])
+@MySQLConnection
+def ed_update():
+    if 'user' in session:
+        result = clooca.repository.project.update(connect, session['user'], request.form['project_id'])
+        return result.dumps()
+    return redirect(url_for('login'))
+
+@app.route('/ed-api/gen', methods=['POST'])
+@MySQLConnection
+def ed_gen():
+    if 'user' in session:
+        result = clooca.repository.project.update(connect, session['user'], request.form['project_id'])
+        return result.dumps()
+    return redirect(url_for('login'))
+
 
 """
 tool

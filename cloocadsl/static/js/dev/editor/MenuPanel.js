@@ -41,6 +41,11 @@ function MenuPanel(wb) {
             iconCls: 'add16',
         	handler : onItemClick
         },{
+            id: 'quick-update',
+            text: '更新',
+            iconCls: 'add16',
+        	handler : onItemClick
+        },{
             id: 'quick-run',
             text: '実行',
             iconCls: 'add16',
@@ -61,6 +66,12 @@ function MenuPanel(wb) {
 					}, "json");
 		}else if(item.id == 'quick-commit') {
 			$.post('/ed-api/commit', { project_id : g_project.id},
+					function(data) {
+						if(data) {
+						}
+					}, "json");
+		}else if(item.id == 'quick-update') {
+			$.post('/ed-api/update', { project_id : g_project.id},
 					function(data) {
 						if(data) {
 						}

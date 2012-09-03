@@ -146,16 +146,44 @@ def commit(connect, user, project_id):
     current_version, model, checkout_date = getProjectWSFromDB(connect, user, project_id)
     head_version = getProjectInfoFromDB(connect, project_id)
     if current_version == head_version:
+        next_version = current_version + 1
         resp.code = 1
+        cur.execute('INSERT INTO model (version,content,project_id) VALUES(%s,%s,%s);',(next_version, model, project_id))
+        cur.execute('UPDATE project_info SET head_version=%s WHERE id=%s;', (next_version, project_id, ))
+        connect.commit()
+        resp.success = True
+        resp.content = model
     else:
         resp.code = 2
     return resp
 
-def update(project_key):
+def update(connect, user, project_id):
     """
     update head version
     """
-    return True
+    resp = CloocaResponse(0, '', False)
+    permission = getProjectAccessInfo(connect, user, project_id)
+    if not permission == 2:
+        return resp
+    resp.code = 1
+    cur = connect.cursor()
+    current_version, model, checkout_date = getProjectWSFromDB(connect, user, project_id)
+    head_version = getProjectInfoFromDB(connect, project_id)
+    cur = connect.cursor()
+    cur.execute('SELECT content FROM model WHERE version=%s AND project_id=%s',(head_version, project_id))
+    row = cur.fetchone()
+    if row == None:
+        cur.close()
+        resp.code = 0
+        return resp
+    content = row[0]
+    #merge model and content
+    merged_model = content
+    num_of_affected_row = cur.execute('UPDATE project_workspace SET model=%s,current_version=%s WHERE project_id=%s AND user_id=%s;', (merged_model, head_version, project_id, user['id'], ))
+    connect.commit()
+    cur.close()
+    resp.content = content
+    return resp
 
 """
 """

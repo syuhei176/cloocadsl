@@ -1,3 +1,9 @@
+/*
+ * Copyright 2012 Technical Rockstars inc.
+ * 
+ * ModelController.js
+ * 
+ */
 function ModelController(ctool, model) {
 //	this.model = new Model();
 	/*
@@ -39,11 +45,14 @@ ModelController.prototype.getModel = function() {
  */
 ModelController.prototype.getCompiledModel = function() {
 	var self = this;
-	return compile(copy(this.model));
+	var restoreCode = [];
+	var root = compile(copy(this.model), null, 'root');
+	eval(restoreCode.join(';'));
+	return root;
 	/*
 	 * elemをコンパイルしてオブジェクトを返す。
 	 */
-	function compile(elem) {
+	function compile(elem, parent, uri) {
 		var copy_dest = null;
 		if(elem instanceof Object) {
 			//オブジェクトだった場合
@@ -54,7 +63,8 @@ ModelController.prototype.getCompiledModel = function() {
 				var entity = self.get(elem);
 				if(entity) {
 					//参照uriの場合
-					return compile(entity);
+					restoreCode.push(uri+'='+elem.replace('undefined', 'root'));
+					return 'dammy'
 				}
 			}
 			return elem;
@@ -66,23 +76,7 @@ ModelController.prototype.getCompiledModel = function() {
 		for(var key in elem) {
 			if(key == '0') continue;
 			if(key.substr(0,4) == '_sys') continue;
-			copy_dest[key] = compile(elem[key]);
-
-			/*
-			var _is_contain = true;
-			if(key == '0') continue;
-			if(key.substr(0,4) == '_sys') continue;
-			console.log(key);
-			if(typeof(elem[key]) == 'string') {
-				var entity = mc.get(elem[key]);
-				console.log('compile'+elem[key]);
-				if(entity) {
-					elem[key] = entity;
-					_is_contain = false;
-				}
-			}
-			if(_is_contain) compile(elem[key]);
-			*/
+			copy_dest[key] = compile(elem[key], elem, uri + '.' + key);
 		}
 		return copy_dest;
 	}

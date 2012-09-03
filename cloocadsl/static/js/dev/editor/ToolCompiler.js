@@ -238,7 +238,7 @@ CompiledTool.Class.prototype.getInstance = function() {
 	if(this.idprop) {
 		id = 'unNamed' + this.id + model_idgen.getNewId();
 	}else{
-		id = model_idgen.getNewId();
+		id = 'id' + model_idgen.getNewId();
 	}
 	var instance = {
 			_sys_name:id,
