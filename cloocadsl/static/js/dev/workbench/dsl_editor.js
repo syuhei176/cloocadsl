@@ -6,8 +6,8 @@ function DSLEditor(key, name, metaDataController) {
 		id: 'dsleditor-'+this.key,
 		title: name,
 		layout : 'fit',
-		width : 480,
-		height : Ext.getCmp('centerpanel').getHeight() - 120,
+		width : Ext.getCmp('metamodel-centerpanel').getWidth() - 10,
+		height : Ext.getCmp('metamodel-centerpanel').getHeight() - 50,
 		html : '<textarea id="dsleditor-textarea-'+this.key+'" style="font-size:32pt;">' + this.metaDataController.get(this.key).content + '</textarea>',
 		autoScroll: true,
 		closable: true
@@ -47,4 +47,9 @@ DSLEditor.prototype.onActivate = function() {
 
 DSLEditor.prototype.onDeactivate = function() {
 	
+}
+
+DSLEditor.prototype.onResize = function(w, h) {
+	this.panel.setWidth(w - 10);
+	this.panel.setHeight(h - 50);
 }

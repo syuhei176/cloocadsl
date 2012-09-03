@@ -1,28 +1,12 @@
-<!DOCTYPE  html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>clooca</title>
-		
-		<!-- CSS -->
-		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
-		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
-    	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
-    	<style>
-    	.slideshow {
-    	margine 32px 32px 32px 32px;
-    	width: 600px;
-    	height: 500px;
-    	background-image: url("/static/images/m31.jpeg")
-    	}
-    	#register-form-container {
-    	position:absolute;
-    	top: 200px;
-    	left: 400px;
-    	}
-    	</style>
-    	<script src="/static/js/lib/jquery-1.7.1.min.js"></script>
-	    <script src="/static/js/lib/jquery-ui-1.8.18.custom.min.js"></script>
+<!DOCTYPE html>
+<html class='no-js'>
+<head>
+    <meta charset='UTF-8' />
+    <title>clooca</title>
+    <meta content='width=device-width' name='viewport' />
+    <link href='/static/css/style-naoe.css' rel='stylesheet' />
+    <script src='/static/js/lib/modernizr.js'></script>
+    <script src="/static/js/lib/jquery-1.7.1.min.js"></script>
 	    <script>
 	    <!--
 	    $(function(){
@@ -61,60 +45,131 @@
 
 		  -->
 	    </script>
-	</head>
-	
-	<body class="home">
-		<!-- WRAPPER -->
-		<div id="wrapper">
-			<div id="header">
-				<div class="logo">
-					<a href="#">clooca</a>
-				</div>
-				<div id="menu-wrapper">
-					<ul id="menu">
-					<li><a href="#">アイコン１</a></li>
-					<li><a href="#">アイコン１</a></li>
-			    	</ul>
-			    </div>
-				<div class="login">
-				<a href="/login">ログイン</a>
-				</div>
-			</div>
-			<div id="main">
-			<section class="wrapper">
-      		<div class='slideshow' id='slideStandard'>
-				<div id="register-form-container">
+  </head>
+<body class="index">
+<div class='container'>
+      <header>
+        <div class='wrapper'>
+          <a class='symbolset-logo' href='./index.html'>
+          <img alt='clooca game' src='img/clooca_logo_1.png' />
+          </a><br>
+          <nav class="right">
+          	<a href='./register.html'>新規登録</a>
+       	  <a href='/login'>ログイン</a> 
+          <a href='dashboard.html'>ゲームをはじめる！</a> </nav>
+        </div>
+      </header>
+      			<div id="register-form-container">
 				<form id="registerForm" action="register-to">
 				<div>メールアドレス<input type="text" name="email"/></div>
 				<input type="submit" value="新規登録" class="button-type2" style="width:200px;" />
 				</form>
 				</div>
-        	</div>
-      		</section>
-      		      <section class='wrapper features'>
-        <h1 class='big'>clooca gameはこういうもんですよー。</h1>
+	  <section class="wrapper">
+      	<div class='slideshow' style="min-width: 650px;">
+        	<div class="leftImgBox">
+            	<a href="dashboard.html"><img alt='' src='img/images/top_01.jpeg' /></a>
+            </div>
+            <div class="rightMenuBox">
+            	<ul>
+                	<li>
+                    	<a class='addCart button' href="#" rel="nofollow">ゲーム１</a>
+                    </li>
+                    <li>
+                    	<a class='addCart button' href="#" rel="nofollow">ゲーム２</a>
+                    </li>
+                    <li>
+                    	<a class='addCart button' href="#" rel="nofollow">ゲーム３</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+      </section>
+    
+      
+      <section class='wrapper features'>
         <div class='semantic third'>
-          <img alt='' class='retina' src='../public/img/feature_01.png' />
-          <h3>Entry</h3>
+          <img alt='' class='retina' src='img/images/pages-icon.png' />
+          <h3>はじめに</h3>
           <p>まずはアカウント登録から。光の早さで終わるよー。簡単だよーっと。</p>
         </div>
         <div class='encoded third'>
-          <img alt='' class='retina' src='../public/img/feature_02.png' />
-          <h3>Design</h3>
+          <img alt='' class='retina' src='img/images/numbers-icon.png' />
+          <h3>チュートリアル</h3>
           <p>モデル書くだけ。とか適当なキャッチコピーをつらつらと</p>
         </div>
         <div class='lightweight third'>
-          <img alt='' class='retina' src='../public/img/feature_03.png' />
-          <h3>Fight!</h3>
+          <img alt='' class='retina' src='img/images/keynote-icon.png' />
+          <h3>ドキュメント</h3>
           <p>コーディングとかないよー。お絵かきしたらいきなりバトルだよーっと</p>
         </div>
       </section>
-      開発者登録
-				</div>
-			<div id="footer">
-			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.
-			</div>
-		</div>
-		<!-- ENDS WRAPPER -->
-	</body>
+      <section class='wrapper set'>
+        <aside class='pos'>
+          <a class='addCart button' href="/checkout" rel="nofollow">clooca Market</a>
+          <div class='promo'>
+            なんか宣伝する？<br/> プロモーションスペース<br/> <a href="/clooca">clooca game &gt;</a>
+          </div>
+
+          <div class='info'>
+          	<div class="center">
+            	clooca
+            </div>
+            <div class='half'>
+              <b>100+</b>
+              <span>Users</span>
+            </div>
+            <div class='half'>
+              <b>10+</b>
+              <span>Tools</span>
+            </div>
+          </div>
+        </aside>
+        <div class='copy'>
+          <h2>Model Design</h2>
+          <p>設計について語るのか？</p>
+          
+          <p>モデル設計を面白おかしく説明。文章がないので以下ぼっちゃん</p>
+          <p>親譲の無鉄砲で小供の時から損ばかりしている。小学校に居る時分学校の二階から飛び降りて一週間ほど腰を抜ぬかした事がある。なぜそんな無闇をしたと聞く人があるかも知れぬ。別段深い理由でもない。新築の二階から首を出していたら、同級生の一人が冗談に、いくら威張ても、そこから飛び降りる事は出来まい。 </p>
+        </div>
+      </section>
+      <section class='wrapper set'>
+      <aside class='pos'>
+          <div class='promo'>
+            なんか宣伝する？<br/> プロモーションスペース<br/> <a href="/clooca">clooca &gt;</a>
+          </div>
+        </aside>
+        <div class='copy'>
+          <h2>What's New?</h2>
+          <p>なんか新しいことあった？へいへいへいへい。ランキング機能はいったで。</p>
+          
+          <p>一昔前はこんなことやったんで。お腹すいた</p>
+          
+          <p>さらに昔はこんなことやったんで。もう忘れたけど。</p>
+        </div>
+      </section>
+
+  </div> <!-- end .container -->
+  <footer>
+      <div class='wrapper'>
+        <nav>
+          <ul>
+            <li>clooca</li>
+            <li>
+              <a href='/policy'>Privacy Policy</a>
+            </li>
+            <li>
+              <a href='mailto:syuhei176@gmail.com'>Contact</a>
+            </li>
+          </ul>
+        </nav>
+        <div class='copyright'>
+          <span>
+            Copyright &copy; 2012
+          <a href='http://technicalrockstars.co.jp/' target='_blank'>株式会社Technical Rockstars All Rights Reserved.</a>
+          </span>
+        </div>
+      </div>
+</footer>
+</body>
 </html>

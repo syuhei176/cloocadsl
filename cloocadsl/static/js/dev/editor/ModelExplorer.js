@@ -1,7 +1,8 @@
-function ModelExplorer(modelController, editor, ctool) {
+function ModelExplorer(modelController, editor, ctool, editorTabPanel) {
 	var self = this;
 	this.modelController = modelController;
 	this.editor = editor;
+	this.editorTabPanel = editorTabPanel;
 	this.selected = null;
 	this.ctool = ctool;
 	this.panel = Ext.create('Ext.tree.Panel', {
@@ -27,32 +28,45 @@ function ModelExplorer(modelController, editor, ctool) {
 /**
  * レンダリング
  */
-ModelExplorer.prototype.refresh = function() {
+ModelExplorer.prototype.refresh = function(point_uri) {
 	var self = this;
 	/*
 	 * モデルコントローラからデータ取得
 	 */
 	var model = this.modelController.getModel();
+	var expanded = true;
 	/*
 	 * パッケージを読み込みツリー状に表示する
 	 */
-	function create_package_tree(m, parent_uri) {
+	function create_package_tree(m, parent_uri, expanded) {
 		var packages_tree = [];
-		for(var key in m) {
-			if(key == '0') continue;
-			if(key.substr(0,4) == '_sys') continue;
-			var current_uri = parent_uri + '.' + key;
-			var children = create_package_tree(m[key], current_uri);
-			if(m[key]['_sys_exist'] == undefined && children.length == 0) continue;
-			packages_tree.push({text: key,
-				icon: '/static/images/editor/root_leaf.gif',
-				leaf : children.length == 0,
-				children : children,
-				uri:current_uri});
-		}
+		var metaClass = self.ctool.getClass(m['_sys_meta']);
+			/*
+			 * クラスのインスタンス
+			 */
+			for(var key in m) {
+				if(key == '0') continue;
+				if(key.substr(0,4) == '_sys') continue;
+				var current_uri = parent_uri + '.' + key;
+				var children = [];
+				if(metaClass) {
+					if(metaClass.associations.hasOwnProperty(key) && metaClass.associations[key].containment) {
+						children = create_package_tree(m[key], current_uri, expanded && point_uri!=current_uri);
+					}
+				}else{
+					children = create_package_tree(m[key], current_uri, expanded && point_uri!=current_uri);
+				}
+				if(m[key]['_sys_exist'] == undefined && children.length == 0) continue;
+				packages_tree.push({text: key,
+					icon: '/static/images/editor/root_leaf.gif',
+					leaf : children.length == 0,
+					children : children,
+					uri:current_uri,
+					expanded: expanded});
+			}
 		return packages_tree;
 	}
-	var packages_tree = create_package_tree(model, 'root');
+	var packages_tree = create_package_tree(model, 'root', true);
 	console.log(packages_tree);
 	
 	this.panel.getStore().setRootNode(	{
@@ -107,16 +121,30 @@ ModelExplorer.prototype.create = function(klass) {
 }
 
 ModelExplorer.prototype.open = function() {
+	var elem = this.modelController.get(this.selected);
+	var metaClass = this.ctool.getClass(elem._sys_meta);
 	var key = this.selected.split(".").join("-"); 
-	var deditor = new DiagramEditor(
-			key,			//key
-			this.selected,								//title of diagram editor
-			this.modelController.get(this.selected),	//diagram instance
-			this.modelController,							//model controller
-			this.ctool,									//compiled tool
-			this.editor
-			);
-	this.editor.editorTabPanel_preview.add(deditor, key);
+	var deditor = null;
+	if(metaClass.gtype == 'diagram') {
+		deditor = new DiagramEditor(
+				key,									//key
+				this.selected,							//title of diagram editor
+				elem,									//diagram instance
+				this.modelController,					//model controller
+				this.ctool,								//compiled tool
+				this.editor
+				);
+	}else if(metaClass.gtype == 'text') {
+		deditor = new TextEditor(
+				key,									//key
+				this.selected,							//title of diagram editor
+				elem,									//diagram instance
+				this.modelController,					//model controller
+				this.ctool,								//compiled tool
+				this.editor
+				);
+	}
+	this.editorTabPanel.add(deditor, key);
 }
 
 ModelExplorer.prototype.resetting_option = function() {
@@ -131,11 +159,11 @@ ModelExplorer.prototype.del = function() {
 	 * 選択されているパッケージを削除する
 	*/
     Ext.Msg.confirm( 
-            'パッケージの削除', 
-            self.selectedPackage+'を削除しますよ？', 
+            'モデルの削除', 
+            self.selected+'を削除しますよ？', 
             function(btn){ 
                 if(btn == 'yes'){ 
-                    self.metaDataController.delPackage(self.selectedPackage);
+                	self.modelController.del(self.selected);
                 	self.refresh();
                 } 
                 if(btn == 'no'){ 
@@ -185,11 +213,12 @@ ModelExplorer.prototype.showContextmenu = function(meta, x, y) {
 	        menu: [menu]
 	    },{
 	        id: 'delete',
-	        text: '削除'
+	        text: '削除',
+	        handler: function(){self.del()}
 	    },{
 	        id: 'refresh',
 	        text: '更新',
-	        handler: function(){self.refresh()}
+	        handler: function(){self.refresh(self.selected)}
 	    }]
 	});
 	mnuContext.showAt(x, y);

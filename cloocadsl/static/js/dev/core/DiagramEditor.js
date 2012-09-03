@@ -9,7 +9,6 @@
  * @returns
  */
 function DiagramEditor(key, name, diagram, modelController, ctool, wb) {
-	console.log(this);
 	var self = this;
 	this.name = name;
 	this.key = key;
@@ -27,7 +26,7 @@ function DiagramEditor(key, name, diagram, modelController, ctool, wb) {
 	this.drag_move_prev = new Point2D();
 	this.drag_move = new Point2D();
 	this.drag_end = new Point2D();
-	this.selected = null;
+	this.selected = new DiagramEditor.SelectedObject();
 	this.dragMode = 0;
 	this.select_button = null;
 	this.copied_elem = null;
@@ -127,6 +126,11 @@ DiagramEditor.prototype.onDeactivate = function() {
 	this.tool_palet = null;
 }
 
+DiagramEditor.prototype.onClose = function() {
+	this.tool_palet.hide();
+	this.tool_palet = null;
+}
+
 /**
  * static変数
  */
@@ -139,17 +143,17 @@ DiagramEditor.DRAG_RESIZE = 5;
 DiagramEditor.DRAG_RANGE = 6;
 
 DiagramEditor.prototype.ActionMove = function(x, y) {
+	var self = this;
 	this.drag_move.x = x;
 	this.drag_move.y = y;
 	if(this.dragMode == DiagramEditor.DRAG_MOVE) {
-		if(this.selected != null) {
-			if(this.selected instanceof Array) {
-				for(var i=0;i < this.selected.length;i++){
-					this.updateObject(this.selected[i],Number(this.drag_move.x-this.drag_move_prev.x),Number(this.drag_move.y-this.drag_move_prev.y));
+		if(this.selected.isSelected()) {
+			if(this.selected.getSelectedType() == 'multi') {
+				for(var key in this.selected.getSelectedDatas()){
+					move_node(this.selected.getSelectedDatas()[key]);
 				}
-			}else{
-				this.selected.x += this.drag_move.x-this.drag_move_prev.x;
-				this.selected.y += this.drag_move.y-this.drag_move_prev.y;
+			}else if(this.selected.getSelectedType() == 'single') {
+				move_node(this.selected.getSelectedData());
 			}
 			this.draw()
 		}
@@ -172,6 +176,19 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 	}
 	this.drag_move_prev.x = this.drag_move.x;
 	this.drag_move_prev.y = this.drag_move.y;
+	
+	/*
+	 * private function
+	 */
+	function move_node(node) {
+		if(node.x) {
+			node.x += self.drag_move.x-self.drag_move_prev.x;
+			node.y += self.drag_move.y-self.drag_move_prev.y;
+			for(var key in node.child) {
+				move_node(node.child[key]);
+			}
+		}
+	}
 }
 
 /**
@@ -180,11 +197,12 @@ DiagramEditor.prototype.ActionMove = function(x, y) {
 DiagramEditor.prototype.addNodePattern1 = function(x, y, meta_ele) {
 	//Structureの設定
 	var asso = this.metaDiagram.getContainAssociation(meta_ele);
-	if(asso && asso.feature == 'contain') {
+	if(asso && asso.feature === 'contain') {
 		console.log(this.diagram._sys_uri);
 		var instance = this.modelController.addInstance(this.diagram, meta_ele);
 		this.diagram._sys_d[instance._sys_uri] = {
 				uri : instance._sys_uri,
+				gtype : 'node',
 				x : x,
 				y : y,
 				w : 80,
@@ -200,12 +218,13 @@ DiagramEditor.prototype.addNodePattern2 = function(x, y, meta_ele, parent, paren
 	//Structureの設定
 	var metaParent = this.ctool.getClass(parent._sys_meta);
 	var asso = metaParent.getContainAssociation(meta_ele);
-	if(asso && asso.feature == 'child') {
+	if(asso && asso.feature === 'child') {
 		var instance = this.modelController.addInstance(parent, meta_ele);
 		parent_sys_d.child[instance._sys_uri] = {
 				uri : instance._sys_uri,
-				x : x - parent_sys_d.x,
-				y : y - parent_sys_d.y,
+				gtype : 'node',
+				x : x,
+				y : y,
 				w : 60,
 				h : 40,
 				child : {}
@@ -226,13 +245,13 @@ DiagramEditor.prototype.addConnection = function(src, dest, meta_ele) {
 	/*
 	 * contain
 	 */
-	var casso = this.srcMeta.getContainAssociation(meta_ele);
-	if(casso && casso.feature == 'contain') {
+	var casso = srcMeta.getContainAssociation(meta_ele);
+	if(casso && casso.feature === 'contain') {
 		//pattern 1
 		instance = this.modelController.add(src._sys_uri, meta_ele);
 	}else{
 		casso = this.metaDiagram.getContainAssociation(meta_ele);
-		if(casso && casso.feature == 'contain') {
+		if(casso && casso.feature === 'contain') {
 			//pattern 2
 			instance = this.modelController.addInstance(this.diagram, meta_ele);
 		}else{
@@ -246,8 +265,8 @@ DiagramEditor.prototype.addConnection = function(src, dest, meta_ele) {
 	 */
 	var srcAsso = meta_ele.getAssociations(srcMeta);
 	for(var i=0;i < srcAsso.length;i++) {
-		if(srcAsso[i].feature == 'source') {
-			this.modelController.addRelationship(src, instance, srcAsso[i]);
+		if(srcAsso[i].feature === 'source') {
+			this.modelController.addRelationship(instance, src, srcAsso[i]);
 		}
 	}
 	
@@ -256,8 +275,8 @@ DiagramEditor.prototype.addConnection = function(src, dest, meta_ele) {
 	 */
 	var destAsso = meta_ele.getAssociations(destMeta);
 	for(var i=0;i < destAsso.length;i++) {
-		if(destAsso[i].feature == 'target') {
-			this.modelController.addRelationship(dest, instance, destAsso[i]);
+		if(destAsso[i].feature === 'target') {
+			this.modelController.addRelationship(instance, dest, destAsso[i]);
 		}
 	}
 	
@@ -269,33 +288,62 @@ DiagramEditor.prototype.addConnection = function(src, dest, meta_ele) {
 }
 
 DiagramEditor.prototype.ActionDown = function(x, y) {
-	console.log(this);
 	if(this.tool == null) {
-		this.dragMode = DiagramEditor.DRAG_MOVE;
-		this.selected = this.find(x, y);
-		this.createPropertyArea();
+		/*
+		 * ツールを選択していない（Selectツール）
+		 */
+		var obj = this.find(x, y);
+		if(obj == null) {
+			/*
+			 * キャンバスをクリックした場合
+			 */
+			this.selected.clear()
+			this.dragMode = DiagramEditor.DRAG_RANGE;
+		}else{
+			/*
+			 * ノードをクリックした場合
+			 */
+			if(this.selected.getSelectedType() == 'multi' && obj.uri in this.selected.getSelectedDatas()) {
+				/*
+				 * 複数選択していて、今回も選択済みのノードをクリックした場合
+				 */
+				/*
+				 * 何もしない、複数移動へ
+				 */
+			}else{
+				this.selected.clear()
+				this.selected.select(obj.uri, obj);
+				this.createPropertyArea();
+			}
+			this.dragMode = DiagramEditor.DRAG_MOVE;
+		}
 	}else{
+		/*
+		 * ツールを選択している
+		 */
 		var metaClass = this.ctool.getClass(this.tool.id);
 		var parent_sys_d = this.find(x, y);
 		if(parent_sys_d) {
+			/*
+			 * ノードをクリックした場合
+			 */
 			var parent = this.modelController.get(parent_sys_d.uri);
-			if(metaClass.gtype == 'node') {
+			if(metaClass.gtype === 'node') {
 				//子ノード追加
 				this.addNodePattern2(x, y, metaClass, parent, parent_sys_d);
-			}else if(metaClass.gtype == 'connection') {
+			}else if(metaClass.gtype === 'connection') {
 				//コネクションの追加
 				this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
 			}
 		}else{
-			if(metaClass.gtype == 'node') {
+			/*
+			 * キャンバスをクリックした場合
+			 */
+			if(metaClass.gtype === 'node') {
 				//ノード追加
 				this.addNodePattern1(x, y, metaClass);
-			}else if(metaClass.gtype == 'connection') {
-				//コネクションの追加
-				this.dragMode = DiagramEditor.DRAG_RUBBERBAND;
 			}
 		}
-		console.log(this.modelController.getModel());
 	}
 	this.drag_start.x = x;
 	this.drag_start.y = y;
@@ -308,7 +356,7 @@ DiagramEditor.prototype.ActionUp = function(x, y) {
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		var src = this.modelController.get(this.find(this.drag_start.x, this.drag_start.y).uri);
 		var target = this.modelController.get(this.find(this.drag_end.x, this.drag_end.y).uri);
-		var meta_ele = this.ctool.getClass(this.too.id);
+		var meta_ele = this.ctool.getClass(this.tool.id);
 		this.addConnection(src, target, meta_ele);
 		/*
 		this.select_button.toggle(true);
@@ -341,8 +389,8 @@ DiagramEditor.prototype.find = function(x, y) {
 		function findChild(node) {
 			for(var ckey in node.child) {
 				var child = node.child[ckey];
-				if(node.x + child.x < x && x < node.x + child.x + child.w) {
-					if(node.y + child.y < y && y < node.y + child.y + child.h) {
+				if(child.x < x && x < child.x + child.w) {
+					if(child.y < y && y < child.y + child.h) {
 						var result = findChild(child);
 						if(result) return result;
 						return child;
@@ -353,7 +401,25 @@ DiagramEditor.prototype.find = function(x, y) {
 		}
 	}
 	function findConnection() {
-		
+		function findConnection_part() {
+			var points = new Array();
+			var src = ModelController.getObject(this.diagram, rel.src);
+			var dest = ModelController.getObject(this.diagram, rel.dest);
+			var s = new Point2D((src.bound.x + src.bound.width / 2), (src.bound.y + src.bound.height / 2));
+			var e = new Point2D((dest.bound.x + dest.bound.width / 2), (dest.bound.y + dest.bound.height / 2));
+			points.push(s);
+			points = points.concat(rel.points);
+			points.push(e);
+			for(var i=0;i < points.length - 1;i++) {
+				if((new Line2D(points[i].x, points[i].y, points[i+1].x, points[i+1].y)).ptSegDist(x, y) < 16) {
+					if(rel == this.selected) this.dragMode = DiagramEditor.DRAG_POINT;
+					this.selected = rel;
+					this.fireSelectRelationship(this.selected);
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 	function findProperty() {
 		
@@ -369,55 +435,12 @@ DiagramEditor.prototype.draw = function() {
 		var metaClass = this.ctool.getClass(elem._sys_meta);
 		//containment feature
 		//diagram infomation
-		if(metaClass.shape == 'rect') {
-			var col = "#000";
-			if(this.selected && key == this.selected.id) {
-				col = "#00f";
-			}
-			this.canvas.drawRect({
-				strokeStyle: col,
-				fillStyle: "#fff",
-				x: this.diagram._sys_d[key].x, y: this.diagram._sys_d[key].y,
-				width: this.diagram._sys_d[key].w, height: this.diagram._sys_d[key].h,
-				fromCenter: false}
-			);
-			drawChild(this.diagram._sys_d[key]);
-			/*
-			for(var i=0;i < notation.labels.length;i++) {
-				var prop = this.modelController.get(this.base_uri + '.' + key).props[notation.labels[i]];
-				if(prop instanceof Array) {
-					
-				}else{
-					this.canvas.drawText({
-						  fillStyle: "#000",
-						  x: this.arino.nodes[key].x, y: this.arino.nodes[key].y,
-						  text: prop,
-						  align: "center",
-						  baseline: "middle",
-						  font: "16px 'ＭＳ ゴシック'"
-						});
-				}
-			}
-			*/
+		if(metaClass.gtype === 'node') {
+			drawChild(key, this.diagram._sys_d[key]);
+		}else if(metaClass.gtype === 'connection') {
+			drawConnection(key, this.diagram._sys_d[key]);
 		}
 	}
-	/*
-	for(var key in this.arino.connections) {
-		var notation = this.notationController.get(this.arino.connections[key].meta_uri);
-		var elem = this.modelController.get(this.base_uri + '.' + key);
-		var src_id = elem.a_props[notation.sourceFeature.split('.').pop()];
-		var target_id = elem.a_props[notation.targetFeature.split('.').pop()];
-		console.log(notation.sourceFeature.split('.').pop());
-		this.canvas.drawLine({
-			  strokeStyle: "#777",
-			  strokeWidth: 2,
-			  strokeCap: "round",
-			  strokeJoin: "miter",
-			  x1: this.arino.nodes[src_id].x, y1: this.arino.nodes[src_id].y,
-			  x2: this.arino.nodes[target_id].x, y2: this.arino.nodes[target_id].y
-			});
-	}
-	*/
 	if(this.dragMode == DiagramEditor.DRAG_RUBBERBAND) {
 		this.canvas.drawLine({
 			  strokeStyle: "#777",
@@ -427,44 +450,117 @@ DiagramEditor.prototype.draw = function() {
 			  x1: this.drag_start.x, y1: this.drag_start.y,
 			  x2: this.drag_move.x, y2: this.drag_move.y
 			});
+	}else if(this.dragMode == DiagramEditor.DRAG_RANGE) {
+		self.canvas.drawRect({
+			strokeStyle: "#777",
+			x: self.drag_start.x, y: self.drag_start.y,
+			width: self.drag_move.x - self.drag_start.x, height: self.drag_move.y - self.drag_start.y,
+			fromCenter: false}
+		);
 	}
-	function drawChild(node) {
-		for(var ckey in node.child) {
-			var child = node.child[ckey];
-			self.canvas.drawRect({
-				strokeStyle: col,
-				fillStyle: "#fff",
-				x: node.x + child.x, y: node.y + child.y,
-				width: child.w, height: child.h,
-				fromCenter: false}
-			);
-			drawChild(child);
+	function drawChild(ckey, node) {
+		var elem = self.modelController.get(ckey);
+		var metaClass = self.ctool.getClass(elem._sys_meta);
+		var col = "#000";
+		if(self.selected.isSelected()){
+			if(self.selected.getSelectedType() == 'single') {
+				if(self.selected.getSelectedData().uri == ckey)
+					col = "#00f";
+			}else if(self.selected.getSelectedType() == 'multi') {
+				if(ckey in self.selected.getSelectedDatas())
+					col = "#00f";
+			}
+		}
+		self.canvas.drawRect({
+			strokeStyle: col,
+			fillStyle: "#fff",
+			x: node.x, y: node.y,
+			width: node.w, height: node.h,
+			fromCenter: false}
+		);
+		drawProp(elem, metaClass, node.x, node.y);
+		for(var key in node.child) {
+			drawChild(key, node.child[key]);
+		}
+	}
+	function drawConnection(key, connection) {
+		var elem = self.modelController.get(key);
+		var metaClass = self.ctool.getClass(elem._sys_meta);
+		var src_d = null, dest_d = null
+		for(var akey in metaClass.associations) {
+			if(metaClass.associations[akey].feature  === 'source') {
+				console.log(elem[akey]);
+				src_d = self.diagram._sys_d[elem[akey]];
+			}else if(metaClass.associations[akey].feature  === 'target') {
+				dest_d = self.diagram._sys_d[elem[akey]];
+			}
+		}
+		if(src_d && dest_d) {
+			var s = new Point2D((src_d.x + src_d.w / 2), (src_d.y + src_d.h / 2));
+			var e = new Point2D((dest_d.x + dest_d.h / 2), (dest_d.y + dest_d.h / 2));
+			var start = 0;
+			var end = 0;
+			if(connection.points.length == 0) {
+				start = self.getConnectionPoint(new Line2D(s.x, s.y, e.x, e.y), src_d);
+				end = self.getConnectionPoint(new Line2D(e.x, e.y, s.x, s.y), dest_d);
+			}else if(connection.points.length > 0) {
+				start = self.getConnectionPoint(new Line2D(s.x, s.y, rel.points[0].x, rel.points[0].y), src_d);
+				end = self.getConnectionPoint(new Line2D(e.x, e.y, rel.points[rel.points.length-1].x, rel.points[rel.points.length-1].y), dest_d);
+			}
+			self.canvas.drawLine({
+				  strokeStyle: "#777",
+				  strokeWidth: 2,
+				  strokeCap: "round",
+				  strokeJoin: "miter",
+				  x1: start.x, y1: start.y,
+				  x2: end.x, y2: end.y
+				});
+		}
+	}
+	function drawProp(elem, metaClass,x,y) {
+		for(var key in metaClass.properties) {
+			var metaProp = metaClass.properties[key];
+			var disp = '';
+			if(metaProp.upper == 1) {
+				if(metaProp.type === 'string') {
+					disp = elem[key]
+				}
+			}
+			self.canvas.drawText({
+				  fillStyle: "#000",
+				  x: x, y: y + 10,
+				  text: disp,
+				  align: "left",
+				  baseline: "middle",
+				  font: "16px 'ＭＳ ゴシック'"
+				});
 		}
 	}
 }
 
 DiagramEditor.prototype.createPropertyArea = function() {
-	if(this.selected == null) return;
+	if(this.selected.isSelected() == false) return;
 	var self = this;
 	var props = [];
-	var metaElem = this.metaDataController.get(this.selected.meta_uri);
+	var elem = this.modelController.get(this.selected.getSelectedData().uri);
+	var metaElem = this.ctool.getClass(elem._sys_meta);
 	for(var key in metaElem.properties) {
 		props.push({
 	        	name: key,
 	        	xtype: 'textfield',
 	        	fieldLabel: key,
-	        	value: this.selected.props[key],
+	        	value: elem[key],
 	        	listeners : {
 	        		change : {
 	        			fn : function(textField, newValue) {
 	        				console.log(textField.name);
-	        				self.modelController.get(self.base_uri + '.' + self.selected.id).props[key] = newValue;
+	        				elem[key] = newValue;
 	        			}
 	        		}
 	        	}
 			});
 	}
-	this.wb.statuspanel.setPropertyPanel(props);
+	this.wb.getPropertyPanel().setPropertyPanel(props);
 }
 
 DiagramEditor.prototype.createButton = function() {
@@ -512,12 +608,20 @@ DiagramEditor.prototype.createButton = function() {
 /*
  * private
  */
-DiagramEditor.prototype.deleteSelected = function() {
+DiagramEditor.prototype.deleteFromDiagram = function() {
+	var self = this;
 	if(this.selected) {
 		//図から削除
-		delete this.arino.nodes[this.selected.id];
-		//モデルから削除
-		this.modelController.delClass(this.base_uri + '.' + this.selected.id);
+		findnode(this.diagram._sys_d);
+		function findnode(nodes) {
+			for(var key in nodes) {
+				if(nodes[key].uri == self.selected.getSelectedData().uri) {
+					delete nodes[key];
+					return;
+				}
+				findnode(nodes[key].child);
+			}
+		}
 		//選択解除
 		this.selected = null;
 		return true;
@@ -525,12 +629,67 @@ DiagramEditor.prototype.deleteSelected = function() {
 	return false;
 }
 
+DiagramEditor.prototype.deleteFromModel = function() {
+	if(this.selected) {
+		//図から削除
+		delete this.arino.nodes[this.selected.id];
+		//モデルから削除
+		this.modelController.del(this.selected.uri);
+		//選択解除
+		this.selected = null;
+		return true;
+	}
+	return false;
+}
+
+DiagramEditor.prototype.copy = function() {
+	
+}
+
+DiagramEditor.prototype.paste = function() {
+	
+}
+
+DiagramEditor.prototype.selectRange = function(s, e) {
+	var rect;
+	var x, y, w, h;
+	if(s.x > e.x) {
+		x = e.x;
+		w = s.x - e.x;
+	}else{
+		x = s.x;
+		w = e.x - s.x;
+	}
+	if(s.y > e.y) {
+		y = e.y;
+		h = s.y - e.y;
+	}else{
+		y = s.y;
+		h = e.y - s.y;
+	}
+	var rect = new Rectangle2D(x, y, w, h);
+	this.selected.clear();
+	
+	for(var key in this.diagram._sys_d) {
+		var node = this.diagram._sys_d[key];
+		if(Rectangle2D.contains(rect, new Point2D(node.x, node.y))) {
+			if(Rectangle2D.contains(rect, new Point2D(node.x + node.w, node.y + node.h))) {
+				this.selected.select(key, node);
+			}
+		}
+	}
+}
+
+
 DiagramEditor.prototype.getMenuContext = function() {
 	var self = this;
 	return new Ext.menu.Menu({
 	    items: [{
-	        id: 'delete_element',
-	        text: '削除'
+	        id: 'delete-from-diagram',
+	        text: '図から削除'
+	    },{
+	        id: 'delete-from-model',
+	        text: 'モデルから削除'
 	    },{
 	        id: 'delete_point',
 	        text: 'ポイントを削除'
@@ -541,20 +700,17 @@ DiagramEditor.prototype.getMenuContext = function() {
 	        id: 'paste',
 	        text: 'ペースト'
 	    },{
-	        id: 'up_step',
-	        text: '一つ上へ'
-	    },{
-	        id: 'down_step',
-	        text: '一つ下へ'
-	    },{
 	        id: 'diagram',
 	        text: '関連する図を作成'
 	    }],
 	    listeners: {
         click: function(menu, item) {
             switch (item.id) {
-                case 'delete_element':
-                	self.deleteSelected();
+                case 'delete-from-diagram':
+                	self.deleteFromDiagram();
+                    break;
+                case 'delete-from-model':
+                	self.deleteFromModel();
                     break;
                 case 'delete_point':
                 	self.deletePoint();
@@ -582,4 +738,57 @@ DiagramEditor.prototype.getMenuContext = function() {
         }
 	    }
 	});
+}
+
+
+DiagramEditor.prototype.getConnectionPoint = function(d, bound) {
+	if(d.intersectsLine(bound.x, bound.y, bound.x+bound.w, bound.y)) {
+		return d.getConnect(new Line2D(bound.x, bound.y, bound.x+bound.w, bound.y));
+	}
+	if(d.intersectsLine(bound.x+bound.w, bound.y, bound.x+bound.w, bound.y+bound.h)) {
+		return d.getConnect(new Line2D(bound.x+bound.w, bound.y, bound.x+bound.w, bound.y+bound.h));
+	}
+	if(d.intersectsLine(bound.x+bound.w, bound.y+bound.h, bound.x, bound.y+bound.h)) {
+		return d.getConnect(new Line2D(bound.x+bound.w, bound.y+bound.h, bound.x, bound.y+bound.h));
+	}
+	if(d.intersectsLine(bound.x, bound.y+bound.h, bound.x, bound.y)) {
+		return d.getConnect(new Line2D(bound.x, bound.y+bound.h, bound.x, bound.y));
+	}
+	return new Point2D(bound.x, bound.y);
+}
+
+DiagramEditor.SelectedObject = function() {
+	var selected_type = 'single';
+	var selected_data = null;
+	var selected_datas = null;
+	var length = 0;
+	return {
+		select : function(key, node) {
+			selected_data = node;
+			selected_datas[key] = node;
+			length++;
+			if(length >= 2) selected_type = 'multi';
+		},
+		clear : function() {
+			selected_data = null;
+			selected_datas = {};
+			selected_type = 'single';
+			length = 0;
+		},
+		getSelectedType : function() {
+			return selected_type;
+		},
+		setSelectedType : function(t) {
+			selected_type = t;
+		},
+		getSelectedData : function() {
+			return selected_data;
+		},
+		getSelectedDatas : function() {
+			return selected_datas;
+		},
+		isSelected : function() {
+			return selected_data != null;
+		}
+	}
 }

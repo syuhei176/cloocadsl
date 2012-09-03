@@ -24,6 +24,13 @@ EditorTabPanel.prototype.close = function() {
 	}
 }
 
+EditorTabPanel.prototype.fireResizeEvent = function(w, h) {
+	for(var i=0;i < this.editors.length;i++) {
+		if(this.editors[i].editor.onResize) this.editors[i].editor.onResize(w, h);
+	}
+}
+
+
 EditorTabPanel.prototype.update = function() {
 	var len = this.editors.length;
 	for(var i=0;i < len;i++) {
@@ -69,6 +76,7 @@ EditorTabPanel.prototype.add = function(editor, key) {
 	});
 	tab.on('close', function(){
 //		self.current_editor = null;
+		if(editor.onClose) editor.onClose();
 		for(var i=0;i < self.editors.length;i++) {
 			if(self.editors[i].tab == tab) self.editors.splice(i, 1);
 		}

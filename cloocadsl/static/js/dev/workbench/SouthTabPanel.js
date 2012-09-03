@@ -26,7 +26,7 @@ function SouthTabPanel(wb) {
 	});
 	
 	var tabpanel = Ext.create('Ext.tab.Panel', {
-		title: name,
+//		title: name,
 		tabPosition: 'top',
         defaults :{
             bodyPadding: 6,

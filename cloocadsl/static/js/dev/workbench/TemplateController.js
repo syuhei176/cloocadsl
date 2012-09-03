@@ -27,7 +27,7 @@ TemplateController.prototype.save = function(name, package_uri, content) {
 	$.post('/wb-api/save-template', { toolkey : g_toolinfo.toolkey, name : name, package_uri : package_uri, content : content },
 			function(data) {
 				if(data) {
-					this.templates[i].modify = false;
+					this.templates[name].modify = false;
 				}
 			}, "json");	
 }

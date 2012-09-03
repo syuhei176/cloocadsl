@@ -101,16 +101,7 @@ def commit_dsml(connect, package):
     #実際にデータベースにテーブルを挿入する
     cur = connect.cursor()
     package_uri = package['parent_uri'] + '.' + package['name']
-    if package['op'] == 'add':
-        op = 1
-    elif package['op'] == 'update':
-        op = 2
-    elif package['op'] == 'del':
-        op = 3
-    else:
-        op = 0
-    if not op == 0:
-        cur.execute('INSERT INTO metapackage (tool_key,package_uri,lang_type,version,content,name,parent_uri,op) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);',(g_tool_key, package_uri, 1, next_version, json.dumps(package['content']).encode('utf-8'), package['name'], package['parent_uri'], op))
+    cur.execute('INSERT INTO metapackage (tool_key,package_uri,lang_type,version,content,name,parent_uri) VALUES(%s,%s,%s,%s,%s,%s,%s);',(g_tool_key, package_uri, 1, next_version, json.dumps(package['content']).encode('utf-8'), package['name'], package['parent_uri'], ))
     cur.close()
 
 def commit_notation(connect, notation):

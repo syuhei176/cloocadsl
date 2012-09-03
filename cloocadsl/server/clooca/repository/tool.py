@@ -31,12 +31,41 @@ def getMyWritableTools(connect, user):
                                'owner_id':b[4],
                                }] + a, rows, [])
 
-def getMyReadableTools(connect, user):
+def getMyReadableTools(connect, user, num=5):
     cur = connect.cursor()
-    cur.execute('SELECT id,tool_info.tool_uri,name,head_version,owner_id FROM tool_info INNER JOIN user_has_tool ON user_has_tool.tool_uri = tool_info.tool_uri AND user_has_tool.user_id = %s;', (user['id'], ))
+    cur.execute('SELECT id,tool_info.tool_uri,name,head_version,owner_id FROM tool_info INNER JOIN user_has_tool ON user_has_tool.tool_uri = tool_info.tool_uri AND user_has_tool.user_id = %s ORDER BY user_has_tool.last_used_date DESC LIMIT %s;', (user['id'], num))
     rows = cur.fetchall()
     cur.close()
-    return reduce(lambda a,b: [{'id':b[0],'tool_key':b[1],'name':b[2].decode('utf-8'),'head_version':b[3],'owner_id':b[4],}] + a, rows, [])
+    tools = []
+    for i in range(len(rows)):
+        tool = {}
+        tool['id'] = rows[i][0]
+        tool['tool_key'] = rows[i][1]
+        tool['name'] = rows[i][2].decode('utf-8')
+        tool['head_version'] = rows[i][3]
+        tool['owner_id'] = rows[i][4]
+        tools.append(tool)
+    return tools
+"""
+    return reduce(lambda a,b: [{'id':b[0],
+                                'tool_key':b[1],
+                                'name':b[2].decode('utf-8'),
+                                'head_version':b[3],
+                                'owner_id':b[4],
+                                }] + a, rows, [])
+                                """
+
+def getPublicTools(connect, user, num, token=''):
+    cur = connect.cursor()
+    cur.execute('SELECT id,tool_uri,name,head_version,owner_id FROM tool_info WHERE visibillity=1 AND name like %s ORDER BY updated_date DESC LIMIT %s;', (token.encode('utf-8') + '%', num))
+    rows = cur.fetchall()
+    cur.close()
+    return reduce(lambda a,b: [{'id':b[0],
+                               'tool_key':b[1],
+                               'name':b[2].decode('utf-8'),
+                               'head_version':b[3],
+                               'owner_id':b[4],
+                               }] + a, rows, [])
 
 def getToolInfo(connect, user, tool_key):
     cur = connect.cursor()
@@ -111,9 +140,9 @@ def load_from_ws(connect, user, tool_key):
     tool['current_version'] = rows[0][2]
     return tool
 
-"""
-"""
 def checkout(connect, user, tool_key):
+    """
+    """
     tool = {}
     cur = connect.cursor()
     cur.execute('SELECT COUNT(*) FROM user_has_tool WHERE user_id=%s AND tool_uri=%s;', (user['id'], tool_key, ))
@@ -128,12 +157,13 @@ def checkout(connect, user, tool_key):
             cur.close()
             return None
         else:
+            #visibillityが1で、ユーザがアクセス権を持っていない場合は、チェックアウト時にアクセス権が付けられる
             cur.execute('INSERT INTO user_has_tool (user_id,tool_uri,permission,is_bought) VALUES(%s,%s,%s,%s);',(user['id'], tool_key, 1, 0))
             connect.commit()
     d = datetime.datetime.today()
     cur.execute('INSERT INTO tool_workspace (user_id,tool_uri,checkout_date) VALUES(%s,%s,%s);',(user['id'], tool_key, d.strftime("%Y-%m-%d"), ))
     result = updateImpl.update_impl(connect, user, tool_key, rep_version, False)
-    #cur.execute('UPDATE tool_workspace SET metamodel=%s WHERE tool_uri=%s AND user_id=%s;', (result['metamodel'], tool_key, user['id'], ))
+    cur.execute('UPDATE tool_workspace SET metamodel=%s,current_version=%s WHERE tool_uri=%s AND user_id=%s;', (json.dumps(result['metamodel']), rep_version, tool_key, user['id'], ))
     connect.commit()
     cur.close()
     tool['tool_key'] = tool_key
@@ -242,13 +272,22 @@ def update(connect, user, tool_key):
         #権限なし
         resp.code = 0
         return resp
+    if access_ret == 1:
+        #権限なし
+        resp.code = 0
+        return resp
     cur = connect.cursor()
     cur.execute('SELECT head_version FROM tool_info WHERE tool_uri=%s;', (tool_key, ))
     rep_version = int(cur.fetchone()[0])
     cur.close()
     resp.success = True
     resp.code = 1
-    resp.content = updateImpl.update_impl(connect, user, tool_key, rep_version, True)
+    metamodel = updateImpl.update_impl(connect, user, tool_key, rep_version, True)
+    resp.content = metamodel
+    cur = connect.cursor()
+    num_of_affected_row = cur.execute('UPDATE tool_workspace SET metamodel=%s,current_version=%s WHERE tool_uri=%s AND user_id=%s;', (json.dumps(metamodel['metamodel']).encode('utf-8'), rep_version, tool_key, user['id'], ))
+    connect.commit()
+    cur.close()
     return resp
 
 """
@@ -270,7 +309,12 @@ def update_to_ver(connect, user, tool_key, version):
     if version <= rep_version:
         resp.success = True
         resp.code = 1
-        resp.content = updateImpl.update_impl(connect, user, tool_key, version)
+        metamodel = updateImpl.update_impl(connect, user, tool_key, version)
+        resp.content = metamodel
+        cur = connect.cursor()
+        num_of_affected_row = cur.execute('UPDATE tool_workspace SET metamodel=%s,current_version=%s WHERE tool_uri=%s AND user_id=%s;', (json.dumps(metamodel['metamodel']).encode('utf-8'), rep_version, tool_key, user['id'], ))
+        connect.commit()
+        cur.close()
     else:
         resp.code = 2
     return resp
@@ -279,3 +323,96 @@ def update_to_ver(connect, user, tool_key, version):
 """
 def revert(tool_key, version_id):
     return {}
+
+def getTool(connect, user, tool_key, version):
+    """
+    読み込み権限のあるユーザが、ツールを取得する
+    """
+    resp = CloocaResponse()
+    """
+    アクセス権の確認
+    """
+    access_ret = GetToolAccessInfo(connect, user, tool_key)
+    if access_ret == 0:
+        #権限なし
+        resp.code = 0
+        return resp
+    cur = connect.cursor()
+    cur.execute('SELECT head_version FROM tool_info WHERE tool_uri=%s;', (tool_key, ))
+    rep_version = int(cur.fetchone()[0])
+    cur.close()
+    if version <= rep_version:
+        resp.success = True
+        resp.code = 1
+        metamodel = updateImpl.update_impl(connect, user, tool_key, version)
+        resp.content = metamodel
+    else:
+        resp.code = 2
+    return resp
+
+
+def getTaggedTool(connect, user, tool_key, tag_id):
+    """
+    読み込み権限のあるユーザが、タグ付けされたツールを取得する
+    """
+    #アクセス権の確認
+    access_ret = GetToolAccessInfo(connect, user, tool_key)
+    if access_ret == 0:
+        #権限なし
+        resp.code = 0
+        return resp
+    cur = connect.cursor()
+    d = datetime.datetime.today()
+    num_of_affected_row = cur.execute('UPDATE user_has_tool SET last_used_date=%s WHERE tool_uri=%s AND user_id=%s;', (d.strftime("%Y-%m-%d"), tool_key, user['id'], ))
+    connect.commit()
+    cur.execute('SELECT version FROM tool_tag WHERE tool_uri = %s AND id = %s;', (tool_key, tag_id))
+    version = int(cur.fetchone()[0])
+    cur.close()
+    metamodel = updateImpl.update_impl(connect, user, tool_key, version, False)
+    return metamodel
+
+def tags(connect, user, tool_key):
+    """
+    アクセス権の確認
+    """
+    access_ret = GetToolAccessInfo(connect, user, tool_key)
+    if access_ret == 0:
+        #権限なし
+        return []
+    cur = connect.cursor()
+    cur.execute('SELECT id,version,created_date,tag FROM tool_tag WHERE tool_uri = %s;', (tool_key, ))
+    rows = cur.fetchall()
+    cur.close()
+    return reduce(lambda a,b: [{'id':b[0],
+                               'version':b[1],
+                               'created_date':str(b[2]),
+                               'tag':b[3]}] + a, rows, [])
+    
+def create_tag(connect, user, tool_key, tag):
+    """
+    アクセス権の確認
+    """
+    access_ret = GetToolAccessInfo(connect, user, tool_key)
+    if access_ret == 0:
+        #権限なし
+        return False
+    if access_ret == 1:
+        #書き込み権限なし
+        return False
+    cur = connect.cursor()
+    cur.execute('SELECT head_version FROM tool_info WHERE tool_uri=%s;', (tool_key, ))
+    rep_version = int(cur.fetchone()[0])
+    cur.execute('SELECT COUNt(*) FROM tool_tag WHERE tool_uri=%s AND version=%s;', (tool_key, rep_version, ))
+    tag_count = cur.fetchone()[0]
+    if not tag_count == 0:
+        cur.close()
+        return False
+    d = datetime.datetime.today()
+    cur.execute('INSERT INTO tool_tag (tool_uri,version,created_date,tag) VALUES(%s,%s,%s,%s);',(tool_key, rep_version, d.strftime("%Y-%m-%d"), tag))
+    connect.commit()
+    cur.close()
+    return True
+
+def del_tag(connect, user, tool_key):
+    pass
+

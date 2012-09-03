@@ -35,11 +35,25 @@
 .project-date {
 }
 </style>
+<script>
+<!-- 
+$(function() {
+	$('#edit-button').click(function(){
+		window.open('/edit/{{projinfo.id}}');
+	});
+})
+-->
+</script>
 <div class="project-info-wrapper">
+{% if projinfo == None: %}
+<!-- プロジェクトがありません -->
+{% else: %}
 <div class="project-info">
-	<div id="project-name">プロジェクト１</div>
-	<div id="project-owner">syuhei</div>
-	<div id="project-version">version 1</div>
-	<div id="project-date">2012/7/6</div>
+	<div id="project-name">{{projinfo.name}}</div>
+	<div id="project-owner">{{projinfo.owner_id}}</div>
+	<div id="project-version">version {{projinfo.head_version}}</div>
+	<div id="project-date">{{projinfo.created_date}}</div>
+	<input id="edit-button" type="button" value="編集" class="button-type1" style="width:48px;" />
 </div>
+{% endif %}
 </div>

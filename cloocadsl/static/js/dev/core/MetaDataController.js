@@ -5,11 +5,25 @@
 function MetaDataController() {
 	this.meta_structure = null;
 	this.elements = {};
-	this.changelisteners = [];
+	this.listeners = {
+			change : []
+	}
 }
 
-MetaDataController.prototype.addChangeListener = function(l) {
-	this.changelisteners.push(l);
+/**
+ * 
+ */
+MetaDataController.prototype.on = function(event, cb) {
+	this.listeners[event].push(cb);
+}
+
+/**
+ * 
+ */
+MetaDataController.prototype.fireEventChange = function(mmc, p) {
+	for(var i=0;i < this.listeners['change'].length;i++) {
+		this.listeners['change'][i](mmc, p);
+	}
 }
 
 MetaDataController.prototype.getMetaModel = function() {
@@ -66,9 +80,7 @@ MetaDataController.prototype.update = function(uri, attr, value) {
 	var p = this.get(uri);
 	p.content[attr] = value;
 	p.op = 'update';
-	for(var i=0;i < this.changelisteners.length;i++) {
-		this.changelisteners[i](this, p);
-	}
+	this.fireEventChange(this, p);
 }
 
 

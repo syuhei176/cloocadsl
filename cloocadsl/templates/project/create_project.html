@@ -1,0 +1,71 @@
+<style>
+.project-info-wrapper {
+	width: 320px;
+	height: 90%;
+	overflow: auto;
+}
+.project-info {
+	width: 300px;
+	height: 60px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f0f0a0;
+    color: #0f0f0f;
+    text-decoration: none;
+    border: 3px #d0d0d0 solid;
+}
+.project-info:hover {
+	color: #1f1f1f;
+    background-color: #f0f0c0;
+}
+.create-tool {
+	width: 300px;
+	height: 60px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f0f0c0;
+    color: #0f0f0f;
+    text-decoration: none;
+    border: 3px #d0d0d0 dotted;
+
+}
+</style>
+<script>
+<!-- 
+$(function() {
+	$('#create-tool').click(function(){
+		$.post("/project/create",
+				{toolkey : $('#toolkey').val(), name : $('#name').val(), toolver : $('#toolver').val() },
+				function(data){
+					window.location.href = '/#projects/{{toolinfo.tool_key}}'
+				}
+		);
+		return false;
+	});
+})
+-->
+</script>
+<h2>{{toolinfo.name}}</h2>
+<div class="project-info-wrapper">
+<form>
+<div>プロジェクト名<input id="name" type="text" name="name" /></div>
+<div>ツールバージョン
+<select id="toolver" name="toolver">
+{% for tag in tooltags %}
+<option value="{{tag.id}}">{{tag.tag}}</option>
+{% endfor %}
+</select></div>
+<input id="toolkey" type="hidden" name="toolkey" value="{{toolinfo.tool_key}}" />
+<div></div><input id="create-tool" type="submit" value="新規作成" class="button-type1" style="width:240px;"/>
+</form>
+</div>

@@ -20,13 +20,22 @@
     <script src="/static/js/lib/jcanvas.min.js"></script>
     <script src="/static/js/lib/ext-all.js"></script>
     <script src="/static/js/lib/json2.js"></script>
+    <script src="/static/js/lib/peg-0.7.0.js"></script>
     <script src="/static/js/editor.clooca.js"></script>
     <script src="/static/js/dev/editor/CloocaEditor.js"></script>
     <script src="/static/js/dev/editor/MenuPanel.js"></script>
     <script src="/static/js/dev/editor/ModelExplorer.js"></script>
+    <script src="/static/js/dev/editor/ToolCompiler.js"></script>
+    <script src="/static/js/dev/editor/PropertyPanel.js"></script>
+    <script src="/static/js/dev/core/IdGenerator.js"></script>
+    <script src="/static/js/dev/core/math2d.js"></script>
     <script src="/static/js/dev/core/metastructure.js"></script>
     <script src="/static/js/dev/core/EditorTabPanel.js"></script>
     <script src="/static/js/dev/core/MetaDataController.js"></script>
+    <script src="/static/js/dev/core/Model.js"></script>
+    <script src="/static/js/dev/core/ModelController.js"></script>
+    <script src="/static/js/dev/core/DiagramEditor.js"></script>
+    <script src="/static/js/dev/core/TextEditor.js"></script>
     <div id="script-div"></div>
 
     <!--                                           -->
@@ -43,6 +52,9 @@
     <script>
     <!--
     $(function(){
+    	g_toolinfo = {{tool|safe}};
+    	g_project = {{proj|safe}};
+    	g_model = {{model|safe}};
     	/*
     	initall();
     	g_userinfo = {{userinfo|safe}};
@@ -53,65 +65,6 @@
     	cloocaEditor = new CloocaEditor({});
     });
     
-    function init_layout() {
-    	new Ext.Viewport({
-    		layout:'border',
-    		items:[
-    		       new Ext.Panel({
-    		    	   id: 'centerpanel',
-    		    	   html:'',
-    		    	   width:'100px',
-    		    	   region:'center',
-    		    	   layout: 'fit',
-    		    	   items : []
-    		       }),
-    		       new Ext.Panel({
-    		    	   id:'menupanel',
-    		    	   margins:'0 3 0 3',
-    		    	   region:'north',
-    		    	   items: []
-    		       }),
-    		       new Ext.Panel({
-    		    	   id:'propertypanel',
-    		    	   title: 'property',
-    		    	   html:'',
-    		    	   margins:'3 3 3 3',
-    		    	   region:'south',
-    		    	   collapsible:true,
-    		    	   split:true,
-    		    	   items : []
-    		    	   }),
-    		       new Ext.Panel({
-    		     	   id:'toolpanel',
-    		    	   title:'Tool',
-    		    	   html:'toolbuttons',
-    		    	   margins:'0 3 0 3',
-    		    	   region:'east',
-    		    	   collapsible:true,
-    		    	   split:true,
-	    		       layout: {
-	    		    	    type: 'vbox',
-	    		    	    align : 'stretch',
-	    		    	    pack  : 'start'
-	    		    	},
-	    		    	items: [
-	    		    	    {html:'panel 1', flex:1},
-	    		    	    {html:'panel 3', flex:2}
-	    		    	]
-    		       }),
-    		       new Ext.Panel({
-    		    	   id:'modelexplorer',
-    		    	   title:'Model Explorer',
-    		    	   html:' ',
-    		    	   margins:'0 0 0 3',
-    		    	   region:'west',
-    		    	   collapsible:true,
-    		    	   split:true,
-    		    	   items: []
-    		       }),
-    		       ]
-    	});
-    	}
     -->
     </script>
   </head>

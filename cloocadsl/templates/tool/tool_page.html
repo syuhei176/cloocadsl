@@ -4,21 +4,6 @@
 	height: 90%;
 	overflow: auto;
 }
-.project-info {
-	width: 300px;
-	height: 60px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #f0f0a0;
-    color: #0f0f0f;
-    text-decoration: none;
-    border: 3px #d0d0d0 solid;
-}
 .project-info:hover {
 	color: #1f1f1f;
     background-color: #f0f0c0;
@@ -43,6 +28,9 @@
 <script>
 <!-- 
 $(function() {
+	$('#edit-button').click(function(){
+		window.open('/wb/{{tool.tool_key}}');
+	});
 	$('div#user-info').click(function(){
 		$(this).find('input').each(function(){
 			var user_id = $(this).val();
@@ -56,11 +44,21 @@ $(function() {
 -->
 </script>
 <div class="project-info-wrapper">
-<div id="user-info" class="project-info">
+<div id="user-info" class="midium-box">
 	<div class="project-name">{{tool.name}}</div>
 	version:{{tool.head_version}}
 	作成日:{{tool.created_date}}
 	<input type="hidden" name="tool_key" value="{{tool.tool_key}}" />
-	<a href="/wb/{{tool.tool_key}}" >編集</a>
+	<input id="edit-button" type="button" value="編集" class="button-type1" style="width:48px;" />
+</div>
+<div class="midium-box">共有設定</div>
+<div class="midium-box">API設定</div>
+<div>
+						{% for m in messages: %}
+						<div>{{m.content}}</div>
+						{% endfor %}
+						{% for m in commits: %}
+						<div>{{m.content}}</div>
+						{% endfor %}
 </div>
 </div>

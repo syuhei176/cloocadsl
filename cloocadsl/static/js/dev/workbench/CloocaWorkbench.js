@@ -8,10 +8,10 @@ function CloocaWorkbench(option) {
 	 * jarty カスタマイズ 
 	 */
 	Jarty.Function.file = function(runtime, option) {
-		runtime.write("/* start file "+option.name + " */");
+		runtime.write("<file name="+option.name + " >");
 	}
 	Jarty.Function.fileClose = function(runtime) {
-		runtime.write("/* end file */");
+		runtime.write("</file>");
 	}
 	/*
 	 * end of jarty カスタマイズ 
@@ -31,48 +31,73 @@ function CloocaWorkbench(option) {
 	this.metaDatacontroller.load();
 	this.metaPackageExplorer = new MetaPackageExplorer(this.metaDatacontroller, this);
 	
-	
 	this.templateController = new TemplateController();
 	this.templateExplorer = new TemplateExplorer(this.templateController, this);
-	
-	/*
-	this.easyExplorer_dev = new EasyExplorer(this.metaDatacontroller, this);
-	this.notationController = new NotationController();
-	this.notationExplorer = new NotationExplorer(this.notationController, this);
-	*/
 	
 	this.vcs = new VersionControllSystem(this);
 	
 	var self = this;
 	
+	this.toolCompiler = new ToolCompiler(self.metaDatacontroller.getMetaModel());
 	/*
 	 * メタモデルが更新されるたびに呼ばれる
 	 */
-	this.metaDatacontroller.addChangeListener(function(){
+	this.metaDatacontroller.on('change', function(mmc, package){
 		//preview
-		var toolCompiler = new ToolCompiler(self.metaDatacontroller.getMetaModel());
-		toolCompiler.Compile();
-		self.modelController.setCtool(toolCompiler.getCompiledTool());
-		self.modelExplorer = new ModelExplorer(self.modelController, null, toolCompiler.getCompiledTool());
+//		var toolCompiler = new ToolCompiler(self.metaDatacontroller.getMetaModel());
+		if(self.toolCompiler.Compile()) {
+			self.modelController.setCtool(self.toolCompiler.getCompiledTool());
+			self.modelExplorer = new ModelExplorer(self.modelController, self, self.toolCompiler.getCompiledTool(), self.editorTabPanel_preview);
+		}
 	});
-	var toolCompiler = new ToolCompiler(self.metaDatacontroller.getMetaModel());
-	toolCompiler.Compile();
-	this.modelController = new ModelController(toolCompiler.getCompiledTool());
-	this.modelExplorer = new ModelExplorer(this.modelController, this, toolCompiler.getCompiledTool());
+	this.toolCompiler.Compile();
+	this.modelController = new ModelController(this.toolCompiler.getCompiledTool());
+	this.modelExplorer = new ModelExplorer(this.modelController, this, this.toolCompiler.getCompiledTool(), self.editorTabPanel_preview);
 	
+	/*
+	 * テンプレートが更新されるたびに呼ばれる
+	 */
 	this.templateController.on('change', function(name, newValue){
 		self.modelCompile(newValue);
 	});
-
 }
 
+CloocaWorkbench.prototype.getPropertyPanel = function() {
+	return this.statuspanel;
+}
+
+CloocaWorkbench.prototype.save = function() {
+	if(this.editorTabPanel.current_editor) {
+		this.editorTabPanel.current_editor.save();
+	}
+	if(this.editorTabPanel_template.current_editor) {
+		this.editorTabPanel_template.current_editor.save();
+	}
+}
+
+CloocaWorkbench.prototype.saveAll = function() {
+	this.metaDatacontroller.save();
+	this.templateController.saveModified()
+}
+
+
 CloocaWorkbench.prototype.modelCompile = function(template) {
-	var model = this.modelController.getModel();
-	var result = (Jarty.eval(template, copy(model)));
+	var model = this.modelController.getCompiledModel();
+	console.log(model);
+	var result = null;
+	var error = '';
+	try {
+		result = (Jarty.eval(template, copy(model)));
+		result = result.replace(/</g,'&lt;');
+		result = result.replace(/>/g,'&gt;');
+	}catch(e){
+		error = e.message;
+	}
 	Ext.getCmp('template-preview').removeAll();
 	Ext.getCmp('template-preview').add({
 		title : 'preview',
-		html : result
+		autoScroll : true,
+		html : '<div style="color:red;">'+error+'</div><br><pre><code>'+result+'</code></pre>'
 	});
 	function copy(a) {
 	    var F = function(){};
@@ -82,6 +107,7 @@ CloocaWorkbench.prototype.modelCompile = function(template) {
 }
 
 CloocaWorkbench.prototype.init_layout = function() {
+	var self = this;
 	new Ext.Viewport({
 		layout:'border',
 		items:[{	//north
@@ -107,10 +133,17 @@ CloocaWorkbench.prototype.init_layout = function() {
 		    		   		    margins: '5 0 0 0',cmargins: '5 5 0 0',
 	    		   			    width: 200,minSize: 100,maxSize: 220
 		    		   		},{			//metamodel editor
+		    		   			id:'metamodel-centerpanel',
 		    		   			region:'center',
 		    		   		    collapsible: false,
 		    		   		    split: false,
-	    		   			    items : [this.editorTabPanel.getPanel()]
+	    		   			    items : [this.editorTabPanel.getPanel()],
+	    		   			    listeners : {
+	    		   			    	resize : function(panel, adjWidth, adjHeight, eOpts) {
+	    		   			    		console.log(adjWidth, adjHeight);
+	    		   			    		self.editorTabPanel.fireResizeEvent(adjWidth, adjHeight);
+	    		   			    	}
+	    		   			    }
 		    		   		},{			//metamodel preview
 		    		   			title : 'Preview',
 		    		   			region:'east',
@@ -161,9 +194,10 @@ CloocaWorkbench.prototype.init_layout = function() {
 				    	   }]
 		       },{	//south
 		    	   id:'south-panel',
+//		    	   title:'south',
 		    	   region:'south',
 		    	   margins:'0 3 0 3',
-		    	   split:true
+		    	   split:false
 		       }]
 	});
 }

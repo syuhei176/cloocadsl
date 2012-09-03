@@ -7,12 +7,13 @@ function DSMLEditor(key, name, pkg, metaModelController) {
 		id: 'dsleditor-'+this.key,
 		title: name,
 		layout : 'fit',
-		width : 480,
-		height : Ext.getCmp('centerpanel').getHeight() - 120,
+		width : Ext.getCmp('metamodel-centerpanel').getWidth() - 10,
+		height : Ext.getCmp('metamodel-centerpanel').getHeight() - 50,
 		html : '<textarea id="dsleditor-textarea-'+this.key+'" style="font-size:18pt;">' + this.pkg.content.text + '</textarea>',
 		autoScroll: true,
 		closable: true
 	});
+	this.codemirror = null;
 }
 
 DSMLEditor.prototype.save = function() {
@@ -41,6 +42,8 @@ DSMLEditor.prototype.Initialize = function() {
 				 */
 			 }
 	});
+	console.log(myCodeMirror);
+	this.codemirror = myCodeMirror;
 }
 
 DSMLEditor.prototype.onActivate = function() {
@@ -49,4 +52,9 @@ DSMLEditor.prototype.onActivate = function() {
 
 DSMLEditor.prototype.onDeactivate = function() {
 	
+}
+
+DSMLEditor.prototype.onResize = function(w, h) {
+	this.panel.setWidth(w - 10);
+	this.panel.setHeight(h - 50);
 }

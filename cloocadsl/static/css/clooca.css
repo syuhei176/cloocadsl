@@ -223,6 +223,15 @@ position:relative;
 	background-color: #d0d0d0;
 }
 
+.left-menu .view-all{
+	color: #000077;
+}
+.left-menu .view-all:hover{
+	background-color: #f0f0f0;
+	color: #000077;
+}
+
+
 #latest-feed {
 	width: 320px;
 }
@@ -333,7 +342,7 @@ width: 240px;
 }
 
 /*
-
+	ボタン
 */
 
 .controll-label {
@@ -376,4 +385,47 @@ width: 240px;
 
 .button-type2:hover {
 	background-color: #69D55A;
+}
+
+/*
+	デコレーション、ボックス
+*/
+.new-box {
+	width: 300px;
+	height: 60px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f7f7e7;
+    color: #0f0f0f;
+    text-decoration: none;
+    border: 3px #d0d0d0 dotted;
+}
+.new-box:hover {
+    background-color: #d0f0d0;
+}
+
+.midium-box {
+	width: 300px;
+	height: 60px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #f0f0a0;
+    color: #0f0f0f;
+    text-decoration: none;
+    border: 3px #d0d0d0 solid;
+}
+
+.midium-box:hover {
+	color: #1f1f1f;
+    background-color: #f0f0c0;
 }

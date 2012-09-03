@@ -50,7 +50,7 @@ def update_packages(connect):
             continue
         package_uri = row[0]
         lang_type = int(row[1])
-        content = row[2].decode('utf-8')
+        content = row[2]
         name = row[3]
         parent_uri = row[4]
         op = row[5]

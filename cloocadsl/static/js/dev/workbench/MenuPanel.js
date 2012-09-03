@@ -5,7 +5,7 @@ function MenuPanel(wb) {
 	this.panel = {
         tbar: [{
         	id: 'tool-name',
-        	html: 'サンプルツール'
+        	html: g_toolinfo.toolkey
         },'-',{
             text: constant_string.file,
             iconCls: 'add16',
@@ -37,6 +37,7 @@ function MenuPanel(wb) {
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
+                	   id: 'manage-versions',
                 	   text: 'バージョン管理',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
@@ -80,6 +81,11 @@ function MenuPanel(wb) {
             iconCls: 'add16',
         	handler : onItemClick
         },{
+            id: 'quick-saveall',
+            text: 'すべて保存',
+            iconCls: 'add16',
+        	handler : onItemClick
+        },{
             id: 'quick-commit',
             text: 'コミット',
             iconCls: 'add16',
@@ -92,11 +98,9 @@ function MenuPanel(wb) {
 		}else if(item.id == 'create-template') {
 			self.wb.templateExplorer.create();
 		}else if(item.id == 'quick-save') {
-			self.wb.metaDatacontroller.save();
-			//editorTabPanel_template
-			self.wb.editorTabPanel.current_editor.save();
-			
-			self.wb.templateController.saveModified()
+			self.wb.save();
+		}else if(item.id == 'quick-saveall') {
+			self.wb.saveAll();
 		}else if(item.id == 'quick-commit') {
 			 Ext.Msg.prompt('コミットします。','コメントを書いてください。',function(btn,text){
 				 if(btn != 'cancel') {
@@ -105,6 +109,9 @@ function MenuPanel(wb) {
 			 },null,true,'');
 		}else if(item.id == 'vcs-update') {
 			self.wb.vcs.update();
+		}else if(item.id == 'manage-versions') {
+			var win = CloocaWorkbench.ManageVersionsWindow();
+			win.show();
 		}
 	}
 	/*

@@ -13,81 +13,71 @@
 	    
 	    <script>
 	    $(function(){
-			{% if mode == 'toolinfo': %}
-			/*
-			 * ツール情報モード
-			 */
-	    	$('#edit-button').click(function(){
-	    		window.open('/wb/{{tool.tool_key}}');
-	    	});
 	    	$('#market').click(function(){
-    			window.location.href = '/#market';
+    			window.location.hash = 'market';
+	    	});
+	    	$('#tools a').click(function(){
+    			window.location.href = '#projects/' + $(this).attr('href');
+    			return false;
 	    	});
 	    	$('#myproject').click(function(){
-    			window.location.href = '/#projects';
+    			window.location.hash = 'projects';
 	    	});
 	    	$('#mytool').click(function(){
-	    	});
-	    	$('#mytool-available').click(function(){
-    			window.location.href = '/#available-tools';
-	    	});
-	    	$('#mytool-developping').click(function(){
-    			window.location.href = '/#developping-tools';
-	    	});
-			{% else: %}
-			/*
-			 * 通常モード
-			 */
-			homemode();
-			{% endif %}
-			function homemode() {
-		    	$('#market').click(function(){
-		    		$.get("/market", function(data){
-		    			$('.left-menu li a').each(function(){
-		    				$(this).removeClass('left-menu-selected');
-		    			});
-		    			$('#content').html(data);
-		    			$('#market').addClass('left-menu-selected');
-		    			window.location.hash = 'market';
-		    		});
-		    	});
-		    	$('#myproject').click(function(){
-	    			window.location.hash = 'projects';
-		    	});
-		    	$('#mytool').click(function(){
-		    		$.get("/mytool", function(data){
-		    			$('.left-menu li a').each(function(){
-		    				$(this).removeClass('left-menu-selected');
-		    			});
-		    			$('#content').html(data);
-		    			$('#mytool').addClass('left-menu-selected');
-		    		});
-		    	});
-		    	$('#mytool-available').click(function(){
-	    			window.location.hash = 'available-tools';
-		    	});
-		    	
-		    	$('#mytool-developping').click(function(){
-	    			window.location.hash = 'developping-tools';
-		    	});
-		    	
-		    	loadbyhash();
-		    	
-		    	$('#finder').click(function(){
-		    		if($('#sesarch-text').val() != '') {
-		    			window.location.href = '/search/' + $('#sesarch-text').val();
-		    		}
-		    	});
-
-		    	$(window).bind('hashchange', function() {
-		    		loadbyhash();
-		    	});
-		    	
-		    	function loadbyhash() {
+	    		$.get("/mytool", function(data){
 	    			$('.left-menu li a').each(function(){
 	    				$(this).removeClass('left-menu-selected');
 	    			});
-		    		var hash = window.location.hash;
+	    			$('#content').html(data);
+	    			$('#mytool').addClass('left-menu-selected');
+	    		});
+	    	});
+	    	$('#mytool-available').click(function(){
+    			window.location.hash = 'available-tools';
+	    	});
+	    	
+	    	$('#mytool-developping').click(function(){
+    			window.location.hash = 'developping-tools';
+	    	});
+	    	
+	    	loadbyhash();
+	    	
+	    	$('#finder').click(function(){
+	    		if($('#sesarch-text').val() != '') {
+	    			window.location.href = '/search/' + $('#sesarch-text').val();
+	    		}
+	    	});
+
+	    	$(window).bind('hashchange', function() {
+	    		loadbyhash();
+	    	});
+	    	
+	    	function loadbyhash() {
+    			$('.left-menu li a').each(function(){
+    				$(this).removeClass('left-menu-selected');
+    			});
+	    		var hash = window.location.hash;
+	    		if(hash.indexOf('/') > 0) {
+	    			hashes = hash.split('/');
+		    		if(hashes[0] == '#tool') {
+			    		$.get("/tool/info-view/" + hashes[1], function(data){
+			    			$('#content').html(data);
+			    		});
+		    		}else if(hashes[0] == '#projects'){
+		    			$.get("/myprojects/" + hashes[1], function(data){
+		    				$('#content').html(data);
+			    		});
+		    		}else if(hashes[0] == '#create-project'){
+			    		$.get("/proj/create-view/" + hashes[1], function(data){
+			    			$('#content').html(data);
+			    			$('#mytool-developping').addClass('left-menu-selected');
+			    		});
+		    		}else if(hashes[0] == '#project-page'){
+			    		$.get("/project-page/" + hashes[1], function(data){
+			    			$('#content').html(data);
+			    		});
+		    		}
+	    		}else{
 		    		if(hash == '#home') {
 			    		$.get("/home", function(data){
 			    			$('#content').html(data);
@@ -120,8 +110,8 @@
 		    		}else if(hash == '#groups'){
 		    			
 		    		}
-		    	}
-			}
+	    		}
+	    	}
 	    });
 	    </script>
 	    
@@ -157,6 +147,13 @@
 					<ul class="left-menu">
 					<li><a id="market">マーケット</a></li>
 			    	</ul>
+					<h4>ツール</h4>
+					<ul id="tools" class="left-menu">
+{% for tool in tools %}
+					<li><a href="{{tool.tool_key}}">{{tool.name}}</a></li>
+{% endfor %}
+					<li><a class="view-all">全部見る</a></li>
+					</ul>
 					<h4>ダッシュボード</h4>
 					<ul class="left-menu">
 					<li><a id="myproject">マイプロジェクト</a></li>
@@ -168,7 +165,7 @@
 						{% endif %}
 				    	</ul>
 					</li>
-			    	</ul>
+<!-- 			    	</ul> -->
 			    </div>
 				<div class="left-menu-wrapper">
 					<h4>グループ</h4>
@@ -179,24 +176,6 @@
 			    </div>
 				</div>
 			<div id="content">
-						{% if mode == 'toolinfo': %}
-						<div class="project-info-wrapper">
-						<div id="user-info" class="project-info">
-							<div class="project-name">{{tool.name}}</div>
-							<div class="tool-key">ツールキーは{{tool.tool_key}}、</div>
-							<div class="tool-version">現在のバージョンは{{tool.head_version}}で、</div>
-							<div class="tool-creation-date">{{tool.created_date}}に作成された。</div>
-							<input type="hidden" name="tool_key" value="{{tool.tool_key}}" />
-							<input id="edit-button" type="button" value="編集" class="button-type1" style="width:48px;" />
-						</div>
-						{% for m in messages: %}
-						<div>{{m.content}}</div>
-						{% endfor %}
-						{% for m in commits: %}
-						<div>{{m.content}}</div>
-						{% endfor %}
-						</div>
-						{% endif %}
 			</div>
 				<div id="content-right">
 				<!-- もしdevelopperでなければ -->

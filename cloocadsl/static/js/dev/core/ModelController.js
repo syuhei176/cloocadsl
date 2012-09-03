@@ -1,12 +1,28 @@
-function ModelController(ctool) {
-	this.model = new Model();
+function ModelController(ctool, model) {
+//	this.model = new Model();
 	/*
 	 * json構造のため、Modelは直接MetaModelを持てない
 	 * →モデルコントローラにメタモデルコントローラを持たせる
 	 */
 	this.ctool = ctool;
 	//this.model._sys_meta = this.ctool.getRootClass().id;
-	this.model = this.ctool.getRootClass().getInstance();
+	var self = this;
+	/*
+	window.onbeforeunload = function(){
+		localStorage.setItem('model', JSON.stringify(self.model));
+	}
+	var lsm = localStorage.getItem('model');
+	if(lsm) {
+		this.model = JSON.parse(lsm);
+	}else{
+		this.model = this.ctool.getRootClass().getInstance();
+	}
+	*/
+	if(model != 'null' && model != undefined) {
+		this.model = model;
+	}else{
+		this.model = this.ctool.getRootClass().getInstance();
+	}
 }
 
 ModelController.prototype.setCtool = function(ctool) {
@@ -15,6 +31,60 @@ ModelController.prototype.setCtool = function(ctool) {
 
 ModelController.prototype.getModel = function() {
 	return this.model;
+}
+
+/**
+ * modelではreferenceをuriの文字列で表していた。
+ * compiledModelではJavascript参照に置き換える。
+ */
+ModelController.prototype.getCompiledModel = function() {
+	var self = this;
+	return compile(copy(this.model));
+	function compile(elem) {
+		var copy_dest = null;
+		if(elem instanceof Object) {
+			copy_dest = {};
+		}else{
+			if(typeof(elem) == 'string') {
+				var entity = self.get(elem);
+				if(entity) {
+					return compile(entity);
+				}
+			}
+			return elem;
+		}
+		if(elem._sys_lang == 'text') {
+			var parser = self.ctool.getClass(elem._sys_meta).getParser();
+			return parser.parse(elem.text);
+		}
+		for(var key in elem) {
+			if(key == '0') continue;
+			if(key.substr(0,4) == '_sys') continue;
+			copy_dest[key] = compile(elem[key]);
+
+			/*
+			var _is_contain = true;
+			if(key == '0') continue;
+			if(key.substr(0,4) == '_sys') continue;
+			console.log(key);
+			if(typeof(elem[key]) == 'string') {
+				var entity = mc.get(elem[key]);
+				console.log('compile'+elem[key]);
+				if(entity) {
+					elem[key] = entity;
+					_is_contain = false;
+				}
+			}
+			if(_is_contain) compile(elem[key]);
+			*/
+		}
+		return copy_dest;
+	}
+	function copy(a) {
+	    var F = function(){};
+	    F.prototype = a;
+	    return new F;
+	}
 }
 
 /**
@@ -52,9 +122,9 @@ ModelController.prototype.addRelationship = function(src, dest, asso) {
 	}
 	*/
 	if(asso.upper == 1) {
-		src[asso.name] = dest;
+		src[asso.name] = dest._sys_uri;
 	}else{
-		src[asso.name][dest._sys_name] = dest;
+		src[asso.name][dest._sys_name] = dest._sys_uri;
 	}
 }
 
@@ -87,18 +157,25 @@ ModelController.prototype.getParent = function(uri) {
 	return this.get(uri_array.join('.'));
 }
 
-
 ModelController.prototype.get = function(uri) {
 	if(uri == 'root') {
 		return this.model;
 	}
+	if(uri.indexOf('.') <= 0) return null;
 	var uri_array = uri.split('.');
 	uri_array.shift();
 	var current = this.model;
 	for(var i=0;i < uri_array.length;i++) {
 		current = current[uri_array[i]];
+		if(current == undefined) return null;
 	}
 	return current;
+}
+
+ModelController.prototype.del = function(uri) {
+	var parent = this.getParent(uri);
+	var deleteNode = this.get(uri);
+	delete parent[deleteNode._sys_name];
 }
 
 /*

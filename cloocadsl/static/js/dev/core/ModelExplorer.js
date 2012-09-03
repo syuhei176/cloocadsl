@@ -16,20 +16,21 @@ ModelExplorer.prototype.refresh = function() {
 	 * メタデータコントローラからデータ取得
 	 */
 	var packages = this.metaDataController.getPackages();
+	console.log(packages);
 	/*
 	 * パッケージを読み込みツリー状に表示する
 	 */
 	function create_package_tree(packages, parent_uri) {
 		var packages_tree = [];
 		for(var key in packages) {
-			packages_tree.push(create_package_tree_part(packages[key]));
+				packages_tree.push(create_package_tree_part(packages[key]));
 		}
 		
 		function create_package_tree_part(pkg) {
 			var packages_tree = [];
 			var package_uri = pkg.parent_uri + '.' + pkg.name;
 			for(var key in pkg.nestingPackages) {
-				packages_tree.push(create_package_tree_part(pkg.nestingPackages[key]));
+					packages_tree.push(create_package_tree_part(pkg.nestingPackages[key]));
 			}
 			for(var key in pkg.content.classes) {
 				var klass = pkg.content.classes[key];
@@ -236,11 +237,11 @@ ModelExplorer.prototype.del = function() {
 	 * 選択されているパッケージを削除する
 	*/
     Ext.Msg.confirm( 
-            'パッケージの削除', 
+            'モデルの削除', 
             self.selected+'を削除しますよ？', 
             function(btn){ 
                 if(btn == 'yes'){ 
-                    self.metaDataController.delPackage(self.selected);
+                	self.modelController.del(self.selected);
                 	self.refresh();
                 } 
                 if(btn == 'no'){ 

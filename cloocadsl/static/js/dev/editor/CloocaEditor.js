@@ -9,7 +9,17 @@ function CloocaEditor(option) {
 	this.init_layout();
 	this.menupanel = new MenuPanel(this);
 	this.menupanel.setAvailabledRedo(false);
-	this.modelExplorer = new ModelExplorer();
+	this.propertyPanel = new PropertyPanel(this);
+	
+	this.toolCompiler = new ToolCompiler(g_toolinfo.metamodel);
+	this.toolCompiler.Compile();
+	this.modelController = new ModelController(this.toolCompiler.getCompiledTool(), JSON.parse(g_model.model));
+	this.modelExplorer = new ModelExplorer(this.modelController, this, this.toolCompiler.getCompiledTool(), this.editorTabPanel);
+
+}
+
+CloocaEditor.prototype.getPropertyPanel = function() {
+	return this.propertyPanel;
 }
 
 CloocaEditor.prototype.init_layout = function() {
@@ -25,7 +35,7 @@ CloocaEditor.prototype.init_layout = function() {
 		    	   items : [this.editorTabPanel.getPanel()]
 		       }),
 		       new Ext.Panel({
-		    	   id:'menupanel',
+		    	   id:'ed-menupanel',
 		    	   margins:'0 3 0 3',
 		    	   region:'north',
 		    	   items: []
@@ -36,8 +46,8 @@ CloocaEditor.prototype.init_layout = function() {
 		    	   html:'',
 		    	   margins:'3 3 3 3',
 		    	   region:'south',
-		    	   collapsible:true,
-		    	   split:true,
+//		    	   collapsible:true,
+//		    	   split:true,
 		    	   items : []
 		    	   }),
 		       new Ext.Panel({

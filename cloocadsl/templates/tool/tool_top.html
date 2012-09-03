@@ -4,41 +4,6 @@
 	height: 90%;
 	overflow: auto;
 }
-.project-info {
-	width: 300px;
-	height: 60px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #f0f0a0;
-    color: #0f0f0f;
-    text-decoration: none;
-    border: 3px #d0d0d0 solid;
-}
-.project-info:hover {
-	color: #1f1f1f;
-    background-color: #f0f0c0;
-}
-.create-tool {
-	width: 300px;
-	height: 60px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #f0f0c0;
-    color: #0f0f0f;
-    text-decoration: none;
-    border: 3px #d0d0d0 dotted;
-
-}
 </style>
 <script>
 <!-- 
@@ -46,7 +11,7 @@ $(function() {
 	$('div#tool-info').click(function(){
 		$(this).find('input').each(function(){
 			var tool_key = $(this).val();
-			window.location.href = '/tool/info-view/' + tool_key;
+			window.location.href = '#tool/' + tool_key;
 		});
 	});
 	$('#create-tool').click(function(){
@@ -56,9 +21,9 @@ $(function() {
 -->
 </script>
 <div class="project-info-wrapper">
-<div id="create-tool" class="create-tool">新規作成</div>
+<div id="create-tool" class="new-box">新規作成</div>
 {% for tool in tools %}
-<div id="tool-info" class="project-info">
+<div id="tool-info" class="midium-box">
 	<div class="project-name">{{tool.name}}</div>
 	version:{{tool.head_version}}
 	<input type="hidden" name="tool_key" value="{{tool.tool_key}}" />

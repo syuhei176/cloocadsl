@@ -41,31 +41,25 @@
 $(function(){
 	$('div#project-info').click(function(){
 		$(this).find('input').each(function(){
-			if($(this).val() != '編集開始') {
-				var user_id = $(this).val();
-				window.location.href = '/profile/' + user_id;
-			}
+			var project_id = $(this).val();
+			window.location.href = "/#project-page/" + project_id;
 		});
+	});
+	$('#create-project').click(function(){
+		window.location.href = "/#create-project/{{toolinfo.tool_key}}"
 	});
 })
 //-->
 </script>
+<h2>{{toolinfo.name}}</h2>
 <div class="project-info-wrapper">
-<div class="project-info">
-	<div id="project-name">プロジェクト１</div>
-	<div id="project-owner">syuhei</div>
-	<div id="project-version">version 1</div>
+<div id="create-project" class="new-box">新規作成</div>
+{% for proj in projects %}
+<div id="project-info" class="midium-box">
+	<input type="hidden" name="project_id" value="{{proj.id}}" />
+	<div id="project-name">{{proj.name}}　オーナー</div>
+	<div id="project-version">version {{proj.head_version}}</div>
 	<div id="project-date">2012/7/6</div>
 </div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
-<div class="project-info">プロジェクト１</div>
+{% endfor %}
 </div>

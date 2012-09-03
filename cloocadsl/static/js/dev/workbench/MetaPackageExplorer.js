@@ -22,7 +22,9 @@ MetaPackageExplorer.prototype.refresh = function() {
 	function create_package_tree(packages, parent_uri) {
 		var packages_tree = [];
 		for(var key in packages) {
-			packages_tree.push(create_package_tree_part(packages[key]));
+			if(packages[key].op != 'del') {
+				packages_tree.push(create_package_tree_part(packages[key]));
+			}
 		}
 		
 		function create_package_tree_part(pkg) {
@@ -210,7 +212,7 @@ MetaPackageExplorer.prototype.open = function() {
 	if(p.lang_type == 'dsl') {
 		var dsleditor = new DSLEditor(key, p.name, this.metaDataController);
 		this.wb.editorTabPanel.add(dsleditor, key);
-	}else{
+	}else if(p.lang_type == 'dsml'){
 		if(p.meta == 'C') {
 			p = this.metaDataController.get(p.parent_uri);
 			var key = p.parent_uri + '.' + p.name;
@@ -267,10 +269,6 @@ MetaPackageExplorer.prototype.init_contextmenu = function() {
 		        id: 'create-package',
 		        text: 'パッケージ作成',
 		        handler: function(){self.create_package();}
-	        },{
-		        id: 'create-class',
-		        text: 'クラス作成',
-		        handler: function(){self.create_class();}
 	        }]
 	    },{
 	        id: 'delete',
@@ -280,26 +278,12 @@ MetaPackageExplorer.prototype.init_contextmenu = function() {
 	        id: 'refresh',
 	        text: '更新',
 	        handler: function(){self.refresh();}
-	    }],
-	    listeners: {click: function(menu, item) {}}
-	});
-	var mnuContext_class = new Ext.menu.Menu({
-	    items: [{
-	        id: 'create',
-	        text: '新規作成',
-	        menu: [{
-		        id: 'create-asso',
-		        text: '関連作成',
-		        handler: function(){self.create_package();}
-	        },{
-		        id: 'create-prop',
-		        text: 'プロパティ作成',
-		        handler: function(){self.create_class();}
-	        }]
 	    },{
-	        id: 'delete',
-	        text: '削除',
-	        handler: function(){self.del();}
+	        id: 'package-info',
+	        text: '情報',
+	        handler: function(){
+	        	Ext.Msg.alert('','' + self.selected_item.name + ',' + self.selected_item.op);
+	        }
 	    }],
 	    listeners: {click: function(menu, item) {}}
 	});
@@ -308,7 +292,7 @@ MetaPackageExplorer.prototype.init_contextmenu = function() {
 		self.selected_item = self.metaDataController.get(self.selected);
 		if(event.button == 2) {
 			if(self.selected_item.meta == 'C') {
-				mnuContext_class.showAt(event.getX(), event.getY());
+				
 			}else if(self.selected_item.meta == 'A') {
 				//nothing to do
 			}else if(self.selected_item.meta == 'P') {

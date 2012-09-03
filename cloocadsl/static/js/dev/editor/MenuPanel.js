@@ -6,92 +6,20 @@ function MenuPanel(wb) {
         	id: 'tool-name',
         	html: 'サンプルツール'
         },'-',{
-            text: 'ファイル',
+            text: 'プロジェクト',
             iconCls: 'add16',
             menu: [
                    {
-                	   text: '新規作成',
-                	   iconCls: 'add16',
-                	   menu: [
-                	       {
-	                	       id: 'create-package',
-	                    	   text: 'パッケージ',
-	                    	   iconCls: 'add16',
-	                    	   handler : onItemClick
-                    	   },{
-	                	       id: 'create-template',
-                        	   text: 'テンプレート',
-                        	   iconCls: 'add16',
-                        	   handler : onItemClick
-                    	   }]
-                   },{
-                	   text: '名前の変更',
+                	   text: 'ソースコード生成',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    },{
-                	   text: '保存',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   text: '全部保存',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   text: 'バージョン管理',
+                	   text: '設定',
                 	   iconCls: 'add16',
                 	   handler : onItemClick
                    }
                    ],
         	handler : onItemClick
-        },{
-            text: 'ワークベンチ',
-            iconCls: 'add16',
-            menu: [
-                   {
-                	   id: 'preview',
-                	   text: 'プレビュー（未実装）',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   id: 'metajson',
-                	   text: 'メタモデル',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   id: 'welcome_editor',
-                	   text: 'ウェルカムメッセージ',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   },{
-                	   id: 'config',
-                	   text: 'コンフィグ',
-                	   iconCls: 'add16',
-                	   handler : onItemClick
-                   }
-                   ]
-        },{
-            text: 'テンプレート',
-            iconCls: 'add16',
-            menu: [
-                   {
-                	   id: 'new',
-                	   text: '新規作成',
-                	   iconCls: 'add16',
-                	   handler : onTempItemClick
-                   },
-                   {
-                	   id: 'import',
-                	   text: 'インポート',
-                	   iconCls: 'add16',
-                	   handler : onTempItemClick
-                   },
-                   {
-                	   id: 'export',
-                	   text: 'エクスポート',
-                	   iconCls: 'add16',
-                	   handler : onTempItemClick
-                   }
-                   ]
         },'-',{
             id: 'quick-undo',
             text: '←',
@@ -113,8 +41,8 @@ function MenuPanel(wb) {
             iconCls: 'add16',
         	handler : onItemClick
         },{
-            id: 'quick-preview',
-            text: 'プレビュー',
+            id: 'quick-run',
+            text: '実行',
             iconCls: 'add16',
         	handler : onItemClick
         }]
@@ -125,7 +53,12 @@ function MenuPanel(wb) {
 		}else if(item.id == 'create-template') {
 			self.wb.templateExplorer.create();
 		}else if(item.id == 'quick-save') {
-			self.wb.editorTabPanel.current_editor.save();
+			var model_json = JSON.stringify(self.wb.modelController.getModel());
+			$.post('/ed-api/save', { project_id : g_project.id, model : model_json },
+					function(data) {
+						if(data) {
+						}
+					}, "json");
 		}
 	}
 	/*

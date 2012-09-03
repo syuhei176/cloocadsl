@@ -1,13 +1,11 @@
-<!DOCTYPE  html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title>clooca</title>
-		
-		<!-- CSS -->
-		<link rel="stylesheet" href="/static/css/clooca.css" type="text/css" media="screen" />
-		<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
-    	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
+<!DOCTYPE html>
+<html class='no-js'>
+<head>
+    <meta charset='UTF-8' />
+    <title>clooca game</title>
+    <meta content='width=device-width' name='viewport' />
+    <link href='/static/css/style-naoe.css' rel='stylesheet' />
+    <script src='/static/js/modernizr.js'></script>
     	<script src="/static/js/lib/jquery-1.7.1.min.js"></script>
 	    <script src="/static/js/lib/jquery-ui-1.8.18.custom.min.js"></script>
 	    <script>
@@ -45,35 +43,72 @@
 	    })
 		  -->
 	    </script>
-	</head>
-	
-	<body class="home">
-		<!-- WRAPPER -->
-		<div id="wrapper">
-			<div id="header">
-				<div class="logo">
-					<a href="#">clooca</a>
-				</div>
-				<div class="login">
-				syuhei176@gmail.com
-				</div>
-			</div>
-			<div id="main">
-				<div id="content">
-				<div id="login-form-container">
-					<form id="loginForm" action="/login-to">
-					<div>ユーザ名：<input type="text" name="email" /></div>
-					<div>パスワード：<input type="password" name="password" /></div>
-					<div>ログイン状態を維持する：<input type="checkbox" name="permanent" value="permanent"/></div>
-					<input type="submit" value="ログイン" class="button-type2" style="width:200px;" />
-					</form>
-				</div>
-				</div>
-			</div>
-			<div id="footer">
-			Copyright &copy 2011-2012 株式会社Technical Rockstars  all rights reserved.
-			</div>
-		</div>
-		<!-- ENDS WRAPPER -->
-	</body>
+  </head>
+<body class="index">
+<div class='container'>
+      <header>
+        <div class='wrapper'>
+          <a class='symbolset-logo' href='./index.html'>
+          <img alt='clooca game' src='img/clooca_logo_1.png' />
+          </a> ログイン<br>
+          <nav class="right">
+          	<a href='./register.html'>新規登録</a>
+          	<a href='./login.html'>ログイン</a>
+          </nav>
+        </div>
+      </header>
+	  <section class="wrapper">
+      	<div class='promo'>
+        	<div id="login-form-container" class="inputForm">
+        	  <form id="loginForm" name="form1" method="post" action="/login-to">
+            	<table border="0" cellpadding="10" cellspacing="10">
+                  <tr>
+                    <th>ユーザ名</td>
+                    <td><input name="email" type="text" id="userid" tabindex="1" size="25"></td>
+                  </tr>
+                  <tr>
+                    <th>パスワード</td>
+                    <td><input name="password" type="password" id="passed" tabindex="2" size="25"></td>
+                  </tr>
+                  <tr>
+                    <th>&nbsp;</td>
+                    <td><input type="checkbox" name="permanent" value="permanent" id="stable" tabindex="3">
+                    ログイン状態を維持</td>
+                  </tr>
+                  <tr>
+                    <th>                  
+                    <td><input type="submit" name="button" id="button" class="button" value="ログイン" tabindex="4" style="width:245px;"></td>
+                  </tr>
+                  <tr>
+                    <th>                  
+                    <td><input type="submit" name="buttonfb" id="buttonfb" class="button buttonfb" value="facebookでログイン" tabindex="4" style="width:245px;"></td>
+                  </tr>
+                </table>
+              </form>
+          </div>
+        </div>
+      </section>
+</div> <!-- end .container -->
+  <footer>
+      <div class='wrapper'>
+        <nav>
+          <ul>
+            <li>clooca</li>
+            <li>
+              <a href='/policy'>Privacy Policy</a>
+            </li>
+            <li>
+              <a href='mailto:syuhei176@gmail.com'>Contact</a>
+            </li>
+          </ul>
+        </nav>
+        <div class='copyright'>
+          <span>
+            Copyright &copy; 2012
+          <a href='http://technicalrockstars.co.jp/' target='_blank'>株式会社Technical Rockstars All Rights Reserved.</a>
+          </span>
+        </div>
+      </div>
+</footer>
+</body>
 </html>
