@@ -42,12 +42,12 @@
 $(function(){
 	$('input#friend-request').click(function(){
 		$(this).parent().find('input').each(function(){
-			if($(this).val() != '友達申請') {
+			if($(this).val() != '許可') {
 				var user_id = $(this).val();
-				var requested_user_id = {{user.id}};
-	//			console.log(requested_user_id+"|"+user_id);
+				var requesting_user_id = {{user.id}};
+				console.log(requesting_user_id+"|"+user_id);
 				$.post("/sns/accept",
-						{requested_user_id : user_id},
+						{requesting_user_id : user_id},
 						function(data){
 					
 				});
