@@ -256,6 +256,14 @@ def ed_save():
         return json.dumps(result)
     return redirect(url_for('login'))
 
+@app.route('/ed-api/commit', methods=['POST'])
+@MySQLConnection
+def ed_commit():
+    if 'user' in session:
+        result = clooca.repository.project.commit(connect, session['user'], request.form['project_id'])
+        return result.dumps()
+    return redirect(url_for('login'))
+
 
 """
 tool
@@ -377,6 +385,9 @@ wb
 def wb(tool_key):
     if 'user' in session:
         result = clooca.repository.tool.load_from_ws(connect, session['user'], tool_key)
+        if result == None:
+            #権限がありません
+            return render_template('request_deny.html')
         return render_template('test/wb.html', toolinfo=result)
     return redirect(url_for('login'))
 
