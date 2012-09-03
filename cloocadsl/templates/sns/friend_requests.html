@@ -36,12 +36,16 @@
 .project-date {
 }
 </style>
+
+
 <script>
 $(function(){
 	$('input#friend-request').click(function(){
 		$(this).parent().find('input').each(function(){
 			if($(this).val() != '友達申請') {
 				var user_id = $(this).val();
+				var requested_user_id = {{user.id}};
+	//			console.log(requested_user_id+"|"+user_id);
 				$.post("/sns/accept",
 						{requested_user_id : user_id},
 						function(data){
@@ -53,9 +57,15 @@ $(function(){
 })
 </script>
 <div id="users-wrapper" class="project-info-wrapper">
+
+{% if not items %}
+<div>友達リクエストはありません。</div>
+{% endif %}
+
+
 {% for item in items %}
 <div id="user-info" class="project-info">
-	<div class="project-name">{{item.name}}</div>
+	<div class="project-name">名前: {{item.fullname}}</div>
 	<input type="hidden" name="user_id" value="{{item.id}}" />
 	<input id="friend-request" type="button" value="許可" />
 </div>

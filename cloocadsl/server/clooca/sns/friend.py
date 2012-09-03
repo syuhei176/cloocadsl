@@ -83,12 +83,13 @@ def getFriendList(connect, user, num):
     cur.close()
     users = []
     for i in range(len(rows)):
-        user = {}
-        user['id'] = rows[i][0]
-        user['email'] = rows[i][1]
-        user['fullname'] = rows[i][2].decode('utf-8')
-        user['name'] = rows[i][2].decode('utf-8')
-        users.append(user)
+    	if not rows[i][0] == user['id']:
+	        user = {}
+	        user['id'] = rows[i][0]
+	        user['email'] = rows[i][1]
+	        user['fullname'] = rows[i][2].decode('utf-8')
+	        user['name'] = rows[i][2].decode('utf-8')
+	        users.append(user)
     return users
 
 def getUserProfile(connect, user, user_id):

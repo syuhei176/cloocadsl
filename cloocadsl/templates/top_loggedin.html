@@ -10,7 +10,6 @@
     	<link href="/static/css/ui-darkness/jquery-ui-1.8.18.custom.css" rel="stylesheet">
     	<script src="/static/js/lib/jquery-1.7.1.min.js"></script>
 	    <script src="/static/js/lib/jquery-ui-1.8.18.custom.min.js"></script>
-	    
 	    <script>
 	    $(function(){
 	    	$('#market').click(function(){
@@ -40,6 +39,7 @@
     			window.location.hash = 'developping-tools';
 	    	});
 	    	
+
 	    	loadbyhash();
 	    	
 	    	$('#finder').click(function(){
@@ -47,16 +47,33 @@
 	    			window.location.href = '/search/' + $('#sesarch-text').val();
 	    		}
 	    	});
+	    	
+	    	$('#request').click(function(){
+		    	window.location.hash= "request";
+		    	
+	    	});
+	    	
+	    	
+	    	$('#new_todo').click(function(){
+		    	window.location.hash= "new_todo";
+		    	
+	    	});
+	    	
+	    	
 
 	    	$(window).bind('hashchange', function() {
+  	
 	    		loadbyhash();
+	
 	    	});
 	    	
 	    	function loadbyhash() {
+	    		
     			$('.left-menu li a').each(function(){
     				$(this).removeClass('left-menu-selected');
     			});
 	    		var hash = window.location.hash;
+	    		
 	    		if(hash.indexOf('/') > 0) {
 	    			hashes = hash.split('/');
 		    		if(hashes[0] == '#tool') {
@@ -106,9 +123,19 @@
 			    		$.get("/tool/create-view", function(data){
 			    			$('#content').html(data);
 			    			$('#mytool-developping').addClass('left-menu-selected');
+			    		
 			    		});
 		    		}else if(hash == '#groups'){
 		    			
+		    		}else if(hash=="#request"){
+			    		console.log("hash name is request");
+			    		$.get("/sns/reqs", function(data){
+			    			$('#content').html(data);
+			    			
+			     		});
+		    		}else if(hash=="#new_todo"){
+		    			console.log("hash name is new_todo");
+			    		
 		    		}
 	    		}
 	    	}
@@ -130,8 +157,8 @@
 			    </div>
 				<div id="menu-wrapper">
 					<ul id="menu">
-					<li><a href="#">新規TODO</a></li>
-					<li><a href="#">リクエスト</a></li>
+					<li><a id = "new_todo">新規TODO</a></li>
+					<li><a id="request">リクエスト</a></li>
 			    	</ul>
 			    </div>
 				<div class="login">
