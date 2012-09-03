@@ -2,3 +2,4 @@ config.py
 config_group.py
 config_game.py
 /.settings
+.DS_Store
