@@ -7,8 +7,8 @@ import sys
 import datetime
 import config
 from flask import session
-from core.util import Gmail
-from core.util import Util
+from clooca.util import Gmail
+from clooca.util import Util
 
 
 reg_username = re.compile('\w+')

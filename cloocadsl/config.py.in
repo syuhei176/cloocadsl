@@ -1,0 +1,29 @@
+# coding: utf-8
+
+CLOOCA_ROOT = '/Users/hiyashuuhei/git/cloocadsl/cloocadsl'
+CLOOCA_MODULE = CLOOCA_ROOT + '/server'
+CLOOCA_WAR = CLOOCA_ROOT + '/static'
+
+EDITION = 'local'
+#EDITION = 'local_test'
+#EDITION = 'dev'
+#EDITION = 'www'
+
+
+if EDITION == 'local':
+    CLOOCA_ROOT = '/Users/hiyashuuhei/git/cloocadsl/cloocadsl'
+    CLOOCA_MODULE = CLOOCA_ROOT + '/server'
+    DB_NAME = 'l_clooca'
+    DB_HOST = 'localhost'
+    DB_PORT = 3306
+    DB_USER = 'root'
+    DB_PASSWD = 'un1verse7'
+
+if EDITION == 'local_test':
+    CLOOCA_ROOT = '/Users/hiyashuuhei/git/cloocadsl/cloocadsl'
+    CLOOCA_MODULE = CLOOCA_ROOT + '/server'
+    DB_NAME = 'l_clooca_test'
+    DB_HOST = 'localhost'
+    DB_PORT = 3306
+    DB_USER = 'root'
+    DB_PASSWD = 'un1verse7'
