@@ -101,6 +101,8 @@ def checkout(connect, user, project_id):
     cur.execute('INSERT INTO project_workspace (user_id,project_id,checkout_date,model) VALUES(%s,%s,%s,%s);',(user['id'], project_id, d.strftime("%Y-%m-%d"), 'null'))
     connect.commit()
     cur.close()
+    resp = update(connect, user, project_id, need_merge=False)
+    project['metamodel'] = resp.content
     return project
 
 def save_to_ws(connect, user, project_id, model):
@@ -158,30 +160,32 @@ def commit(connect, user, project_id):
         resp.code = 2
     return resp
 
-def update(connect, user, project_id):
+def update(connect, user, project_id, need_merge=True):
     """
     update head version
     """
     resp = CloocaResponse(0, '', False)
     permission = getProjectAccessInfo(connect, user, project_id)
     if not permission == 2:
+        resp.code = -1
         return resp
-    resp.code = 1
     cur = connect.cursor()
     current_version, model, checkout_date = getProjectWSFromDB(connect, user, project_id)
     head_version = getProjectInfoFromDB(connect, project_id)
+    if current_version == head_version:
+        resp.code = -2
+        return resp
     cur = connect.cursor()
     cur.execute('SELECT content FROM model WHERE version=%s AND project_id=%s',(head_version, project_id))
     row = cur.fetchone()
     if row == None:
         cur.close()
-        resp.code = 0
+        resp.code = -3
         return resp
     content = row[0]
-    
     cur.execute('SELECT content FROM model WHERE version=%s AND project_id=%s',(head_version-1, project_id))
     row = cur.fetchone()
-    if row == None:
+    if row == None or need_merge==False:
         merged_model = content
     else:
         #merge model and content
@@ -190,6 +194,7 @@ def update(connect, user, project_id):
     num_of_affected_row = cur.execute('UPDATE project_workspace SET model=%s,current_version=%s WHERE project_id=%s AND user_id=%s;', (merged_model, head_version, project_id, user['id'], ))
     connect.commit()
     cur.close()
+    resp.code = 1
     resp.content = content
     return resp
 

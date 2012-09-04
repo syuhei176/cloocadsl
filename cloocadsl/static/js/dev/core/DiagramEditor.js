@@ -489,7 +489,6 @@ DiagramEditor.prototype.draw = function() {
 		var src_d = null, dest_d = null
 		for(var akey in metaClass.associations) {
 			if(metaClass.associations[akey].feature  === 'source') {
-				console.log(elem[akey]);
 				src_d = self.diagram._sys_d[elem[akey]];
 			}else if(metaClass.associations[akey].feature  === 'target') {
 				dest_d = self.diagram._sys_d[elem[akey]];
@@ -507,6 +506,8 @@ DiagramEditor.prototype.draw = function() {
 				start = self.getConnectionPoint(new Line2D(s.x, s.y, rel.points[0].x, rel.points[0].y), src_d);
 				end = self.getConnectionPoint(new Line2D(e.x, e.y, rel.points[rel.points.length-1].x, rel.points[rel.points.length-1].y), dest_d);
 			}
+			console.log(connection);
+			console.log(end);
 			self.canvas.drawLine({
 				  strokeStyle: "#777",
 				  strokeWidth: 2,

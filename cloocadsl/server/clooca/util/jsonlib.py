@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 
 def diff(a,b):
@@ -6,12 +7,14 @@ def diff(a,b):
 def getType(a):
     if isinstance(a, dict):
         return 'object'
-    if isinstance(a, list):
+    elif isinstance(a, list):
         return 'array'
-    if isinstance(a, str):
+    elif isinstance(a, str):
         return 'string'
-    if isinstance(a, int):
+    elif isinstance(a, int):
         return 'number'
+    elif isinstance(a, bool):
+        return 'boolean'
     return 'null'
 
 def compareTree(a, b):
@@ -19,8 +22,10 @@ def compareTree(a, b):
     a_type = getType(a)
     b_type = getType(b)
     if a_type == b_type:
-        if a_type == 'object' or a_type == 'array':
-            pass
+        if a_type == 'object':
+            return compareTree_dict(a, b)
+        elif a_type == 'array':
+            return compareTree_list(a, b)
         else:
             if a == b:
                 return a
@@ -28,6 +33,9 @@ def compareTree(a, b):
                 return {'+':a,'-':b}
     else:
         return {'+':a,'-':b}
+
+def compareTree_dict(a, b):
+    diff = {'_sys_diff':{}}
     for key in a:
         diff[key] = None
     for key in b:
@@ -42,11 +50,31 @@ def compareTree(a, b):
             diff['_sys_diff'][key] = '-'
             diff[key] = b[key]
         else:
-            print 'error'
+            print 'error ' + key
     return diff
-        
+
+def compareTree_list(a, b):
+    diff = []
+    for i in a:
+        diff.append(i)
+    for i in b:
+        if i in diff:
+            pass
+        else:
+            diff.append(i)
+    return diff
 
 def merge_part(a, b):
+    if isinstance(a, str):
+        return a
+    if isinstance(a, int):
+        return a
+    if isinstance(a, bool):
+        return a
+    if isinstance(a, dict):
+        pass
+    if isinstance(a, list):
+        return a
     result = {}
     keys = {}
     for key in a:
@@ -58,10 +86,6 @@ def merge_part(a, b):
             continue
         #if key[0:4] == '_sys':
         #    continue
-        if not isinstance(a, dict):
-            return a
-        if not isinstance(a, list):
-            return a
         state = 0
         if a.has_key('_sys_diff') and key in a['_sys_diff']:
             if a['_sys_diff'][key] == '+':
@@ -128,11 +152,35 @@ def merge(src, dest, base):
     clean_sys_diff(merged_model)
     return merged_model
 
-if __name__ == 'main':
+if __name__ == '__main__':
     import json
     jsondiff={}
-    jsondict_base={'a':{'b':{},'c':{'d':'aaa'}}}
-    jsondict_a={'a':{'b':{},'c':{'d':'aaa'}}}
-    jsondict_b={'a':{'b':{'e':0},'c':{}}}
+    jsondict_base={'a':
+                   {'b':{
+                         'array':[{'x':0,'y':5}]
+                         },
+                    'c':{
+                         'text':'aaa',
+                         'bool':True,
+                         'num':5
+    }}}
+    jsondict_a={'a':
+                   {'b':{
+                         'array':[{'x':0,'y':5}],
+                         'bool':True
+                         },
+                    'c':{
+                         'text':'aaa',
+                         'bool':True,
+                         'num':5
+    }}}
+    jsondict_b={'a':
+                   {'b':{
+                         'array':[{'x':0,'y':5}]
+                         },
+                    'c':{
+                         'text':'aaa',
+                         'bool':True
+    }}}
     jsondiff = merge(jsondict_a, jsondict_b, jsondict_base)
     print json.dumps(jsondiff)

@@ -56,7 +56,7 @@ ModelExplorer.prototype.refresh = function(point_uri) {
 				}else{
 					children = create_package_tree(m[key], current_uri, expanded && point_uri!=current_uri);
 				}
-				if(m[key]['_sys_exist'] == undefined && children.length == 0) continue;
+				if(m[key] != null && m[key]['_sys_exist'] == undefined && children.length == 0) continue;
 				packages_tree.push({text: key,
 					icon: '/static/images/editor/root_leaf.gif',
 					leaf : children.length == 0,
