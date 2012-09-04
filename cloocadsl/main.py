@@ -328,7 +328,7 @@ def finditems(filter, token):
         elif filter == 'tool':
             result = clooca.repository.tool.getPublicTools(connect, session['user'], 5, token=token)
         connect.close()
-        return render_template('/sns/search_result_inner.html', items=result)
+        return render_template('/sns/search_result_inner.html', items=result,user=session['user'])
     return render_template('login.html')
 
 @app.route('/sns/reqs')
@@ -337,7 +337,7 @@ def friend_requests():
         connect = MySQLdb.connect(db=config.DB_NAME, host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER, passwd=config.DB_PASSWD)
         result = clooca.sns.friend.getRequestedList(connect, session['user'], 5)
         connect.close()
-        return render_template('/sns/friend_requests.html', items=result)
+        return render_template('/sns/friend_requests.html', items=result,user=session['user'])
     return render_template('login.html')
 
 @app.route('/sns/friends')

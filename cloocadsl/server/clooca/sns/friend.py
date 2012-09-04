@@ -10,14 +10,15 @@ def findItem(connect, user, token, start, num):
     cur.close()
     users = []
     for i in range(len(rows)):
-        user = {}
-        user['id'] = rows[i][0]
-        user['email'] = rows[i][1]
-        user['fullname'] = rows[i][2].decode('utf-8')
-        user['name'] = rows[i][2].decode('utf-8')
-        #user['is_friend'] = rows[i][3]
-        #user['is_friend_pre'] = rows[i][4]
-        users.append(user)
+    	if not rows[i][0] == user['id']:
+	        user = {}
+	        user['id'] = rows[i][0]
+	        user['email'] = rows[i][1]
+	        user['fullname'] = rows[i][2].decode('utf-8')
+	        user['name'] = rows[i][2].decode('utf-8')
+	        #user['is_friend'] = rows[i][3]
+	        #user['is_friend_pre'] = rows[i][4]
+	        users.append(user)
     return users
 
 """
